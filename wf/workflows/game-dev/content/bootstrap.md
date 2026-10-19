@@ -32,11 +32,11 @@ EOF
 
 ## 第一批應寫檔案
 
-依新手指南的三段完整 JSON 建立候選根下 `game/external/mods/mycardgame/mod_info.json`、`cards/card_heavy_strike.json`、`characters/character_red.json`，保留 `properties`／`patch_data` 包裝。卡為費用 2、15 傷害、起手追加一次、暫不進卡包；不要複製官方範例的 script takeover。
+依新手指南的三段完整 JSON 建立候選根下 `game/external/mods/my_pack/mod_info.json`、`cards/card_heavy_strike.json`、`characters/character_red.json`，保留 `properties`／`patch_data` 包裝。卡為費用 2、15 傷害、起手追加一次、暫不進卡包；不要複製官方範例的 script takeover。
 
-`mod_folder_to_load_data` 的 key 相對於 **game 根**，不是相對 mod_info：`external/mods/mycardgame/cards/` 映射 `CardData`／`_id_to_card_data`，`external/mods/mycardgame/characters/` 映射 `CharacterData`／`_id_to_character_data`。檔名不取代 object_id；角色補丁須使用既有 `character_red`。
+`mod_folder_to_load_data` 的 key 相對於 **game 根**，不是相對 mod_info：`external/mods/my_pack/cards/` 映射 `CardData`／`_id_to_card_data`，`external/mods/my_pack/characters/` 映射 `CharacterData`／`_id_to_character_data`。檔名不取代 object_id；角色補丁須使用既有 `character_red`。
 
-修改候選 `game/external/mod_list.json`：保留 `external/` 與既有項目，在 `properties.mod_load_data` 新增 `"external/mods/mycardgame/": {"enabled": true, "load_priority": 10}`。priority 升序載入，避免同 priority 的覆寫碰撞。只建資料夾、只登記 schema、或只放卡 JSON 都不足以啟用 mod。
+修改候選 `game/external/mod_list.json`：保留 `external/` 與既有項目，在 `properties.mod_load_data` 新增 `"external/mods/my_pack/": {"enabled": true, "load_priority": 10}`。priority 升序載入，避免同 priority 的覆寫碰撞。只建資料夾、只登記 schema、或只放卡 JSON 都不足以啟用 mod。
 
 如需求是獎勵取得，先走 [卡牌設計](../card-design.md) 檢查現有 card_pack_red 的篩選；符合紅色／COMMON／ATTACK 且 `card_appears_in_card_packs=true` 的卡可用既有 pack，不必一律新建 pack。以下 probe 刻意限定起手版，改規格時同步改斷言。
 

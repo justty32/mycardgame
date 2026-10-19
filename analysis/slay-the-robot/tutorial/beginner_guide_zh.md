@@ -14,22 +14,22 @@
 
 以下路徑皆相對 `game/`；引擎中的 `res://` 也指向此目錄。
 
-1. 建立 `external/mods/mycardgame/`，內含 `cards/`、`characters/` 和 `mod_info.json`。
+1. 建立 `external/mods/my_pack/`，內含 `cards/`、`characters/` 和 `mod_info.json`。
 2. 依下方設定註冊資料夾。載入器只讀 `mod_folder_to_load_data` 登記的資料夾，不會因為新增目錄就自動載入。
-3. 在 [mod_list.json](../../../game/external/mod_list.json) 的 `properties.mod_load_data` 保留原設定，新增 `"external/mods/mycardgame/": {"enabled": true, "load_priority": 10}`。優先數字較大者較晚載入。
+3. 在 [mod_list.json](../../../game/external/mod_list.json) 的 `properties.mod_load_data` 保留原設定，新增 `"external/mods/my_pack/": {"enabled": true, "load_priority": 10}`。優先數字較大者較晚載入。
 
 `mod_info.json` 的最小設定：
 
 ```json
 {
   "properties": {
-    "object_id": "mod_data_mycardgame",
+    "object_id": "mod_data_my_pack",
     "mod_name": "My Card Game",
     "mod_folder_to_load_data": {
-      "external/mods/mycardgame/cards/": {
+      "external/mods/my_pack/cards/": {
         "class_name": "CardData", "table_name": "_id_to_card_data"
       },
-      "external/mods/mycardgame/characters/": {
+      "external/mods/my_pack/characters/": {
         "class_name": "CharacterData", "table_name": "_id_to_character_data"
       }
     }
@@ -41,7 +41,7 @@
 
 ## 第一張卡：重擊
 
-將以下內容存為 `external/mods/mycardgame/cards/card_heavy_strike.json`。未指定的欄位使用 `CardData` 預設值。
+將以下內容存為 `external/mods/my_pack/cards/card_heavy_strike.json`。未指定的欄位使用 `CardData` 預設值。
 
 ```json
 {
@@ -66,7 +66,7 @@
 
 `card_type` 的 0、1、2 依序是攻擊、技能、能力；`card_rarity = 1` 是普通。`card_values` 供行動及描述使用。攻擊產生器讀取 `damage` 與 `number_of_attacks`，再建立實際攻擊行動；見 [ActionAttackGenerator.gd](../../../game/scripts/actions/combatant_actions/ActionAttackGenerator.gd) `perform_action()`。此處關閉卡包收錄，先以固定起始牌組驗證。
 
-新增 `external/mods/mycardgame/characters/character_red.json`：
+新增 `external/mods/my_pack/characters/character_red.json`：
 
 ```json
 {
