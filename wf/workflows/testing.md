@@ -54,7 +54,7 @@ runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash �
 從專案根以 bash 加 python3 執行；`python3 --version` 須實際成功，不能只看命令存在。
 
 ```bash
-python3 --version && bash wf/tools/wf-lint.sh --strict .
+python3 --version && bash wf/tools/wf-lint.sh --strict . && python3 tools/boundary_lint.py
 ```
 
 Linux／macOS 直接用原生 bash；Windows 經 WSL 或 Git Bash，步驟與商店別名／Win32 error 5 處理見 [dev-env/windows](dev-env/windows.md)。2026-10-19 Manjaro 原生與 Windows WSL 皆回傳全部零項。
