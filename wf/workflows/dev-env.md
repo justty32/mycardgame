@@ -51,7 +51,7 @@ Windows 取得引擎、PowerShell 檢查與 Git Bash/WSL 文件檢查的步驟�
 
 環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
 
-只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前依序為 framework-fixes.patch、resource-lifecycle.patch、content-profile.patch、combat-framework-phase0.patch，最後 combat-framework-phase1.patch。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)。
+只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前依序為 framework-fixes.patch、resource-lifecycle.patch、content-profile.patch、combat-framework-phase0.patch，combat-framework-phase1.patch，最後 combat-framework-phase2.patch。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)。
 
 `.tools/`、artifacts/、Godot cache、個人 profile／settings／saves 不屬於發布原始碼。必要的歷史驗證已另選入 analysis/slay-the-robot/evidence/；發布副本記錄原件與副本 hash 及路徑遮罩，不能當成未處理的原始日誌。
 

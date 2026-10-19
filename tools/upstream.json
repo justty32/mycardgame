@@ -33,6 +33,12 @@
       "sha256": "3c58636adf85c4919da0051b74686461e527bb8ca367d8b04ae17c9b5237d359",
       "description": "Combat framework Phase 1 (wf/specs/combat-framework): CombatDirector + CombatTimeline action timeline (CTB) replaces Combat.gd's turn alternation; BaseUnitController/PlayerInputController/EnemyIntentController; CombatEndTurn renamed CombatEndAction; enemies decide intent on entering the timeline; rules reset_block_on_action_start/discard_hand_on_action_end/hand_limit consumed; enemy_speed/character_speed/card_action_delay/enemy_intent_action_delay fields; StatusEffectData UNIT_ACTION_START/END + EVERY_N_TICKS; StatsHandler turn_count = hero actions, combat_tick; TimelineBar HUD; Root.tscn director/timeline nodes and animation tracks.",
       "validation": "wf/plans/combat-framework/phase-1.md"
+    },
+    {
+      "file": "tools/patches/combat-framework-phase2.patch",
+      "sha256": "fcacb75f5f1e601d57ab6bac7cd01ece1c67d6907da4ff1e4eca8a0b29b8fa2f",
+      "description": "Combat framework Phase 2 (wf/specs/combat-framework): BoardData/BoardTargeting/IntentResolver/ThreatPreview, EncounterData + EncounterWaveData with legacy-event synthesis, CombatDirector board setup / wave-0 spawning / movement / enemy intent movement, board card/intent/unit fields, ActionMoveUnit/ActionDisplaceUnit/ActionGrantMovePoints/ActionComputeBoardValue, board validators, InterceptorRooted, Hand cell targeting and BoardView, ThreatPreview-based incoming damage, Board suite.",
+      "validation": "wf/plans/combat-framework/phase-2.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",
