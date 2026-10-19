@@ -6,7 +6,7 @@
 
 ## 環境與來源
 
-背景測試使用 Windows PowerShell 7；Godot `4.6.stable.official.89cea1439` 可攜版放在 `.tools/godot-4.6/`，或透過 `-GodotPath` 提供其他位置。官方下載 URL、SHA-512 與本地補丁見 [upstream.json](../../tools/upstream.json)。Git Bash、Python 3.13 用於文件 lint；commit／push 使用 WSL 的 justty32 Git 全域設定與既有 SSH 認證。
+背景測試使用 Windows PowerShell 7；Godot `4.6.stable.official.89cea1439` 可攜版放在 `.tools/godot-4.6/`，或透過 `-GodotPath` 提供其他位置。官方下載 URL、SHA-512 與本地補丁見 [upstream.json](../../tools/upstream.json)。文件 lint 可用 WSL 原生 python3 或 Git Bash 搭 Windows Python 3.13，完整 PowerShell 入口見 [文件檢查](testing.md#文件檢查修改後必跑)；commit／push 使用 WSL 的 justty32 Git 全域設定與既有 SSH 認證。
 
 發布 repository 為 `justty32/mycardgame`，外層 snapshot 包含 game 普通檔案與本地修復。原開發機另外保留 game/.git 作上游固定版本 checkout；fresh clone 沒有內層 repository。因此 `git -C game rev-parse HEAD` 可能是外層專案 commit；上游基準須讀來源鎖，不能混用。runner 分開記錄上游、checkout 及實際來源檔雜湊。
 
@@ -29,7 +29,7 @@
 
 clone 本專案即包含已修復的 game，不要再次套用補丁。依來源鎖下載官方 Godot 4.6 Windows x64，核對 SHA-512 後解壓，或指定現有執行檔，再執行隔離 All。不需 PAS、Node/npm 或 export template 即可跑現有背景套件；本專案尚未驗證發行匯出。
 
-先在專案根唯讀核對工具與佈局；`$PSVersionTable.PSVersion` 須為 7 以上，Python 與 Git Bash 用於文件檢查。缺工具時只記錄缺項，再依當前安裝授權處理；Git 身份與 WSL 認證不是背景遊戲測試前提。
+先在專案根唯讀核對工具與佈局；`$PSVersionTable.PSVersion` 須為 7 以上，文件檢查依所選執行器確認 WSL 原生 python3 或 Git Bash／Windows Python 能實際執行。缺工具時只記錄缺項，再依當前安裝授權處理；Git 身份與 WSL 認證不是背景遊戲測試前提。
 
 ```powershell
 $PSVersionTable.PSVersion
@@ -65,7 +65,7 @@ runner 的版本探測與隔離 All 才產生本機執行證據；上述雜湊�
 
 框架除錯模式會使用 game/external/profile.json、user_settings.json 與 saves/。舊 Smoke 只在 Global 首次 ready 後轉移其後寫入，不能用它直接測使用者存檔；流程驗證一律走隔離 runner。發布省略個人設定，由框架在新環境依預設值建立。
 
-Windows 沙箱曾阻擋 Godot 寫入 user://、編輯器設定，以及 Git Bash 建立 signal pipe；遇到這些錯誤依執行環境核准流程處理。不能由權限差異推定遊戲根因，也不能只依 exit 0 宣稱無錯。原生崩潰調查目前依使用者要求擱置。
+Windows 沙箱曾阻擋 Godot 寫入 user://、編輯器設定，以及 Git Bash 建立 signal pipe（Win32 error 5）；後者可改用已驗 WSL lint 入口，其他錯誤依執行環境核准流程處理。不能由權限差異推定遊戲根因，也不能只依 exit 0 宣稱無錯。原生崩潰調查目前依使用者要求擱置。
 
 ## Done when
 

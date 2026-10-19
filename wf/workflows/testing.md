@@ -48,11 +48,19 @@ runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash �
 
 ## 文件檢查（修改後必跑）
 
-從專案根執行。Windows 明確指定 Git Bash；用 Python 函式避免 python3 商店別名。
+從專案根執行，可選 WSL 或 Git Bash。2026-10-19 WSL strict lint 已回傳全部零項；PowerShell 外層命令如下，`--cd` 路徑依實際 checkout 調整。先確認 WSL 原生 `python3 --version` 能實際執行，不能只看命令名稱存在。
+
+```powershell
+wsl.exe --cd /mnt/c/code/mine/mycardgame bash -lc 'python3 --version && bash wf/tools/wf-lint.sh --strict .'
+```
+
+另一執行器為 Git Bash；以下 Python 函式避免 Windows python3 商店別名。
 
 ```powershell
 & 'C:\Program Files\Git\bin\bash.exe' -c 'function python3() { python "$@"; }; export -f python3; python3 --version && bash wf/tools/wf-lint.sh --strict .'
 ```
+
+若 Git Bash 建立 signal pipe 遇 Win32 error 5，記為執行環境阻礙，可改用已確認的 WSL 入口，不推定遊戲缺陷。WSL 的 CRLF 錯誤依 [版本控制](version-control.md) 查 shell 換行。
 
 exit 0 且 broken、residue、oversize、biglist、querycmd 均為 0。新增分析仍納入根目錄掃描。此檢查不能證明遊戲玩法正確。
 
