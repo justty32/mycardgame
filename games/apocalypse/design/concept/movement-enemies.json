@@ -1,0 +1,133 @@
+{
+ "contract": "wf-table/1",
+ "source": "concept-movement.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "遭遇／單位",
+  "移動",
+  "意圖移動模式",
+  "框架欄位"
+ ],
+ "rows": [
+  {
+   "遭遇／單位": "A 鼠人炮灰 ×3",
+   "移動": "1",
+   "意圖移動模式": "**APPROACH** 後蜂擊；三隻存活時改 **FLANK**（包圍主角）",
+   "框架欄位": "`enemy_intent_move FLANK`（Phase 2b 前退化 APPROACH）"
+  },
+  {
+   "遭遇／單位": "A 毒晶鼠人",
+   "移動": "1",
+   "意圖移動模式": "APPROACH → 「硬化」時 HOLD",
+   "框架欄位": "—"
+  },
+  {
+   "遭遇／單位": "A 鼠人授名者",
+   "移動": "1",
+   "意圖移動模式": "**KEEP_RANGE 2**（躲在炮灰後丟炸藥，light 光環需相鄰友軍 → `preferred_range 2` 兼顧）",
+   "框架欄位": "`enemy_intent_preferred_range 2`"
+  },
+  {
+   "遭遇／單位": "B 盾衛",
+   "移動": "1",
+   "意圖移動模式": "APPROACH；兩人相鄰時 HOLD（結陣）；Phase 2b 後給 `opportunity_actions`（離開其相鄰受 3）",
+   "框架欄位": "`enemy_is_immovable false`、`enemy_displace_resistance 1`（重裝難推）"
+  },
+  {
+   "遭遇／單位": "B 投矛手",
+   "移動": "1",
+   "意圖移動模式": "**KEEP_RANGE 3**（保持 ≥2，射程 4）",
+   "框架欄位": "`preferred_range 3`"
+  },
+  {
+   "遭遇／單位": "B 薩滿",
+   "移動": "1",
+   "意圖移動模式": "KEEP_RANGE 1 對**盾衛**（站盾衛旁）；框架沒有「對友軍保距」→ 原型用 HOLD + 進場格設在盾衛後",
+   "框架欄位": "延後需求：`enemy_intent_target_rule` 加 `NEAREST_ALLY`（記入後續）"
+  },
+  {
+   "遭遇／單位": "B 半人馬遊騎兵",
+   "移動": "3",
+   "意圖移動模式": "**CHARGE 3**（反衝鋒：直線疾行 3 + 單格 8）→ 「破甲重箭」時 **RETREAT**（打完退，`move_after true`）",
+   "框架欄位": "`enemy_intent_move CHARGE`、`enemy_intent_move_distance 3`"
+  },
+  {
+   "遭遇／單位": "C 鋼鐵蝗蟲群",
+   "移動": "2，2×2",
+   "意圖移動模式": "飛行（`ignores_occupancy`）；「俯衝」APPROACH；「升空」RETREAT 並不可被近戰命中",
+   "框架欄位": "`enemy_footprint (2,2)`、HP<8 縮 1 格（`footprint` 改值 + 重新放置）"
+  },
+  {
+   "遭遇／單位": "C 機械蜘蛛",
+   "移動": "1",
+   "意圖移動模式": "HOLD；「羅網」＝3・十字生成**羅網場域** 200 刻（進入／停留：延後 50 + 定身 1 次行動）",
+   "框架欄位": "`ActionCreateField field_web`"
+  },
+  {
+   "遭遇／單位": "C 縮小再造蜈蚣",
+   "移動": "1，1×3",
+   "意圖移動模式": "HOLD（不可推）；分裂後兩條小蜈蚣 APPROACH",
+   "框架欄位": "`enemy_is_immovable true`"
+  },
+  {
+   "遭遇／單位": "D 腐爛魂靈 ×3",
+   "移動": "1",
+   "意圖移動模式": "APPROACH；兩隻相鄰時「黏合」（`ActionSummonEnemies` 在其中一格、移除兩者）",
+   "框架欄位": "—"
+  },
+  {
+   "遭遇／單位": "D 有翼畸形怪",
+   "移動": "3，飛行",
+   "意圖移動模式": "「黑雲」KEEP_RANGE 3 → 「撲咬」APPROACH 後 **RETREAT**（`move_after`）",
+   "框架欄位": "`enemy_ignores_occupancy true`"
+  },
+  {
+   "遭遇／單位": "D 三臉魔物",
+   "移動": "1",
+   "意圖移動模式": "HOLD（瞪視全場）",
+   "框架欄位": "—"
+  },
+  {
+   "遭遇／單位": "菁英 石像鬼",
+   "移動": "3，飛行",
+   "意圖移動模式": "「俯衝投矛」**CHARGE 3**（穿透，含移動；`path_actions` 沿途 4 傷害）→ 「長戟橫掃」HOLD → 「吞金修補」**RETREAT**",
+   "框架欄位": "`CHARGE` + `enemy_intent_path_actions`（Phase 2b）"
+  },
+  {
+   "遭遇／單位": "菁英 百目鬼殺手",
+   "移動": "2",
+   "意圖移動模式": "APPROACH；「環境生眼」200 刻：全場 `teleport_blocked`（我方換位／隱匿／傳送無效）",
+   "框架欄位": "全場場域 `field_eyes`（`field_blocks_teleport_into`）+ 狀態 `teleport_blocked`"
+  },
+  {
+   "遭遇／單位": "Boss 萬變者・熔爐",
+   "移動": "0，2×2",
+   "意圖移動模式": "HOLD、不可推；「放蟲」北側空格生成（`NEAREST_EMPTY`，中心 = 本體北側）",
+   "框架欄位": "`enemy_is_immovable true`"
+  },
+  {
+   "遭遇／單位": "Boss 戴冠殘軀",
+   "移動": "2",
+   "意圖移動模式": "APPROACH；單次受 ≥25 凍結",
+   "框架欄位": "—"
+  },
+  {
+   "遭遇／單位": "Boss 愈使 獵食天使",
+   "移動": "2",
+   "意圖移動模式": "**KEEP_RANGE 4**（直列骨箭）→ 「邪炎長戟」APPROACH",
+   "框架欄位": "`preferred_range 4`"
+  },
+  {
+   "遭遇／單位": "Boss 愈使 本體",
+   "移動": "0，2×2",
+   "意圖移動模式": "HOLD、不可推、不可選目標",
+   "框架欄位": "`enemy_is_immovable`"
+  },
+  {
+   "遭遇／單位": "Boss 衰敗法老",
+   "移動": "1",
+   "意圖移動模式": "KEEP_RANGE 5（咒箭鎖定沉澱最高者）",
+   "框架欄位": "`target_rule` 需 `HIGHEST_VALUE(沉澱)`（記入後續）"
+  }
+ ]
+}

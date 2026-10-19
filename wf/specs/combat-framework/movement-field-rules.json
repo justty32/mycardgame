@@ -1,0 +1,35 @@
+{
+ "contract": "wf-table/1",
+ "source": "13-movement-fields-position.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "項目",
+  "規則"
+ ],
+ "rows": [
+  {
+   "項目": "靜態格旗標",
+   "規則": "（遭遇資料）：`is_blocked`（障礙：不可進入、不可停、飛行可越過）、`blocks_line`（直線／穿透形狀在此格截斷，預設 false）、`move_cost`（預設 1）、`tags`。可破壞障礙物不是格旗標，而是 `faction = NEUTRAL` 的單位（既有機制）。"
+  },
+  {
+   "項目": "場域（field）",
+   "規則": "掛在格上的可過期實例，資料類 `FieldData`（SCHEMA `fields/`）。一格可有多個場域，依 `field_stack_policy` 處理同 id：`REPLACE`（預設，刷新時長）／`STACK`／`IGNORE`。"
+  },
+  {
+   "項目": "觸發時點",
+   "規則": "`on_enter`：單位進入格時（主動、卡牌、強制位移、傳送皆算；波次生成預設不算 `field_triggers_on_spawn = false`）。路徑經過的中途格預設不觸發（`field_triggers_on_pass_through = false`），危險格可設 true。\n`on_leave`：離開格時（倒下移出不算）。\n`on_stay`：佔格單位**自己的行動開始**時（`unit_action_started` 後、抽牌前）。\n`every_n_ticks`：全域時鐘每過 N 刻對佔格單位執行（無人則跳過）。\n過期：`field_duration_ticks`（-1 永久）從建立刻算，`combat_tick_advanced` 時移除並發 `field_removed`。"
+  },
+  {
+   "項目": "作用對象",
+   "規則": "`field_faction_filter`（ANY／PARTY／ENEMY，相對於 `field_owner`：`ALLY_OF_OWNER`／`OPPONENT_OF_OWNER`）。"
+  },
+  {
+   "項目": "移動限制",
+   "規則": "`field_blocks_movement`（等同臨時障礙）、`field_blocks_teleport_into`、`field_move_cost_override`。"
+  },
+  {
+   "項目": "補充",
+   "規則": "場域動作的 `parent_combatant` = 建立者（owner；倒下後改為 null，動作以 targets 為準）；targets = 觸發單位。"
+  }
+ ]
+}

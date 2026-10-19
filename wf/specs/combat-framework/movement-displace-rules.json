@@ -1,0 +1,51 @@
+{
+ "contract": "wf-table/1",
+ "source": "12-movement-displace-zoc.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "項目",
+  "規則"
+ ],
+ "rows": [
+  {
+   "項目": "方向",
+   "規則": "推（PUSH）＝沿「來源→目標」方向離開來源；拉（PULL）＝朝來源；距離以曼哈頓軸分解，取**主軸**（|dx| > |dy| 走 x，反之走 y；相等時依 `rules.displace_tie_axis`，預設 `VERTICAL`）。來源 = `parent_combatant`，或 values 指定 `origin_cell`。"
+  },
+  {
+   "項目": "逐格推進",
+   "規則": "每格檢查目標 footprint 是否可進入（棋盤外、`is_blocked`、任何單位都擋）；擋住即**停在前一格**，剩餘格數 R。"
+  },
+  {
+   "項目": "碰撞",
+   "規則": "R > 0 時觸發碰撞：被位移者受 `collision_damage_per_cell × R`（值走攔截鏈，預設 0）；擋住它的若是單位，該單位受 `collision_damage_to_blocker`（預設 0）；可選 `delay_on_collision`（被位移者 `next_action_tick += N`，預設 0）。碰撞傷害用 `ActionDirectDamage` 流程（不走格擋由 `bypass_block` 值決定，預設 false）。"
+  },
+  {
+   "項目": "交換（SWAP）",
+   "規則": "parent 與目標交換 anchor，兩者 footprint 需相同；不觸發碰撞；發兩次 `unit_moved`。"
+  },
+  {
+   "項目": "傳送／閃現（TELEPORT）",
+   "規則": "`ActionMoveUnit mode=TELEPORT`，目標格 footprint 全空；不走路徑、不耗移動點；受 `teleport_blocked` 狀態（見 2.4）拒絕。"
+  },
+  {
+   "項目": "拉近到相鄰（PULL_ADJACENT）",
+   "規則": "PULL 且 distance = 無限，直到與來源距離 1 或被擋。"
+  },
+  {
+   "項目": "多格單位",
+   "規則": "預設不可被位移——`rules.displace_max_footprint_area = 1`（面積 > 此值視為不可位移）。內容包調高後，多格單位整體以 anchor 位移，每格檢查全部 footprint。"
+  },
+  {
+   "項目": "不可位移",
+   "規則": "單位 `is_immovable = true`（`EnemyData.enemy_is_immovable`／`CharacterData.character_is_immovable`，預設 false）或 `displace_resistance`（預設 0）：實際距離 = max(0, distance − resistance)。狀態效果（定身）以攔截器把 `distance` 設 0。"
+  },
+  {
+   "項目": "補充",
+   "規則": "強制位移**不消耗**移動點、**不觸發**控制區（§3，`zoc_triggers_on_forced_move = false`）、**會觸發**場域格進入／離開（§4）、**不計入** `cells_moved_this_action`，但計入 `cells_displaced_this_action`。"
+  },
+  {
+   "項目": "補充",
+   "規則": "兩個單位同格永不發生；位移失敗（距離 0）不是錯誤，動作正常結束。"
+  }
+ ]
+}

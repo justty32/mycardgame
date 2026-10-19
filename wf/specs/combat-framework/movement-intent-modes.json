@@ -1,0 +1,47 @@
+{
+ "contract": "wf-table/1",
+ "source": "14-movement-intent-spawn.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "模式",
+  "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）",
+  "無合法格時"
+ ],
+ "rows": [
+  {
+   "模式": "HOLD",
+   "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）": "原地",
+   "無合法格時": "—"
+  },
+  {
+   "模式": "APPROACH",
+   "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）": "到達「與目標距離 ≤ intent_range」的格中路徑最短者；都到不了則取距離目標最近的格",
+   "無合法格時": "原地，意圖保留、改等待（spec 既有）"
+  },
+  {
+   "模式": "RETREAT",
+   "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）": "與最近敵對單位距離最大的格；平手取仍能命中目標者",
+   "無合法格時": "原地"
+  },
+  {
+   "模式": "KEEP_RANGE",
+   "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）": "距離目標 == preferred_range 的格（平手取離其他敵對單位最遠）；無則取 |距離 − preferred| 最小者",
+   "無合法格時": "原地"
+  },
+  {
+   "模式": "FLANK",
+   "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）": "目標相鄰格中，「與目標的其他敵對單位（對敵人而言是我方）相鄰數最少」者；再平手取與目標已相鄰的敵方友軍相對側",
+   "無合法格時": "退化為 APPROACH"
+  },
+  {
+   "模式": "CHARGE",
+   "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）": "僅沿目標所在行或列直線前進（距離上限 move_distance），停在目標相鄰或首個阻擋前；未對齊則先用 ≤ move_distance 的步數對齊到同行／列（若能一步完成），再衝；`path_actions` 對沿途每個被穿越單位執行（需 `ignores_occupancy`，否則一律停在首個單位前）",
+   "無合法格時": "退化為 APPROACH"
+  },
+  {
+   "模式": "TELEPORT",
+   "目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）": "依 `teleport_rule` 選格（不走路徑、無視 move_range；`MARKED_CELL` 取意圖資料指定或「標記」場域格）",
+   "無合法格時": "原地"
+  }
+ ]
+}

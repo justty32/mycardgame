@@ -13,7 +13,7 @@
    "資料夾（SCHEMA）": "`combat_rules/`",
    "類別": "`CombatRulesData`",
    "必填": "patch `combat_rules_default`：能量節奏（`energy_per_action`/`energy_cap`）、`draw_per_action`、`hand_limit`、`discard_hand_on_action_end`、`default_action_delay`、`wait_action_delay`、`party_size_max`、`deploy_size_max`、`default_board_size`",
-   "選填": "`free_move_per_action`、`extra_move_delay_per_cell`、`downed_member_policy`、`tie_break`、`distance_metric`"
+   "選填": "`free_move_per_action`、`extra_move_delay_per_cell`、`downed_member_policy`、`tie_break`、`distance_metric`、移動規則欄位（`move_adjacency`、`move_split_allowed`、`paid_move_max_cells`、`move_pass_through_allies`／`_enemies`、`move_undo_allowed`、`displace_tie_axis`、`displace_max_footprint_area`、`zone_of_control`、`zoc_extra_move_cost`、`zoc_triggers_on_forced_move`；見 11–13）"
   },
   {
    "資料夾（SCHEMA）": "`characters/`",
@@ -25,19 +25,19 @@
    "資料夾（SCHEMA）": "`cards/`",
    "類別": "`CardData`",
    "必填": "現有欄位 + `card_range`、`card_shape`、`card_target_faction`",
-   "選填": "`card_move_distance`、`card_action_delay`（快／重牌）、`card_ai_hints`（role、value_key、danger；沒有則 AI 以 0 分對待）"
+   "選填": "`card_move_distance`、`card_action_delay`（快／重牌）、`card_ai_hints`（role、value_key、danger；沒有則 AI 以 0 分對待）、`card_play_validators` 的位置類 Validator"
   },
   {
    "資料夾（SCHEMA）": "`enemies/`",
    "類別": "`EnemyData`",
    "必填": "現有欄位 + `enemy_speed`、`enemy_move_range`、`enemy_footprint`；每個意圖的 `enemy_intent_range`、`enemy_intent_shape`、`enemy_intent_target_rule`",
-   "選填": "`enemy_intent_move`、`enemy_intent_action_delay`、`enemy_ignores_occupancy`、`enemy_is_minion`（召喚物）"
+   "選填": "`enemy_intent_move`、`enemy_intent_action_delay`、`enemy_ignores_occupancy`、`enemy_is_minion`（召喚物）、`enemy_is_immovable`、意圖的 `enemy_intent_move_distance`／`enemy_intent_preferred_range`"
   },
   {
    "資料夾（SCHEMA）": "`encounters/`",
    "類別": "`EncounterData`",
    "必填": "`encounter_board_size`、`encounter_waves`（每波：單位加權清單＋進場格＋登場延遲）",
-   "選填": "`encounter_deploy_cells`、`wave_stagger_ticks`、`wave_on_start/cleared_actions`、格貼圖／背景"
+   "選填": "`encounter_deploy_cells`、`wave_stagger_ticks`、`wave_on_start/cleared_actions`、格貼圖／背景、`encounter_blocked_cells`、`encounter_spawn_zone_cells`、`wave_spawn_policy`"
   },
   {
    "資料夾（SCHEMA）": "`events/`",
@@ -80,6 +80,12 @@
    "類別": "`games/<game>/tests/*_probe.gd`",
    "必填": "驗自家遭遇／角色／AI 設定載入與欄位值",
    "選填": "可加題材版 headless 流程，但不得改 `tests/` 框架回歸"
+  },
+  {
+   "資料夾（SCHEMA）": "`fields/`",
+   "類別": "`FieldData`（Phase 2b 起）",
+   "必填": "`field_duration_ticks` 與至少一組觸發動作",
+   "選填": "其餘旗標（`field_faction_filter`、`field_stack_policy`、`field_blocks_movement`、`field_blocks_teleport_into`、`field_move_cost_override`、`field_triggers_on_pass_through`、`field_tags` 等）"
   }
  ]
 }

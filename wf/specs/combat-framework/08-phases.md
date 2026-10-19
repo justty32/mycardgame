@@ -12,7 +12,7 @@
 
 agent 分級：雜活＝sonnet、普通＝opus、需思考＝fable（依 user.md）。所有 fixture 只用框架測試資料（`character_red`、`enemy_1`、`card_attack_basic`…），禁止題材 id 進 `game/`、`tests/`。
 
-各階段的改動、規模、風險、Done when、agent 已抽到 [phases.json](phases.json)（7 列，每列一個階段）。欄位：phase、title、playable、changes、size、risk、done_when、agent。下列標題只列階段名稱與可玩狀態。
+各階段的改動、規模、風險、Done when、agent 已抽到 [phases.json](phases.json)（8 列，每列一個階段；含 2b）。欄位：phase、title、playable、changes、size、risk、done_when、agent。下列標題只列階段名稱與可玩狀態。
 
 ### Phase 0：基礎重構——combatant 抽象化、單位註冊表、規則物件（可玩：與現在完全相同）
 
@@ -21,6 +21,9 @@ agent 分級：雜活＝sonnet、普通＝opus、需思考＝fable（依 user.md
 
 
 ### Phase 2：棋盤 + 移動 + 範圍／形狀卡（可玩：主角在 5×5 移動並用射程卡）
+
+
+### Phase 2b：場域格與控制區（可玩：戰鬥中場域與控制區可觸發；移動增補，見 [16-movement-phasing.md](16-movement-phasing.md)，排在 Phase 3 之後）
 
 
 ### Phase 3：波次（可玩：一場遭遇兩波）

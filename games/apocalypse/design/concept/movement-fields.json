@@ -1,0 +1,84 @@
+{
+ "contract": "wf-table/1",
+ "source": "concept-movement.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "場域",
+  "來源",
+  "時長",
+  "觸發",
+  "旗標"
+ ],
+ "rows": [
+  {
+   "場域": "地獄格 `field_hell`",
+   "來源": "遭遇資料 `encounter_initial_fields`（深淵深度 `[world W02]`）",
+   "時長": "永久",
+   "觸發": "on_stay：站上者 +1 沉澱；on_enter：無；標籤 `abyss_boost`：深淵牌在此格 +25%（牌的 `ValidatorCellHasField` 分支）",
+   "旗標": "`field_faction_filter ANY`"
+  },
+  {
+   "場域": "聖所格 `field_sanctuary`",
+   "來源": "沈棠秘儀・埋骨聖所",
+   "時長": "300",
+   "觸發": "on_stay（隊友）：沉澱 −1；on_enter（敵人）：受 3",
+   "旗標": "兩組動作各帶 faction 檢查"
+  },
+  {
+   "場域": "殘影 `field_shadow`",
+   "來源": "沈棠殘影",
+   "時長": "永久，全場上限 3（`ActionCreateField` 前 `ValidatorFieldCount < 3`）",
+   "觸發": "無觸發；作為傳送／代受的標記",
+   "旗標": "`field_tags [\"shadow\"]`"
+  },
+  {
+   "場域": "羅網 `field_web`",
+   "來源": "機械蜘蛛",
+   "時長": "200",
+   "觸發": "on_enter／on_stay：延後 50、定身 1 次行動",
+   "旗標": "`field_triggers_on_pass_through true`（穿過也被纏）"
+  },
+  {
+   "場域": "銀霧 `field_silver_mist`",
+   "來源": "機械蜘蛛「銀霧」",
+   "時長": "100",
+   "觸發": "on_stay：格擋 −3",
+   "旗標": "自身周圍"
+  },
+  {
+   "場域": "怨土 `field_grudge_soil`",
+   "來源": "商瀾怨念之地",
+   "時長": "200",
+   "觸發": "on_enter／on_stay：+1 怨念",
+   "旗標": "`OPPONENT_OF_OWNER`"
+  },
+  {
+   "場域": "水晶柱 `encounter_blocked_cells`",
+   "來源": "秘儀雙螺旋水晶柱 `[item pi153]`",
+   "時長": "靜態",
+   "觸發": "障礙：不可進入，`blocks_line true`（擋直線穿透）",
+   "旗標": "遭遇資料"
+  },
+  {
+   "場域": "逢魔時封鎖 `field_twilight_edge`",
+   "來源": "秘儀 `[item pi067]`",
+   "時長": "300",
+   "觸發": "`field_blocks_movement true` 在邊緣一圈：把雙方關在中央 3×3",
+   "旗標": "由秘儀完成動作 `ActionCreateField` 對邊緣格"
+  },
+  {
+   "場域": "環境生眼 `field_eyes`",
+   "來源": "百目鬼殺手",
+   "時長": "200",
+   "觸發": "無動作；全場 `field_blocks_teleport_into`",
+   "旗標": "配合 `teleport_blocked`"
+  },
+  {
+   "場域": "黑雲 `field_black_cloud`",
+   "來源": "有翼畸形怪「黑雲」（同人改為留場）",
+   "時長": "100",
+   "觸發": "every 50 刻：佔格者受 1",
+   "旗標": "九宮"
+  }
+ ]
+}

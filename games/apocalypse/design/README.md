@@ -13,7 +13,7 @@
 |------|------|
 | [core-loop.md](core-loop.md) | 題材、核心差異機制、一局流程、勝敗、局外成長、呈現方向與發行目標 |
 | [content-scope.md](content-scope.md) | 角色與起始牌組、最小切片的內容數量、節點案例與暫不做的範圍 |
-| [concept/concept-overview.md](concept/concept-overview.md) | 概念原型目錄（概念草案，數值為佔位）：總覽與使用者已定事項，分檔含[戰鬥 CTB／棋盤](concept/concept-battle.md)、[隊伍](concept/concept-party.md)、[核心系統](concept/concept-systems.md)、[遺物藥物與切片](concept/concept-items-slice.md)、[原型角色](concept/concept-characters.md)、[原型敵人](concept/concept-enemies.md)；卡表／清單在同資料夾 json |
+| [concept/concept-overview.md](concept/concept-overview.md) | 概念原型目錄（概念草案，數值為佔位）：總覽與使用者已定事項，分檔含[戰鬥 CTB／棋盤](concept/concept-battle.md)、[隊伍](concept/concept-party.md)、[核心系統](concept/concept-systems.md)、[遺物藥物與切片](concept/concept-items-slice.md)、[原型角色](concept/concept-characters.md)、[原型敵人](concept/concept-enemies.md)、[移動](concept/concept-movement.md)；卡表／清單在同資料夾 json |
 | `specs/` | 任務 spec：方案與取捨，一任務一檔 `YYYY-MM-DD-<slug>.md`，第一份出現時建立 |
 | `plans/` | 任務 plan：步驟、驗證與實際驗收記錄，一任務一檔，檔名同 spec |
 | `archive/` | 動工完成的 spec／plan 移此凍結，規則見 [STRUCTURE](../../../wf/STRUCTURE.md#archive-規則) |

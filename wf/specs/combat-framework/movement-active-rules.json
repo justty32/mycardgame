@@ -1,0 +1,31 @@
+{
+ "contract": "wf-table/1",
+ "source": "11-movement-active.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "項目",
+  "規則"
+ ],
+ "rows": [
+  {
+   "項目": "移動點",
+   "規則": "單位每次行動開始時 `move_points = rules.free_move_per_action`（框架預設 0）。移動 1 格耗 1 點（格的 `move_cost` 可更高，見 §4）。點數用盡後，若 `rules.paid_move_max_cells > 0`，可再付費移動最多 N 格，每格把本次行動延遲 +`extra_move_delay_per_cell`。"
+  },
+  {
+   "項目": "移動與出牌順序",
+   "規則": "預設**可拆分**（`rules.move_split_allowed = true`）：行動中任何時刻只要還有移動點／付費額度就能移動，出牌前後皆可。內容包若要「先移後打」設 `move_split_allowed = false`：打出第一張牌後 `move_points` 歸零。"
+  },
+  {
+   "項目": "卡牌移動",
+   "規則": "（`card_move_distance` 或 `ActionMoveUnit`）**不消耗移動點**、不加付費延遲；只受卡牌自身費用與 `card_action_delay` 約束。"
+  },
+  {
+   "項目": "路徑",
+   "規則": "鄰接 `rules.move_adjacency = FOUR`（預設）或 `EIGHT`（八向時斜走仍算 1 點；距離計算仍依 `distance_metric`，兩者獨立）。\n不可進入：棋盤外、`BoardCellData.is_blocked`、被任何單位佔的格（自己的 footprint 除外）。\n穿越：`rules.move_pass_through_allies = false`、`move_pass_through_enemies = false`（預設都不可穿）；單位層 `ignores_occupancy = true`（既有 `enemy_ignores_occupancy`，CharacterData 補 `character_ignores_occupancy`）可穿越任何單位與障礙格但不可停在上面（＝飛行）。\n多格單位：以 anchor 走，每一步 footprint 全部格都要可進入。\n尋路：`BoardData.reachable_cells(unit, budget, ignore_occupancy) -> Dictionary[Vector2i, Array[Vector2i]]`（可達格 → 路徑）用 BFS（有 `move_cost` 時用 Dijkstra，整數成本），**結果決定性**：鄰居展開順序固定為 N、E、S、W（八向再接 NE、SE、SW、NW）。`BoardData.find_path(unit, to) -> Array[Vector2i]` 同一函式取單條路。"
+  },
+  {
+   "項目": "撤銷",
+   "規則": "預設不可撤銷（`rules.move_undo_allowed = false`）。開啟時僅限「本次行動尚未出牌且未觸發任何格事件」才可退回起點（UI 按鈕）。"
+  }
+ ]
+}

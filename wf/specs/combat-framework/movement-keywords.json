@@ -1,0 +1,72 @@
+{
+ "contract": "wf-table/1",
+ "source": "15-movement-cards.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "關鍵字",
+  "語意",
+  "實作"
+ ],
+ "rows": [
+  {
+   "關鍵字": "移動 N",
+   "語意": "沿路徑移動至多 N 格到所選格（不耗移動點）",
+   "實作": "`ActionMoveUnit {mode TO_CELL, distance N}`，`card_target_faction EMPTY_CELL`，`card_range N`"
+  },
+  {
+   "關鍵字": "突進 N",
+   "語意": "朝目標直線前進至相鄰再動作",
+   "實作": "`ActionMoveUnit {mode TOWARD, distance N, stop_at_distance 1}` + 攻擊；`card_shape LINE`、`card_range N+1`、validator `ValidatorInLine`"
+  },
+  {
+   "關鍵字": "後撤 N",
+   "語意": "遠離最近敵對單位",
+   "實作": "`ActionMoveUnit {mode AWAY, reference NEAREST_OPPONENT, distance N}`"
+  },
+  {
+   "關鍵字": "閃現 N",
+   "語意": "傳送到 N 距離內空格",
+   "實作": "`ActionMoveUnit {mode TELEPORT}`，`card_range N`，`EMPTY_CELL`"
+  },
+  {
+   "關鍵字": "推 N／拉 N",
+   "語意": "強制位移",
+   "實作": "`ActionDisplaceUnit {mode PUSH/PULL, distance N}`"
+  },
+  {
+   "關鍵字": "拉近",
+   "語意": "拉到相鄰",
+   "實作": "`ActionDisplaceUnit {mode PULL_ADJACENT}`"
+  },
+  {
+   "關鍵字": "換位",
+   "語意": "與目標交換",
+   "實作": "`ActionDisplaceUnit {mode SWAP}`，`card_target_faction ALLY`（或 ANY）"
+  },
+  {
+   "關鍵字": "撞擊 X",
+   "語意": "位移碰撞傷害",
+   "實作": "`collision_damage_per_cell X`"
+  },
+  {
+   "關鍵字": "定身",
+   "語意": "不能移動／被位移",
+   "實作": "狀態 `status_rooted`（攔截 distance → 0）"
+  },
+  {
+   "關鍵字": "場域 id（N 刻）",
+   "語意": "生成場域",
+   "實作": "`ActionCreateField {field_id, duration_override N}`"
+  },
+  {
+   "關鍵字": "驅散場域",
+   "語意": "移除",
+   "實作": "`ActionRemoveField`"
+  },
+  {
+   "關鍵字": "移動點 +N",
+   "語意": "本次行動加移動點",
+   "實作": "`ActionGrantMovePoints`"
+  }
+ ]
+}

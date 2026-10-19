@@ -1,0 +1,52 @@
+{
+ "contract": "wf-table/1",
+ "source": "16-movement-phasing.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "項目",
+  "Phase 2（棋盤）",
+  "之後"
+ ],
+ "rows": [
+  {
+   "項目": "§1 移動點、付費移動、四向 BFS、佔格、預覽 UI、`ActionMoveUnit` 四模式、`ActionGrantMovePoints`",
+   "Phase 2（棋盤）": "✔",
+   "之後": "八向、撤銷、穿越友軍（資料旗標已留，Phase 2 先只實作「不可穿」與 `ignores_occupancy`）"
+  },
+  {
+   "項目": "§2 `ActionDisplaceUnit` PUSH/PULL/PULL_ADJACENT/SWAP、碰撞停住與碰撞傷害、多格不可位移、`is_immovable`、`status_rooted`",
+   "Phase 2（棋盤）": "✔",
+   "之後": "`displace_resistance`、多格位移、`delay_on_collision`"
+  },
+  {
+   "項目": "§3 控制區",
+   "Phase 2（棋盤）": "—",
+   "之後": "Phase 2b"
+  },
+  {
+   "項目": "§4 障礙格 `is_blocked`、`encounter_blocked_cells`（尋路與 LINE 截斷需要）",
+   "Phase 2（棋盤）": "✔",
+   "之後": "場域 `FieldData` 全套 → Phase 2b"
+  },
+  {
+   "項目": "§5 `ValidatorDistance`、`ValidatorCellsMoved`、`ValidatorInLine`、`ActionComputeBoardValue`（distance/adjacent/cells_moved 三鍵）",
+   "Phase 2（棋盤）": "✔",
+   "之後": "`ValidatorFlanked`、`ValidatorAdjacentUnits`、`is_flanked`、listener 範例"
+  },
+  {
+   "項目": "§6 `KEEP_RANGE`、`CHARGE`（不含 path_actions）、`planned_move_cell` 顯示",
+   "Phase 2（棋盤）": "✔",
+   "之後": "`FLANK`、`TELEPORT`、`path_actions`、`move_after`"
+  },
+  {
+   "項目": "§7 `NEAREST_EMPTY`（共用於 `ActionSummonEnemies`）",
+   "Phase 2（棋盤）": "✔",
+   "之後": "`WAIT_UNTIL_FREE`／`FAIL_SKIP`、預告標記 → Phase 3"
+  },
+  {
+   "項目": "§8 關鍵字四組（移動／突進／推拉／閃現）測試資料",
+   "Phase 2（棋盤）": "✔",
+   "之後": "場域關鍵字 → Phase 2b"
+  }
+ ]
+}
