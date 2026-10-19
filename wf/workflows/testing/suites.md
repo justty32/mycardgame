@@ -10,7 +10,7 @@
 
 ```bash
 python3 tools/test_game.py --suite All
-# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb
+# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb、Board
 python3 tools/test_game.py --suite SaveLoad
 # Windows 包裝：./tools/test-game.ps1 -Suite SaveLoad
 ```
@@ -21,9 +21,9 @@ exit 0 為通過、1 為驗證失敗（含強制失敗）、2 為找不到引擎
 
 runner 為每個程序設外層期限（預設 180 秒，`--timeout-seconds` 可調），只停止本次程序樹；檢查 exit、完成標記、SCRIPT ERROR／FAIL 與引擎錯誤。預設不放行退出 resource 或 ObjectDB leak。冷匯入若遇指定 SoundManager UID，建立快取後必須再次匯入通過（4.6 每次冷匯入都出現，2026-10-19 Linux 4.7.2 未出現，規則仍保留）；rejected 分支只放行十個逐項核對的預期拒絕訊息。日誌、命令及 results.json 留於唯一輸出目錄，不覆蓋舊證據。歷史重現開關不作修復後通過標準。
 
-runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash 標記，啟動前確認 log 可寫；欄位與 wrapper PID 限制見 [native-crash](../game-dev/native-crash.md)。[合成測試](../../../tests/test_runner_diagnostics.py)（`python3 tests/test_runner_diagnostics.py`，136 項）以假引擎程序驗 runner，包含資源訊息即使 exit 0 也須失敗；不啟動 Godot，也不證明使用者 crash 已重現／修復。
+runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash 標記，啟動前確認 log 可寫；欄位與 wrapper PID 限制見 [native-crash](../game-dev/native-crash.md)。[合成測試](../../../tests/test_runner_diagnostics.py)（`python3 tests/test_runner_diagnostics.py`，138 項）以假引擎程序驗 runner，包含資源訊息即使 exit 0 也須失敗；不啟動 Godot，也不證明使用者 crash 已重現／修復。
 
-[Dictionary](../../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[Ctb](../../../tests/ctb_flow.gd)（fixture [ctb_fixture.gd](../../../tests/ctb_fixture.gd)，標記 `CTB PASS:`，在 All 中排在 CombatDefeat 與 SaveLoad 之間）驗 CTB 時間軸：不同速度的行動順序與刻數、`combat_tick_advanced`、EVERY_N_TICKS 狀態、行動開始清格擋、turn_count＝主角行動數、TimelineBar／TurnOverlay 文字與中途離樹後 Director 停止；[SaveLoad](../../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；不代表所有卡牌／遭遇或自訂內容已驗證。
+[Dictionary](../../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[Ctb](../../../tests/ctb_flow.gd)（fixture [ctb_fixture.gd](../../../tests/ctb_fixture.gd)，標記 `CTB PASS:`，在 All 中排在 CombatDefeat 與 SaveLoad 之間）驗 CTB 時間軸：不同速度的行動順序與刻數、`combat_tick_advanced`、EVERY_N_TICKS 狀態、行動開始清格擋、turn_count＝主角行動數、TimelineBar／TurnOverlay 文字與中途離樹後 Director 停止；[Board](../../../tests/board_flow.gd)（cases [board_cases.gd](../../../tests/board_cases.gd)、fixture [board_fixture.gd](../../../tests/board_fixture.gd)，標記 `BOARD PASS:`，在 All 中排在 Ctb 與 SaveLoad 之間）驗 7×5 棋盤：移動點與付費移動延遲、障礙與繞路、射程／CROSS／LINE_PIERCE／2×2 佔格、突進／推／拉近／交換／閃現、定身、召喚最近空格、KEEP_RANGE／CHARGE／APPROACH 移動與 ThreatPreview 等於實際受傷；[SaveLoad](../../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；不代表所有卡牌／遭遇或自訂內容已驗證。
 
 ## 新內容如何接到 runner
 

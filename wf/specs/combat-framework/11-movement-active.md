@@ -64,6 +64,8 @@ ValidatorCellFree {cell: "SELECTED_CELL", for_unit: "PARENT"}   # footprint 全�
 | 卡牌移動 | 牌自身 `card_action_delay` | 已含在 max 內 |
 | 強制位移（§2） | 0 | 被位移者時間軸不變 |
 
+修訂 2026-10-19（實作 Phase 2）：延遲單位是「行動延遲」，換成刻數要再乘 `timeline_delay_scale ÷ speed`（付費 2 格 × 20 = +40 延遲，速度 10 下 = +400 刻）；Phase 2 尋路只做四向 BFS，`move_cost`／八向／穿越友軍／撤銷留到 2b。
+
 ### 1.4 AI
 
 貪婪第 1 步的候選格＝`reachable_cells(unit, move_points + paid_move_max_cells)`；付費格的成本 = `extra_move_delay_per_cell × 格數 × ai_weights.save_energy`（沒有該軸則以 `0.01/刻` 折算）作負分。`move_split_allowed = false` 時 AI 一律先移後打。AI 隊員的卡牌移動由出牌迴圈的 preview 估「移動後可打到的目標數」決定。

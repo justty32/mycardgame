@@ -19,6 +19,8 @@ EnemyIntentData（尾端新增）
   enemy_intent_move_after: bool = false     # true = 先執行意圖動作再移動（打了就跑）
 ```
 
+修訂 2026-10-19（實作 Phase 2）：`FLANK` 暫退 APPROACH、`TELEPORT` 暫退 HOLD（2b 實作）；CHARGE 未與目標同行／列時直接退化 APPROACH（不做一步對齊）；目標規則 RANDOM／MARKED 暫退 HERO；攻擊打不到時跳過並保留意圖到下次行動；ThreatPreview 每個敵人只計一次當前意圖。
+
 ### 6.2 定義（純函式 `IntentResolver.resolve(board, enemy, intent, target) -> {move_cell, path, targets, cells, can_hit}`）
 
 各移動模式的目的格選擇與無合法格時行為（表）已抽到 [movement-intent-modes.json](movement-intent-modes.json)（7 列）。欄位：模式、目的格選擇（候選 = `reachable_cells(enemy, move_distance)`，含原地）、無合法格時。

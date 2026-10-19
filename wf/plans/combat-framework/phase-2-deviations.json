@@ -1,0 +1,67 @@
+{
+ "contract": "wf-table/1",
+ "source": "phase-2.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "id",
+  "說明"
+ ],
+ "rows": [
+  {
+   "id": "a",
+   "說明": "BoardView 是由 Combat 在執行時建立的自繪 Control，沒有 BoardView.tscn／BoardCell.tscn，Root.tscn 不動。戰鬥者圖像仍在原本的畫面位置，棋盤上只畫代表方塊。"
+  },
+  {
+   "id": "b",
+   "說明": "EnemyContainer 沒有改名為 UnitLayer；改由 Director 呼叫它的 `spawn_event_enemy`／`spawn_board_enemy`。"
+  },
+  {
+   "id": "c",
+   "說明": "BoardView 點到被佔的格時不同時發 `enemy_clicked`，否則會重複出牌；改由 Hand 把 `enemy_clicked` 轉成點格。"
+  },
+  {
+   "id": "d",
+   "說明": "尋路只做四向 BFS。`move_cost`／Dijkstra、八向、穿越友軍、撤銷留到 2b；`move_adjacency = EIGHT` 暫時退回四向。"
+  },
+  {
+   "id": "e",
+   "說明": "意圖移動：FLANK 退回 APPROACH，TELEPORT 退回 HOLD；目標規則 RANDOM／MARKED 退回 HERO。CHARGE 沒對齊目標時直接改用 APPROACH，不做「一步對齊再衝」。攻擊打不到時跳過，並保留同一意圖到下次行動。"
+  },
+  {
+   "id": "f",
+   "說明": "ThreatPreview 對每個敵人只計一次當前意圖：只要它在目標下次行動（行動中的單位用投影值）之前會行動就計入，快速敵人的多次行動不累加。"
+  },
+  {
+   "id": "g",
+   "說明": "ActionHandler 的動作是後進先出，所以框架測試卡的 `card_play_actions` 依執行順序反向列出。spec 範例裡寫在攻擊上的 `action_validators` 鍵在框架中不存在，改用 ActionValidator 包住攻擊。"
+  },
+  {
+   "id": "h",
+   "說明": "`card_move_distance` 的語意：EMPTY_CELL 牌是移動到所選格（TO_CELL），其他牌是朝所選目標移動（TOWARD，停在相鄰格）。"
+  },
+  {
+   "id": "i",
+   "說明": "閃現的定身拒絕由 ValidatorPathExists 的移動力檢查達成：預覽被攔截到 distance 0 就失敗。`teleport_blocked` 旗標留到 2b。spec 原列的 ValidatorDisplaceable 改為 `ActionDisplaceUnit.is_displaceable` 靜態函式。"
+  },
+  {
+   "id": "j",
+   "說明": "ActionDisplaceUnit 另加 TO_CELL 模式（指定格）；`bypass_block` 已實作。displace_resistance、多格位移、delay_on_collision 照計畫留到 2b。"
+  },
+  {
+   "id": "k",
+   "說明": "舊 TARGET_OVERRIDES 的語意不改（ALL_ENEMIES 仍指敵人群組）；新增 ALL_OPPONENTS 代替「parent 的對立陣營」。"
+  },
+  {
+   "id": "l",
+   "說明": "Done when 數值的調整：\n- 第 2 條「多 40 刻」改為延遲 +40，在速度 10 下等於 400 刻。\n- 第 5 條撞牆案例改為敵人在邊緣 (3,0)、主角在 (3,1)；原寫法超出射程 1。\n- 第 5 條「兩者各受 3」改用距離 1 的變體卡。\n- 第 6 條定身時閃現在選牌階段就不能打出。\n- 第 13 條改由 CombatVictory 斷言。\n- 「付費延遲相加」的斷言放在 Board 的第 2 條，不在 ctb_flow。"
+  },
+  {
+   "id": "m",
+   "說明": "Phase 1 遺留修正：`unit_spawned` 在 Enemy.init 之前就發出，所以召喚改為延遲一幀才入列；`Enemy.is_alive` 在資料為 null 時回傳 false。"
+  },
+  {
+   "id": "n",
+   "說明": "ActionComputeBoardValue 寫入的 `distance` 鍵與移動動作的 distance 同名，同一張牌不要同時用。"
+  }
+ ]
+}

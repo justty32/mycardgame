@@ -24,7 +24,7 @@
 
 從 `intent_initial` 指向第一輪可用意圖，每個可到達狀態寫出傷害×次數、格擋、custom actions、下一狀態權重與預告內容。權重須非負、總和大於零，目標 ID 全部存在；需要停留時明確自迴圈，不用空權重代表「維持原狀」。目前空權重實際回傳 null，不能相信旁邊的停留註解。
 
-敵人在進入時間軸等待時（開戰、生成、每次自身行動後）由 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 呼叫 `Enemy.decide_next_intent()` 切換意圖；輪到它時 `CombatDirector.perform_enemy_intent` 以 `Enemy.build_intent_actions_data` 組出 stack：重設格擋（依 rules）、加格擋、攻擊、custom actions；custom actions 陣列也受逆序影響。每個敵人自己的行動依序處理 PRE_ENEMY_TURN → PRE_ENEMY_INTENT → 意圖 → POST_ENEMY_INTENT → POST_ENEMY_TURN 狀態；「先上易傷再攻擊」必須測實際次序，不能只看 JSON 排列。
+敵人在進入時間軸等待時（開戰、生成、每次自身行動後）由 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 呼叫 `Enemy.decide_next_intent()` 切換意圖；輪到它時 `CombatDirector.perform_enemy_intent` 先依意圖的 `enemy_intent_move`（[IntentResolver](../../../game/scripts/combat/board/IntentResolver.gd)，射程／形狀／目標規則）在棋盤上移動，打不到就跳過攻擊並保留意圖，再以 `Enemy.build_intent_actions_data` 組出 stack：重設格擋（依 rules）、加格擋、攻擊、custom actions；custom actions 陣列也受逆序影響。每個敵人自己的行動依序處理 PRE_ENEMY_TURN → PRE_ENEMY_INTENT → 意圖 → POST_ENEMY_INTENT → POST_ENEMY_TURN 狀態；「先上易傷再攻擊」必須測實際次序，不能只看 JSON 排列。
 
 預告用 attack／attack-generator 的 preview interception 算數字，圖示來自 `enemy_intent_display_types`。custom action 的視覺推導只有部分已知腳本；新腳本須同步描述／圖示契約。純防禦或召喚意圖明確將傷害與攻擊次數設 0。重複預覽前後比較狀態、RNG 與資源，證明預覽不改遊戲；數字斷言不等於玩家已看得懂。
 

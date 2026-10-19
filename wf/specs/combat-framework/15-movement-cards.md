@@ -52,6 +52,8 @@
   }}
 ```
 
+修訂 2026-10-19（實作 Phase 2）：ActionHandler 以堆疊執行，`card_play_actions` 由最後一項先跑，上例的順序在框架測試資料中反向列出（移動列在攻擊之後）；框架沒有 `action_validators` 鍵，突進的「相鄰才攻擊」用 ActionValidator 包住攻擊；閃現以 ValidatorCellFree＋ValidatorPathExists{teleport} 驗證。
+
 `card_shape` 數字對應 spec 的 `TARGET_SHAPES` 順序（SINGLE 0、ROW 1、COLUMN 2、CROSS 3、SQUARE_3 4、LINE 5…）；`card_target_faction` 依 `{OPPONENT 0, ALLY 1, ANY 2, SELF 3, EMPTY_CELL 4}`。`card_ai_hints.value` 是沒有 preview 數值的移動類牌的固定估值。
 
 新 Action 放 `game/scripts/actions/board_actions/`，Validator 放 `game/scripts/validators/board/`，都登記進 `Scripts` 常數。

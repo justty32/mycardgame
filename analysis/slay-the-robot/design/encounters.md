@@ -24,7 +24,7 @@
 
 ## 遭遇、池與資料接線
 
-[EventData.gd](../../../game/data/readonly/EventData.gd) 的 `event_weighted_enemy_object_ids` 是「每槽一個加權字典」，EnemyContainer 逐槽抽樣；同一敵人可以跨槽重複。自動配置用 HBoxContainer，指定配置用 positions；指定位置少於生成槽會記錯誤並停止超界生成。初始／戰後 actions、獎勵開關與 dialogue ID 同在 EventData，場景種類則在 [LocationData.gd](../../../game/data/mutable/LocationData.gd)。
+[EventData.gd](../../../game/data/readonly/EventData.gd) 的 `event_weighted_enemy_object_ids` 是「每槽一個加權字典」，戰鬥框架 Phase 2 起由 CombatDirector 逐槽抽樣（同一 RNG、同順序）並經 EnemyContainer 生成；有 `event_encounter_object_id` 時改讀 [EncounterData](../../../game/data/readonly/EncounterData.gd) 的第 0 波與棋盤格，沒有則合成北側一列；同一敵人可以跨槽重複。自動配置用 HBoxContainer，指定配置用 positions；指定位置少於生成槽會記錯誤並停止超界生成。初始／戰後 actions、獎勵開關與 dialogue ID 同在 EventData，場景種類則在 [LocationData.gd](../../../game/data/mutable/LocationData.gd)。
 
 [EventPoolData.gd](../../../game/data/readonly/EventPoolData.gd) 是事件 ID 陣列及 fallback。[PlayerData.get_next_event_object_id_from_pool](../../../game/data/prototype/PlayerData.gd) 補池時去重並用 `rng_event_pool` 洗牌，依序取第一個 validator 通過者、移除該 ID。全部不通過時直接取 fallback；fallback 本身不再驗 validator。這不是帶權重的事件池，重複 ID 無法提高機率。
 
