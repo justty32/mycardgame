@@ -17,7 +17,7 @@ mycardgame 是以 Slay-The-Robot 為框架的個人卡牌遊戲開發基地：�
 | [analysis/slay-the-robot](../analysis/slay-the-robot/README.md) | 本專案維護的框架分析與教學 |
 | `games/<game>/` | 題材樹：各遊戲的 AGENTS 入口、design（核心玩法、內容範圍、任務 spec／plan）、wf overlay 與內容包；由根 AGENTS.md 路由，框架文件不連入 |
 | [specs/combat-framework](specs/combat-framework/README.md) | 框架級 spec：隊伍制 CTB 戰棋戰鬥框架（草案；Phase 0 已實作） |
-| [plans/combat-framework](plans/combat-framework/phase-0.md) | 上列 spec 各階段的實際驗收（目前 Phase 0） |
+| [plans/combat-framework](plans/combat-framework/phase-1.md) | 上列 spec 各階段的實際驗收（Phase 0、Phase 1；最新為 Phase 1，前一階段由檔頭連過去） |
 | [WORKFLOWS.md](WORKFLOWS.md) | 意圖對應工作流 |
 | [agent-session](workflows/agent-session.md) | agent 冷啟動、分工與交接 |
 | [game-dev](workflows/game-dev/README.md) | 整局、關卡、卡牌／敵人，以及完整場景的美術／動畫／特效／聲音／UI、第一個 mod 與驗收 |

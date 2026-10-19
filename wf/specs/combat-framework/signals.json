@@ -21,7 +21,7 @@
   {
    "訊號": "`combat_tick_advanced`",
    "參數": "`previous_tick: int, current_tick: int`",
-   "時點": "時鐘前進"
+   "時點": "時鐘前進（修訂 2026-10-19：只在時鐘實際前進時發）"
   },
   {
    "訊號": "`timeline_changed`",
@@ -36,7 +36,7 @@
   {
    "訊號": "`unit_spawned` / `unit_downed` / `unit_removed`",
    "參數": "`unit`",
-   "時點": "生成／倒下／離場"
+   "時點": "生成／倒下／離場（修訂 2026-10-19：Phase 1 起 `unit_spawned`／`unit_removed` 由 UnitRegistry 在註冊／取消註冊時發；`unit_downed` 留 Phase 4）"
   },
   {
    "訊號": "`wave_started` / `wave_cleared`",
@@ -46,7 +46,7 @@
   {
    "訊號": "`end_action_requested`",
    "參數": "`immediacy: int`",
-   "時點": "取代 `end_turn_requested`"
+   "時點": "取代 `end_turn_requested`（修訂 2026-10-19：`end_turn_requested` 保留為舊別名）"
   },
   {
    "訊號": "`cell_clicked` / `cell_hovered`",

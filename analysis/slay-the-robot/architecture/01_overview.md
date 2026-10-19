@@ -44,7 +44,7 @@
 
 並非所有 action 都一定經過排程器：`generate_visition_location()` 明確直接呼叫 action 的 `perform_action()`。ActionCardPlay 本身僅供攔截，不執行；這兩個例外分別見 ActionGenerator 與 [ActionCardPlay.gd](../../../game/scripts/actions/card_actions/card_play_actions/ActionCardPlay.gd)。
 
-已知未修的回合排程欄位不一致：[Combat.gd](../../../game/scripts/ui/Combat.gd) `queue_end_turn()` 第 516 行在已有 `end_turn_object` 時讀取 `end_turn_queue_value`，但 [CombatEndTurn.gd](../../../game/scripts/ui/CombatEndTurn.gd) 第 12 行宣告的是 `end_turn_queue_immediacy`。這是靜態確認的獨立缺陷；目前單次結束回合測試沒有涵蓋等待中再次要求結束回合的優先序判斷。本輪未修改，也不把它當作已驗修復或資源保留原因。
+歷史紀錄（已隨 2026-10-19 替換消失）的回合排程欄位不一致：上游 Combat.gd `queue_end_turn()` 第 516 行在已有 `end_turn_object` 時讀取 `end_turn_queue_value`，但 CombatEndTurn.gd（已刪除）第 12 行宣告的是 `end_turn_queue_immediacy`。這是靜態確認的獨立缺陷；目前單次結束回合測試沒有涵蓋等待中再次要求結束回合的優先序判斷。本輪未修改，也不把它當作已驗修復或資源保留原因。（2026-10-19 戰鬥框架 Phase 1 以 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) `request_end_action()` 與 [CombatEndAction.gd](../../../game/scripts/ui/CombatEndAction.gd) 取代 queue_end_turn／CombatEndTurn，新碼統一讀 `immediacy` 欄位，此不一致隨之消失；這是替換造成的結果，不是另行驗證的獨立修復，「等待中再次要求結束」的優先序仍無專項測試。）
 
 ## 存檔與重新進入
 

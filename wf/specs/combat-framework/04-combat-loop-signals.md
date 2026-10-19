@@ -51,6 +51,8 @@ HandManager
 - `perform_end_of_turn_hand_actions`（`HandManager.gd:460-535`）改名 `perform_end_of_action_hand_actions(unit_uid)`，由 `CombatDirector._end_action` 依 `rules.discard_hand_on_action_end` 呼叫。
 - `card_energy_cost_until_turn`（`CardData.gd:17`）語意改「直到持有者下次行動結束」，欄位名保留（JSON 相容）。
 
+修訂 2026-10-19（Phase 1）：`perform_end_of_action_hand_actions()` 已由 Director 依 `rules.discard_hand_on_action_end` 呼叫，舊名 `perform_end_of_turn_hand_actions` 保留為別名；尚無 `unit_uid` 參數，UnitPiles／proxy 留 Phase 4。另加 `get_hand_limit()` 讀 `rules.hand_limit`。
+
 ## 3.4 訊號重新定義與監聽者遷移
 
 新增（`Signals.gd`）（修訂 2026-10-19：Phase 0 已宣告；`member`／`plan` 參數在 PartyMemberData／AiPlan 出現前不標型別）：
@@ -58,6 +60,8 @@ HandManager
 （表）已抽到 [signals.json](signals.json)（11 列）。欄位：訊號、參數、時點。
 
 舊訊號處置：`player_turn_started/ended` **保留**，語意改為「主角（player_party[0]）的行動開始／結束」；`enemy_turn_started/ended` 保留，語意改為「某一個敵人的行動開始／結束」（參數維持無；不建議新碼使用）。`end_turn_requested` 改名。`ActionEndTurn` 檔名保留、內部改發新訊號。
+
+修訂 2026-10-19（Phase 1）：`end_turn_requested` 未刪，保留為 `end_action_requested` 的舊別名（Director 兩者都聽）。`player_turn_started` 在主角行動開始、補能量與抽牌前發，`player_turn_ended` 在棄牌後；`turn_count` 由 Director 在動畫前呼叫 `StatsHandler.begin_hero_action()` 遞增。遺物與 CardDecorator 仍連 `player_turn_*`（時點同舊版），改連 `unit_action_*` 延到 Phase 4。各列實際處置見下表的「修訂 2026-10-19」。
 
 監聽者遷移表：
 

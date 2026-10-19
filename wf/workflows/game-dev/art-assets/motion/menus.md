@@ -14,7 +14,7 @@
 
 ### 回合提示與規則回呼
 
-Root 的 CombatAnimation 已接 start_turn／end_turn。[Combat.gd](../../../../../game/scripts/ui/Combat.gd) 的 start_turn_animation／end_turn_animation 播放它們；文字 .tscn 可核實 start_turn 在 1 秒呼叫 _on_player_start_turn_animation_finished → start_turn，end_turn 在 0.5 秒發 player_turn_ended。start_turn 同時淡入淡出 TurnOverlay 並最後解除 EndTurnButton.disabled。
+Root 的 CombatAnimation 有 start_turn（1 秒）／end_turn（0.5 秒）。2026-10-19 Phase 1 起由 [CombatDirector](../../../../../game/scripts/combat/CombatDirector.gd) 在主角行動開始／結束時播放並 await animation_finished；動畫內已無流程 callback 與 EndTurnButton 解鎖軌，start_turn 只剩 TurnOverlay 淡入淡出與 update_turn_label，end_turn 只剩 disabled 軌。改時長會直接改變行動節奏。
 
 這段既有動畫含玩法回呼；縮短、跳過或減少動態不能只停掉動畫，否則可能漏開始回合或解除按鈕。若改造，先把一次性回合完成責任與純視覺效果分開，驗 start/end 各一次、無提前輸入與無重複抽牌。人物攻擊動畫則不自動管命中，兩者不可套同一假設。
 

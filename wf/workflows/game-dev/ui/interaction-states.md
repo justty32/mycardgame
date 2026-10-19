@@ -14,7 +14,7 @@
 
 先讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd) 與 Root 的 `RunScreen/Combat`。`Energy/EnergyCount` 讀 Global.player_data 能量；DrawPile／DiscardPile／ExhaustPile 的 Count 讀 HandManager 對應陣列；MoneyLabel／HealthLabel 讀 player_data。`update_combat_display()` 接 card_played／drawn／deck_shuffled／discarded／exhausted、energy_changed、card_queue_refunded；金錢／生命另接 player_money_changed／player_health_changed。改 HUD 應沿這些來源刷新，不只修改 Label.text。
 
-EndTurnButton.button_up 經 queue_end_turn／CombatEndTurn 等待卡牌與 actions，再進回合動畫。Hand disabled、actions_being_performed 與 card_play_queue 是不同狀態；不要假設所有 action 期間都禁止排隊出牌。敵人意圖在 Enemy 的 `Visible/Intent`、血條／格擋／狀態在 BaseCombatant；動這些顯示要同查其更新方法，不從頂端 HealthLabel 複製資料。
+EndTurnButton 發 end_action_requested，CombatDirector 經 CombatEndAction 等卡牌與 actions，再播結束動畫；主角抽牌後才啟用。Hand disabled、actions_being_performed 與 card_play_queue 是不同狀態；別假設所有 action 期間都禁止排隊出牌。敵人意圖在 Enemy 的 `Visible/Intent`、血條／格擋／狀態在 BaseCombatant；動這些顯示要同查其更新方法，不從頂端 HealthLabel 複製。
 
 [Card.gd](../../../../game/scripts/ui/card/Card.gd) 的 CardButton.gui_input 在 left_click／right_click **釋放**時發 card_selected／card_right_clicked；[Hand.gd](../../../../game/scripts/ui/Hand.gd) 訂閱後，先拒絕 disabled、右鍵執行中、can_play_card 失敗、同牌已在 queue 的出牌。無目標卡直接建 CardPlayRequest 入列；需目標卡存 current_selected_card，顯示 SelectTargetLabel。Enemy SelectionButton 經 enemy_clicked 讓 Hand 建帶敵人的 request；enemy_hovered（離開時為 null）要求卡面重算預覽。
 
@@ -44,12 +44,12 @@ Back 清零不保證子 action 零次；ActionPickCards 要 min_card_amount=1 �
 
 ### 新 modal 與鍵盤／手把
 
-先沿 Root 的 CardSelectionOverlay／CardDraftSelectionOverlay 比較：都是直接內嵌 Control、固定 1200×700、z_index=10、process_mode=PAUSABLE；PauseOverlay 則有自己的暫停契約。新畫面先指定 opener、結果 owner、是否允許取消、一次完成／重入規則、底層輸入如何被擋、退出目的地。沒有共用 modal 基底；不要無條件複製 pause 語意。
+先沿 Root 的 CardSelectionOverlay／CardDraftSelectionOverlay 比較：都是直接內嵌 Control、固定 1200×700、z_index=10、process_mode=PAUSABLE；PauseOverlay 則有自己的暫停契約。新畫面先指定 opener、結果 owner、是否允許取消、一次完成／重入規則、底層輸入如何被擋、退出目的地。沒有共用 modal 基底；別無條件複製 pause 語意。
 
-鍵盤／手把需求須定 action map（方向／確認／取消）、初始 focus、順序及關閉還原對象；不可用／隱藏元件跳過，沒有候選時焦點落在允許的 Back／Skip。設定可見 focus 樣式，ScrollContainer.follow_focus 只負責捲動，不能替 Card.gui_input 建確認行為。取消應先交最上層允許關閉的 modal，再交選目標；不可取消狀態保留提示，避免同次輸入再觸發底層。這些是待實作契約，現有自訂 InputMap 只有兩個滑鼠 action；未核實控制器流程。
+鍵盤／手把需求須定 action map（方向／確認／取消）、初始 focus、順序及關閉還原對象；不可用／隱藏元件跳過，沒有候選時焦點落在允許的 Back／Skip。設定可見 focus 樣式，ScrollContainer.follow_focus 只負責捲動，不能替 Card.gui_input 建確認行為。取消應先交最上層允許關閉的 modal，再交選目標；不可取消狀態保留提示，避免同次輸入再觸發底層。這些是待實作契約；現有自訂 InputMap 只有兩個滑鼠 action，未核實控制器。
 
 ### 清理與交接
 
-關閉畫面需解開自己新增的訂閱、清參照／timer／tween，恢復輸入 owner；queue_free 延至 frame，重開前別把待刪節點當新候選。重複 init 的 Card 會再 connect，需測重入。強制離開則沿 ActionHandler.clear_all_actions → force_action_end 清空 picked_cards、設 async_cancelled、釋放等待；UI 只 visible=false 會留下 action。Root._exit_tree 已有此清理，但不代表所有自建 modal 都安全。
+關閉畫面需解開自己新增的訂閱、清參照／timer／tween，恢復輸入 owner；queue_free 延至 frame，重開前別把待刪節點當新候選。重複 init 的 Card 會再 connect，需測重入。強制離開則沿 ActionHandler.clear_all_actions → force_action_end 清空 picked_cards、設 async_cancelled、釋放等待；UI 只 visible=false 會留下 action。Root._exit_tree 已有此清理，不代表所有自建 modal 都安全。
 
 動態戰鬥 UI 的 owner 生命週期另見 [元件](components-layout.md)。將成功、拒絕、正常取消、強制退出交 [專項驗證](verification.md)，不以關閉成功推定 Action 已結束。

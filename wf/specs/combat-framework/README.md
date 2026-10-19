@@ -2,7 +2,7 @@
 
 [INDEX](../../INDEX.md)｜[planning](../../workflows/planning.md)
 
-狀態：草案，第 6 節開放問題已由使用者 2026-10-19 決定（見 [09-risks-decisions.md](09-risks-decisions.md)）。Phase 0 已於 2026-10-19 實作，驗收見 [plan](../../plans/combat-framework/phase-0.md)；與原文的偏差以「修訂」標在 phases.json 與各節；Phase 1 起尚未動工。題材中立——所有題材名詞、數值與角色皆由內容包（JSON mod）提供；本 spec 只定義框架的資料類別、迴圈、訊號、介面與分階段計畫。
+狀態：草案，第 6 節開放問題已由使用者 2026-10-19 決定（見 [09-risks-decisions.md](09-risks-decisions.md)）。Phase 0、Phase 1（CTB + 單一主角）已於 2026-10-19 實作，驗收見 [Phase 0 plan](../../plans/combat-framework/phase-0.md)、[Phase 1 plan](../../plans/combat-framework/phase-1.md)；與原文的偏差以「修訂」標在 phases.json 與各節；Phase 2 起尚未動工。題材中立——所有題材名詞、數值與角色皆由內容包（JSON mod）提供；本 spec 只定義框架的資料類別、迴圈、訊號、介面與分階段計畫。
 需求來源：使用者 2026-10-19 決定（見 01 的目標表）；題材概念目錄只當需求樣本，不進本 spec。
 落點（已決，使用者 2026-10-19）：框架級 spec／plan 放 `wf/specs/`、`wf/plans/`，題材級放 `games/<game>/design/`；題材樹只放「需求與驗收」一頁連回本 spec。每階段開工時在 `wf/plans/` 開同名 plan 記錄實際驗收。
 程式碼引用格式 `檔案:行`，以 2026-10-19 工作樹為準（`tests/framework_smoke.gd`、`tools/test_game.py`、`tests/test_runner_diagnostics.py` 當時正由另一 agent 修改，本 spec 不碰）。原文的節號（§1–§7）保留在各檔標題，正文內的 §3.4 之類交叉引用照節號找檔。
@@ -11,16 +11,16 @@
 
 | 檔 | 原節 | 內容 |
 |---|---|---|
-| [01-goals-current-state.md](01-goals-current-state.md) | §1–§2 | 目標 G1–G6、非目標、現況假設（大表在 json） |
-| [02-data-party-rules.md](02-data-party-rules.md) | §3.1.1–3.1.2 | 隊伍資料、`CombatRulesData` |
-| [03-data-board-encounter.md](03-data-board-encounter.md) | §3.1.3–3.1.6 | 棋盤、遭遇與波次、卡牌／意圖／目標、AI 傾向 |
-| [04-combat-loop-signals.md](04-combat-loop-signals.md) | §3.2–§3.4 | `CombatDirector` 迴圈、每單位牌堆、訊號與監聽者遷移 |
-| [05-intent-and-ai.md](05-intent-and-ai.md) | §3.5–§3.6 | 棋盤上的意圖、AI 隊員貪婪決策 |
-| [06-meta.md](06-meta.md) | §3.7 | 招募、牌獎、購卡、升階、存檔版本、UI 骨架 |
-| [07-tradeoffs.md](07-tradeoffs.md) | §4 | 時間軸、棋盤、AI、資料模型、牌堆、舊訊號、存檔的取捨 |
-| [08-phases.md](08-phases.md) | §5 | Phase 0–6 分階段計畫（細節在 phases.json） |
-| [09-risks-decisions.md](09-risks-decisions.md) | §6 | 風險與已決事項（使用者 2026-10-19） |
-| [10-pack-requirements.md](10-pack-requirements.md) | §7 | 題材包要提供的資料（表在 json） |
+| [01-goals-current-state.md](01-goals-current-state.md) | §1–§2 | 目標、非目標、現況 |
+| [02-data-party-rules.md](02-data-party-rules.md) | §3.1.1–3.1.2 | 隊伍、規則物件 |
+| [03-data-board-encounter.md](03-data-board-encounter.md) | §3.1.3–3.1.6 | 棋盤、遭遇波次、卡牌／意圖、AI 傾向 |
+| [04-combat-loop-signals.md](04-combat-loop-signals.md) | §3.2–§3.4 | Director 迴圈、牌堆、訊號遷移 |
+| [05-intent-and-ai.md](05-intent-and-ai.md) | §3.5–§3.6 | 意圖顯示、AI 決策 |
+| [06-meta.md](06-meta.md) | §3.7 | 招募、牌獎、存檔、UI |
+| [07-tradeoffs.md](07-tradeoffs.md) | §4 | 設計取捨 |
+| [08-phases.md](08-phases.md) | §5 | Phase 0–6 計畫 |
+| [09-risks-decisions.md](09-risks-decisions.md) | §6 | 風險、已決事項 |
+| [10-pack-requirements.md](10-pack-requirements.md) | §7 | 題材包需提供的資料 |
 
 ## 已決事項（使用者 2026-10-19）
 

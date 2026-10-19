@@ -10,5 +10,6 @@
 
 ## 待使用者項
 
-- [testing] 回公司 Windows 機時跑 `./tools/test-game.ps1 -Suite All` 與 `python tests/test_runner_diagnostics.py`，確認 ps1 薄包裝、不開窗、taskkill 殺樹、APPDATA 隔離、.tools/godot-4.7 引擎探測（Python 3.12 以下的 junction 跳過）；另驗 `python tools/link_pack.py <pack>` 的 Windows junction 路徑（symlink 失敗退 mklink /J）與 ps1 新參數 `-Pack`／`-PackTests`／`-ContentProfile`（見 pack 流程）→ 回報結果後我修正並更新 dev-env／testing
+- [testing] 回公司 Windows 機時跑 `./tools/test-game.ps1 -Suite All` 與 `python tests/test_runner_diagnostics.py`，確認 ps1 薄包裝、不開窗、taskkill 殺樹、APPDATA 隔離、.tools/godot-4.7 引擎探測（Python 3.12 以下的 junction 跳過）；另驗 `python tools/link_pack.py <pack>` 的 Windows junction 路徑（symlink 失敗退 mklink /J）與 ps1 新參數 `-Pack`／`-PackTests`／`-ContentProfile`（見 pack 流程）；All 已含新 suite Ctb（亦可 `-Suite Ctb`）→ 回報結果後我修正並更新 dev-env／testing
+- [game-dev] 實機打一場戰鬥，照 combat-framework phase-1 plan 末節看 TimelineBar、TurnOverlay、End Turn 與動畫 → 回報後我修 UI
 - [repo 結構] 拆 repo 時再問使用者：框架 repo 是否改名（如 cardframework）、題材樹是否各自獨立成 repo；改名前現有名稱與 `mycardgame-tests` 等執行期字串先不動 → 使用者決定後我做改名與連結修正

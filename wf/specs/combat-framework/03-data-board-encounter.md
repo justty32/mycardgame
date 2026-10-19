@@ -24,7 +24,7 @@ BaseCombatant
   + next_action_tick: int
   + last_action_tick: int
   + action_count: int
-  + controller: BaseUnitController（修訂 2026-10-19：Phase 0 暫型別 RefCounted，Phase 4 換）
+  + controller: BaseUnitController（修訂 2026-10-19：Phase 0 暫型別 RefCounted；修訂 2026-10-19：Phase 1 起型別 BaseUnitController）
 ```
 
 ## 3.1.4 遭遇與波次（讀取資料）

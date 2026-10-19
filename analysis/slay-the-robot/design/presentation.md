@@ -65,7 +65,7 @@ Card 的 gui_input 在 action released 時發 selected／right_clicked，mouse_e
 
 ## HUD、選牌與 tooltip 的補查
 
-2026-10-19 本輪讀碼，仍以固定上游加本地 patches 為準，沒有引擎／視覺／真實輸入實測。[Combat.gd](../../../game/scripts/ui/Combat.gd) 位於 Root 的 RunScreen/Combat；EnergyCount 讀 player_data 能量、三個牌堆 Count 讀 HandManager；金錢／生命另接 player_money_changed／player_health_changed。卡牌移動、energy_changed 與 card_queue_refunded 觸發 update_combat_display。EndTurnButton 經 queue_end_turn 和 CombatEndTurn 等待排隊及 actions，Hand disabled 不等同 ActionHandler 忙碌。
+2026-10-19 本輪讀碼，仍以固定上游加本地 patches 為準，沒有引擎／視覺／真實輸入實測。[Combat.gd](../../../game/scripts/ui/Combat.gd) 位於 Root 的 RunScreen/Combat；EnergyCount 讀 player_data 能量、三個牌堆 Count 讀 HandManager；金錢／生命另接 player_money_changed／player_health_changed。卡牌移動、energy_changed 與 card_queue_refunded 觸發 update_combat_display。EndTurnButton 經 queue_end_turn 和 CombatEndTurn 等待排隊及 actions，Hand disabled 不等同 ActionHandler 忙碌。（2026-10-19 戰鬥框架 Phase 1 後：按鈕改發 end_action_requested，由 CombatDirector 以 CombatEndAction 等待；queue_end_turn 與 CombatEndTurn 已刪除。）
 
 [Hand](../../../game/scripts/ui/Hand.gd) 拒絕 disabled、右鍵執行中、不合法牌與同牌已排隊；無目標卡立即入列，需要目標則設 current_selected_card／SelectTargetLabel。Enemy 的 SelectionButton 只在 alive 時發 enemy_clicked，hover／離開發 enemy_hovered(enemy/null) 更新預覽。BackgroundButton 清目標；右鍵先清目標再可能執行 card_right_click_actions，並非純取消。CardGlow 由 validator／選牌使用，不能當成統一可用標記；不合法手牌選取以 alpha=0.3 顯示。
 

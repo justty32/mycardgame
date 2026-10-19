@@ -25,7 +25,7 @@
 
 敵人／玩家死亡音選 `enemy_killed`／`player_killed` 的邏輯死亡，或 `enemy_death_animation_finished`／`player_death_animation_finished` 的呈現完成之一。需要兩段演出時以不同 cue 明列，不把同音播兩次。收束 owner 以 actor instance＋本次 encounter 去重，防重複傷害或結算回呼重播；autoplay／重複卡亦沿同一語意政策。
 
-回合音用已發生的 `player_turn_started/ended`、`enemy_turn_started/ended`，不要用 end_turn_requested 當回合已結束。一般選「玩家開始」與「敵人開始」兩個明確提示即可；若加入結束音要定與開始音重疊規則。敵人 intent 音屬行動語意，不能代替整個敵方回合提示。玩家死亡後排隊中的回合提示必須失效。
+回合音用已發生的 `player_turn_started/ended`（CTB 下＝主角一次行動的開始／結束）、`enemy_turn_started/ended`（＝單一敵人的一次行動，每個敵人各發一次），不要用 end_action_requested（舊名 end_turn_requested）當行動已結束。一般選「玩家開始」與「敵人開始」兩個明確提示即可；多敵連續行動時要定冷卻或合併規則，加入結束音也要定與開始音重疊規則。敵人 intent 音屬行動語意，不能代替整個敵人行動提示。玩家死亡後排隊中的回合提示必須失效。
 
 ### 中斷、退出與混音
 

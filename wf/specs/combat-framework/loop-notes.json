@@ -9,7 +9,7 @@
  "rows": [
   {
    "no": "1",
-   "text": "`Global.are_remaining_enemies()` 改為委派 `CombatDirector.has_living_opponents()`，`ActionHandler.gd:93-96` 的 short-circuit 改問 `CombatDirector.is_combat_over()`，否則波間空檔會把所有攻擊短路。"
+   "text": "`Global.are_remaining_enemies()` 改為委派 `CombatDirector.has_living_opponents()`，`ActionHandler.gd:93-96` 的 short-circuit 改問 `CombatDirector.is_combat_over()`，否則波間空檔會把所有攻擊短路。**修訂 2026-10-19（Phase 1）**：委派延到 Phase 3 波次一起做；`Global.are_remaining_enemies()` 與 short-circuit 暫不變，`CombatDirector` 已提供 `has_living_opponents()`／`is_combat_over()`。"
   },
   {
    "no": "2",
@@ -17,7 +17,7 @@
   },
   {
    "no": "3",
-   "text": "玩家單位行動時：`HandManager.set_active_unit(unit)`、`Hand` 顯示其手牌、`EndActionButton` 啟用；`CombatEndTurn` 改名 `CombatEndAction` 行為不變（`end_turn_requested` → `end_action_requested`）。"
+   "text": "玩家單位行動時：`HandManager.set_active_unit(unit)`、`Hand` 顯示其手牌、`EndActionButton` 啟用；`CombatEndTurn` 改名 `CombatEndAction` 行為不變（`end_turn_requested` → `end_action_requested`）。**修訂 2026-10-19（Phase 1）**：已改名 `CombatEndAction`、按鈕發 `end_action_requested`（`end_turn_requested` 留作別名）；`set_active_unit` 與 UnitPiles 留 Phase 4。"
   },
   {
    "no": "4",
@@ -25,7 +25,7 @@
   },
   {
    "no": "5",
-   "text": "「每回合一次」的卡牌／狀態語意：以**該單位的 action_count** 計；「持續 X 刻」以 `combat_tick_advanced` 計。`StatusEffectData.status_effect_action_process_times` 新增尾端枚舉 `UNIT_ACTION_START`、`UNIT_ACTION_END`、`EVERY_N_TICKS`（N 存 `status_effect_tick_interval`），舊值重釋：`PRE/POST_DRAW_PLAYER_START_TURN` = 我方單位行動開始抽牌前後；`PRE/POST_DISCARD_PLAYER_END_TURN` = 我方單位行動結束棄牌前後；`PRE/POST_ENEMY_TURN` 與 `PRE/POST_ENEMY_INTENT` 合併為該敵人行動開始／結束（兩對都觸發，保持舊資料有效）。"
+   "text": "「每回合一次」的卡牌／狀態語意：以**該單位的 action_count** 計；「持續 X 刻」以 `combat_tick_advanced` 計。`StatusEffectData.status_effect_action_process_times` 新增尾端枚舉 `UNIT_ACTION_START`、`UNIT_ACTION_END`、`EVERY_N_TICKS`（N 存 `status_effect_tick_interval`），舊值重釋：`PRE/POST_DRAW_PLAYER_START_TURN` = 我方單位行動開始抽牌前後；`PRE/POST_DISCARD_PLAYER_END_TURN` = 我方單位行動結束棄牌前後；`PRE/POST_ENEMY_TURN` 與 `PRE/POST_ENEMY_INTENT` 合併為該敵人行動開始／結束（兩對都觸發，保持舊資料有效）。**修訂 2026-10-19（Phase 1 實作）**：三個尾端枚舉與 `status_effect_tick_interval`（預設 100）已加；舊值依上述重釋，敵人行動開始依序觸發 PRE_ENEMY_TURN → PRE_ENEMY_INTENT，結束依序 POST_ENEMY_INTENT → POST_ENEMY_TURN；`EVERY_N_TICKS` 由 `BaseCombatant.perform_tick_status_effects(prev, now)` 在時鐘前進時處理。"
   },
   {
    "no": "6",

@@ -12,7 +12,7 @@
 
 ### 畫面目的與完整素材包
 
-玩家須同時辨識手牌效果與費用、能量、敵人意圖／生命／格擋、自己的生存狀態，完成出牌和結束回合，再看懂結果。以 [Root](../../../../../game/scenes/Root.tscn) 的 `RunScreen/Combat` 組合 BackgroundButton、Player、EnemyContainer、Hand、Energy／牌堆、EndTurnButton、TurnOverlay、CardPicking、SelectTargetLabel；跨場景說明由根 Tooptips 提供。沒有獨立「頭目 HUD」場景可直接套用。
+玩家須同時辨識手牌效果與費用、能量、敵人意圖／生命／格擋、自己的生存狀態，完成出牌和結束回合，再看懂結果。以 [Root](../../../../../game/scenes/Root.tscn) 的 `RunScreen/Combat` 組合 BackgroundButton、Player、EnemyContainer、Hand、Energy／牌堆、EndTurnButton、TurnOverlay、TimelineBar（行動順序條）、CardPicking、SelectTargetLabel；跨場景說明由根 Tooptips 提供。沒有獨立「頭目 HUD」場景可直接套用。
 
 素材包包括背景及安全區、角色／敵人 SpriteFrames、卡圖與卡框／費用圖示、意圖／狀態／牌堆圖示、血條／格擋標記、回合提示、選取／不可用／focus 樣式；HUD 文字與數值保留可編輯。圖像交 [卡牌](../../art-assets/cards.md)、[戰鬥角色](../../art-assets/combatants.md) 與 [場景背景](../../art-assets/environments.md)；實際元件尺寸和 Hand 相依值見元件規格，不各自發明第二套。
 
@@ -20,7 +20,7 @@
 
 ### 資料與進場
 
-Combat 收 map_location_selected，依 LocationData 類型決定戰鬥或隱藏戰鬥 HUD；COMBAT／MINIBOSS／BOSS 經 ActionGenerator.generate_combat_start 進既有流程。Combat._on_combat_started 用 EventData 生敵人、開始回合動畫、設能量與 HUD。背景非空路徑依 Act→Location→Event 覆寫，Event 優先；空路徑不一定清前場景圖，需求若要空白須明定。
+Combat 收 map_location_selected，依 LocationData 類型決定戰鬥或隱藏戰鬥 HUD；COMBAT／MINIBOSS／BOSS 經 ActionGenerator.generate_combat_start 進既有流程。Combat._on_combat_started 用 EventData 經 EnemyContainer 生敵人，再交 CombatDirector.begin_combat()：首次行動前處理、時間軸排序，主角行動時才播動畫、補能量與抽牌。背景非空路徑依 Act→Location→Event 覆寫，Event 優先；空路徑不一定清前場景圖，需求若要空白須明定。
 
 玩家與敵人數值來自 mutable data／combatant；HUD 讀 Global.player_data／HandManager，意圖在 Enemy.Visible/Intent，狀態在 BaseCombatant.Visible/StatusContainer。每次 action 刷新與訊號鏈見互動狀態；UI 不因動畫顯示或每 frame 重算就重複扣費、傷害、抽牌。
 
@@ -30,7 +30,7 @@ Combat 收 map_location_selected，依 LocationData 類型決定戰鬥或隱藏�
 
 選牌 Action 可能暫時接管 Hand／CardPicking 或整個 overlay；玩家應看出選幾張、已選數、能否確認，不能同時出牌。Energy／牌堆檢視、tooltip 和 modal 的層級及輸入擁有者按共同互動設定，裝飾不得遮住命中區。額外確認步驟必須由規格要求，不能悄悄改成拖放或雙擊。
 
-EndTurnButton 經 queue_end_turn 等排隊卡與 actions 完成；TurnOverlay 文字由 StatsHandler turn count 產生，CombatAnimation 含流程 callback，新增動畫不可丟掉 callback。敵人死亡動畫完成後由 Combat 判定結束並等待 actions；一般勝利進獎勵，玩家死亡進結算，通關是另一條規則。離開時清選取／tooltip／待選 Action，晚到的視覺完成不能再出牌或再開獎勵。
+Combat.gd 只做 HUD，行動流程在 CombatDirector：EndTurnButton 發 end_action_requested，經 CombatEndAction 等排隊卡與 actions 完成；TurnOverlay 由 update_turn_label 顯示「Tick T - Action N」（刻數與主角行動數）。CombatAnimation 的 start_turn／end_turn 已無流程 callback，由 Director 播放後 await animation_finished，改動畫時長會直接改變行動節奏。敵人死亡動畫完成後由 Combat 判定結束並等待 actions；一般勝利進獎勵，玩家死亡進結算，通關是另一條規則。離開時清選取／tooltip／待選 Action，晚到的視覺完成不能再出牌或再開獎勵。
 
 ### 聲音、動畫與結果回饋
 

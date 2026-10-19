@@ -93,7 +93,7 @@ Player.play_death_animation 只有在共用 animation_player 沒在播時才啟�
 
 [CardTrail](../../../game/scripts/ui/card/CardTrail.gd) 是每 frame 推進的 Line2D；init 中同名參數的自指賦值、combat_ended handler 未在 _ready 接線為靜態疑點，未 runtime 重現或修復。新演出需明確持有唯讀視覺副本，不能等已被釋放的原Card完成。
 
-[Root.tscn](../../../game/scenes/Root.tscn) 的 CombatAnimation 與人物逐格不同：start_turn 的 method key 在1秒呼叫開始回合，end_turn 在0.5秒發回合結束；它還管 TurnOverlay 與 EndTurnButton.disabled。改速度／跳過／減少動態需保住這些玩法責任，不能套用「動畫純視覺」假設。
+[Root.tscn](../../../game/scenes/Root.tscn) 的 CombatAnimation 與人物逐格不同：start_turn 的 method key 在1秒呼叫開始回合，end_turn 在0.5秒發回合結束；它還管 TurnOverlay 與 EndTurnButton.disabled。改速度／跳過／減少動態需保住這些玩法責任，不能套用「動畫純視覺」假設。（2026-10-19 Phase 1 本地改動後：兩段動畫的流程 callback 與 EndTurnButton 解鎖軌已移除，改由 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 播放並 await animation_finished；時長仍直接決定主角行動節奏，以上為上游原貌。）
 
 [DialogueOverlay](../../../game/scripts/ui/DialogueOverlay.gd)、[ShopOverlay](../../../game/scripts/ui/ShopOverlay.gd)、[RewardOverlay](../../../game/scripts/ui/RewardOverlay.gd) 目前沒有各自 Tween／AnimationPlayer 序列，以立即填資料／顯示／清子項為主。對話名稱屬整體Dialogue，提示圖不是speaker頭像欄位，沒有逐字；商店purchased在庫存移除與後續取得／扣款actions排入後發出，UI等actions_ended重建；獎勵草稿則需選牌完成，不能用獎勵按鈕點擊當取得結果。新增演出應以用途控制器銜接這些不同階段。
 

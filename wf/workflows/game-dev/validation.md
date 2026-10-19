@@ -12,7 +12,7 @@
 
 **新卡牌、角色、JSON 或 mod**：必跑 Smoke；新增針對該內容的載入、ID 引用、角色牌組／card pack 歸屬驗證。涉及行為時，還要實際生成並執行該 action，核對費用、目標與結果。官方 example_mod 通過不能代表新 mod 通過，也不保證載入順序／碰撞符合預期。
 
-**戰鬥、Action、Validator、Interceptor**：必跑 Smoke 與受影響規則的針對性測試。用固定 seed 或明確狀態驗證合法與拒絕路徑、執行順序及生命／格擋／能量等結果；依變更覆蓋死亡、回合結束或非同步結束。ActionGenerator 建立物件成功不能證明它執行正確；必要時完整走一次相關戰鬥。
+**戰鬥、Action、Validator、Interceptor**：必跑 Smoke 與受影響規則的針對性測試。用固定 seed 或明確狀態驗證合法與拒絕路徑、執行順序及生命／格擋／能量等結果；依變更覆蓋死亡、回合結束或非同步結束；動戰鬥節奏／時間軸（速度、延遲、行動順序、每 N 刻狀態）另跑 `--suite Ctb`。ActionGenerator 建立物件成功不能證明它執行正確；必要時完整走一次相關戰鬥。
 
 **所有權、回指、async cache 或資源清理**：跑 `--suite ResourceLifecycle` 並依 [resource-lifecycle](resource-lifecycle.md) 補新增路徑；驗正常、拒絕、預覽及取消，核對受影響完整流程的退出日誌。測試強制 free 產品物件、只減少資源數或放寬白名單，不能當成修復證據。
 
