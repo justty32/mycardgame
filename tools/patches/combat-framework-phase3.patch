@@ -1,0 +1,1510 @@
+diff --git a/autoload/Global.gd b/autoload/Global.gd
+index 2365eb4..b873225 100644
+--- a/autoload/Global.gd
++++ b/autoload/Global.gd
+@@ -395,7 +395,12 @@ func get_alive_enemies() -> Array[Enemy]:
+ 			returned_enemies.append(enemy)
+ 	return returned_enemies
+ 
++## Living enemies, or (during combat) enemies still to come in later waves:
++## CombatDirector.has_remaining_opponents(). Short-circuits ask this, so they hold between waves.
+ func are_remaining_enemies() -> bool:
++	var director: CombatDirector = get_combat_director()
++	if director != null and director.is_running:
++		return director.has_remaining_opponents()
+ 	return len(get_alive_enemies()) > 0
+ 
+ ## The CombatDirector of the loaded run screen (group "combat_director"), null outside it.
+diff --git a/autoload/Signals.gd b/autoload/Signals.gd
+index 79d1063..01350d5 100644
+--- a/autoload/Signals.gd
++++ b/autoload/Signals.gd
+@@ -110,8 +110,8 @@ signal end_turn_requested(end_turn_immediacy_level: int)	# legacy name of end_ac
+ 
+ # combat framework: unit actions, timeline and board
+ # Emitted by CombatDirector: unit_action_*, combat_tick_advanced, timeline_changed, end_action_requested;
+-# by UnitRegistry: unit_spawned / unit_removed. unit_moved, unit_downed, wave_*, cell_* are declared
+-# for later phases (board, waves) and not emitted yet.
++# by UnitRegistry: unit_spawned / unit_removed. wave_started / wave_cleared by the CombatDirector's
++# WaveController (Phase 3). unit_downed and the party signals are declared for later phases.
+ signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: after draw, before input/decision
+ signal unit_action_ended(unit: BaseCombatant)	# a unit's action ends: after discard, before delay is computed
+ signal combat_tick_advanced(previous_tick: int, current_tick: int)	# the combat clock advanced
+diff --git a/data/readonly/embedded/EncounterWaveData.gd b/data/readonly/embedded/EncounterWaveData.gd
+index 5aeb278..e2bea16 100644
+--- a/data/readonly/embedded/EncounterWaveData.gd
++++ b/data/readonly/embedded/EncounterWaveData.gd
+@@ -1,9 +1,17 @@
+ ## Embedded read only data in EncounterData: one wave of units entering the board.
+-## Phase 2 spawns wave 0 only; the timing and action fields are consumed by the wave flow (Phase 3).
++## Wave flow (combat framework Phase 3, CombatDirector's WaveController / UnitSpawner): wave 0 enters
++## at combat start; wave i + 1 starts wave_enter_delay_ticks after wave i is cleared (no living
++## non-minion enemy and all its units entered). Unit k enters at the wave start
++## + wave_stagger_ticks * k + its spawn_delay_ticks and acts at that tick (wave 0 units are placed at
++## combat start and first act at that tick). wave_on_start_actions run on wave_started,
++## wave_on_cleared_actions on wave_cleared (parent = hero).
+ extends SerializableData
+ class_name EncounterWaveData
+ 
+-## What to do when a wave unit's cell is occupied. Phase 2 implements NEAREST_EMPTY.
++## What to do when a wave unit's cell is occupied: NEAREST_EMPTY = nearest free anchor (full board:
++## retry like WAIT_UNTIL_FREE); WAIT_UNTIL_FREE = retry every wave_spawn_retry_ticks up to
++## wave_spawn_max_retries, then NEAREST_EMPTY; FAIL_SKIP = skip the unit. Skipped units do not block
++## the wave clear.
+ enum SPAWN_POLICIES {NEAREST_EMPTY, WAIT_UNTIL_FREE, FAIL_SKIP}
+ 
+ ## One entry per unit: {"weights": {"enemy_id": weight}, "cell": [x, y], "spawn_delay_ticks": int}.
+diff --git a/scripts/combat/BoardController.gd b/scripts/combat/BoardController.gd
+new file mode 100644
+index 0000000..6464765
+--- /dev/null
++++ b/scripts/combat/BoardController.gd
+@@ -0,0 +1,90 @@
++## Board side of one combat, owned by CombatDirector: builds the BoardData from the encounter
++## (deploy / spawn zones, blocked cells), deploys the hero, places units (NEAREST_EMPTY) and runs the
++## acting party unit's click movement (free move points first, then paid cells). A RefCounted
++## created per combat; CombatDirector.board / .encounter read through it.
++extends RefCounted
++class_name BoardController
++
++var rules: CombatRulesData = null
++## Board of the current combat and the encounter it was built from.
++var board: BoardData = null
++var encounter: EncounterData = null
++
++func _init(combat_rules: CombatRulesData) -> void:
++	rules = combat_rules
++
++## Builds the board from the encounter and places the hero on the first deploy cell.
++func setup(encounter_data: EncounterData) -> void:
++	encounter = encounter_data
++	board = BoardData.new(encounter.get_board_size(rules), rules)
++	var deploy_cells: Array[Vector2i] = EncounterData.cells_from_json(encounter.encounter_deploy_cells)
++	if deploy_cells.is_empty():
++		deploy_cells = default_deploy_cells()
++	for cell: Vector2i in deploy_cells:
++		if board.is_in_bounds(cell):
++			board.get_cell(cell).is_deploy_zone = true
++	var spawn_cells: Array[Vector2i] = EncounterData.cells_from_json(encounter.encounter_spawn_zone_cells)
++	if spawn_cells.is_empty():
++		for y: int in min(2, board.size.y):
++			for x: int in board.size.x:
++				spawn_cells.append(Vector2i(x, y))
++	for cell: Vector2i in spawn_cells:
++		if board.is_in_bounds(cell):
++			board.get_cell(cell).is_spawn_zone = true
++	for cell: Vector2i in EncounterData.cells_from_json(encounter.encounter_blocked_cells):
++		board.set_blocked(cell, true)
++	# party: the hero takes the first deploy cell
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	if hero != null:
++		place_unit_nearest(hero, deploy_cells[0] if not deploy_cells.is_empty() else Vector2i(int(board.size.x / 2), board.size.y - 1))
++
++func clear() -> void:
++	board = null
++	encounter = null
++
++## Default deploy zone: the two south rows, the hero's cell (bottom row center) first.
++func default_deploy_cells() -> Array[Vector2i]:
++	var cells: Array[Vector2i] = [Vector2i(int(board.size.x / 2), board.size.y - 1)]
++	for y: int in range(board.size.y - 1, max(-1, board.size.y - 3), -1):
++		for x: int in board.size.x:
++			if not cells.has(Vector2i(x, y)):
++				cells.append(Vector2i(x, y))
++	return cells
++
++func default_spawn_origin() -> Vector2i:
++	return Vector2i(int(board.size.x / 2), 0)
++
++## Places a unit at cell, or the nearest empty anchor (NEAREST_EMPTY). false = the board is full.
++func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
++	if board == null or unit == null:
++		return false
++	if board.place(unit, cell):
++		return true
++	var anchor: Vector2i = board.nearest_empty_anchor(unit, cell)
++	if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
++		DebugLogger.log_error("CombatDirector: no free cell for unit {0}".format([unit.get_unit_display_name()]))
++		return false
++	return board.place(unit, anchor)
++
++## Cells the party unit can still move this action: free move points plus paid cells.
++func get_move_budget(unit: BaseCombatant) -> int:
++	if unit == null or rules == null:
++		return 0
++	return unit.move_points + max(0, rules.paid_move_max_cells - unit.paid_cells_this_action)
++
++## Moves the unit along the shortest path to cell within its move budget (ActionMoveUnit, consuming
++## move points). false = no budget or the cell is not reachable.
++func move_party_unit(unit: BaseCombatant, cell: Vector2i) -> bool:
++	if board == null or unit == null:
++		return false
++	var budget: int = get_move_budget(unit)
++	if budget <= 0:
++		return false
++	var path: Array[Vector2i] = board.find_path(unit, cell, budget)
++	if path.is_empty():
++		return false
++	var move_actions: Array[BaseAction] = ActionGenerator.create_actions(unit, null, [unit], [{
++		Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": cell, "distance": len(path), "consumes_move_points": true, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
++	}], null)
++	ActionHandler.add_actions(move_actions)
++	return true
+diff --git a/scripts/combat/BoardController.gd.uid b/scripts/combat/BoardController.gd.uid
+new file mode 100644
+index 0000000..490338a
+--- /dev/null
++++ b/scripts/combat/BoardController.gd.uid
+@@ -0,0 +1 @@
++uid://bu4h7gml718tt
+diff --git a/scripts/combat/CombatActionPhases.gd b/scripts/combat/CombatActionPhases.gd
+new file mode 100644
+index 0000000..23a5b4e
+--- /dev/null
++++ b/scripts/combat/CombatActionPhases.gd
+@@ -0,0 +1,105 @@
++## Fixed phases of one unit action on the combat timeline (status-effect hooks, legacy turn
++## signals, draw / discard, overlay animations), called by CombatDirector around the controller's
++## decide(). Party units: begin = animation, player_turn_started, energy, block reset, PRE_DRAW,
++## draw, POST_DRAW + UNIT_ACTION_START, unit_action_started; end = animation, player_turn_ended,
++## PRE_DISCARD, discard, POST_DISCARD + UNIT_ACTION_END, unit_action_ended. Enemies: PRE_ENEMY_TURN,
++## PRE_ENEMY_INTENT + UNIT_ACTION_START, unit_action_started / POST_ENEMY_INTENT, POST_ENEMY_TURN +
++## UNIT_ACTION_END, unit_action_ended, enemy_turn_ended.
++extends RefCounted
++class_name CombatActionPhases
++
++static func begin_party_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
++	HandManager.set_disable_hand(true)
++	unit.reset_action_movement(director.rules.free_move_per_action)
++	if unit.is_hero():
++		StatsHandler.begin_hero_action()	# turn count = hero actions; before the overlay reads it
++	await play_combat_animation(director, CombatDirector.ANIMATION_ACTION_START)
++	if director.is_aborted(generation):
++		return
++	# hero's action has started: legacy signal (StatsHandler turn count, artifacts, intent cycle listeners)
++	Signals.player_turn_started.emit()
++	ActionGenerator.generate_start_of_turn_energy_actions()
++	if unit is Player:
++		(unit as Player).update_incoming_damage_amount(true)
++	if director.rules.reset_block_on_action_start:
++		unit.generate_reset_block_action()
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DRAW_PLAYER_START_TURN)
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	ActionGenerator.generate_start_of_turn_draw_actions()
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DRAW_PLAYER_START_TURN)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	Signals.unit_action_started.emit(unit)
++	HandManager.set_disable_hand(false)
++	if HandManager.hand != null:
++		HandManager.hand.update_hand_card_display()
++
++static func end_party_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
++	HandManager.set_disable_hand(true)
++	director.reset_end_action()
++	await play_combat_animation(director, CombatDirector.ANIMATION_ACTION_END)
++	if director.is_aborted(generation):
++		return
++	Signals.player_turn_ended.emit()
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DISCARD_PLAYER_END_TURN)
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	if director.rules.discard_hand_on_action_end:
++		await HandManager.perform_end_of_action_hand_actions()
++		await director.wait_actions(generation)
++		if director.is_aborted(generation):
++			return
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DISCARD_PLAYER_END_TURN)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	Signals.unit_action_ended.emit(unit)
++
++## Plays an animation on Combat's AnimationPlayer (TurnOverlay) and waits for it. No-op headless-safe.
++static func play_combat_animation(director: CombatDirector, animation_name: String) -> void:
++	var combat: Node = director.get_parent()
++	if combat == null or not combat.has_node("CombatAnimation"):
++		return
++	var animation_player: AnimationPlayer = combat.get_node("CombatAnimation") as AnimationPlayer
++	if animation_player == null or not animation_player.has_animation(animation_name):
++		return
++	animation_player.play(animation_name)
++	await animation_player.animation_finished
++
++static func begin_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
++	unit.reset_action_movement(0)
++	Signals.enemy_turn_started.emit()	# legacy signal: one enemy's action begins
++	# both legacy pairs fire for this enemy's own action (old data stays valid)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_INTENT)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	Signals.unit_action_started.emit(unit)
++
++static func end_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
++	if unit.is_alive():
++		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_INTENT)
++		await director.wait_actions(generation)
++		if director.is_aborted(generation):
++			return
++		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_TURN)
++		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
++		await director.wait_actions(generation)
++		if director.is_aborted(generation):
++			return
++	Signals.unit_action_ended.emit(unit)
++	Signals.enemy_turn_ended.emit()
+diff --git a/scripts/combat/CombatActionPhases.gd.uid b/scripts/combat/CombatActionPhases.gd.uid
+new file mode 100644
+index 0000000..61579c3
+--- /dev/null
++++ b/scripts/combat/CombatActionPhases.gd.uid
+@@ -0,0 +1 @@
++uid://f4rueghb3lh0
+diff --git a/scripts/combat/CombatDirector.gd b/scripts/combat/CombatDirector.gd
+index 2453676..1d397a6 100644
+--- a/scripts/combat/CombatDirector.gd
++++ b/scripts/combat/CombatDirector.gd
+@@ -1,10 +1,13 @@
+ ## Runs one combat as an action timeline (CTB): pops the unit with the smallest next_action_tick,
+ ## performs its action (player input or enemy intent) and re-queues it after a delay scaled by its
+ ## speed (CombatRulesData). Replaces the AnimationPlayer-driven turn alternation of Combat.gd;
+-## Combat.gd keeps the HUD and ends combat from the death animation. Phase 2: the Director builds the
+-## board (BoardData) from the event's EncounterData (or one synthesized for legacy events), spawns
+-## wave 0 through the EnemyContainer unit layer, places units, runs movement (move points, paid
+-## movement, enemy intent movement) and keeps the ThreatPreview fresh.
++## Combat.gd keeps the HUD. Components (one per combat): BoardController builds the board from the
++## event's EncounterData (or one synthesized for legacy events) and runs movement; UnitSpawner
++## spawns wave units / summons through the EnemyContainer unit layer and WaveController runs the wave
++## flow (wave_started / wave_cleared, next-wave scheduling, victory when the last wave is cleared,
++## which ends the combat through Combat.end_combat); CombatActionPhases holds the
++## fixed begin / end phases of an action and CombatStartActions the combat-start actions; enemy
++## intents (with intent movement) run in EnemyIntentController. The Director keeps the ThreatPreview fresh.
+ ## Child of RunScreen/Combat. Signals: player_turn_* = the hero's action (pre-draw / post-discard),
+ ## enemy_turn_* = one enemy's action, unit_action_started/ended for every unit, combat_tick_advanced,
+ ## timeline_changed. With equal speeds and the default rules the order equals the old turn flow.
+@@ -24,9 +27,18 @@ var rules: CombatRulesData = null
+ var acting_unit: BaseCombatant = null
+ var current_tick: int = 0
+ var is_running: bool = false
++## Components of the current combat (null outside combat): board / movement and unit spawning.
++var board_controller: BoardController = null
++var unit_spawner: UnitSpawner = null
++## Wave progression of the current / last combat (kept after the combat stops for the victory check).
++var waves: WaveController = null
+ ## Board of the current combat (null outside combat) and the encounter it was built from.
+-var board: BoardData = null
+-var encounter: EncounterData = null
++var board: BoardData:
++	get:
++		return board_controller.board if board_controller != null else null
++var encounter: EncounterData:
++	get:
++		return board_controller.encounter if board_controller != null else null
+ var threat_preview: ThreatPreview = null
+ 
+ var _generation: int = 0	# invalidates suspended loops when combat/run ends
+@@ -46,6 +58,7 @@ func _ready() -> void:
+ 	Signals.unit_spawned.connect(_on_unit_spawned)
+ 	Signals.unit_removed.connect(_on_unit_removed)
+ 	Signals.enemy_killed.connect(_on_enemy_killed)
++	Signals.enemy_death_animation_finished.connect(_on_enemy_death_animation_finished)
+ 	Signals.unit_moved.connect(_on_unit_moved)
+ 	tree_exiting.connect(_stop)
+ 
+@@ -53,14 +66,23 @@ func _ready() -> void:
+ func has_living_opponents() -> bool:
+ 	return not Global.get_alive_enemies().is_empty()
+ 
+-## Hero down (hero_down_ends_run) or no living opponents; also true once combat_ended fired.
++## Living opponents (minions included) or enemies still to come (a later wave, units waiting to
++## enter). Global.are_remaining_enemies() delegates here during combat, so the ActionHandler /
++## HandManager short-circuits do not fire between waves.
++func has_remaining_opponents() -> bool:
++	if has_living_opponents():
++		return true
++	return is_running and waves != null and waves.has_more_waves()
++
++## Hero down (hero_down_ends_run) or no remaining opponents (has_remaining_opponents); also true once
++## combat_ended fired. Victory itself is decided by WaveController.is_final_cleared.
+ func is_combat_over() -> bool:
+ 	if not is_running:
+ 		return true
+ 	var hero: BaseCombatant = UnitRegistry.get_hero()
+ 	if hero == null or (rules.hero_down_ends_run and not hero.is_alive()):
+ 		return true
+-	return not has_living_opponents()
++	return not has_remaining_opponents()
+ 
+ func is_player_action_pending() -> bool:
+ 	return _waiting_for_player
+@@ -86,25 +108,34 @@ func begin_combat(event_data: EventData = null) -> void:
+ 	_waiting_for_player = false
+ 	_player_finish_pending = false
+ 	_cards_played_this_action.clear()
+-	_reset_end_action()
++	reset_end_action()
+ 	if event_data == null:
+ 		event_data = Global.get_player_event_data()
+-	_setup_board(event_data)
++	board_controller = BoardController.new(rules)
++	unit_spawner = UnitSpawner.new(self)
++	var encounter_data: EncounterData = Global.get_event_encounter_data(event_data)
++	board_controller.setup(encounter_data)
++	waves = WaveController.new(self, encounter_data)
++	unit_spawner.spawn_first_wave(event_data, encounter_data)
+ 	for unit: BaseCombatant in UnitRegistry.get_all_units():
+ 		if not unit.is_alive():
+ 			continue
+ 		unit.reset_unit_combat_state()
+-		unit.next_action_tick = _spawn_delays.get(unit.unit_uid, 0)
++		unit.next_action_tick = unit_spawner.first_action_tick(unit)
+ 		_assign_controller(unit)
+ 		timeline.push(unit)
+-	_spawn_delays.clear()
++	unit_spawner.clear()
+ 	# enemies decide their first intent while waiting for their first action
+ 	for enemy: Enemy in Global.get_alive_enemies():
+ 		enemy.decide_next_intent()
+ 	is_running = true
+ 	refresh_threats()
+ 	Signals.timeline_changed.emit()
+-	await _perform_initial_combat_actions(generation)
++	waves.enter_wave(0)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	await CombatStartActions.perform(self, generation)
+ 	if generation != _generation:
+ 		return
+ 	await _run_loop(generation)
+@@ -115,10 +146,12 @@ func _stop() -> void:
+ 	_generation += 1
+ 	is_running = false
+ 	acting_unit = null
+-	board = null
+-	encounter = null
++	if board_controller != null:
++		board_controller.clear()
++	board_controller = null
++	unit_spawner = null
+ 	threat_preview = null
+-	_reset_end_action()
++	reset_end_action()
+ 	_cards_played_this_action.clear()
+ 	if timeline != null:
+ 		timeline.clear()
+@@ -159,11 +192,20 @@ func _admit_spawned_unit(unit: BaseCombatant, generation: int) -> void:
+ 	if not unit.is_alive():
+ 		return
+ 	if board != null and not board.has_unit(unit):
+-		place_unit_nearest(unit, _default_spawn_origin())
++		board_controller.place_unit_nearest(unit, board_controller.default_spawn_origin())
++	_admit(unit, current_tick + timeline.wait_for(rules.default_action_delay, unit.speed))
++
++## A wave unit entering mid-combat (UnitSpawner): acts at the current tick.
++func admit_wave_unit(unit: BaseCombatant) -> void:
++	if is_running and timeline != null and unit.is_alive():
++		_admit(unit, current_tick)
++
++## Queues a unit entering mid-combat; enemies decide their intent now.
++func _admit(unit: BaseCombatant, next_tick: int) -> void:
+ 	unit.reset_unit_combat_state()
+ 	_assign_controller(unit)
+ 	unit.last_action_tick = current_tick
+-	unit.next_action_tick = current_tick + timeline.wait_for(rules.default_action_delay, unit.speed)
++	unit.next_action_tick = next_tick
+ 	timeline.push(unit)
+ 	if unit is Enemy:
+ 		(unit as Enemy).decide_next_intent()
+@@ -182,6 +224,13 @@ func _on_enemy_killed(enemy: Enemy) -> void:
+ 	if board != null:
+ 		board.remove(enemy)
+ 		refresh_threats()
++	if is_running and waves != null:
++		waves.queue_check()
++
++## Victory after a kill is decided when a death animation ends (legacy timing; WaveController).
++func _on_enemy_death_animation_finished(_enemy: Enemy) -> void:
++	if waves != null:
++		waves.on_death_animation_finished()
+ 
+ func _on_unit_moved(_unit: BaseCombatant, _from: Vector2i, _to: Vector2i) -> void:
+ 	refresh_threats()
+@@ -194,11 +243,17 @@ func refresh_threats() -> void:
+ 	var hero: Player = UnitRegistry.get_hero() as Player
+ 	if hero != null:
+ 		hero.update_incoming_damage_amount(false)
++
+ #endregion
+ 
+ #region Loop
+ func _run_loop(generation: int) -> void:
+ 	while generation == _generation:
++		if is_combat_over():
++			break
++		await waves.enter_due_units(generation)
++		if _aborted(generation):
++			return
+ 		if is_combat_over():
+ 			break
+ 		var unit: BaseCombatant = timeline.pop_next()
+@@ -234,13 +289,28 @@ func _run_loop(generation: int) -> void:
+ 	if generation == _generation:
+ 		acting_unit = null
+ 
+-## True when the loop must return without touching state (combat/run ended or hero died).
++## Generation of the running combat; components pass it back to is_aborted / wait_actions.
++func get_generation() -> int:
++	return _generation
++
++## True when a suspended step must return without touching state (combat/run ended or hero died).
++func is_aborted(generation: int) -> bool:
++	return _aborted(generation)
++
++## Awaits the ActionHandler queue (no-op when idle).
++func wait_actions(generation: int) -> void:
++	await _wait_actions(generation)
++
+ func _aborted(generation: int) -> bool:
+ 	if generation != _generation:
+ 		return true
+ 	var hero: BaseCombatant = UnitRegistry.get_hero()
+ 	return hero == null or not hero.is_alive()
+ 
++## Advances the clock to tick (combat_tick_advanced, EVERY_N_TICKS statuses); no-op if not later.
++func advance_clock(tick: int, generation: int) -> void:
++	await _advance_clock(tick, generation)
++
+ func _advance_clock(tick: int, generation: int) -> void:
+ 	if tick <= current_tick:
+ 		return
+@@ -259,15 +329,15 @@ func _wait_actions(_generation: int) -> void:
+ 
+ func _begin_action(unit: BaseCombatant, generation: int) -> void:
+ 	if unit.faction == BaseCombatant.FACTIONS.PARTY:
+-		await _begin_party_action(unit, generation)
++		await CombatActionPhases.begin_party_action(self, unit, generation)
+ 	else:
+-		await _begin_enemy_action(unit, generation)
++		await CombatActionPhases.begin_enemy_action(self, unit, generation)
+ 
+ func _end_action(unit: BaseCombatant, generation: int) -> void:
+ 	if unit.faction == BaseCombatant.FACTIONS.PARTY:
+-		await _end_party_action(unit, generation)
++		await CombatActionPhases.end_party_action(self, unit, generation)
+ 	else:
+-		await _end_enemy_action(unit, generation)
++		await CombatActionPhases.end_enemy_action(self, unit, generation)
+ 
+ ## Delay of the action just performed: the largest card_action_delay played (party) or the
+ ## intent's enemy_intent_action_delay; rules.default_action_delay when unspecified.
+@@ -298,39 +368,6 @@ func _on_card_played(card_play_request: CardPlayRequest) -> void:
+ #endregion
+ 
+ #region Party (hero) action
+-func _begin_party_action(unit: BaseCombatant, generation: int) -> void:
+-	HandManager.set_disable_hand(true)
+-	unit.reset_action_movement(rules.free_move_per_action)
+-	if unit.is_hero():
+-		StatsHandler.begin_hero_action()	# turn count = hero actions; before the overlay reads it
+-	await _play_combat_animation(ANIMATION_ACTION_START)
+-	if _aborted(generation):
+-		return
+-	# hero's action has started: legacy signal (StatsHandler turn count, artifacts, intent cycle listeners)
+-	Signals.player_turn_started.emit()
+-	ActionGenerator.generate_start_of_turn_energy_actions()
+-	if unit is Player:
+-		(unit as Player).update_incoming_damage_amount(true)
+-	if rules.reset_block_on_action_start:
+-		unit.generate_reset_block_action()
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DRAW_PLAYER_START_TURN)
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	ActionGenerator.generate_start_of_turn_draw_actions()
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DRAW_PLAYER_START_TURN)
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	Signals.unit_action_started.emit(unit)
+-	HandManager.set_disable_hand(false)
+-	if HandManager.hand != null:
+-		HandManager.hand.update_hand_card_display()
+-
+ ## Awaited by PlayerInputController until CombatEndAction finishes the action.
+ func wait_for_player_action() -> void:
+ 	if _player_finish_pending:
+@@ -364,276 +401,47 @@ func finish_player_action(end_action: CombatEndAction = null) -> void:
+ 	else:
+ 		_player_finish_pending = true
+ 
+-func _reset_end_action() -> void:
++## Cancels a waiting end-action request (action ended or combat stopped).
++func reset_end_action() -> void:
+ 	if _end_action_request != null:
+ 		_end_action_request.disable()
+ 		_end_action_request = null
+ 
+-func _end_party_action(unit: BaseCombatant, generation: int) -> void:
+-	HandManager.set_disable_hand(true)
+-	_reset_end_action()
+-	await _play_combat_animation(ANIMATION_ACTION_END)
+-	if _aborted(generation):
+-		return
+-	Signals.player_turn_ended.emit()
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DISCARD_PLAYER_END_TURN)
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	if rules.discard_hand_on_action_end:
+-		await HandManager.perform_end_of_action_hand_actions()
+-		await _wait_actions(generation)
+-		if _aborted(generation):
+-			return
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DISCARD_PLAYER_END_TURN)
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	Signals.unit_action_ended.emit(unit)
+-
+-## Plays an animation on Combat's AnimationPlayer (TurnOverlay) and waits for it. No-op headless-safe.
+-func _play_combat_animation(animation_name: String) -> void:
+-	var combat: Node = get_parent()
+-	if combat == null or not combat.has_node("CombatAnimation"):
+-		return
+-	var animation_player: AnimationPlayer = combat.get_node("CombatAnimation") as AnimationPlayer
+-	if animation_player == null or not animation_player.has_animation(animation_name):
+-		return
+-	animation_player.play(animation_name)
+-	await animation_player.animation_finished
+ #endregion
+ 
+ #region Enemy action
+-func _begin_enemy_action(unit: BaseCombatant, generation: int) -> void:
+-	unit.reset_action_movement(0)
+-	Signals.enemy_turn_started.emit()	# legacy signal: one enemy's action begins
+-	# both legacy pairs fire for this enemy's own action (old data stays valid)
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_INTENT)
+-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	Signals.unit_action_started.emit(unit)
+-
+-## Performs the enemy's current intent (EnemyIntentController): moves by the intent's move mode
+-## (IntentResolver), then performs the intent against what it hits from there. An attack that
+-## cannot reach its target is skipped and the intent is kept for the enemy's next action.
++## Performs the enemy's current intent with intent movement (EnemyIntentController.perform_intent).
+ func perform_enemy_intent(enemy: Enemy) -> void:
+-	var generation: int = _generation
+-	if enemy == null or not enemy.is_alive():
+-		return
+-	var enemy_intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
+-	var target: BaseCombatant = IntentResolver.choose_target(board, enemy, enemy_intent)
+-	var plan: Dictionary = IntentResolver.resolve(board, enemy, enemy_intent, target)
+-	var path: Array = plan.get("path", [])
+-	if board != null and not path.is_empty() and plan["move_cell"] != enemy.board_anchor:
+-		var move_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, [enemy], [{
+-			Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": plan["move_cell"], "distance": len(path), "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
+-		}], null)
+-		ActionHandler.add_actions(move_actions)
+-		await _wait_actions(generation)
+-		if _aborted(generation) or not enemy.is_alive():
+-			return
+-	var hit: Dictionary = IntentResolver.hits_from(board, enemy, enemy.board_anchor, enemy_intent, target)
+-	var can_hit: bool = hit["can_hit"]
+-	if enemy_intent != null and enemy_intent.enemy_intent_number_of_attacks > 0 and not can_hit:
+-		enemy.keep_intent_next_action = true
+-	var enemy_actions_data: Array[Dictionary] = enemy.build_intent_actions_data(enemy_intent, rules.reset_block_on_action_start, can_hit)
+-	# play intent sound if one exists and no attacks
+-	if enemy_intent != null and enemy_intent.enemy_intent_audio_path != "" and enemy_intent.enemy_intent_number_of_attacks == 0:
+-		ActionGenerator.generate_sound_action(enemy_intent.enemy_intent_audio_path, false)
+-	var targets: Array[BaseCombatant] = []
+-	if can_hit:
+-		targets.assign(hit["targets"])
+-	elif target != null:
+-		targets.append(target)
+-	var enemy_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, targets, enemy_actions_data, null)
+-	ActionHandler.add_actions(enemy_actions)
+-	await _wait_actions(generation)
+-
+-func _end_enemy_action(unit: BaseCombatant, generation: int) -> void:
+-	if unit.is_alive():
+-		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_INTENT)
+-		await _wait_actions(generation)
+-		if _aborted(generation):
+-			return
+-		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_TURN)
+-		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
+-		await _wait_actions(generation)
+-		if _aborted(generation):
+-			return
+-	Signals.unit_action_ended.emit(unit)
+-	Signals.enemy_turn_ended.emit()
+-#endregion
+-
+-#region First-action setup (moved from Combat.gd's first player turn)
+-func _perform_initial_combat_actions(generation: int) -> void:
+-	var hero: BaseCombatant = UnitRegistry.get_hero()
+-	var location_data: LocationData = Global.get_player_location_data()
+-	if location_data != null:
+-		var card_play_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
+-		card_play_request.card_data = null
+-		card_play_request.selected_target = null
+-		# location initial actions
+-		var location_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], location_data.location_initial_combat_actions, null)
+-		ActionHandler.add_actions(location_initial_combat_actions)
+-		await _wait_actions(generation)
+-		if _aborted(generation):
+-			return
+-		# event initial actions
+-		var event_data: EventData = Global.get_player_event_data()
+-		if event_data != null:
+-			var event_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], event_data.event_initial_combat_actions, null)
+-			ActionHandler.add_actions(event_initial_combat_actions)
+-			await _wait_actions(generation)
+-			if _aborted(generation):
+-				return
+-	# combat start consumable actions
+-	for consumable_slot_index: int in Global.player_data.player_consumable_slot_count:
+-		var consumable_data: ConsumableData = Global.get_player_consumable_in_slot_index(consumable_slot_index)
+-		if consumable_data != null and len(consumable_data.consumable_initial_combat_actions) > 0:
+-			var consumable_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
+-			var consumable_actions: Array[BaseAction] = ActionGenerator.create_actions(null, consumable_request, [], consumable_data.consumable_initial_combat_actions, null)
+-			ActionHandler.add_actions(consumable_actions)
+-	await _wait_actions(generation)
+-	if _aborted(generation):
+-		return
+-	# combat start card actions
+-	for card_data: CardData in HandManager.player_draw:
+-		var card_request: CardPlayRequest = HandManager.create_card_play_request(card_data, null, true, true)
+-		var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_request, [], card_data.card_initial_combat_actions, null)
+-		ActionHandler.add_actions(card_play_actions)
+-	await _wait_actions(generation)
++	await EnemyIntentController.perform_intent(self, enemy)
+ #endregion
+ 
+-#region Board (combat framework Phase 2)
+-var _spawn_delays: Dictionary[String, int] = {}	# unit_uid -> first next_action_tick (wave spawn delays)
+-
+-func _get_unit_layer() -> Node:
+-	var combat: Node = get_parent()
+-	if combat == null or not combat.has_node("EnemyContainer"):
+-		return null
+-	return combat.get_node("EnemyContainer")
+-
+-## Builds the board from the event's encounter, places the hero on the first deploy cell and
+-## spawns wave 0 (weighted picks in order with rng_enemy_spawning, like the legacy spawner).
+-func _setup_board(event_data: EventData) -> void:
+-	encounter = Global.get_event_encounter_data(event_data)
+-	board = BoardData.new(encounter.get_board_size(rules), rules)
+-	var deploy_cells: Array[Vector2i] = EncounterData.cells_from_json(encounter.encounter_deploy_cells)
+-	if deploy_cells.is_empty():
+-		deploy_cells = _default_deploy_cells()
+-	for cell: Vector2i in deploy_cells:
+-		if board.is_in_bounds(cell):
+-			board.get_cell(cell).is_deploy_zone = true
+-	var spawn_cells: Array[Vector2i] = EncounterData.cells_from_json(encounter.encounter_spawn_zone_cells)
+-	if spawn_cells.is_empty():
+-		for y: int in min(2, board.size.y):
+-			for x: int in board.size.x:
+-				spawn_cells.append(Vector2i(x, y))
+-	for cell: Vector2i in spawn_cells:
+-		if board.is_in_bounds(cell):
+-			board.get_cell(cell).is_spawn_zone = true
+-	for cell: Vector2i in EncounterData.cells_from_json(encounter.encounter_blocked_cells):
+-		board.set_blocked(cell, true)
+-	# party: the hero takes the first deploy cell
+-	var hero: BaseCombatant = UnitRegistry.get_hero()
+-	if hero != null:
+-		place_unit_nearest(hero, deploy_cells[0] if not deploy_cells.is_empty() else Vector2i(int(board.size.x / 2), board.size.y - 1))
+-	_spawn_delays.clear()
+-	var unit_layer: Node = _get_unit_layer()
+-	if unit_layer == null or encounter.encounter_waves.is_empty():
+-		return
+-	unit_layer.clear_enemies()
+-	var wave: EncounterWaveData = encounter.encounter_waves[0]
+-	var index: int = 0
+-	for unit_entry: Dictionary in wave.wave_units:
+-		var weights: Dictionary[Variant, int] = {}
+-		weights.assign(unit_entry.get("weights", {}))
+-		if weights.is_empty():
+-			index += 1
+-			continue
+-		var rng_enemy_spawning: RandomNumberGenerator = Global.player_data.get_player_rng("rng_enemy_spawning")
+-		var enemy_object_id: String = Random.get_weighted_selection(rng_enemy_spawning, weights)
+-		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
+-		if enemy == null:
+-			break	# positional events stop when their slots run out (legacy)
+-		var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
+-		if not board.is_in_bounds(cell):
+-			cell = _default_spawn_origin()
+-		place_unit_nearest(enemy, cell)
+-		var spawn_delay: int = int(unit_entry.get("spawn_delay_ticks", 0))
+-		if spawn_delay > 0:
+-			_spawn_delays[enemy.unit_uid] = spawn_delay
+-		index += 1
+-
+-## Default deploy zone: the two south rows, the hero's cell (bottom row center) first.
+-func _default_deploy_cells() -> Array[Vector2i]:
+-	var cells: Array[Vector2i] = [Vector2i(int(board.size.x / 2), board.size.y - 1)]
+-	for y: int in range(board.size.y - 1, max(-1, board.size.y - 3), -1):
+-		for x: int in board.size.x:
+-			if not cells.has(Vector2i(x, y)):
+-				cells.append(Vector2i(x, y))
+-	return cells
+-
+-func _default_spawn_origin() -> Vector2i:
+-	return Vector2i(int(board.size.x / 2), 0)
+-
++#region Board and spawning (delegated to BoardController / UnitSpawner)
+ ## Places a unit at cell, or the nearest empty anchor (NEAREST_EMPTY). false = the board is full.
+ func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
+-	if board == null or unit == null:
+-		return false
+-	if board.place(unit, cell):
+-		return true
+-	var anchor: Vector2i = board.nearest_empty_anchor(unit, cell)
+-	if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
+-		DebugLogger.log_error("CombatDirector: no free cell for unit {0}".format([unit.get_unit_display_name()]))
+-		return false
+-	return board.place(unit, anchor)
++	return board_controller != null and board_controller.place_unit_nearest(unit, cell)
+ 
+ ## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
+ ## the nearest empty cell; it enters the timeline as if it had just acted.
+ func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i) -> Enemy:
+-	var unit_layer: Node = _get_unit_layer()
+-	if unit_layer == null or board == null:
+-		return null
+-	var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id)
+-	if enemy != null and not place_unit_nearest(enemy, cell):
+-		enemy.queue_free()
++	if unit_spawner == null:
+ 		return null
+-	return enemy
++	return unit_spawner.spawn_enemy_at_cell(enemy_object_id, cell)
+ 
+ ## Cells the acting party unit can still move this action: free move points plus paid cells.
+ func get_move_budget(unit: BaseCombatant) -> int:
+-	if unit == null or rules == null:
++	if board_controller == null:
+ 		return 0
+-	return unit.move_points + max(0, rules.paid_move_max_cells - unit.paid_cells_this_action)
++	return board_controller.get_move_budget(unit)
+ 
+ ## Player movement input (BoardView click on an empty cell): moves the acting party unit along the
+ ## shortest path, spending free move points first, then paid cells (+extra_move_delay_per_cell each).
+ ## false = not the player's action, busy, or the cell is not reachable within the budget.
+ func request_player_move(cell: Vector2i) -> bool:
+-	if not is_running or board == null or acting_unit == null or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
++	if not is_running or board_controller == null or acting_unit == null or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
+ 		return false
+ 	if not _waiting_for_player or _end_action_request != null:
+ 		return false
+ 	if ActionHandler.actions_being_performed or HandManager.cards_being_played or not HandManager.card_play_queue.is_empty():
+ 		return false
+-	var unit: BaseCombatant = acting_unit
+-	var budget: int = get_move_budget(unit)
+-	if budget <= 0:
+-		return false
+-	var path: Array[Vector2i] = board.find_path(unit, cell, budget)
+-	if path.is_empty():
+-		return false
+-	var move_actions: Array[BaseAction] = ActionGenerator.create_actions(unit, null, [unit], [{
+-		Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": cell, "distance": len(path), "consumes_move_points": true, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
+-	}], null)
+-	ActionHandler.add_actions(move_actions)
+-	return true
++	return board_controller.move_party_unit(acting_unit, cell)
+ #endregion
+diff --git a/scripts/combat/CombatStartActions.gd b/scripts/combat/CombatStartActions.gd
+new file mode 100644
+index 0000000..1f9791b
+--- /dev/null
++++ b/scripts/combat/CombatStartActions.gd
+@@ -0,0 +1,43 @@
++## Combat-start actions run once before the first action of a combat (moved from Combat.gd's first
++## player turn): location / event initial actions, consumable initial actions and the draw pile's
++## card_initial_combat_actions, parented to the hero. Called by CombatDirector.begin_combat.
++extends RefCounted
++class_name CombatStartActions
++
++static func perform(director: CombatDirector, generation: int) -> void:
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	var location_data: LocationData = Global.get_player_location_data()
++	if location_data != null:
++		var card_play_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
++		card_play_request.card_data = null
++		card_play_request.selected_target = null
++		# location initial actions
++		var location_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], location_data.location_initial_combat_actions, null)
++		ActionHandler.add_actions(location_initial_combat_actions)
++		await director.wait_actions(generation)
++		if director.is_aborted(generation):
++			return
++		# event initial actions
++		var event_data: EventData = Global.get_player_event_data()
++		if event_data != null:
++			var event_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], event_data.event_initial_combat_actions, null)
++			ActionHandler.add_actions(event_initial_combat_actions)
++			await director.wait_actions(generation)
++			if director.is_aborted(generation):
++				return
++	# combat start consumable actions
++	for consumable_slot_index: int in Global.player_data.player_consumable_slot_count:
++		var consumable_data: ConsumableData = Global.get_player_consumable_in_slot_index(consumable_slot_index)
++		if consumable_data != null and len(consumable_data.consumable_initial_combat_actions) > 0:
++			var consumable_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
++			var consumable_actions: Array[BaseAction] = ActionGenerator.create_actions(null, consumable_request, [], consumable_data.consumable_initial_combat_actions, null)
++			ActionHandler.add_actions(consumable_actions)
++	await director.wait_actions(generation)
++	if director.is_aborted(generation):
++		return
++	# combat start card actions
++	for card_data: CardData in HandManager.player_draw:
++		var card_request: CardPlayRequest = HandManager.create_card_play_request(card_data, null, true, true)
++		var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_request, [], card_data.card_initial_combat_actions, null)
++		ActionHandler.add_actions(card_play_actions)
++	await director.wait_actions(generation)
+diff --git a/scripts/combat/CombatStartActions.gd.uid b/scripts/combat/CombatStartActions.gd.uid
+new file mode 100644
+index 0000000..4e66454
+--- /dev/null
++++ b/scripts/combat/CombatStartActions.gd.uid
+@@ -0,0 +1 @@
++uid://rloiewjd2chw
+diff --git a/scripts/combat/CombatTimeline.gd b/scripts/combat/CombatTimeline.gd
+index 9a31ccf..c0b4c8f 100644
+--- a/scripts/combat/CombatTimeline.gd
++++ b/scripts/combat/CombatTimeline.gd
+@@ -48,6 +48,17 @@ func get_units() -> Array[BaseCombatant]:
+ 
+ ## Removes and returns the unit that acts next, or null when nothing waits.
+ func pop_next() -> BaseCombatant:
++	var best: BaseCombatant = _peek()
++	if best != null:
++		_units.erase(best)
++	return best
++
++## next_action_tick of the unit that acts next (not removed); -1 when nothing waits.
++func peek_next_tick() -> int:
++	var best: BaseCombatant = _peek()
++	return best.next_action_tick if best != null else -1
++
++func _peek() -> BaseCombatant:
+ 	_prune()
+ 	if _units.is_empty():
+ 		return null
+@@ -55,7 +66,6 @@ func pop_next() -> BaseCombatant:
+ 	for unit: BaseCombatant in _units:
+ 		if unit != best and _is_before(unit, unit.next_action_tick, best, best.next_action_tick):
+ 			best = unit
+-	_units.erase(best)
+ 	return best
+ 
+ ## Ticks a unit of the given speed waits after an action of the given delay. Never below 1.
+diff --git a/scripts/combat/UnitSpawner.gd b/scripts/combat/UnitSpawner.gd
+new file mode 100644
+index 0000000..c947da1
+--- /dev/null
++++ b/scripts/combat/UnitSpawner.gd
+@@ -0,0 +1,220 @@
++## Unit spawning of one combat, owned by CombatDirector: spawns encounter wave units through the
++## combat's unit layer (EnemyContainer) and places them on the board (BoardController), and spawns
++## board summons (ActionSummonEnemies with spawn cells). A RefCounted created per combat.
++## Wave 0 spawns when combat starts (units act at enter delay + stagger * index + spawn delay).
++## Later waves are scheduled by WaveController: a wave-start entry at the wave's start tick and one
++## entry per unit at start + stagger * index + spawn_delay_ticks; CombatDirector enters due entries
++## before the timeline unit acting at or after that tick. An entering unit acts at its entry tick.
++## Occupied entry cell (EncounterWaveData.wave_spawn_policy): NEAREST_EMPTY = nearest free anchor
++## (full board: retry like WAIT_UNTIL_FREE); WAIT_UNTIL_FREE = retry every wave_spawn_retry_ticks,
++## after wave_spawn_max_retries use NEAREST_EMPTY; FAIL_SKIP = skip. Skipped units are dropped and
++## do not block the wave from clearing.
++extends RefCounted
++class_name UnitSpawner
++
++const KIND_WAVE_START: String = "wave_start"
++const KIND_UNIT: String = "unit"
++
++var director: CombatDirector = null
++## unit_uid -> first next_action_tick of a wave-0 unit (enter delay, stagger and spawn delay).
++var spawn_delays: Dictionary[String, int] = {}
++## Entries still to enter, ordered by tick then insertion:
++## {"kind", "tick", "wave", "order"} plus for units {"enemy_object_id", "cell", "retries"}.
++var pending: Array[Dictionary] = []
++## Wave units dropped by their spawn policy (for tests / UI).
++var skipped_units: Array[Dictionary] = []
++var _next_order: int = 0
++
++func _init(combat_director: CombatDirector) -> void:
++	director = combat_director
++
++func get_unit_layer() -> Node:
++	var combat: Node = director.get_parent() if director != null else null
++	if combat == null or not combat.has_node("EnemyContainer"):
++		return null
++	return combat.get_node("EnemyContainer")
++
++## Tick of a wave-0 unit's first action (0 without delays).
++func first_action_tick(unit: BaseCombatant) -> int:
++	return spawn_delays.get(unit.unit_uid, 0)
++
++func clear() -> void:
++	spawn_delays.clear()
++
++#region Wave 0 (combat start)
++## Spawns wave 0 of the encounter: weighted picks in order with rng_enemy_spawning (like the legacy
++## spawner), in the event's placement mode, placed on their cell by the wave's spawn policy.
++func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
++	spawn_delays.clear()
++	var unit_layer: Node = get_unit_layer()
++	if unit_layer == null or encounter.encounter_waves.is_empty():
++		return
++	unit_layer.clear_enemies()
++	var board_controller: BoardController = director.board_controller
++	var wave: EncounterWaveData = encounter.encounter_waves[0]
++	var index: int = 0
++	for unit_entry: Dictionary in wave.wave_units:
++		var enemy_object_id: String = _pick_enemy(unit_entry)
++		if enemy_object_id == "":
++			index += 1
++			continue
++		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
++		if enemy == null:
++			break	# positional events stop when their slots run out (legacy)
++		var cell: Vector2i = _entry_cell(unit_entry)
++		var tick: int = _entry_tick(wave, 0, index, unit_entry)
++		if board_controller.board.can_stand(enemy, cell) or wave.wave_spawn_policy == EncounterWaveData.SPAWN_POLICIES.NEAREST_EMPTY:
++			board_controller.place_unit_nearest(enemy, cell)
++			if tick > 0:
++				spawn_delays[enemy.unit_uid] = tick
++		else:
++			_discard(enemy)
++			var entry: Dictionary = _unit_entry(0, tick, enemy_object_id, cell)
++			if wave.wave_spawn_policy == EncounterWaveData.SPAWN_POLICIES.WAIT_UNTIL_FREE:
++				_retry(entry, wave)
++			else:
++				_skip(entry, "cell occupied (FAIL_SKIP)")
++		index += 1
++
++## Removes a just-spawned unit at once (it unregisters before the timeline is filled).
++func _discard(enemy: Enemy) -> void:
++	if enemy.get_parent() != null:
++		enemy.get_parent().remove_child(enemy)
++	enemy.queue_free()
++#endregion
++
++#region Later waves
++## Schedules wave wave_index starting at start_tick: its wave-start entry and every unit entry
++## (enemy ids picked now, in entry order, with rng_enemy_spawning).
++func schedule_wave(wave_index: int, start_tick: int) -> void:
++	var wave: EncounterWaveData = director.encounter.encounter_waves[wave_index]
++	_insert({"kind": KIND_WAVE_START, "tick": start_tick, "wave": wave_index})
++	var index: int = 0
++	for unit_entry: Dictionary in wave.wave_units:
++		var enemy_object_id: String = _pick_enemy(unit_entry)
++		if enemy_object_id != "":
++			_insert(_unit_entry(wave_index, start_tick + max(0, wave.wave_stagger_ticks) * index + max(0, int(unit_entry.get("spawn_delay_ticks", 0))), enemy_object_id, _entry_cell(unit_entry)))
++		index += 1
++
++func has_pending() -> bool:
++	return not pending.is_empty()
++
++## Whether units of the wave still have to enter (or retry).
++func has_pending_units(wave_index: int) -> bool:
++	for entry: Dictionary in pending:
++		if entry["kind"] == KIND_UNIT and entry["wave"] == wave_index:
++			return true
++	return false
++
++## Tick of the earliest pending entry; -1 when none.
++func next_pending_tick() -> int:
++	return pending[0]["tick"] if not pending.is_empty() else -1
++
++## Enters every entry due at or before tick (wave starts and units, in order).
++func enter_due(tick: int) -> void:
++	while not pending.is_empty() and pending[0]["tick"] <= tick:
++		var entry: Dictionary = pending.pop_front()
++		if entry["kind"] == KIND_WAVE_START:
++			director.waves.enter_wave(entry["wave"])
++		else:
++			_enter_unit(entry)
++
++func _enter_unit(entry: Dictionary) -> void:
++	var wave: EncounterWaveData = director.encounter.encounter_waves[entry["wave"]]
++	var board: BoardData = director.board
++	var footprint: Vector2i = _footprint_of(entry["enemy_object_id"])
++	var cell: Vector2i = entry["cell"]
++	var anchor: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
++	if board.footprint_fits(footprint, cell):
++		anchor = cell
++	else:
++		match wave.wave_spawn_policy:
++			EncounterWaveData.SPAWN_POLICIES.FAIL_SKIP:
++				_skip(entry, "cell occupied (FAIL_SKIP)")
++				return
++			EncounterWaveData.SPAWN_POLICIES.WAIT_UNTIL_FREE:
++				if _retry(entry, wave):
++					return
++		anchor = board.nearest_empty_anchor_for_footprint(footprint, cell)
++		if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
++			# full board: wait like WAIT_UNTIL_FREE (NEAREST_EMPTY), else give up
++			if wave.wave_spawn_policy != EncounterWaveData.SPAWN_POLICIES.NEAREST_EMPTY or not _retry(entry, wave):
++				_skip(entry, "no free cell")
++			return
++	var unit_layer: Node = get_unit_layer()
++	var enemy: Enemy = unit_layer.spawn_board_enemy(entry["enemy_object_id"]) if unit_layer != null else null
++	if enemy == null:
++		_skip(entry, "no unit layer")
++		return
++	if not board.place(enemy, anchor):
++		_discard(enemy)
++		_skip(entry, "placement failed")
++		return
++	director.admit_wave_unit(enemy)
++
++## Re-queues the entry wave_spawn_retry_ticks later; false = retries used up.
++func _retry(entry: Dictionary, wave: EncounterWaveData) -> bool:
++	if entry["retries"] >= wave.wave_spawn_max_retries:
++		return false
++	entry["retries"] += 1
++	entry["tick"] += max(1, wave.wave_spawn_retry_ticks)
++	_insert(entry)
++	return true
++
++func _skip(entry: Dictionary, reason: String) -> void:
++	skipped_units.append(entry)
++	DebugLogger.log_line("UnitSpawner: wave {0} unit {1} at {2} skipped at tick {3}: {4}".format([entry["wave"], entry["enemy_object_id"], entry["cell"], entry["tick"], reason]), Color.YELLOW, DebugLogger.Severities.WARNING)
++#endregion
++
++#region Helpers
++func _insert(entry: Dictionary) -> void:
++	entry["order"] = _next_order
++	_next_order += 1
++	var position: int = pending.size()
++	for i: int in pending.size():
++		if entry["tick"] < pending[i]["tick"]:
++			position = i
++			break
++	pending.insert(position, entry)
++
++func _unit_entry(wave_index: int, tick: int, enemy_object_id: String, cell: Vector2i) -> Dictionary:
++	return {"kind": KIND_UNIT, "tick": tick, "wave": wave_index, "enemy_object_id": enemy_object_id, "cell": cell, "retries": 0}
++
++## First action tick of a wave-0 unit: enter delay + stagger * index + spawn delay.
++func _entry_tick(wave: EncounterWaveData, start_tick: int, index: int, unit_entry: Dictionary) -> int:
++	return start_tick + max(0, wave.wave_enter_delay_ticks) + max(0, wave.wave_stagger_ticks) * index + max(0, int(unit_entry.get("spawn_delay_ticks", 0)))
++
++func _pick_enemy(unit_entry: Dictionary) -> String:
++	var weights: Dictionary[Variant, int] = {}
++	weights.assign(unit_entry.get("weights", {}))
++	if weights.is_empty():
++		return ""
++	var rng_enemy_spawning: RandomNumberGenerator = Global.player_data.get_player_rng("rng_enemy_spawning")
++	return Random.get_weighted_selection(rng_enemy_spawning, weights)
++
++## Entry cell, or the default spawn origin when missing / off the board.
++func _entry_cell(unit_entry: Dictionary) -> Vector2i:
++	var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
++	if not director.board.is_in_bounds(cell):
++		cell = director.board_controller.default_spawn_origin()
++	return cell
++
++func _footprint_of(enemy_object_id: String) -> Vector2i:
++	var enemy_data: EnemyData = Global.get_enemy_data(enemy_object_id)
++	if enemy_data == null:
++		return Vector2i(1, 1)
++	return Vector2i(max(1, enemy_data.enemy_footprint.x), max(1, enemy_data.enemy_footprint.y))
++#endregion
++
++## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
++## the nearest empty cell. null = no unit layer / board, or the board is full.
++func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i) -> Enemy:
++	var unit_layer: Node = get_unit_layer()
++	var board_controller: BoardController = director.board_controller
++	if unit_layer == null or board_controller == null or board_controller.board == null:
++		return null
++	var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id)
++	if enemy != null and not board_controller.place_unit_nearest(enemy, cell):
++		enemy.queue_free()
++		return null
++	return enemy
+diff --git a/scripts/combat/UnitSpawner.gd.uid b/scripts/combat/UnitSpawner.gd.uid
+new file mode 100644
+index 0000000..29b666b
+--- /dev/null
++++ b/scripts/combat/UnitSpawner.gd.uid
+@@ -0,0 +1 @@
++uid://bltcjkp4ognmn
+diff --git a/scripts/combat/WaveController.gd b/scripts/combat/WaveController.gd
+new file mode 100644
+index 0000000..910e12c
+--- /dev/null
++++ b/scripts/combat/WaveController.gd
+@@ -0,0 +1,144 @@
++## Wave progression of one combat, owned by CombatDirector (combat framework Phase 3). Wave 0 starts
++## with the combat; a wave is cleared once all its units entered (or were skipped) and no living
++## non-minion enemy remains; then wave_cleared(i) fires, wave_on_cleared_actions run (parent = hero)
++## and wave i + 1 is scheduled at the clear tick + its wave_enter_delay_ticks (UnitSpawner). At its
++## start tick wave_started(i) fires and wave_on_start_actions run. The combat is won when the last
++## wave is cleared (is_final_cleared); CombatDirector then ends it.
++## Minions (EnemyData.enemy_is_minion) never block a clear: they stay on the board and keep acting
++## into the next wave, and the combat ends with them alive (the legacy "only minions left" rule).
++## A later wave of minions only is cleared as soon as its units have entered; wave 0 is checked on
++## kills only, so a minions-only encounter still ends at the first kill (legacy).
++extends RefCounted
++class_name WaveController
++
++var director: CombatDirector = null
++var waves: Array[EncounterWaveData] = []
++## Index of the latest wave that started (-1 before wave 0).
++var current_wave: int = -1
++## Number of waves whose wave_cleared fired (waves 0 .. cleared_count - 1).
++var cleared_count: int = 0
++var _check_queued: bool = false
++var _victory_requested: bool = false
++
++func _init(combat_director: CombatDirector, encounter: EncounterData) -> void:
++	director = combat_director
++	if encounter != null:
++		waves = encounter.encounter_waves
++
++func get_wave_count() -> int:
++	return len(waves)
++
++## Starts a wave: wave_started and its wave_on_start_actions.
++func enter_wave(wave_index: int) -> void:
++	if wave_index < 0 or wave_index >= len(waves):
++		return
++	current_wave = wave_index
++	Signals.wave_started.emit(wave_index)
++	_perform_actions(waves[wave_index].wave_on_start_actions)
++
++## Whether more enemies are still to come: a later wave or units waiting to enter.
++func has_more_waves() -> bool:
++	if current_wave < len(waves) - 1:
++		return true
++	return director.unit_spawner != null and director.unit_spawner.has_pending()
++
++## Whether a living enemy blocks the wave clear (minions do not).
++static func has_living_blockers() -> bool:
++	for enemy: Enemy in Global.get_alive_enemies():
++		if enemy.enemy_data != null and not enemy.enemy_data.enemy_is_minion:
++			return true
++	return false
++
++## The last wave started, all its units entered and no living non-minion enemy remains (victory).
++## Evaluated from the current state, so it also holds after the director stopped.
++func is_final_cleared() -> bool:
++	if waves.is_empty() or current_wave != len(waves) - 1:
++		return false
++	if director.unit_spawner != null and director.unit_spawner.has_pending_units(current_wave):
++		return false
++	return not has_living_blockers()
++
++## Clears the current wave when its clear condition holds: wave_cleared, its actions and the
++## scheduling of the next wave. true = a wave was cleared by this call.
++func check() -> bool:
++	if current_wave < 0 or cleared_count > current_wave:
++		return false
++	if director.unit_spawner == null or director.unit_spawner.has_pending_units(current_wave):
++		return false
++	if has_living_blockers():
++		return false
++	var wave_index: int = current_wave
++	cleared_count = wave_index + 1
++	Signals.wave_cleared.emit(wave_index)
++	_perform_actions(waves[wave_index].wave_on_cleared_actions)
++	if wave_index + 1 < len(waves):
++		director.unit_spawner.schedule_wave(wave_index + 1, director.current_tick + max(0, waves[wave_index + 1].wave_enter_delay_ticks))
++	return true
++
++func _perform_actions(actions_data: Array[Dictionary]) -> void:
++	if actions_data.is_empty():
++		return
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	var actions: Array[BaseAction] = ActionGenerator.create_actions(hero, null, [], actions_data, null)
++	ActionHandler.add_actions(actions)
++
++#region Director hooks
++## Wave clear check after a kill, once the action queue settles (death actions such as summons
++## count before the wave is judged cleared).
++func queue_check() -> void:
++	if _check_queued:
++		return
++	_check_queued = true
++	_run_queued_check.call_deferred(director.get_generation())
++
++func _run_queued_check(generation: int) -> void:
++	if not is_instance_valid(director) or generation != director.get_generation():
++		_check_queued = false
++		return
++	if ActionHandler.actions_being_performed:
++		# no await: a pending coroutine would keep this RefCounted alive past the combat
++		ActionHandler.actions_ended.connect(_run_queued_check.bind(generation), CONNECT_ONE_SHOT)
++		return
++	_check_queued = false
++	if director.is_running:
++		check()
++
++## Victory after a kill: decided when a death animation ends (legacy timing) by the last wave being
++## cleared; replaces Combat.gd's "only minions left" check. Also evaluated after the loop stopped.
++func on_death_animation_finished() -> void:
++	if director.is_running:
++		check()
++	if is_final_cleared():
++		end_combat_victory()
++
++## Ends the combat through Combat.end_combat() (event post-combat actions, combat_ended) once.
++func end_combat_victory() -> void:
++	if _victory_requested:
++		return
++	_victory_requested = true
++	if ActionHandler.actions_being_performed:
++		await ActionHandler.actions_ended
++	var combat: Node = director.get_parent()
++	if combat != null and combat.has_method("end_combat"):
++		combat.end_combat()
++
++## Enters pending wave entries due before the next timeline unit (ties: entries first), advancing
++## the clock to each entry tick. A last wave cleared here without a kill (skipped units) ends the combat.
++func enter_due_units(generation: int) -> void:
++	while director.unit_spawner != null and director.unit_spawner.has_pending():
++		var entry_tick: int = director.unit_spawner.next_pending_tick()
++		var unit_tick: int = director.timeline.peek_next_tick()
++		if unit_tick >= 0 and entry_tick > unit_tick:
++			return
++		await director.advance_clock(entry_tick, generation)
++		if director.is_aborted(generation):
++			return
++		director.unit_spawner.enter_due(director.current_tick)
++		await director.wait_actions(generation)
++		if director.is_aborted(generation):
++			return
++		check()
++		if is_final_cleared():
++			end_combat_victory()
++			return
++#endregion
+diff --git a/scripts/combat/WaveController.gd.uid b/scripts/combat/WaveController.gd.uid
+new file mode 100644
+index 0000000..e04fec2
+--- /dev/null
++++ b/scripts/combat/WaveController.gd.uid
+@@ -0,0 +1 @@
++uid://btbrbkevermkr
+diff --git a/scripts/combat/board/BoardData.gd b/scripts/combat/board/BoardData.gd
+index 63c947b..1d6a92e 100644
+--- a/scripts/combat/board/BoardData.gd
++++ b/scripts/combat/board/BoardData.gd
+@@ -204,6 +204,13 @@ func is_in_line(unit_a: BaseCombatant, unit_b: BaseCombatant) -> bool:
+ ## unit (the unit's own cells and units in ignored_units do not count).
+ func can_stand(unit: BaseCombatant, anchor: Vector2i, ignored_units: Array = []) -> bool:
+ 	var footprint: Vector2i = unit.footprint if unit != null else Vector2i(1, 1)
++	return _footprint_fits(unit, footprint, anchor, ignored_units)
++
++## Whether a not-yet-spawned unit of this footprint fits at anchor (wave spawn policies).
++func footprint_fits(footprint: Vector2i, anchor: Vector2i) -> bool:
++	return _footprint_fits(null, footprint, anchor, [])
++
++func _footprint_fits(unit: BaseCombatant, footprint: Vector2i, anchor: Vector2i, ignored_units: Array) -> bool:
+ 	for cell: Vector2i in footprint_cells(anchor, footprint):
+ 		if not is_in_bounds(cell) or is_blocked(cell):
+ 			return false
+@@ -269,6 +276,13 @@ func _build_path(parents: Dictionary, start: Vector2i, destination: Vector2i) ->
+ ## ties: spawn-zone cells first, then smaller y, then smaller x. Falls back to the deploy zone too.
+ ## BOARD_ANCHOR_NONE = the board is full.
+ func nearest_empty_anchor(unit: BaseCombatant, origin: Vector2i) -> Vector2i:
++	return _nearest_empty_anchor(unit, unit.footprint if unit != null else Vector2i(1, 1), origin)
++
++## nearest_empty_anchor for a not-yet-spawned unit of this footprint.
++func nearest_empty_anchor_for_footprint(footprint: Vector2i, origin: Vector2i) -> Vector2i:
++	return _nearest_empty_anchor(null, footprint, origin)
++
++func _nearest_empty_anchor(unit: BaseCombatant, footprint: Vector2i, origin: Vector2i) -> Vector2i:
+ 	var best: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
+ 	var best_key: int = -1
+ 	for allow_deploy: bool in [false, true]:
+@@ -276,7 +290,7 @@ func nearest_empty_anchor(unit: BaseCombatant, origin: Vector2i) -> Vector2i:
+ 			var cell_data: BoardCellData = get_cell(cell)
+ 			if cell_data.is_deploy_zone and not allow_deploy:
+ 				continue
+-			if not can_stand(unit, cell):
++			if not _footprint_fits(unit, footprint, cell, []):
+ 				continue
+ 			var key: int = sort_key([distance(cell, origin), 0 if cell_data.is_spawn_zone else 1, cell.y, cell.x])
+ 			if best_key < 0 or key < best_key:
+diff --git a/scripts/combat/controllers/EnemyIntentController.gd b/scripts/combat/controllers/EnemyIntentController.gd
+index a6d63de..cd8c957 100644
+--- a/scripts/combat/controllers/EnemyIntentController.gd
++++ b/scripts/combat/controllers/EnemyIntentController.gd
+@@ -1,8 +1,44 @@
+ ## Enemy unit: performs the intent decided when it last entered the timeline
+-## (Enemy.decide_next_intent), targeting the hero. Board movement and shapes arrive in Phase 2.
++## (Enemy.decide_next_intent). Moves by the intent's move mode (IntentResolver), then performs the
++## intent against what it hits from there. An attack that cannot reach its target is skipped and the
++## intent is kept for the enemy's next action.
+ extends BaseUnitController
+ class_name EnemyIntentController
+ 
+ func decide(director: CombatDirector, unit: BaseCombatant) -> Variant:
+-	await director.perform_enemy_intent(unit as Enemy)
++	await perform_intent(director, unit as Enemy)
+ 	return null
++
++static func perform_intent(director: CombatDirector, enemy: Enemy) -> void:
++	var generation: int = director.get_generation()
++	if enemy == null or not enemy.is_alive():
++		return
++	var board: BoardData = director.board
++	var enemy_intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
++	var target: BaseCombatant = IntentResolver.choose_target(board, enemy, enemy_intent)
++	var plan: Dictionary = IntentResolver.resolve(board, enemy, enemy_intent, target)
++	var path: Array = plan.get("path", [])
++	if board != null and not path.is_empty() and plan["move_cell"] != enemy.board_anchor:
++		var move_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, [enemy], [{
++			Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": plan["move_cell"], "distance": len(path), "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
++		}], null)
++		ActionHandler.add_actions(move_actions)
++		await director.wait_actions(generation)
++		if director.is_aborted(generation) or not enemy.is_alive():
++			return
++	var hit: Dictionary = IntentResolver.hits_from(board, enemy, enemy.board_anchor, enemy_intent, target)
++	var can_hit: bool = hit["can_hit"]
++	if enemy_intent != null and enemy_intent.enemy_intent_number_of_attacks > 0 and not can_hit:
++		enemy.keep_intent_next_action = true
++	var enemy_actions_data: Array[Dictionary] = enemy.build_intent_actions_data(enemy_intent, director.rules.reset_block_on_action_start, can_hit)
++	# play intent sound if one exists and no attacks
++	if enemy_intent != null and enemy_intent.enemy_intent_audio_path != "" and enemy_intent.enemy_intent_number_of_attacks == 0:
++		ActionGenerator.generate_sound_action(enemy_intent.enemy_intent_audio_path, false)
++	var targets: Array[BaseCombatant] = []
++	if can_hit:
++		targets.assign(hit["targets"])
++	elif target != null:
++		targets.append(target)
++	var enemy_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, targets, enemy_actions_data, null)
++	ActionHandler.add_actions(enemy_actions)
++	await director.wait_actions(generation)
+diff --git a/scripts/ui/Combat.gd b/scripts/ui/Combat.gd
+index 2fab77c..150ee8f 100644
+--- a/scripts/ui/Combat.gd
++++ b/scripts/ui/Combat.gd
+@@ -39,7 +39,6 @@ func _ready():
+ 	Signals.player_health_changed.connect(_on_player_health_changed)
+ 
+ 	Signals.enemy_killed.connect(_on_enemy_killed)
+-	Signals.enemy_death_animation_finished.connect(_on_enemy_death_animation_finished)
+ 
+ 	Signals.combat_started.connect(_on_combat_started)
+ 	Signals.combat_ended.connect(_on_combat_ended)
+@@ -193,22 +192,6 @@ func _on_enemy_killed(enemy: Enemy):
+ 	ActionHandler.add_actions(generated_actions)
+ 
+ 
+-func _on_enemy_death_animation_finished(_enemy: Enemy):
+-	# determine if all non minion enemies killed and end combat
+-	var enemies: Array[Enemy] = []
+-	enemies.assign(get_tree().get_nodes_in_group("enemies"))
+-
+-	var non_minion_enemies_remain: bool = true
+-	for enemy in enemies:
+-		if not enemy.enemy_data.enemy_is_minion:
+-			non_minion_enemies_remain = false
+-
+-	if non_minion_enemies_remain:
+-		# wait for actions to finish and end combat
+-		if ActionHandler.actions_being_performed:
+-			await ActionHandler.actions_ended
+-		end_combat()
+-
+ func _on_combat_started(event_id: String):
+ 	var current_event: EventData = null
+ 	if event_id == "":
+@@ -265,7 +248,8 @@ func _on_run_started():
+ func _on_run_ended():
+ 	visible = false
+ 
+-## Performs end of combat logic and signals end of combat. Runs once per combat.
++## Performs end of combat logic and signals end of combat. Runs once per combat. Called by the
++## CombatDirector's WaveController when the last wave is cleared (after a death animation).
+ func end_combat() -> void:
+ 	if _combat_ending:
+ 		return
+diff --git a/scripts/ui/TimelineBar.gd b/scripts/ui/TimelineBar.gd
+index e40abaf..5305307 100644
+--- a/scripts/ui/TimelineBar.gd
++++ b/scripts/ui/TimelineBar.gd
+@@ -1,6 +1,7 @@
+ ## Combat HUD strip listing the current tick and the next projected actions of the timeline
+ ## ("name@tick"), read from CombatDirector.project_timeline(). Labels are rebuilt on every
+-## timeline_changed / combat_tick_advanced; hidden outside combat.
++## timeline_changed / combat_tick_advanced; hidden outside combat. A WaveLabel ("Wave i/n", built at
++## runtime after the tick label) shows the current wave for encounters with more than one wave.
+ extends HBoxContainer
+ 
+ ## How many upcoming actions to show (the acting unit counts as the first entry).
+@@ -8,6 +9,7 @@ const PROJECTION_COUNT: int = 8
+ 
+ @onready var tick_label: Label = $TickLabel
+ @onready var entry_container: HBoxContainer = $Entries
++var wave_label: Label = null
+ 
+ func _ready() -> void:
+ 	Signals.combat_started.connect(_on_combat_started)
+@@ -16,6 +18,13 @@ func _ready() -> void:
+ 	Signals.timeline_changed.connect(refresh)
+ 	Signals.combat_tick_advanced.connect(_on_combat_tick_advanced)
+ 	Signals.unit_action_started.connect(_on_unit_action_started)
++	Signals.wave_started.connect(_on_wave_changed)
++	Signals.wave_cleared.connect(_on_wave_changed)
++	wave_label = Label.new()
++	wave_label.name = "WaveLabel"
++	wave_label.visible = false
++	add_child(wave_label)
++	move_child(wave_label, tick_label.get_index() + 1)
+ 	visible = false
+ 
+ func refresh() -> void:
+@@ -27,6 +36,10 @@ func refresh() -> void:
+ 		return
+ 	visible = true
+ 	tick_label.text = "Tick %d" % director.current_tick
++	var wave_count: int = director.waves.get_wave_count() if director.waves != null else 0
++	wave_label.visible = wave_count > 1
++	if wave_label.visible:
++		wave_label.text = "Wave %d/%d" % [max(1, director.waves.current_wave + 1), wave_count]
+ 	for entry: Dictionary in director.project_timeline(PROJECTION_COUNT):
+ 		var unit: BaseCombatant = entry["unit"]
+ 		var label: Label = Label.new()
+@@ -49,3 +62,6 @@ func _on_combat_tick_advanced(_previous_tick: int, _current_tick: int) -> void:
+ 
+ func _on_unit_action_started(_unit: BaseCombatant) -> void:
+ 	refresh()
++
++func _on_wave_changed(_wave_index: int) -> void:
++	refresh()

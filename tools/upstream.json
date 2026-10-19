@@ -39,6 +39,12 @@
       "sha256": "fcacb75f5f1e601d57ab6bac7cd01ece1c67d6907da4ff1e4eca8a0b29b8fa2f",
       "description": "Combat framework Phase 2 (wf/specs/combat-framework): BoardData/BoardTargeting/IntentResolver/ThreatPreview, EncounterData + EncounterWaveData with legacy-event synthesis, CombatDirector board setup / wave-0 spawning / movement / enemy intent movement, board card/intent/unit fields, ActionMoveUnit/ActionDisplaceUnit/ActionGrantMovePoints/ActionComputeBoardValue, board validators, InterceptorRooted, Hand cell targeting and BoardView, ThreatPreview-based incoming damage, Board suite.",
       "validation": "wf/plans/combat-framework/phase-2.md"
+    },
+    {
+      "file": "tools/patches/combat-framework-phase3.patch",
+      "sha256": "43dbfc56077667cb839eb26799431998644388afe24463cbdbedf51296e7c068",
+      "description": "Combat framework Phase 3 (wf/specs/combat-framework): CombatDirector split into BoardController / UnitSpawner / CombatActionPhases / CombatStartActions (intent execution in EnemyIntentController); WaveController wave flow (wave_started/wave_cleared, wave_on_*_actions, next-wave scheduling, victory on last wave cleared replacing Combat.gd's minion check); UnitSpawner pending entries with enter delay / stagger / spawn delay and NEAREST_EMPTY / WAIT_UNTIL_FREE / FAIL_SKIP; Global.are_remaining_enemies delegates to CombatDirector.has_remaining_opponents; CombatTimeline.peek_next_tick; BoardData footprint helpers; TimelineBar WaveLabel.",
+      "validation": "wf/plans/combat-framework/phase-3.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",
@@ -49,7 +55,9 @@
   "engine_policy": {
     "baseline": "4.7",
     "baseline_since": "2026-10-19",
-    "accepted_version_patterns": ["^4\\.7\\."],
+    "accepted_version_patterns": [
+      "^4\\.7\\."
+    ],
     "runner": "tools/test_game.py reads accepted_version_patterns for its --version probe; --accept-engine-version REGEX overrides it per run (e.g. '^4\\.6\\.' to replay the previous baseline).",
     "rationale": "Upstream Slay-The-Robot has not moved since 4dac5abe; the project tracks the current stable engine instead of the official 4.6 build it was first imported under.",
     "official_downloads": {
