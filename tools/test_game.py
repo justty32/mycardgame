@@ -15,11 +15,14 @@ Usage (from the project root):
     python3 tools/test_game.py --suite Smoke --godot-path /usr/bin/godot-mono
     python3 tools/test_game.py --suite Smoke --force-failure        # must exit 1
     python3 tools/test_game.py --suite Smoke --pack games/<game>/pack --pack-tests games/<game>/tests
+    python3 tools/test_game.py --suite Smoke --content-profile pack --pack games/<game>/pack --pack-tests games/<game>/tests
 
 --pack installs a content pack (a Slay-The-Robot mod directory) into each isolated
 game copy under external/mods/<name>/ and enables it in that copy's mod_list.json;
 the source game is never modified. --pack-tests copies a directory of pack probes
 (*_probe.gd with check_loaded(global_data) -> {label: bool}) that Smoke calls.
+--content-profile pack makes the engine skip its built-in example/test content
+(Global.get_content_profile()), so a pack is checked without depending on it.
 
 Exit status: 0 = verification passed, 1 = verification failed (including a
 forced failure), 2 = usage / environment error before any engine run.
@@ -83,6 +86,8 @@ SOURCE_HASH_PATHS = (
     "scripts/ui/Map.gd",
     "autoload/FileLoader.gd",
     "data/SerializableData.gd",
+    "autoload/Global.gd",
+    "scripts/ui/menus/NewRunMenu.gd",
 )
 EXCLUDED_DIR_NAMES = frozenset({".git", ".godot", ".import", ".saves", ".screenshots", ".mono"})
 EXCLUDED_FILE_NAMES = frozenset({"profile.json", "user_settings.json"})
@@ -107,6 +112,7 @@ PACK_MODS_PREFIX = "external/mods/"
 PACK_LOAD_PRIORITY_BASE = 10
 PACK_PROBE_GLOB = "*_probe.gd"
 PACK_PROBE_DONE_MARKER = "PACK PROBE DONE: "
+CONTENT_PROFILES = ("test", "pack")
 PACK_NAME_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]*$")
 
 
@@ -563,9 +569,10 @@ def copy_pack_tests(test_dirs: list[Path], destination_root: Path) -> tuple[list
     return probes, hashes
 
 
-def build_user_args(selected: str, *, force_failure: bool = False, probes: Optional[list[Path]] = None) -> list[str]:
+def build_user_args(selected: str, *, force_failure: bool = False, probes: Optional[list[Path]] = None,
+                    content_profile: str = "test") -> list[str]:
     """Arguments after '--' for a suite script (one separator, as Godot expects)."""
-    user: list[str] = []
+    user: list[str] = [] if content_profile == "test" else [f"--content-profile={content_profile}"]
     if selected == "CombatVictory":
         user.append("--scenario=victory")
     elif selected == "CombatDefeat":
@@ -902,7 +909,12 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
                         help="Content pack directory with mod_info.json (repeatable). Installed only into the isolated copies under external/mods/<name>/ and enabled there.")
     parser.add_argument("--pack-tests", action="append", metavar="DIR", default=[],
                         help="Directory of pack probes (*_probe.gd, repeatable); Smoke calls check_loaded(global_data). Requires --pack.")
+    parser.add_argument("--content-profile", choices=CONTENT_PROFILES, default="test",
+                        help="test (default): engine generates the built-in example/test content. pack: skip it so only "
+                             "external data and enabled packs load (Smoke only; needs --pack).")
     args = parser.parse_args(argv)
+    if args.content_profile == "pack" and (args.suite != "Smoke" or not args.pack):
+        parser.error("--content-profile pack requires --suite Smoke and at least one --pack")
     if args.pack_tests and not args.pack:
         parser.error("--pack-tests requires --pack")
     if args.pack_tests and "Smoke" not in expand_suites(args.suite):
@@ -941,6 +953,7 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
         historical_baseline=args.historical_baseline, engine=engine, engine_discovery=discovery,
         accepted_patterns=patterns, policy_source=policy_source, isolation=isolation,
         timeout_seconds=args.timeout_seconds, force_failure=args.force_failure)
+    manifest["content_profile"] = args.content_profile
     manifest["packs"] = {}
     manifest["pack_test_hashes"] = {}
     runner = EngineRunner(engine=engine, run_root=run_root, manifest=manifest, env=env,
@@ -998,7 +1011,8 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
                 runner.invoke("import-verified", directory, import_args, known_shutdown_resources=known_counts)
             script_path = isolated_tests / SUITE_SCRIPTS[selected]
             test_args = ["--headless", "--path", str(isolated_game), "--script", str(script_path)]
-            user_args = build_user_args(selected, force_failure=args.force_failure, probes=probes)
+            user_args = build_user_args(selected, force_failure=args.force_failure, probes=probes,
+                                        content_profile=args.content_profile)
             if selected == "SaveLoad":
                 for phase in ("write", "read", "rejected"):
                     runner.invoke(f"save-{phase}", directory,

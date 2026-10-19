@@ -21,4 +21,8 @@
 
 ```bash
 python3 tools/test_game.py --suite Smoke --pack games/apocalypse/pack --pack-tests games/apocalypse/tests
+# 不載框架範例內容（內容側寫 pack）
+python3 tools/test_game.py --suite Smoke --content-profile pack --pack games/apocalypse/pack --pack-tests games/apocalypse/tests
 ```
+
+示範卡 `apo_card_probe_strike` 仍引用框架範例的 `color_white`；pack 側寫下該顏色不存在，題材要自備顏色等基礎資料才能開局（待使用者決定是否允許依賴框架範例內容）。

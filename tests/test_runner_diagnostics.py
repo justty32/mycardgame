@@ -420,6 +420,24 @@ def main() -> None:
     parsed = runner.parse_args(["--suite", "All", "--pack", "a", "--pack", "b", "--pack-tests", "t"])
     assert_that(parsed.pack == ["a", "b"] and parsed.pack_tests == ["t"], "--pack and --pack-tests are repeatable and accepted with All")
 
+    # --- content profile ---------------------------------------------------------------------------
+    assert_that(runner.build_user_args("Smoke", probes=probes, content_profile="pack")
+                == ["--content-profile=pack", f"--pack-probe={probes[0]}"]
+                and runner.build_user_args("Smoke") == [] and runner.build_user_args("CombatVictory", content_profile="test") == ["--scenario=victory"],
+                "pack content profile is passed to the engine as a user arg; test profile adds nothing")
+    for bad_args in (["--suite", "Smoke", "--content-profile", "pack"],
+                     ["--suite", "All", "--content-profile", "pack", "--pack", "p"],
+                     ["--suite", "Smoke", "--content-profile", "prod", "--pack", "p"]):
+        try:
+            runner.parse_args(bad_args)
+            rejected = False
+        except SystemExit:
+            rejected = True
+        assert_that(rejected, f"content profile validation rejects {' '.join(bad_args)}")
+    parsed = runner.parse_args(["--suite", "Smoke", "--content-profile", "pack", "--pack", "p"])
+    assert_that(parsed.content_profile == "pack" and runner.parse_args([]).content_profile == "test",
+                "pack profile is accepted with Smoke and --pack; test is the default")
+
     # --- editor pack link (tools/link_pack.py) ---------------------------------------------------
     import link_pack  # noqa: E402 - tools/ is already on sys.path
     link_game = RUN_ROOT / "link_game"

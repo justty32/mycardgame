@@ -20,6 +20,16 @@
 - `--pack-tests DIR`（可重複，需 `--pack`，suite 須含 Smoke）：複製到 `<run>/Smoke/pack_tests/`，hash 記在 `pack_test_hashes`，每個 `*_probe.gd` 以 `--pack-probe=<path>` 傳給 Smoke；缺任一 `PACK PROBE DONE:` 即判失敗。
 - 其他 suite 帶 `--pack` 時內容包同樣被載入（疊在框架範例資料上，同 id 即 patch），但只有 Smoke 呼叫 probe。
 
+## 內容側寫（不依賴框架範例內容）
+
+框架啟動時預設以 `GlobalTestDataGenerator` 生成範例／測試內容（character_red、card_attack_basic…），內容包疊在其上。`--content-profile pack`（僅限 `--suite Smoke` 且至少一個 `--pack`）把 `--content-profile=pack` 傳給引擎，`Global.get_content_profile()` 據此跳過生成，只載 external 資料與啟用的 mod；未給命令列參數時讀專案設定 `game/content_profile`，預設 `test`，未知值記 ERROR 並退回 `test`。pack 側寫的 Smoke 改驗「範例內容不存在」與 JSON patch 契約，略過依賴 character_red 的 example_mod probe，再跑內容包 probe。這是本地補丁 `content-profile.patch`（含 NewRunMenu 容忍空的難度修正清單），見 upstream.json。
+
+```bash
+python3 tools/test_game.py --suite Smoke --content-profile pack --pack games/<game>/pack --pack-tests games/<game>/tests
+```
+
+pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容包仍引用範例 id（例如顏色）時，開局與畫面需要該包自備資料。
+
 ## 編輯器載入（本機）
 
 `python3 tools/link_pack.py games/<game>/pack` 建 `game/external/mods/<name>` 相對 symlink（Windows 先試 symlink、再退 `mklink /J` junction，**Windows 路徑未實測**）；該路徑由 .gitignore 的 `/game/external/mods/*`（只放行 example_mod）蓋住，link 後 `git status` 不變。要在編輯器實際載入再加 `--enable`：在追蹤中的 `mod_list.json` 插一行，`git status` 會顯示已修改，**不得 commit**；`--unlink` 移除 link 並逐位元組還原該行。runner 複製時略過 link，並從隔離副本的 mod_list 拿掉被 link 的 mod，框架 Smoke 不受本機 `--enable` 影響；要測該包一律用 `--pack`。拒絕取代或刪除真實 mod 資料夾。

@@ -1,0 +1,58 @@
+diff --git a/autoload/Global.gd b/autoload/Global.gd
+index 2680e85..f7c9e07 100644
+--- a/autoload/Global.gd
++++ b/autoload/Global.gd
+@@ -158,6 +158,27 @@ func register_rod(serializeable_data: SerializableData, allow_collisions: bool =
+ 
+ #endregion
+ 
++#region Content Profile
++
++const CONTENT_PROFILE_TEST: String = "test"
++const CONTENT_PROFILE_PACK: String = "pack"
++## Project setting read when no --content-profile=<test|pack> user argument is given.
++const CONTENT_PROFILE_SETTING: String = "game/content_profile"
++
++## Which built-in content to generate on startup. The command-line user argument
++## (after "--") wins over the project setting; unknown values fall back to "test".
++static func get_content_profile() -> String:
++	var profile: String = str(ProjectSettings.get_setting(CONTENT_PROFILE_SETTING, CONTENT_PROFILE_TEST))
++	for argument: String in OS.get_cmdline_user_args():
++		if argument.begins_with("--content-profile="):
++			profile = argument.trim_prefix("--content-profile=")
++	if profile != CONTENT_PROFILE_TEST and profile != CONTENT_PROFILE_PACK:
++		push_error("Global.get_content_profile(): unknown content profile '%s', using '%s'" % [profile, CONTENT_PROFILE_TEST])
++		return CONTENT_PROFILE_TEST
++	return profile
++
++#endregion
++
+ func _ready():
+ 	### Schema
+ 	# generate the schema. This must be done before everything else in Global or errors will ensue
+@@ -176,7 +197,10 @@ func _ready():
+ 	#ProfileData.ENABLE_ALL_DIFFICULTIES = false
+ 	
+ 	### Test data generation
+-	GlobalTestDataGenerator.generate_test_data()
++	# Content profile (local patch): "test" (default) generates the example/test content;
++	# "pack" skips it so a content pack can run on external data and enabled mods only.
++	if get_content_profile() == CONTENT_PROFILE_TEST:
++		GlobalTestDataGenerator.generate_test_data()
+ 	
+ 	### Testing flags
+ 	ProfileData.ENABLE_ALL_DIFFICULTIES = true
+diff --git a/scripts/ui/menus/NewRunMenu.gd b/scripts/ui/menus/NewRunMenu.gd
+index fa57575..72ca561 100644
+--- a/scripts/ui/menus/NewRunMenu.gd
++++ b/scripts/ui/menus/NewRunMenu.gd
+@@ -129,6 +129,9 @@ func set_selected_difficulty_level(value: int) -> void:
+ 			selected_difficulty_level = min(selected_difficulty_level, character_highest_difficulty_win)
+ 	
+ 	# update text label
++	# local patch: content without difficulty modifiers (e.g. pack content profile) leaves this list empty
++	if selected_difficulty_level < 0 or selected_difficulty_level >= len(Global.STANDARD_DIFFICULTY_RUN_MODIFIER_IDS):
++		return
+ 	var run_modifier_id: String = Global.STANDARD_DIFFICULTY_RUN_MODIFIER_IDS[selected_difficulty_level]
+ 	var run_modifier_data: RunModifierData = Global.get_run_modifier_data(run_modifier_id)
+ 	

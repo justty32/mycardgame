@@ -47,19 +47,29 @@ func _run() -> void:
 	_check(menu != null and menu.is_visible_in_tree(), "main menu is visible after ready")
 	var new_run: Button = game_root.get_node_or_null("TitleScreen/MainMenu/VBoxContainer/NewRunButton") as Button
 	_check(new_run != null and new_run.is_node_ready(), "new run button initializes")
-	var character: Resource = global_data.get_character_data("character_red")
-	_check(character != null, "character_red is registered")
-	_check(not global_data.get_all_cards().is_empty(), "card prototypes are registered")
-	if character == null:
-		_finish()
-		return
-	_check(not character.character_starting_card_object_ids.is_empty(), "red character has a starting deck")
-	for card_id: String in character.character_starting_card_object_ids:
-		_check(global_data.get_card_data(card_id) != null, "starting card resolves: " + card_id)
+	var content_profile: String = global_data.get_content_profile()
+	print("SMOKE: content profile " + content_profile)
+	if content_profile == global_data.CONTENT_PROFILE_PACK:
+		# Pack profile: the built-in example/test content must be absent; packs bring their own.
+		_check(global_data.get_character_data("character_red") == null, "pack profile skips built-in test content (no character_red)")
+		_check(global_data.get_card_data("card_attack_basic") == null, "pack profile skips built-in test content (no card_attack_basic)")
+		_check(_check_array_patch() == true, "array patch probe completed")
+		_check(_check_dictionary_patch() == true, "dictionary patch assertions completed")
+		print("SMOKE: pack profile; example_mod probe skipped because it extends built-in test content.")
+	else:
+		var character: Resource = global_data.get_character_data("character_red")
+		_check(character != null, "character_red is registered")
+		_check(not global_data.get_all_cards().is_empty(), "card prototypes are registered")
+		if character == null:
+			_finish()
+			return
+		_check(not character.character_starting_card_object_ids.is_empty(), "red character has a starting deck")
+		for card_id: String in character.character_starting_card_object_ids:
+			_check(global_data.get_card_data(card_id) != null, "starting card resolves: " + card_id)
 
-	_check(_check_array_patch() == true, "array patch probe completed")
-	_check(_check_dictionary_patch() == true, "dictionary patch assertions completed")
-	_check(_check_example_mod(character) == true, "example_mod probe completed")
+		_check(_check_array_patch() == true, "array patch probe completed")
+		_check(_check_dictionary_patch() == true, "dictionary patch assertions completed")
+		_check(_check_example_mod(character) == true, "example_mod probe completed")
 	_run_pack_probes()
 	if OS.get_cmdline_user_args().has("--capture"):
 		_check(await _capture_menu() == true, "main menu screenshot saved")

@@ -129,6 +129,9 @@ func set_selected_difficulty_level(value: int) -> void:
 			selected_difficulty_level = min(selected_difficulty_level, character_highest_difficulty_win)
 	
 	# update text label
+	# local patch: content without difficulty modifiers (e.g. pack content profile) leaves this list empty
+	if selected_difficulty_level < 0 or selected_difficulty_level >= len(Global.STANDARD_DIFFICULTY_RUN_MODIFIER_IDS):
+		return
 	var run_modifier_id: String = Global.STANDARD_DIFFICULTY_RUN_MODIFIER_IDS[selected_difficulty_level]
 	var run_modifier_data: RunModifierData = Global.get_run_modifier_data(run_modifier_id)
 	

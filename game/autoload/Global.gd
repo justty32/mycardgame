@@ -158,6 +158,27 @@ func register_rod(serializeable_data: SerializableData, allow_collisions: bool =
 
 #endregion
 
+#region Content Profile
+
+const CONTENT_PROFILE_TEST: String = "test"
+const CONTENT_PROFILE_PACK: String = "pack"
+## Project setting read when no --content-profile=<test|pack> user argument is given.
+const CONTENT_PROFILE_SETTING: String = "game/content_profile"
+
+## Which built-in content to generate on startup. The command-line user argument
+## (after "--") wins over the project setting; unknown values fall back to "test".
+static func get_content_profile() -> String:
+	var profile: String = str(ProjectSettings.get_setting(CONTENT_PROFILE_SETTING, CONTENT_PROFILE_TEST))
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--content-profile="):
+			profile = argument.trim_prefix("--content-profile=")
+	if profile != CONTENT_PROFILE_TEST and profile != CONTENT_PROFILE_PACK:
+		push_error("Global.get_content_profile(): unknown content profile '%s', using '%s'" % [profile, CONTENT_PROFILE_TEST])
+		return CONTENT_PROFILE_TEST
+	return profile
+
+#endregion
+
 func _ready():
 	### Schema
 	# generate the schema. This must be done before everything else in Global or errors will ensue
@@ -176,7 +197,10 @@ func _ready():
 	#ProfileData.ENABLE_ALL_DIFFICULTIES = false
 	
 	### Test data generation
-	GlobalTestDataGenerator.generate_test_data()
+	# Content profile (local patch): "test" (default) generates the example/test content;
+	# "pack" skips it so a content pack can run on external data and enabled mods only.
+	if get_content_profile() == CONTENT_PROFILE_TEST:
+		GlobalTestDataGenerator.generate_test_data()
 	
 	### Testing flags
 	ProfileData.ENABLE_ALL_DIFFICULTIES = true

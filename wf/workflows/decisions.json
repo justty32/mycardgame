@@ -68,6 +68,12 @@
    "decision": "編輯器載入題材內容包用 tools/link_pack.py 建 symlink／junction 到 game/external/mods/<name>，mod_list 只在本機以 --enable 暫改",
    "rejected_and_why": "不先做 FileLoader 外部根補丁（命令列 --pack=<abs>）：多一個本地框架補丁、上游合併成本增加，而 link 零框架改動已足夠本機開發；不把題材登記進追蹤的 mod_list.json：框架檔會混入題材",
    "premise": "Windows junction 實測失敗、匯出版需要載入外部包，或多題材同時開發讓本機 mod_list 管理變麻煩時，改評估 FileLoader 補丁"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "加內容側寫開關：--content-profile=test|pack（或專案設定 game/content_profile），pack 時不呼叫 GlobalTestDataGenerator；預設 test，框架測試不變",
+   "rejected_and_why": "不直接移除或改寫範例資料生成：框架回歸全靠它；不讓題材包永遠疊在範例內容上：題材會在不知不覺中依賴 MIT 範例 id，無法驗證自備內容是否完整；不另做 prod 側寫：GlobalProdDataGenerator 上游已停用",
+   "premise": "框架範例內容改成資料檔或題材全部自備基礎資料後，可改成預設 pack 或移除開關"
   }
  ]
 }

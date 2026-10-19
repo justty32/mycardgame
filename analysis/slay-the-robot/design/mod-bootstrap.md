@@ -20,7 +20,7 @@
 
 ## 證據與限制
 
-來源 manifest 的 source_hashes 目前固定列出 13 個框架檔；新 mod 檔、mod_list 及修改測試需額外記錄 hash。測試腳本雖會保存 hash，仍要核對真正執行的新 assertion、退出碼、完成標記及資源錯誤，不以檔案存在代替執行。
+來源 manifest 的 source_hashes 目前固定列出 15 個框架檔；新 mod 檔、mod_list 及修改測試需額外記錄 hash。測試腳本雖會保存 hash，仍要核對真正執行的新 assertion、退出碼、完成標記及資源錯誤，不以檔案存在代替執行。
 
 本輪文件修補的 PowerShell 範例已以 Parser 靜態解析（操作篇其後改為跨平台 Python 候選根，本段與下方實跑均為 Godot 4.6 時的歷史）。載入、出牌、視覺、音效、存讀及發布各自需要適用證據；headless 不涵蓋 GUI、輸入命中或原生視窗穩定性。候選副本試驗不等於已把 mod 納入正式 game，歷史 498 項 All 也不包含這份新範例。
 

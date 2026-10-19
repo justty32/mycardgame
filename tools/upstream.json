@@ -15,6 +15,12 @@
       "sha256": "ed27f763e8492d193c03324954d1533c2e9f03aa33a2a7bc115f6a7189610c8c",
       "description": "Release interceptor processors without reference cycles; finish and cancel async actions safely; clear scene work, weakly defer map layout and remove self-typed menu dictionary retention.",
       "validation": "analysis/slay-the-robot/architecture/05_resource_lifecycle.md"
+    },
+    {
+      "file": "tools/patches/content-profile.patch",
+      "sha256": "bab32741edf84d042ba564d3877dbbd321b3eae09582dc98d4db18a4eabd46a2",
+      "description": "Content profile switch: Global.get_content_profile() (--content-profile=test|pack user arg, else project setting game/content_profile, default test) skips GlobalTestDataGenerator in pack profile; NewRunMenu tolerates an empty standard difficulty modifier list.",
+      "validation": "wf/workflows/game-dev/content/pack.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

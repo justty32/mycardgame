@@ -85,7 +85,7 @@ python3 <candidateRoot>/tools/test_game.py --suite Smoke --project-root <candida
 
 日誌位於候選根的 artifacts/verification；讀其 results.json、smoke.log 及 console log。成功需 `completed=true`、`verdict=PASS`、各階段符合 testing 規則，且出現八項 `PASS: MOD:`，不能只看到舊 Smoke PASS。正式接回專案 game／tests 後命令是 `python3 tools/test_game.py --suite Smoke`；若另用 `--source-game`，tests 仍取執行中 runner 所屬專案，不會跟到候選 game 的旁邊。
 
-runner 的 source_hashes 只涵蓋 13 個框架檔；另記 mod 三檔、mod_list 及修改 tests 的 SHA-256、候選根與日誌。候選與正式檔不一致時不能沿用證據。實作後依內容入口同步文件及 lint；只演練則保留未落地標記。
+runner 的 source_hashes 只涵蓋 15 個框架檔；另記 mod 三檔、mod_list 及修改 tests 的 SHA-256、候選根與日誌。候選與正式檔不一致時不能沿用證據。實作後依內容入口同步文件及 lint；只演練則保留未落地標記。
 
 已有 Combat fixture 會把起始牌組覆寫為五張原生牌，不能證明重擊被使用。出牌需求須在專屬情境中保留新牌，沿 combat_flow 的 `_play()`／等待 idle 檢查費用、合法與拒絕目標、HP／格擋、手牌移動及預覽，再由所接 suite 執行；改牌組後不可照用原生卡 20 傷害的固定勝敗斷言。SaveLoad 同理須明確讓新卡進入存讀快照。完整效果設計與驗收接 [卡牌評量](../card-evaluation.md)。
 
