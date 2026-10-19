@@ -1,0 +1,11 @@
+# VFX 初讀路由與缺口
+
+2026-10-19，獨立冷讀，自 wf/WORKFLOWS.md → agent-session 核心規矩 → game-dev/README.md → art-assets.md；並讀 presentation.md、resource-lifecycle.md、validation.md。共享 SESSION-LOG 已有主 agent 的本任務 open；不另爭寫共享檔。
+
+具體情境為卡牌命中／格擋／狀態短效，延伸投射物、全畫面提示與中途取消。初讀能找到 AnimationData、AnimatedCombatEffect、外部圖像 loader 與生命週期共通規則，但不能只靠原流程判斷效果到底由誰建立、掛在哪個座標系、何時相對於傷害觸發，以及取消是否清掉已播放效果。
+
+入口當時把動畫與 VFX 合在短段落，缺效果 brief、命中與實際扣血的視覺語意區別、多目標次數／併發上限、持續特效註銷、投射物和相機能力邊界、預覽與拒絕專項斷言。既有驗證分流沒有 VFX suite，不能把一般 Smoke 或資源清理通過視為 VFX 覆蓋。
+
+最短實碼核查起點：ActionCreateEffectAnimation → BaseCombatant.create_effect_animation → AnimatedCombatEffect／scene，反追 ActionAttackGenerator 的 stack 順序，再查 AnimationData loop 與 ActionHandler.clear_actions。補文件將明列現成接點和待開發機制，將靜態事實、未跑的背景案例與視覺待驗分開。
+
+本機 game HEAD 為 4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d，有既存本地 framework／lifecycle 修改，來源鎖 tools/upstream.json 已讀；不覆寫它們。本任務只文件，禁止 Godot、桌面／視窗／UI／截圖／焦點／GUI／聲音與既有程序操作，不 commit／push。

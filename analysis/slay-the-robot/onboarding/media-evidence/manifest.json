@@ -1,0 +1,90 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-19",
+ "link_columns": [
+  "copy_path"
+ ],
+ "columns": [
+  "id",
+  "kind",
+  "original_location",
+  "original_sha256",
+  "copy_path",
+  "copy_sha256",
+  "bytes",
+  "transform"
+ ],
+ "rows": [
+  {
+   "id": "art-initial",
+   "kind": "initial",
+   "original_location": "artifacts/media-audit/art-initial.md",
+   "original_sha256": "fd7947737d87a6ab20f53c12d0525fd9e3ef0b1bf4461244dfa6c64604e90d64",
+   "copy_path": "art-initial.md.txt",
+   "copy_sha256": "fd7947737d87a6ab20f53c12d0525fd9e3ef0b1bf4461244dfa6c64604e90d64",
+   "bytes": "2714",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "animation-initial",
+   "kind": "initial",
+   "original_location": "artifacts/media-audit/animation-initial.md",
+   "original_sha256": "aae736b38917d8938ad56b261740cc410718766a79e9c7ac33fc55b8e74907b8",
+   "copy_path": "animation-initial.md.txt",
+   "copy_sha256": "aae736b38917d8938ad56b261740cc410718766a79e9c7ac33fc55b8e74907b8",
+   "bytes": "1916",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "vfx-initial",
+   "kind": "initial",
+   "original_location": "artifacts/media-audit/vfx-initial.md",
+   "original_sha256": "f1778e1d899fb9d00f1531a9b6e4f3112ad8f7807738624c86898893752a2e30",
+   "copy_path": "vfx-initial.md.txt",
+   "copy_sha256": "f1778e1d899fb9d00f1531a9b6e4f3112ad8f7807738624c86898893752a2e30",
+   "bytes": "1650",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "audio-initial",
+   "kind": "initial",
+   "original_location": "artifacts/media-audit/audio-initial.md",
+   "original_sha256": "12091589a910c7a3840326f3c51243f04feb48798deec78f5d9f3259967eb6a9",
+   "copy_path": "audio-initial.md.txt",
+   "copy_sha256": "12091589a910c7a3840326f3c51243f04feb48798deec78f5d9f3259967eb6a9",
+   "bytes": "3828",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "ui-initial",
+   "kind": "initial",
+   "original_location": "artifacts/media-audit/ui-initial.md",
+   "original_sha256": "4b80736ecbe6da62e76d053a83d50b4513c9d2eca42068a9a40d40caca573aab",
+   "copy_path": "ui-initial.md.txt",
+   "copy_sha256": "4b80736ecbe6da62e76d053a83d50b4513c9d2eca42068a9a40d40caca573aab",
+   "bytes": "2323",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "fresh-visual",
+   "kind": "independent-review",
+   "original_location": "artifacts/media-audit/fresh-visual.md",
+   "original_sha256": "49607ba3f2ea6747799cfa5de0d1ceb9c4d0eed9584c693d48dea03123a09629",
+   "copy_path": "fresh-visual.md.txt",
+   "copy_sha256": "49607ba3f2ea6747799cfa5de0d1ceb9c4d0eed9584c693d48dea03123a09629",
+   "bytes": "16940",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "fresh-audio-ui",
+   "kind": "independent-review",
+   "original_location": "artifacts/media-audit/fresh-audio-ui.md",
+   "original_sha256": "67f3fe1ccf1acb3a1af6980e827cd2201bf6fb3bf7edea86f1864f008e99c9a1",
+   "copy_path": "fresh-audio-ui.md.txt",
+   "copy_sha256": "67f3fe1ccf1acb3a1af6980e827cd2201bf6fb3bf7edea86f1864f008e99c9a1",
+   "bytes": "25210",
+   "transform": "byte-identical; no masking"
+  }
+ ]
+}

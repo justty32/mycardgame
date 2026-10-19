@@ -1,0 +1,101 @@
+# D–H 獨立首次接手復走（初次結果）
+
+2026-10-19，reviewer：`/root/media_fresh_audio_ui`。D、E、F、G、H 均判 **pass**，意義僅為「能由工作流與實碼列出可執行的開工計畫」。未實作遊戲，未執行 Godot、GUI、音訊、實際輸入、全倉 lint，也未驗功能成功。本報告保留本次首次結果，沒有事後把 blocked 改成 pass。
+
+本次沒有閱讀 artifacts/media-audit 的既有報告、analysis/slay-the-robot/onboarding/media* 或前任結果。只讀根入口、核心規矩、所導航到的領域文件與 source/tests。根 AGENTS 與 agent-session 核心鏈已讀：STRUCTURE、WORKFLOWS、INDEX、PROJECT、TEMPLATE、common README/user/conventions/code-map/data-files、learning、dev-env；開場計數只有 SESSION-LOG 一筆，WAIT_USER 無項目，依規矩只開前者。SESSION-LOG 的共用條目由主 agent 管理，本 agent 未改任何 wf/analysis/game/tests/tools。
+
+來源基準為 `git -C game rev-parse HEAD` 的 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`，以及 tools/upstream.json 列的本地 patches。game status 有原先的 ActionHandler、FileLoader、SerializableData、Root、Map、BaseMenu、async/pick/interceptor 修復，全部保留；以下判斷以實際工作目錄檔案為準。父 agent 後來通知的「對話框、商店等完整場景」是後續新範圍，不屬於本次五情境的通過範圍。
+
+## D：成功出牌／實際命中／拒絕／UI 短音 — pass
+
+**入口鏈。** WORKFLOWS → game-dev/README → audio.md → audio/README → sfx.md → mixing.md；同一出牌跨媒體責任再接 presentation-delivery.md。沿音訊分析查 ActionPlaySound、AttackGenerator、Attack、HandManager、Hand 與 Player/Enemy.damage，再沿 sfx 指向 combat_flow。沒有靠全倉搜尋發現新的關鍵責任。
+
+**實碼與具體接點。** `game/autoload/HandManager.gd:394` 的 `_play_card` 在 418 移到 limbo，425 才發 `Signals.card_play_started`；`game/scripts/actions/card_actions/card_play_actions/ActionCardPlayEnd.gd:9` 發 `card_played`。目的牌堆移動在 HandManager 等 actions_ended 後的 454，故完成提示不能被描述為已入棄牌堆。`game/scripts/ui/Hand.gd:201` 的 disabled、右鍵執行中、can_play_card false、同牌排隊均直接 return，沒有拒絕 signal；`HandManager.gd:304` 再驗能量，378 的失效目標走退款。
+
+`game/scripts/actions/combatant_actions/ActionAttackGenerator.gd` 同時把 `audio_path` 給 ACTION_ATTACK，並追加 ACTION_PLAY_SOUND；`ActionAttack.gd:19` 在 damage 前即呼叫 generate_sound_action。這正是文件所說的雙播來源與「攻擊嘗試不等於實際扣 HP」。Player.damage 的 63–88 與 Enemy.damage 的 64–92 均可核對：block > damage 才 blocked，等額是 block_broken 後零傷害返回；正扣血才 combatant_damaged。資料接點是 `CardData.card_play_actions`、`card_values`／action dictionary 的 `audio_path`、`audio_path_is_absolute`；`Scripts.ACTION_PLAY_SOUND` 指向 audio action。ActionPlaySound 強制 loop=false，使用 `SoundManager.play_ui_sound`，不等待聲音完成。現成資產 `external/audio/sounds/slash.wav` 可供 loader probe，不能視為新音效已製作。
+
+**第一步與產物。** 先落一份 cue brief 與來源／母檔→遊戲檔紀錄，明定成功取 started 或 played、命中以每個實際受傷目標計數、拒絕理由集合與 UI 接受操作的唯一 handler。原生 `card_attack_basic`、`card_block_basic`／`character_red` 可沿既有 fixture 建基準；新 cue 可用任務專屬語意 ID，但不得假稱已有 cue schema。第二步建立在任何播放之前即攔截出口的 seam／替身；再以唯一控制器接成功、damage 與拒絕。若修攻擊音雙播，要先固定「每擊／每目標」契約，再移除其中一個接點，保留傷害與 action 順序。產物是 cue 契約、素材及 hash、控制器／必要修復、由 Combat 明確呼叫的音訊 helper 與 assertion 日誌。
+
+**觸發、停止與清理 owner。** 出牌／傷害真相仍由 HandManager、Action 與 combatant 所有；新增呈現控制器只觀察既定語意，不能從 hover 或 can_play_card 查詢播放成功音。按鈕音只接已接受的單一 handler，不再疊 pressed/button_up/domain signal。控制器管理自己的全域訂閱與 stream；離場需明定尾音是否可保留，需停則呼叫對應 stop_ui_sound。SoundManager autoload 不因 Root 離樹自然停聲；Root 清 Action 並不等於清音訊。自然 finished 由 pool 回收，手動 stop 僅 deferred stop，需另驗 busy 回收，不能依 finished 想像完成。
+
+**既有測試與新增斷言。** `tests/combat_flow.gd` 的 `_play`、`_reject_unaffordable_card`、`_connect_observers`、`_wait`、`_idle` 確實存在；既有 fixture 是 20 傷害／1 費攻擊、10 格擋／1 費、五張牌、65 HP 敵人，改 fixture 必須同步固定期望。先接 `tests/audio_loader_probe.gd`（待新增）至 Smoke `_run` 起手 ID 迴圈之後、array patch 前，回傳五筆 AUDIO 檢查交 `_check`；再接音訊事件 helper 至 Combat 真出牌鏈。新增斷言為正常成功恰一次、預覽／只選目標成功音零次、拒絕成功音零次且拒絕音依 brief 一次、取消不出牌、多段／多目標／全擋／等額破盾／零傷害／死亡／快速連按的計數，以及 RNG、能量、牌堆未被呈現改動。後續命令為 `./tools/test-game.ps1 -Suite Smoke`、`-Suite Combat`，清理變更加 `-Suite ResourceLifecycle`，本次均未執行。
+
+**缺口與未驗。** 無阻礙開工的工作流缺口。拒絕統一事件、cue 仲裁、變體 RNG、冷卻／併發上限與 mock 開關均屬已明列待實作能力；聲音製作工具／新素材未提供，不妨礙接線與替身準備。未驗解碼 runtime、裝置隔離、池行為、實際播放次數、聽感、延遲及匯出。
+
+## E：標題→地圖／戰鬥／非戰鬥→結算與音量 — pass
+
+**入口鏈。** game-dev → audio.md → audio/README → music.md → mixing.md；music 另連 game-flow。由 audio 分析追 TitleScreen、Combat、ActionGenerator、ActionPlayMusic、FileLoader、SettingsMenu、UserSettingsData 和 plugin music/pool。測試接回 testing、validation 與 content/bootstrap 的候選副本契約。
+
+**實碼與欄位。** `game/scripts/ui/menus/TitleScreen.gd` ready/run_ended 播 title，run_started 只隱藏；title path 為空會略過，不 stop。`game/scripts/ui/Combat.gd:82` 的 map_location_selected 最後在 101 呼叫 generate_location_music_action，戰鬥及非戰鬥節點均走此路。`game/autoload/ActionGenerator.gd:315` 檢查 `EventData.event_music_file_path`，332 卻讀 `act_data.event_music_file_path`，是可定位的既有錯誤。ActData 真正欄位為 `act_music_ambient_file_path`、`act_music_combat_file_path`、`act_music_miniboss_file_path`、`act_music_boss_file_path`；REST/SHOP/STARTING/TREASURE fallback 在 FileLoader 常數。一般 EVENT 用 act ambient；開關地圖 overlay、獎勵與顯示結算沒有獨立音樂 owner。
+
+`game/scripts/ui/RunSummaryOverlay.gd` 接 run_victory／player_death_animation_finished 顯示結算，EndRunButton 才 Global.end_run，不能把 run_ended 當結算開始。ActionPlayMusic 空 path／NO_MUSIC 會 stop_music(duration)，非空只 play_music(audio)，漏傳 `audio_crossfade_duration`。FileLoader.load_audio 以完整 path cache，WAV 強制不 loop、OGG/MP3 接 `audio_loops`；同 path 第二次 loop 要求不會重建。plugin music.play 先 stop(2×fade)，重用同 resource_path busy player，不重播；stop(0) 最低 0.01 秒。
+
+音量對應 `UserSettingsData.settings_audio_master_volume`、`settings_audio_music_volume`、`settings_audio_effects_volume`、`settings_audio_mute_on_window_lose_focus`。SettingsMenu slider handler 寫 music×master 與 effects×master 到子 bus；default_bus_layout 只有 Music、Sounds 送 Master，UI/ambient 共享 Sounds。Global ready 呼叫 load_user_settings，但 FileLoader 只反序列化；SettingsMenu.populate_menu 借 slider signal 套量不是統一冷啟動 apply。這些文件描述與程式一致。
+
+**第一步與產物。** 先建立轉移契約：title、新局地圖、節點到訪、戰後 reward、地圖、勝敗 summary、回 title 的曲目、同曲位置、fade、停／續與環境聲規則；對目前沒事件的畫面提出集中 owner，而不是再向 Map/Combat/Title 各加一份切曲。先以替身演練轉移，再修 override 欄位與 fade 傳參，最後加入單一 apply_audio_settings，於載入後與 slider 改值共用。素材與來源未定處維持候選，不將 NO_MUSIC 當已完成配樂。產物是轉移／設定規格、音訊 controller 與上述局部修復、loop 素材紀錄及 runner 明確呼叫的測試。
+
+**owner。** 新中央狀態 owner 接手既有 title/location 呼叫，保存當前 music/ambient stream 與場景狀態；summary 由勝敗事件通知一次，run_ended 清理並返回 title 政策。ambient 無 JSON action，需 owner 直接 play_ambient_sound/stop_ambient_sound 或 stop_all_ambient_sounds。切場、退出 run、取消轉移要停止不再需要的循環；pool 管 fade tween 與回池。設定 apply owner 只做一次 master 合成，避免又調 Master 再乘一次；持久手動 mute 若新增，需與失焦臨時 mute 分開。
+
+**驗證計畫。** 既有 Combat 可提供 title→新局→地圖→戰鬥→獎勵→地圖與敗北 summary 路徑，但沒有完整多節點／通關音樂測試。擴充 fixture 記每次 path、loop、fade、owner 與 stop；新增 event override、空值 fallback、NO_MUSIC、開關 map 不重播、拒絕旅行不切曲、同曲重入、兩次 run、勝敗 summary、A→B→A。實際 loader/pool 另測兩種 loop 載入順序、fade 結束 busy 回池與 tween 殘留，替身不能證明它們。設定新增 0／中間值／1、存檔後全新程序不開設定頁，驗資料與實際 bus 線性量；SaveLoad 只測 run，不涵蓋此項。先取得 Dummy driver/替身在任何播放前生效的證據再執行，現 runner 僅 headless、無顯式 audio-driver，不能直接把舊命令稱為無聲測試。仍接 Smoke／Combat 與明確新增 settings 程序階段；沒有 Audio suite。
+
+**缺口與未驗。** 無開工阻礙。統一音樂 owner、結算曲、環境 action、intro→loop、節拍同步、設定冷啟動 apply 是已揭露的待實作能力／既有修復項。未驗無縫循環、實際 fade/播放位置、pool、bus、音量恢復、失焦 OS 事件、長聽與成品 external 複製。
+
+## F：戰鬥 HUD、卡牌可用／目標／tooltip — pass
+
+**入口鏈。** game-dev → ui.md → ui/README → interaction-states.md A／Tooltip → verification.md；尺寸問題再到 components-layout。由 project.godot 的 main_scene 走 Root.tscn，再讀 Combat、Hand、Card、Tooltips、KeywordContainer、KeywordTooltip。這條鏈直接給出 `Tooptips` 真實拼字，沒有需要猜測場景名。
+
+**實碼。** Combat.update_combat_display 寫 EnergyCount 為 player_energy/player_energy_max、三堆 Count 為 HandManager 陣列長度，HealthLabel/MoneyLabel 另讀 player_data。ready 的 card_*、energy_changed、card_queue_refunded 與 money/health signals 有實際 connect。Card.gui_input 在 left_click/right_click 釋放才發訊號；can_play_card 對非手牌直接 true，在手牌依攔截後費用、playable 與 validator 判斷。Hand._on_card_selected 的拒絕條件後，`card_requires_target` 存 current_selected_card 並開 SelectTargetLabel；enemy_clicked 建 request。背景 button_up 清目標不送牌；右鍵另可能執行 `card_right_click_actions`。
+
+Card.init 的 combat/ui 訂閱參數是 `(data, angular_offset, connect_combat_signals=false, connect_ui_signals=true)`；Card.update_card_display 有下一 frame 的合併旗標，快速目標刷新可能保留第一參數。`Card.gd:287` hover 啟動 0.5 秒 KeywordTimer；exit 停 timer、hide tooltip；timeout 才 display_card_keywords。Tooltips 的 HUD component_tooltip_data 綁 mouse enter/exit，並無 focus 提示。KeywordContainer 直接取 `card_keyword_object_ids` 後 append retain/exhaust 等 ID，證實不能把現狀稱純讀。tooltip 用 window_get_size 與 200 右邊餘量，沒有完整 viewport／底部 clamp。
+
+**第一步與產物。** 以既有有效 Combat fixture 落狀態規格：回合可操作／等待／不可出、選牌未送出／選敵／取消、hover timeout／離開／modal 遮蔽。先記 HUD 各節點與 owner 欄位，建 `tests/ui_combat_probe.gd`（提案名，尚不存在）於 `_wait(_player_ready, ...)` 成功後載入；只讀／暫時選取消 probe 必須還原，避免破壞後面 20 傷害固定斷言。要改預覽只讀時先記舊 keyword mutation，再做修復與新不變斷言。產物為狀態規格、必要 scene/script 調整、probe 及具體結果。
+
+**owner／清理。** Combat 擁有 HUD 訂閱與資料刷新；Hand 擁有手牌選取、可用性與目標提示；Card 管 hover timer 與局部訂閱，Tooltips 管 tooltip 子節點。新 modal 開啟／owner 移除要顯式停 timer、清 tooltip、清選取，不能等不存在的 mouse_exited。預覽不應變更能量、牌堆、具名 RNG 或 action queue；Root._exit_tree 只保證既有 action/interceptor 清理，新 UI 訂閱／timer／await 後有效性仍須各 owner 管理。
+
+**新增斷言。** 比對 HUD 值與 owner，沿正常 action 改值後再比對；驗 EndTurn disabled／queued 狀態。requires_target 卡選取後顯示提示但不扣能量；background cancel 後 current_selected_card=null、HP/能量/牌堆不變；選敵恰一次 request/費用/效果。負例包括 hand_disabled、費用不足、同卡已排隊、選後目標失效與右鍵有自訂 action。Keyword fixture 可用 `keyword_retain`，驗文字／數量、hide 後延後刪除完成、重開／同 frame 換敵、等待中移除 owner。比較 keyword IDs、energy、pile、具名 RNG、queue 前後；修正 mutation 才要求 IDs 完全不變。命令接 Smoke（共享場景）、Combat（狀態）與 ResourceLifecycle（若改清理），均未跑。
+
+**缺口與未驗。** 無開工阻礙。尚無完整拒絕原因呈現、焦點 tooltip、拖放 API、可用狀態無障礙方案與專項 assertions；文件已區分它們。背景 handler 計畫不證明 hover 命中、實際排版、對比、焦點或控制器可玩。
+
+## G：新 modal／獎勵選牌／確認取消及鍵盤手把 — pass
+
+**入口鏈。** ui.md → ui/README → interaction-states.md B／新 modal／清理 → verification.md B；使用 components-layout 檢查 Root 內嵌 Control。來源鏈到 CardSelectionOverlay、CardDraftSelectionOverlay、RewardOverlay、BaseRewardButton、ActionBasePickCards，再沿實際 script 繼承檢查 CardRewardButton 與 ActionPickCards。後兩者是正常的呼叫／繼承追讀，不需全倉搜尋。
+
+**實碼與資料。** `game/scenes/Root.tscn:2580` 與 2652 的兩 overlay 是內嵌節點，固定 1200×700、z_index=10、PAUSABLE，不是獨立通用 modal API。ActionBasePickCards 用 `card_pick_type`、`min_card_amount`、`max_card_amount`、`min_cards_are_required_for_action`、`quick_pick`、`can_back_out`、`validator_data` 決定候選與完成；候選少於或等於 min 可能直接完成，人工測試需多於 min。HAND_PILE、DECK_PICK_TYPES、PICK_DRAFT 各有 consumer，但共用 card_pick_confirmed，無 session ID。
+
+CardSelectionOverlay VIEW Back 只隱藏；SELECT Back 清 picked_cards 並 emit confirmed；Confirm 依 are_enough_cards_picked 顯示，quick pick 自動送出。Draft 點牌立即 append 並 confirmed，Skip 空選取 confirmed，沒有「先選再確認」。RewardOverlay 的 `reward_card_drafts` 建 ACTION_PICK_CARDS，子 `action_data` 為 ACTION_ADD_CARDS_TO_DECK；reward_group 選中刪的是其他 group。
+
+讀碼補足兩個實作注意：`CardRewardButton.gd` override 不使用 BaseRewardButton 的立即 queue_free，會 await action_async_finished，只有 picked_cards 非空才移除按鈕，所以 Skip 後原 reward 仍可再開；`ActionPickCards.gd` 即使零選取，只要 min 不要求，仍可產生子 actions。若契約是 Back 完全不執行效果，fixture 與資料必須設定 `min_card_amount=1`、`min_cards_are_required_for_action=true`，不能只設 can_back_out。這是已有導航可以定位的細化，非阻礙開工的矛盾；不可把「取消無效果」當所有既有配置的普遍事實。
+
+**第一步與產物。** 先定 opener、結果 owner、可否 Back/Skip、一次提交、重入與底層輸入遮罩；若產品規則未定，保留可回退的候選及核心問題，不擅自改取消是否付費。使用三張合法 `card_attack_basic`／`card_block_basic` 實例供 DECK 選取，min=max=1、quick_pick=false、can_back_out=true、min required=true，保證走人工 modal；draft 另有正常 reward action fixture。新先選後確認功能須一起改 draft 狀態與 Confirm handler，移除原點牌立即完成，不只加按鈕。產物包含 modal 狀態規格、Root/overlay 腳本修改、新輸入 action map、結果／取消一次性保護與 helper。
+
+**鍵盤手把與 owner。** project.godot 只有自訂 left_click/right_click；Card.gui_input 只接它們。需新增方向／確認／取消 action 定義、可見 focus style、初始／鄰接／返回焦點、隱藏禁用跳過與空候選的 Back/Skip。新 modal owner 先消耗最上層取消，避免同次輸入落到選目標／底層；沒有通用 modal stack 可直接啟用。結果 action owner 管 picked_cards 和一次完成，UI owner 管 visibility/引用/timer/訂閱/輸入恢復。強制退出走 clear_all_actions → force_action_end，後者設 async_cancelled、清 picked_cards、emit 等待並 finish；只 hide 不足。Root 已清 actions/interceptors，但不替新增 modal 的任意長期 listener 保證回收。
+
+**測試。** Combat._claim_rewards 已經透過真正 reward button→draft→card_selected 驗 deck+1/ID，未驗 Skip、Back、雙重送出、鍵盤手把。新增獨立 modal fixture 驗零候選、自動分支、合法／不合法、select/unselect、min/max、Confirm/Back/Skip；Skip 後 deck 不變且卡牌 reward 按鈕保留，再透過原 reward 按鈕重開領取，補一次性與待刪 card 的 frame 等待。對 Back 契約斷言子 action 執行次數零；對強制退出斷言 async_finished/cancelled、參照清空、queue idle、重進只完成一次。鍵盤部分背景僅查 InputMap／focus neighbor property 與 handler 消耗契約，當前不能 grab_focus 或模擬真實桌面操作。helper 明確接 Combat；清理再接 ResourceLifecycle，不存在 UI suite。
+
+**缺口與未驗。** 無阻礙列計畫的缺口。通用 modal stack、session ID、鍵盤／控制器完整導覽、draft 二次確認、重入保護都是待實作，不能算現成能力。未驗真實焦點、控制器型號、按鍵重複、穿透命中、動畫與輸入延遲；新對話框與商店整場景另案。
+
+## H：共用 theme／components／layout、長文字與多尺寸 — pass
+
+**入口鏈。** ui.md → ui/README → components-layout.md → menus-localization.md（文字／尺寸）→ verification.md C。從 Root、Card.tscn、KeywordTooltip、CustomUIData、BaseCombatant／BaseCustomUI，再沿 Card scene ext_resource 找 RichLabelAutoSizer。按文件指示只在 game/scenes 搜 theme 消費者；這是影響面搜尋，非缺導航後全倉救援。
+
+**實碼與欄位。** `game/scenes/ui/card/Card.tscn:61` 根 144×184，圖框 96×96，名稱 128×16，描述 128×72，CardButton 同 144×184，Pivot(72,90)。Hand 的 CARD_WIDTH=144、separation=.75×width、CARD_PICK_Y_OFFSET=-300 與 layout 相依；只改圖不改 hitbox／hand 不足。`game/themes/title_screen_theme.tres` 真是 Theme，Button 字級24／Label48，無字型；`panel_theme.tres` 是 StyleBoxFlat。keyword_tooltip_theme 同時供 Root Tooptips、KeywordTooltip、DialogueOption；panel theme 另供 `game/scenes/ui/profile/CharacterStat.tscn`、`game/scenes/ui/codex/CodexEnemyIntent.tscn`。Card 自己有 font override，KeywordTooltip.gd 的 BBCode FONT_SIZE=14、image=24 覆蓋 theme 12。
+
+RichLabelAutoSizer 的 `_min_size=1`，Card 未覆寫；只用自動縮字不是可讀性保障。Root 兩 picker 分別五欄 Grid（separation20）與居中 HBox；project.godot viewport=1200×700、resizable=false，overlay 固定大小。CustomUIData 的 `custom_ui_asset_path` 指 PackedScene，BaseCombatant.register_custom_ui 先 add_child 再 init 到 combatant owner，BaseCustomUI 在 combat_ended unregister；這條不等於 RunScreen modal 生命週期。
+
+**第一步與產物。** 先建立本次元件規格與消費者清單，決定哪些共用 Theme、哪些局部 override、normal/hover/pressed/disabled/focus 各態，並列最低字級、長文換行／增高／捲動政策。可將 1200×700 定基準，960×560 與 1280×720 當待評估候選，不當成已支援承諾。先沿容器／anchor／minimum size 改 Root 與對應子層，再按共同 Card 尺寸更新 Hand 幾何；tooltip 改為可測的 viewport 幾何輸入或明列 window/viewport 差異。輸入文字使用長繁中名、升級後名、負數／多段值、X 費用、BBCode icon、空描述、多 keyword，保留規則數值。若用新字型要保存檔案來源、授權、版本與字重；本次沒有字型資產可宣稱已涵蓋。產物是元件與 viewport 規格、theme/scene/script、字元集合及 ui_layout_probe。
+
+**owner／清理。** Theme owner 維護所有引用者；共享 StyleBox 的修改會影響全部 consumer，局部差異建獨立資源。Card owner 管 init 訂閱、hover／deferred refresh 與清理；動態 CustomUI 掛 combatant，由 owner.unregister 釋放並移字典；需測 owner 死亡／戰鬥結束／手動移除／重進。版面 helper 自己建的 Root 最後 queue_free 並等 frame；不能把新增 focus/tooltip/tween 的資源責任交給 theme。
+
+**測試接點。** `tests/framework_smoke.gd:42` add_child，之後兩個 process_frame；在這裡至 example_mod probe 之前 runtime load `tests/ui_layout_probe.gd`（待建），呼叫 async check_scene，逐 bool 交 `_check`，保留 timeout 與 SMOKE PASS。各 viewport 等布局／字級穩定後驗必要 rect 在範圍內、間距、minimum size、可見性、實際 font 與最低字級；手牌、deck/draft、商店／圖鑑的 Card consumer 至少抽代表實例檢查共享尺寸。字型工具若可用再驗 cmap，不把 cmap 當可讀性。主選單／結算文字改動另保留 Combat 敗北測試的統計語意，`contains("Damage Taken")` 必須適配翻譯而不刪保護；勝利結算與多尺寸需新 fixture。命令為 Smoke／Combat，清理有變再 ResourceLifecycle；沒有現成 UI、font 或 viewport suite。
+
+**缺口與未驗。** 無開工阻礙。未接多語、繁中字型、全套無障礙、響應式重排、視覺比較與任意畫面自動測試均已在工作流揭露。尚未證明字形、換行可讀、遮擋、DPI、對比、命中或不同尺寸實機結果。
+
+## 本次靜態驗證與限制
+
+本次執行檔案閱讀、指定目錄 rg、Git 唯讀 status/rev-parse、Python WAV 檔頭量測與定域連結存在性檢查，沒有啟動引擎或程序控制。音訊/UI 入口及其子文件、presentation-delivery 共12檔，131個本機 Markdown 路徑目標均存在；這只驗目標檔存在，不含所有錨點或全倉 lint。WAV 量測為 slash.wav 7412 bytes、mono、16-bit PCM、44100Hz、3584 frames、0.0812698413秒；沒播放。
+
+有兩次我自行猜測兄弟路徑讀檔失敗：ambient_sound_effects.gd 與 scenes/ui/character/CharacterStat.tscn。後續在已定位的 addons/sound_manager 與 scenes 範圍查到正確 ambient_sounds.gd／scenes/ui/profile/CharacterStat.tscn。這兩個錯誤不是工作流連結提供的路徑，不列為導航缺口；已讀正確來源。其他搜尋為已定位檔案的函式／欄位、theme 消費者與 runner suite 定義，不曾靠全倉搜尋補出關鍵責任。
+
+核對快照 SHA-256：tools/test-game.ps1=`76e6b76091e4964cf590014cb82179b64114f2644f2146484e698fd2604b0486`；game/scenes/Root.tscn=`32fce7ead2fa03b6b5eec2c288246dbc5f975768403bdd68f0242315c2084182`；game/autoload/ActionGenerator.gd=`d65d8c7d4e485854174a5fa395f8f088d647c158ff26d18ac45f9d13dfd75c34`；game/scripts/ui/rewards/CardRewardButton.gd=`dfc405f9d8d223ed733ed4f11cd5a6272dd586087971e988fa1d2144631458be`。
+
+runner 的 ValidateSet 與 mapping 已核對為 All/Dictionary/Combat/SaveLoad/Smoke/ResourceLifecycle。tests 頂層 gd 會複製但不自動呼叫；SourceGame 不更換 tests；headless 沒有顯式 audio-driver。未把任何待建 probe 或 AUDIO/UI PASS 標籤寫成已存在功能。正式開發後的成功門檻仍是本次新增斷言確實到達、suite marker、results.json 與完整日誌符合 testing；本報告僅證明可開工導航與計畫。

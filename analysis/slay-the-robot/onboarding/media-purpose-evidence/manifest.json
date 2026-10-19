@@ -1,0 +1,104 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-19",
+ "link_columns": [
+  "copy_path"
+ ],
+ "columns": [
+  "id",
+  "kind",
+  "original_location",
+  "original_sha256",
+  "copy_path",
+  "copy_sha256",
+  "bytes",
+  "transform",
+  "previous_capture_sha256"
+ ],
+ "rows": [
+  {
+   "id": "art-purpose-initial",
+   "kind": "author-gap-inventory",
+   "original_location": "artifacts/media-audit/art-purpose-initial.md",
+   "original_sha256": "e9ad406edde7fa5f7ec46d544a60c55dacc121dcb93fa6682eb8bec6152c04b2",
+   "copy_path": "art-purpose-initial.md.txt",
+   "copy_sha256": "e9ad406edde7fa5f7ec46d544a60c55dacc121dcb93fa6682eb8bec6152c04b2",
+   "bytes": "1214",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "ui-scenes-initial",
+   "kind": "author-gap-inventory",
+   "original_location": "artifacts/media-audit/ui-scenes-initial.md",
+   "original_sha256": "8a361c72cb06e2b253850115397f1ea6ba25441e61cb83da51c994e2830a015f",
+   "copy_path": "ui-scenes-initial.md.txt",
+   "copy_sha256": "8a361c72cb06e2b253850115397f1ea6ba25441e61cb83da51c994e2830a015f",
+   "bytes": "1301",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "audio-scenes-initial",
+   "kind": "author-gap-inventory",
+   "original_location": "artifacts/media-audit/audio-scenes-initial.md",
+   "original_sha256": "c260df0de295c796ec450144f169e9026a4e0e9cff5d508211193680a45879ed",
+   "copy_path": "audio-scenes-initial.md.txt",
+   "copy_sha256": "c260df0de295c796ec450144f169e9026a4e0e9cff5d508211193680a45879ed",
+   "bytes": "2320",
+   "transform": "byte-identical; no masking"
+  },
+  {
+   "id": "animation-scenes-initial",
+   "kind": "author-gap-inventory",
+   "original_location": "artifacts/media-audit/animation-scenes-initial.md",
+   "original_sha256": "b5e735e49291206b846c1395f264c1a9bd6b44fdd0972f7a2dd2e0c38ff62217",
+   "copy_path": "animation-scenes-initial.md.txt",
+   "copy_sha256": "b5e735e49291206b846c1395f264c1a9bd6b44fdd0972f7a2dd2e0c38ff62217",
+   "bytes": "2138",
+   "transform": "byte-identical final author report; adds explicit non-blind classification only; prior copy preserved separately; no masking",
+   "previous_capture_sha256": "4eb1d7f6628c00831119afb415a50f050e645af198d284a40871e931e7df196c"
+  },
+  {
+   "id": "fresh-purpose-screens-first",
+   "kind": "independent-first-review",
+   "original_location": "artifacts/media-audit/fresh-purpose-screens.md",
+   "original_sha256": "2041e5e2eb37644880735bb812bde8c961cc7a3b84476c681a920dadd04d00a8",
+   "copy_path": "fresh-purpose-screens.md.txt",
+   "copy_sha256": "2041e5e2eb37644880735bb812bde8c961cc7a3b84476c681a920dadd04d00a8",
+   "bytes": "29763",
+   "transform": "byte-identical; frozen first report; no masking"
+  },
+  {
+   "id": "animation-scenes-initial-prior",
+   "kind": "author-gap-inventory-prior-capture",
+   "original_location": "artifacts/media-audit/animation-scenes-initial.md",
+   "original_sha256": "4eb1d7f6628c00831119afb415a50f050e645af198d284a40871e931e7df196c",
+   "copy_path": "animation-scenes-initial.prior.md.txt",
+   "copy_sha256": "4eb1d7f6628c00831119afb415a50f050e645af198d284a40871e931e7df196c",
+   "bytes": "2059",
+   "transform": "earlier capture lacks explicit non-blind classification sentence; recovered exact prior bytes from one-sentence diff and verified against original captured SHA-256; not a review result"
+  },
+  {
+   "id": "fresh-purpose-combat-dialogue-first",
+   "kind": "independent-first-review",
+   "original_location": "artifacts/media-audit/fresh-purpose-combat-dialogue.md",
+   "original_sha256": "667972abc897d7dad78f02e287c631d42e61765b739c8de3dfddfbdf69039661",
+   "copy_path": "fresh-purpose-combat-dialogue.md.txt",
+   "copy_sha256": "667972abc897d7dad78f02e287c631d42e61765b739c8de3dfddfbdf69039661",
+   "bytes": "30445",
+   "transform": "byte-identical; frozen first report; no masking",
+   "previous_capture_sha256": ""
+  },
+  {
+   "id": "fresh-purpose-screens-followup",
+   "kind": "independent-followup-review",
+   "original_location": "artifacts/media-audit/fresh-purpose-screens-followup.md",
+   "original_sha256": "2a6d54114f465925e249ec5ba03b320c420a51e832a8a21fc353570705e043cd",
+   "copy_path": "fresh-purpose-screens-followup.md.txt",
+   "copy_sha256": "2a6d54114f465925e249ec5ba03b320c420a51e832a8a21fc353570705e043cd",
+   "bytes": "15499",
+   "transform": "byte-identical; frozen followup; FIRST HOLD report unchanged; no masking",
+   "previous_capture_sha256": ""
+  }
+ ]
+}

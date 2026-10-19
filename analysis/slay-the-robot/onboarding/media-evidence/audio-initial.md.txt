@@ -1,0 +1,29 @@
+# 音訊冷接手初測（修改前）
+
+2026-10-19；由 wf/WORKFLOWS.md → agent-session 核心規矩 → game-dev → audio.md → design/audio.md → 實碼。來源鎖為 4dac5abe 加既有本地修復。只讀檔／查碼，沒有引擎、播放、GUI、焦點或程序控制。共享 SESSION-LOG 已由主 agent 登記。
+
+## 任務一：成功出牌、命中、拒絕、介面音效
+
+能找到 FileLoader、ActionPlaySound、SoundManager，也有素材 brief、來源與格式要求；第一步可盤點 slash.wav 和 action 引用。但原入口沒有把四個語意拆成可直接選擇的接點，下一位仍需重新探索 Hand／HandManager／Combatant。
+
+核實 HandManager._play_card 在移入 limbo 後發 card_play_started，ActionCardPlayEnd 發 card_played；Hand._on_card_selected 多個 return 是 UI 拒絕，HandManager 另有不足能量與死亡目標退款。ActionAttack 在 target.damage 之前播 audio_path，因此包括被完全格擋的攻擊，不能當扣 HP 音效。實際損傷／格擋事件在 Signals，應追 Player／Enemy 的 damage 實作。沒有通用拒絕音效接線或所有 Button 自動音效。
+
+最先要改的不是資產，而是交付 brief 明定成功是開始或完成、命中是攻擊嘗試或實際扣血，以及拒絕是否每次手動輸入一次。最小實作位置可為既有 ACTION_PLAY_SOUND 卡片接線，或新集中事件 listener；兩者要選唯一 owner。原工作流未提供 listener 斷線、變體隨機不污染戰鬥 RNG、每事件播放計數的細節。
+
+## 任務二：標題 → 地圖 → 戰鬥 → 結算與音量
+
+能找到 ActData／EventData 與 crossfade、設定冷啟動已知缺口；但靜態追全呼叫後發現 generate_location_music_action 目前由 Combat._on_map_location_selected 呼叫，實際到訪的戰鬥／非戰鬥節點都涵蓋；單純開地圖、獎勵及結算不是獨立切曲點。TitleScreen 的空字串略過播放，不會停止前曲；標題設定 NO_MUSIC 才能經 action 停曲。因此先畫轉移契約再補中央 owner，不可只填 act 欄位。
+
+SoundManager 的四池預建數不是併發限制；sound.stop 只有 deferred stop，未立即回池；ambient/music 透過 fade 完成回池。外部 loader 快取鍵只有 path，同檔 loop 設定與 fallback 共用物件可誤導識別。設定 slider 改 Music／Sounds 乘積，冷啟動 load_user_settings 只讀值，沒有全域套用。
+
+## 驗證能否開始
+
+可立即執行 rg、Python wave 檔頭讀取、來源 hash 與局部文件檢查。原文僅將 helper 接入泛用 bootstrap，沒有最小音訊 loader probe；新子流程會提供可複用 helper 與實際 Smoke 呼叫位置。Combat fixture 可延伸，但不能僅沿用舊計數宣稱音效覆蓋。runner 沒有 Audio suite，且未顯式指定 audio driver；本次不執行 Godot。未來先證明替身攔截播放或 Dummy driver，再取得播放計數、bus／pool 證據；這些仍不等於聽感。
+
+## 修正落點
+
+保留 audio.md 為原入口，下接 audio/README.md；sfx.md 處理一次性音效與語意／變體／驗證，music.md 處理循環素材、狀態切換及停止，mixing.md 處理 bus／設定／池與無聲測試橋接。design/audio.md 更新實際呼叫鏈及已知限制。此報告是冷演練結果，沒有音訊功能修復或 runtime 通過宣稱。
+
+## 初讀定位修正（凍結前補註）
+
+最初只用搜尋結果行號判讀，曾將 Combat 的呼叫誤認為 _start_combat，並推論非戰鬥沒有接線。讀取完整函式後更正為 _on_map_location_selected，所有到訪節點已覆蓋；本文任務二採更正結論。此落差顯示搜尋命中不足以推論函式責任，必須讀完整函式及呼叫者。2026-10-19 此檔凍結，不再改初測記錄；後續修正寫交接報告。

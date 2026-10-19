@@ -1,0 +1,19 @@
+# 動畫冷讀初始紀錄
+
+2026-10-19；子 agent animation_workflow；上游鎖與 game HEAD 均為 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`，已有本地修復，未覆寫。主線 SESSION-LOG 已涵蓋本任務。
+
+## 起始任務與路由
+
+假想需求：為角色／敵人製作 idle、attack、hit、death 逐格動畫並接入戰鬥。從 WORKFLOWS → agent-session 通讀核心規矩，接 game-dev → art-assets → presentation 分析，再查 code-map 指向的 AnimationData、FileLoader 與 Combatant。現有入口能找到 frame 陣列與人物 ID，但無法僅據流程完成四狀態接線。
+
+## 修補前缺口
+
+沒有可直接套用的 animations/ JSON 範例與 mod 註冊順序；沒有逐格尺寸、腳底對齊、相對 duration 與 FPS 的明確契約。hit 不在標準常數，也未由 damage() 自動播放，不能寫成新增名稱即可完成。
+
+ActionPlayAnimation 是 instant BaseAction；ActionAttackGenerator 播攻擊並排入傷害，ActionHandler 的 time_delay 在 action 執行後。原流程未說明攻擊畫面不決定命中時點、連續 play 同名不保證重頭、迴圈不會發 animation_finished。
+
+死亡逐格動畫與 AnimationPlayer 是不同控制路徑；Player／Enemy 的死亡回呼由 animation player 呼叫，未證實依逐格末幀才結算。改死亡長度、加入 hit、取消／離樹都需要針對性驗收。現有流程未區分 sheet／骨骼需轉檔或改框架、AnimationPlayer 已有場景用途而非 AnimationData 格式。
+
+## 核實與修補範圍
+
+先實碼核實，再新增 wf/workflows/game-dev/art-assets/animation.md 與 analysis/slay-the-robot/design/animation.md；父入口及 VFX 由其他 owner 整合。只文件與靜態背景檢查，不啟動 Godot、不製作素材、不操作 GUI／桌面／截圖／聲音／既有程序、不 commit／push。局部驗證不代替主線全倉 lint 或遊戲實測。

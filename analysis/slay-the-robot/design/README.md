@@ -14,7 +14,10 @@
 | 對話選項、商店、休息與寶箱 | [非戰鬥節點](noncombat.md) | [關卡子流程](../../../wf/workflows/game-dev/level-design.md) |
 | 新局、跨幕、勝敗、續玩與局外進度 | [整局流程](game-flow.md) | [整局開發](../../../wf/workflows/game-dev/game-flow.md) |
 | 第一個 mod、候選副本與專項測試接線 | [Mod 起步](mod-bootstrap.md) | [內容開發](../../../wf/workflows/game-dev/content.md) |
-| 圖像、動畫、版面與輸入 | [呈現](presentation.md) | [素材](../../../wf/workflows/game-dev/art-assets.md)、[UI](../../../wf/workflows/game-dev/ui.md) |
+| 美術方向、批次資產、母稿與輸出 | [美術製作](art-production.md) | [美術子流程](../../../wf/workflows/game-dev/art-assets/README.md) |
+| 角色動畫、狀態與播放／等待 | [動畫](animation.md) | [動畫製作與接線](../../../wf/workflows/game-dev/art-assets/animation.md) |
+| 戰鬥視覺效果、掛點與回收 | [特效](vfx.md) | [VFX](../../../wf/workflows/game-dev/art-assets/vfx.md) |
+| UI 元件、版面、狀態與輸入 | [呈現](presentation.md) | [UI 子流程](../../../wf/workflows/game-dev/ui/README.md) |
 | 聲音載入、播放、bus 與設定 | [音訊](audio.md) | [聲音](../../../wf/workflows/game-dev/audio.md) |
 
 ## 如何採用

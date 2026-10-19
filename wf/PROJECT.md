@@ -38,6 +38,8 @@ Slay-The-Robot 已固定版本；spire-codex 仍是未匯入的研究參考。
 
 後續以不同任務做 [首次接手演練](../analysis/slay-the-robot/onboarding/README.md)，依實際阻礙補第一個 mod、分層關卡、整局與持久化流程。文件復走、候選範例實跑及正式遊戲驗收各自留證據，不能互相代替；具體子流程由遊戲開發入口派發。
 
+呈現流程另按實際用途拆分：卡框與卡圖、角色／敵人、UI 素材，以及完整對話、商店、戰鬥等場景。由 [完整場景製作](workflows/game-dev/scene-pack.md) 統籌同一畫面的圖像、UI、聲音與動畫；共用技術流程保留為下層工具，不能用基本元件清單代替整套場景交付。
+
 來源為本機 `C:/code/mine/workflows`，讀取時 HEAD 為 `794d6d23322a93e0f65e3748375351904fa67066`，模板標記 v0.6。使用其 tools/wf-init.sh，以 `--flavor dev --non-invasive wf` 產生骨架；沒有修改來源 repo。授權副本見 [LICENSE.workflows](LICENSE.workflows)。
 
 環境、驗證、code map 與偏好已更新為目前事實；尚未建立發行版 export 驗證。後續升級依來源 IMPORT.md 的 kernel-owned / project-owned 分類處理，保留已填的專案內容。

@@ -1,0 +1,9 @@
+# UI 整套場景任務：擴充前缺口
+
+2026-10-19，新使用者要求：以完整用途（對話框、商店等）分流，而非 slider/text 等元素清單。舊 ui-initial 保持不變；本檔記新任務基準。
+
+目前 UI 文件已能串起元件、狀態與專項 fixture，卻缺少「完成一整套畫面」的入口。對話需要頭像／姓名／正文／選項與分支、跳過／逐字是否現成的判讀；商店需要貨品、價格、金錢、不可購買、售罄、服務及退出；戰鬥、地圖、獎勵、選單／圖鑑也需各有玩家目的與完整進出狀態，而不是自行從共用元件拼答案。
+
+現有圖像／聲音／動畫流程尚未在每個畫面的準備包、成功／拒絕／確認／取消／離場 cue 與 owner 清理形成直接交接。下一步逐讀 DialogueOverlay/DialogueOption、ShopOverlay、RestOverlay、Map、Reward與選牌、Root與選單腳本，分出已接線、可複用與待新增契約。
+
+UI owner 負責 dialogue、combat、rewards-selection、menus-collection、screens/README 及既有 UI 導航與 presentation；子 agent 獨佔 shop-rest、map。只改文件，靜態背景檢查；不啟動 Godot、GUI、桌面、截圖、焦點、音訊或操作既有程序，不改 game/tests/tools，不 commit/push。

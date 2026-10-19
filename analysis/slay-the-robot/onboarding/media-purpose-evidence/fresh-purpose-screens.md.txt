@@ -1,0 +1,153 @@
+# 完整用途冷讀 D／E／F：首次判定
+
+2026-10-19；執行者 purpose_fresh_screens。這是第一次由 AGENTS → WORKFLOWS → game-dev → scene-pack 循導航接手，未讀 onboarding/media* 或 artifacts/media-audit 的既有報告。完整讀取 agent-session 指定核心規矩後，依實碼核實八個必要子畫面。來源為 game checkout `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加現存本地修改；沒有改動受查工作流、分析、遊戲、測試或工具。
+
+首次判定：D purpose-shop-rest **HOLD**（商店可開工；休息的專屬動畫／中斷鏈不足）；E purpose-rewards-selection **HOLD**（獎勵列與 draft 可開工；牌庫 SELECT 的專屬 cue／動畫鏈不足）；F purpose-run-journey **PASS，僅限可開工**（選角、地圖、勝敗結算均能定位七項契約及第一步）。HOLD 不表示遊戲不能運作，而是受查流程尚不足以交完整呈現包；PASS 不代表 runtime、視聽、輸入、內容平衡或匯出已通過。
+
+本次只讀檔、靜態搜尋與產生本報告，未執行 Godot、GUI、桌面、視窗、截圖、焦點、音訊播放、既有程序控制、全倉 lint、commit 或 push。下文所稱 fixture／控制器皆為後續建議，未建立、未執行。
+
+## 導航與共同驗收基線
+
+從 [scene-pack](../../wf/workflows/game-dev/scene-pack.md) 可直接找到 [shop-rest](../../wf/workflows/game-dev/ui/screens/shop-rest.md)、[rewards-selection](../../wf/workflows/game-dev/ui/screens/rewards-selection.md)、[map](../../wf/workflows/game-dev/ui/screens/map.md)、[menus-collection](../../wf/workflows/game-dev/ui/screens/menus-collection.md)，再到 [interface-assets](../../wf/workflows/game-dev/art-assets/interface-assets.md)、[screen-cues](../../wf/workflows/game-dev/audio/screen-cues.md)、[shop-cues](../../wf/workflows/game-dev/audio/shop-cues.md) 和 [motion 入口](../../wf/workflows/game-dev/art-assets/motion/README.md)。[UI verification](../../wf/workflows/game-dev/ui/verification.md) 說明 helper 不會自動執行，以及實際 caller 和禁止焦點／播放的前提。
+
+實查 [runner](../../tools/test-game.ps1) 只接受 All／Dictionary／Combat／SaveLoad／Smoke／ResourceLifecycle；Combat 再拆 victory／defeat。沒有 Shop、UI、Screen 或 Audio suite。後續專項若新增 suite，必須同改 ValidateSet、選擇分支、script mapping、PASS marker／manifest；不能只存 helper 就宣稱覆蓋。
+
+共用靜態節點 probe 的可執行接點，是 [framework_smoke](../../tests/framework_smoke.gd) `_run()` 在 Root add_child 且兩個 process_frame 後 runtime load helper，再逐筆交 `_check()`。互動 fixture 可沿 [combat_flow](../../tests/combat_flow.gd) `_scenario()` 的真實選角、起點選項和 MapLocation 按鈕路徑另建情境；有界 `_wait()` 之後核對資料，queue_free 另等 frame。[combat_fixture](../../tests/combat_fixture.gd) 是固定種子／內容注入樣例，不是八畫面的現成覆蓋。
+
+後續獲准背景引擎時，可用 `./tools/test-game.ps1 -Suite Smoke`、`-Suite Combat`，清理變更加 `-Suite ResourceLifecycle`；這次未執行。現成 Combat 會走 Map，自動 `_restore_scroll()` 可能 `grab_focus()`；必須先做不觸焦點的候選 adapter。NewRunMenu 及 TitleScreen 可能播放，須先依 [mixing](../../wf/workflows/game-dev/audio/mixing.md) 建播放出口替身或核實無聲 driver；headless 本身不是無聲證據。
+
+## D1 商店：可開工
+
+**UI 組成。** [Root](../../game/scenes/Root.tscn) 的 RunScreen/ShopOverlay 是 1200×700、z=10，含 CardContainer、ArtifactContainer、ConsumableContainer、ContinueButton；入口實為 Combat/Shop 的 [Shop](../../game/scripts/ui/Shop.gd) button_up → shop_opened。抵達 SHOP 尚不等於展開貨架。金錢在 Combat 的 MoneyLabel；遮罩內的餘額與拒絕理由須新增，不能把價格紅字當完整不可買狀態。
+
+**圖像包。** 現有 CardShopButton 重用 Card，遺物與耗材分別由 [ArtifactShopButton](../../game/scripts/ui/shop/ArtifactShopButton.gd)、[ConsumableShopButton](../../game/scripts/ui/shop/ConsumableShopButton.gd) 讀 texture path。交商品卡、物品圖示、背景／容器、價籤安全區、不可買與售出標記、Continue 狀態；若沿用 theme 可直接交參數，不必生成未接線 PNG。已售項目前消失，售罄佔位是待新增 consumer。
+
+**聲音 cue。** shop-cues 對開店、瀏覽、接受、完成、拒絕、售罄、退出各有語意。實碼 purchased 在 child actions 扣錢／入庫前發出，因此成功聲須明定接受或完成，只播一次；完成採 transaction request + action idle + 真實 money／inventory 差。拒絕目前沒有統一 signal，要在購買 Action 真實出口新增結果，不以 timeout 猜測。短音用現有 Sounds bus／UI pool；環境由單一 owner 保存 handle，地圖覆蓋是否延續留 brief，換節點必撤銷。
+
+**動畫時序。** [motion/dialogue-shop](../../wf/workflows/game-dev/art-assets/motion/dialogue-shop.md) 已給「資料到位→商品揭示→可購買→提交待定→接受／拒絕→效果完成／重建」。實碼沒有此動畫；第一版可採即時顯示，新增時只動容器內視覺 wrapper，成功以不可互動快照避免 populate queue_free 後 Tween 失去目標。關閉失效 generation，重繪不再播放成交。
+
+**實際資料 consumer。** [ShopOverlay](../../game/scripts/ui/ShopOverlay.gd) 讀 [ShopData](../../game/data/mutable/ShopData.gd) 商品與價格生成 action。[BaseShopButton](../../game/scripts/ui/shop/BaseShopButton.gd) init 顯示 money_amount，點擊排隊；[ActionShopPurchaseItems](../../game/scripts/actions/shop_actions/ActionShopPurchaseItems.gd) 再讀庫存價格、money，耗材另查槽位。成功排 child actions、移除貨架、發 purchased；Overlay await actions_ended 再 populate。工作流已正確揭露 stale action／零價重購風險，沒有把 UI 冷卻當業務防重。
+
+**退出 owner。** ShopOverlay Continue 開 Map／跨幕／run_victory，下一 map_location_selected 才 hide；combat_started 與 player_killed 清商品。實碼 `_repopulate_shop_after_actions_ended()` 沒 generation／存活檢查，run_ended 也無本地 handler；場景整合 owner 需補本次商店識別與退出取消。Map Back 可以回到原商店，不能把 Continue 當 queue_free 或撤銷已接受交易。
+
+**專項驗收、第一步與產物。** 第一個改動應是建固定 ShopData fixture（shop_is_visited=true），而非畫商品動畫；擬建 `tests/ui_shop_rest_probe.gd`，按共同 caller 接 Smoke 靜態 probe，互動交新設施情境。三類商品逐筆驗 price−1、price、足額／滿槽、money／deck／artifact／consumable 差、庫存／按鈕數；再驗空貨架、連點 stale action、外部 money 變動、等待中 Continue、離場／Map Back／重開。先保留防重失敗，不把它列正常。產物應是商品／cue 規格、實際 consumer 修改、helper caller 與逐 assertion 日誌。產品待決僅售罄保留、環境延續、額外確認／付費服務；既有點擊即提交可先做。
+
+## D2 休息：HOLD
+
+**UI 組成。** RunScreen/RestOverlay 下三欄 RestActionContainer、ContinueButton；[RestActionButton](../../game/scripts/ui/RestActionButton.gd) 是 240×240 Button，只顯示 rest_action_name。REST_SITE 到訪時 [RestOverlay](../../game/scripts/ui/RestOverlay.gd) 建按鈕，validators／excluded 決定 disabled。需交名稱、效果說明、可用／已用／互斥原因與空服務出口；目前沒有完整說明 consumer。
+
+**圖像包。** [RestActionData](../../game/data/readonly/RestActionData.gd) 有 rest_action_texture_path，但 RestActionButton 不讀它，也沒有 description 欄位。interface-assets 明示 icon consumer 未接；可先新增按鈕子圖與資料映射，再交服務圖示、效果／已用狀態、背景／Continue。若加服務說明，必須另外定義資料來源，不虛構已有欄位。
+
+**聲音 cue。** screen-cues 有休息環境、接受／不可用、治療或升級結果、完成／退出，指定 rest_action_ended(id) 完成，不在按下時播成功。auto_end=false 由成功 child payload 發完成；Back 空選不可當升級成功。採 Sounds 短音、場景 owner 保存環境 handle；按鈕重驗不應再次播完成。
+
+**動畫時序（首次阻塞 D-G1）。** shop-rest 只說「入庫／服務標記動畫均需新增」，導向 ui-motion／scene-choreography；後者用途實際只有 dialogue-shop、rewards-map，motion/menus 也不含 RestOverlay。沒有休息專屬的視覺根、接受後顯示、選牌中父畫面鎖定、Back 返回、rest_action_ended 後互斥標記與 Continue 解除時序。共通 generation 規則不足以代替這條完整服務流程。這是工作流交接缺口，不是要求先實作成品動畫才能 PASS。
+
+**實際資料 consumer。** RestOverlay 讀 player_available_rest_action_object_ids，生成 rest_actions，auto_end 時 push_front ActionRestActionEnd；rest_action_ended 才修改 excluded。INCLUSIVE 只自身、EXCLUSIVE 同類全排除、REPEATABLE 不消耗。handler 只擋 actions_being_performed，不再驗 disabled／validators。GlobalTestDataGenerator 的 Upgrade 是 repeatable、auto_end=false、DECK min=max=1、required=true、quick_pick=false、can_back_out=true；Remove Cards min=1/max=2，成功 payload 才移除與 end。這條鏈已足以開業務 fixture，不需要虛構營地 API。
+
+**退出 owner。** Continue 沒等待中互鎖，直接 can_travel=true／show_map 或勝利；下一非休息節點會 clear_rest_actions。`_on_rest_action_ended` 直接以 id 索引按鈕 dictionary；若選牌期間離場清空，再收到完成信號，存在失效 lookup 風險。Root 離樹／run_ended 透過 ActionHandler 清 async action，但不等於 RestOverlay 自有回呼／動畫都清理。需要指定 RestOverlay owner 同時管理選牌 opener 和本次服務 generation，不只說關閉停止 tween。
+
+**專項驗收、第一步與產物。** `ui_shop_rest_probe` 應先 fixture 三種 cost type、多於 min 的可升級牌、不可升級牌、足量可移除牌，走真實按鈕→ActionPickCards→Confirm／Back；驗 HP／永久牌組／升級值／rest stat／excluded 差。空服務、全 disabled、繞 disabled 呼叫、選牌中 Continue→換節點→完成、重開與 run_end 均需有界收束及零 stale callback。第一步交 owner 補 D-G1 的具體休息時序與退出責任（包括上述 lookup），再復查。產品待決為演出風格／時長、服務說明內容；服務互斥與取消語意維持現況。首次整案 D 不以 D1 通過抵銷 D2 缺口。
+
+## E1 獎勵群組列：可開工
+
+**UI 組成。** RunScreen/RewardOverlay 的 RewardContainer/VBox 與 Continue。必須呈現金錢、遺物、卡牌獎勵與同組／異組關係；空獎勵仍有合法離場，需新增空文案。工作流正確區分 reward_data 已清與畫面仍可領。
+
+**圖像包。** ArtifactRewardButton 讀 artifact_texture_path；MoneyRewardButton／CardRewardButton 主要文字。交 panel／title、各類圖示、群組／可領／已領樣式與 Continue；新錢幣／卡包圖示要在按鈕 scene 增 consumer，不能誤以為已是 Card。Root 尺寸／z-index 與 modal 層級需一起保留。
+
+**聲音 cue。** reward_grant_requested 只是累積，不是展示或取得；combat_ended 等 action idle，chest_opened 另開展示。展示按 batch 去重，領取聲分接受與 child 完成；不對每次 money_changed 無條件播。退出／新 run 失效 pending cue，Sounds pool 並不隨 hide 停止。
+
+**動畫時序。** rewards-map 明確給載入選項→揭示→開放→確認→取走／恢復，沒有現成逐列 reveal。BaseRewardButton 立即 queue_free，需先取唯讀快照或移交刪除責任；動畫不再發 action。group 清除與已領取動畫不可混為同一結果。
+
+**實際資料 consumer。** [RewardOverlay](../../game/scripts/ui/RewardOverlay.gd) populate_reward_display 讀 money／draft／artifact，產生帶 action 的 [BaseRewardButton](../../game/scripts/ui/rewards/BaseRewardButton.gd) 子類，然後 clear_rewards。`_on_reward_group_selected` 在 button_up 時移除其他 group、同組保留；因此 draft 開啟後即已選群組，Skip 只保留那張卡牌獎勵，不會恢復其他 group。另核實 reward_custom_action_data 雖儲存卻沒有 populate consumer；如果需求包含自訂獎勵必須另做，不能據 schema 宣稱支援。
+
+**退出 owner。** Continue 開 Map／下一幕／勝利；map_location_selected hide，但沒有清 display。combat_ended await 之後無 generation guard；player_killed 清理函式存在但 `_ready()` 未接 player_killed。Overlay owner 要補局／batch 身分、等待中離場互鎖與清除；Root／ActionHandler 的全局取消只負責 actions。
+
+**專項驗收、第一步與產物。** 第一個 fixture 固定兩 group，其中同組含 money+draft，另一組 artifact；驗選 group 後異組移除、同組其他項可領，draft Skip 不恢復異組。沿 Combat `_claim_rewards()` 擴充，或建立 `tests/ui_rewards_probe.gd` runtime load 接該段；保留既有金錢與 deck+1 斷言，再補多次領取、空列表、全部領完、等待中 Continue、run_end／重入。產物為 batch 顯示模型、cue／快照 owner、專項斷言。待產品決定是否另設群組確認；保持現有按下即決定即可先開工。
+
+## E2 Draft 點牌／Skip／重開：可開工
+
+**UI 組成。** [CardDraftSelectionOverlay](../../game/scripts/ui/CardDraftSelectionOverlay.gd) 控制 Root/RunScreen/CardDraftSelectionOverlay 的 HBox CardContainer 與 SkipButton；點 Card 立刻完成，沒有暫選 Confirm。hover callback 是 pass，不能承諾已有展開演出。
+
+**圖像包。** 重用 Card 圖／框，交 draft 背板、卡背或 reveal 層、可選／Skip 狀態。不要把獎勵列卡包圖直接當候選卡；素材展示資料由 get_pickable_cards 決定。
+
+**聲音 cue。** 開 draft、選牌、Skip 分開。兩 handler 都發 card_pick_confirmed，cue owner 必須帶選擇原因與 picked_cards；只聽 confirmed 無法判斷取得。選中聲可在選擇接受，入庫聲等 child action 完成；Skip 零取得聲。
+
+**動畫時序。** rewards-map 可用於候選揭示→開放→點牌取走或 Skip 恢復獎勵列。點牌 handler 會 clear_cards，需快照後才表演，不可在已排除節點上 tween；Skip 後保持獎勵按鈕，重開不得被舊 reveal callback 再次完成。
+
+**實際資料 consumer。** [CardRewardButton](../../game/scripts/ui/rewards/CardRewardButton.gd) 排同一 pick_action，await action_async_finished，picked_cards 非空才 queue_free。[ActionBasePickCards](../../game/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd) begin_async_action 重設 async flags；draft 候選由 action values 供給。Draft selected append 一張並 confirmed；Skip 空集合；[ActionPickCards](../../game/scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd) 生成 ADD_CARDS_TO_DECK child。action_async_finished 不保證入庫 child 已 idle。
+
+**退出 owner。** confirmed 清 current reference／hide，selected 另 clear_cards；Skip 和 run_ended 只 hide／清 reference，舊 children 要到下次 populate 才 queue_free。新 owner 應明確將 clear_cards 納入關閉，取消 reveal／tooltip；ActionHandler 的 run_ended／Root._exit_tree 負責 force_action_end，不把 hidden 當已完成 action。
+
+**專項驗收、第一步與產物。** 第一個改動是在 `_claim_rewards()` 開 draft 後先 Skip，等 idle，驗 deck 不變、原 CardRewardButton 可重開，再選 card 驗 ID／size +1。另建空候選（可自動完成，不等 UI）、連點、等待中 end_run、重入與子項清理斷言。擬 helper `ui_rewards_probe.gd` 接既有段，caller await，失敗不可仍列 PASS。產品要改暫選 Confirm 時另定一次提交規則；本次沿點牌立即完成。此子畫面有足夠鏈可開工。
+
+## E3 牌庫 VIEW／SELECT、暫選／Confirm／Back：HOLD
+
+**UI 組成。** [CardSelectionOverlay](../../game/scripts/ui/CardSelectionOverlay.gd) 是另一畫面，五欄 Grid、CardPickLabel、ConfirmButton、BackButton。VIEW 不選；SELECT toggle picked_cards 和 glow，足額顯 Confirm，quick_pick 可能自動確認。Back 可見性由 can_back_out 決定，handler 自身沒有禁止返回 guard；不能以按鈕隱藏代替規則驗證。
+
+**圖像包。** 現有 Card 與 set_card_glow 可作暫選視覺；交多牌捲動面板、暫選／取消選、不可選原因、足額確認、返回、安全字區。待新增 consumer 為不可選理由與新 panel skin，不能把 draft HBox 換圖當整個 deck selector。
+
+**聲音 cue（首次阻塞 E-G1 的一部分）。** screen-cues 的「獎勵與選牌」具體接點只展開 RewardOverlay、BaseRewardButton、CardDraftSelectionOverlay；未對此 SELECT 的選中／取消選中、到達足額、Confirm、Back、VIEW 返回提供逐事件 owner。共通聲包要求可以指導設計，但缺少專屬區分時容易把暫選播成已獲得。需在 CardSelectionOverlay handler 明訂暫選 cue，最終結果則由 ActionPickCards child 結果 owner 處理。
+
+**動畫時序（首次阻塞 E-G1 的核心）。** motion/rewards-map 指定 RewardOverlay／Draft，沒有 CardSelectionOverlay 的 Grid 視覺根、暫選 glow 與 reveal 同屬性責任、Confirm 等待、Back 清選後返回 opener 的階段。motion/cards 的升級段是效果前後快照，也不能替代選牌 modal。需要獨立「候選到位→可暫選→足額可確認→提交→返回／取消清選」契約，明列 quick_pick／空候選自動完成旁路，以及輸入與退出還原。
+
+**實際資料 consumer。** card_pick_requested 的 DECK_PICK_TYPES 才進 SELECT，get_pickable_cards 過 filter；`_on_card_selected` 可反選、is_card_pickable、更新文字及 Confirm。Confirm 直接 confirmed；Back 清 picked_cards 再 confirmed，不是通用 rollback。只有 min=1、required=true 等前提才能讓 Back 零 child。VIEW view_draw_pile shuffle 副本，不應把顯示順序當持久牌堆次序。
+
+**退出 owner。** confirmed／run_ended hide+清 reference，沒有 clear_cards；VIEW Back 只 hide，不發 confirmed。若是休息服務 opener，返回後應仍由 RestOverlay 決定互斥／完成，不可用通用 fly-to-deck 成功動畫。ActionHandler 取消＋ActionBasePickCards.force_action_end 清 picked_cards、解除 await；UI 仍需 modal generation、child／tooltip／新 tween 清理。現文件有共同原則，但沒有專屬 owner 交接到 opener 的完整鏈。
+
+**專項驗收、第一步與產物。** verification 已提供可用 fixture 前提：候選多於 min、min/max、quick_pick=false、can_back_out=true、required=true；可建立 `tests/ui_card_selection_probe.gd` 在新選牌情境 runtime load，或由設施 fixture 呼叫。測不足／足額、反選、max、不可選、Confirm、Back 允許／禁止、quick_pick、零候選／剛好 min、VIEW 不改資料、等待中退出／第二次進入只完成一次。第一步不是補測試綠燈，而是交 owner 補 E-G1 專屬 cue／動畫／父畫面返回契約，再復查。產物需含 opener、Action 身分、Grid wrapper、取消語意和實際 caller。首次整案 E 不以獎勵／draft 鏈代替此畫面。
+
+## F1 選角起局：可開工
+
+**UI 組成。** Root 的 TitleScreen/NewRunMenu 含角色四欄選擇、名稱／描述／HP／Money、第一個遺物圖文、Difficulty、Seed、custom modifiers、StartRun、MainMenu。CharacterSelectionButton 是 64×64；無角色、無遺物、多遺物需獨立空態／顯示要求。起局後仍有 RunStartOptions，不能省略為直接到 Map。
+
+**圖像包。** [CharacterSelectionButton](../../game/scripts/ui/CharacterSelectionButton.gd) 真讀 character_icon_texture_path；character_background_texture_path 沒有這裡的 consumer。交頭像各狀態、資訊安全區、遺物圖、panel／按鈕，立繪若要求才增 TextureRect consumer。說明和難度是文字，不烘入圖。
+
+**聲音 cue。** [NewRunMenu](../../game/scripts/ui/menus/NewRunMenu.gd) populate_character_info 已經 generate_sound_action(character_selection_audio_path)，自動第一角也會進來。screen-cues 明列初始化／手動切換政策、A→B→A、同角重選、新局與續玩差異。新長句 owner 保存 handle、最新 ID 去重；不在選中 signal 再播同音。
+
+**動畫時序。** [motion/menus](../../wf/workflows/game-dev/art-assets/motion/menus.md) 提供 ID 立即成立→立繪交叉淡化→資訊可讀、快速切角只保留最新 ID。現有 [BaseMenu](../../game/scripts/ui/menus/BaseMenu.gd) clear_menu 在 outro hook 前，需先重排可見性與釋放；不能只新增 Tween hook。Start 仍由唯一按鈕 handler，過期動畫不得啟動錯角色。
+
+**實際資料 consumer。** NewRunMenu 讀全角色、profile highest difficulty、STANDARD_DIFFICULTY_RUN_MODIFIER_IDS；StartRun pressed → [Global.start_run](../../game/autoload/Global.gd) 建 PlayerData、seed、deck、health、money、stats、act_1/location_0、autosave、run_started。無角色會使資料 null；difficulty setter 限制分支用了舊 selected_difficulty_level，不可宣稱完整解鎖遞進。這些已被 game-flow/persistence 指向為待修，能先建失敗 fixture。
+
+**退出 owner。** MainMenuButton 經 BaseMenu 導航，只 clear/populate，沒有 start_run；run_started 隱藏 TitleScreen。選角動畫／長句歸 NewRunMenu，導航取消歸 BaseMenu 控制器；起點 [RunStartOptions](../../game/scripts/ui/RunStartOptions.gd) 等 actions_ended 後再 show_map，新增 owner 需 guard run/generation，不能讓離局後 await 重開舊圖。
+
+**專項驗收、第一步與產物。** 第一個 fixture 以兩角色（有／無起始遺物）和空角色集合開始，`tests/ui_run_journey_probe.gd` 靜態部分接 Smoke ready，互動沿 Combat `_scenario()` NewRunButton、角色選擇、seed、StartRun、RunStartOptions。補說明／圖／難度邊界／切換無舊遺物、開始恰一次、取消零 run、modifier 互斥、重入等斷言；先攔截播放、Map 焦點。產物為選角視覺／cue 控制器、fixture 及 caller；題材、立繪風格／解鎖政策待產品，保留現況即可開工。
+
+## F2 地圖選點：可開工
+
+**UI 組成。** RunScreen/Map 是 1200×700、z=100，ScrollContainer/LocationContainer、Back；不是 Grid。當前沒有標題、圖例與線 renderer，工作流明確列待新增。需涵蓋目前／已訪／可達／不可達／隱藏，不只可達閃爍。
+
+**圖像包。** [MapLocation](../../game/scripts/ui/MapLocation.gd) 64×64、icon.svg，類型用 label／???；需加 LOCATION_TYPES 映射、位置／鎖定／未知標記和鄰接線。圖示／tooltip 都不能洩漏 obfuscated 未訪類型；連線座標取 location_position，不杜撰資源 schema。
+
+**聲音 cue。** Map.show/hide 提供唯一開關 owner，新接狀態改變才播；瀏覽、拒絕、接受旅行、到站分開。map_location_selected 目前會經 Combat 觸發 location music，開 Map 不重啟地點曲，避免雙 owner。短音用 Sounds；環境延續政策另 brief，換節點取消舊 cue。
+
+**動畫時序。** [MapLocation.tscn](../../game/scenes/ui/MapLocation.tscn) 2 秒白→藍→白 loop，確有 play 呼叫；不等於路線移動。rewards-map 明定合法檢查→鎖旅行→演出→到站，若延後 visit 需機制 owner 接手；Back 目前只 hide，不撤銷已完成旅行。新增 marker／Tween 有自有取消，hide 後停止循環與還原顏色須補。
+
+**實際資料 consumer。** [Map](../../game/scripts/ui/Map.gd) get_all_act_locations/get_next_locations，略 STARTING，逐節點 position，container 高=max_y+150；父 handler 檢 can_travel＋鄰接才 generate_visition_location。[ActionVisitLocation](../../game/scripts/actions/world_interaction_actions/ActionVisitLocation.gd) 直接改 location_id、清 shop、autosave、emit，不自驗可達。MapLocation 點擊在父驗證前改 visited，非法操作會洩漏已訪狀態；文件已明記，必先失敗測例後修，不把它當動畫完成證據。
+
+**退出 owner。** MapLocation selected 由 Map hide 並關 travel；clear_locations／_exit_tree 取消 process_frame weakref callback。hide 本身未清節點／停 loop。`_restore_scroll` 會 grab_focus，後續 fixture 須 adapter；本次未觸發。MapButton 重建、Back 返回原畫面；shop/rest/dialogue/combat 開 travel 的責任保持各 owner。
+
+**專項驗收、第一步與產物。** 第一個 fixture STARTING＋兩可達分支＋不可達隱藏點＋終點，配 valid event，沿 `ui_map_probe.gd` 接 Smoke ready 和 Combat 首次 Map ready／戰鬥選點前。驗節點／線／位置、STARTING 不顯、空圖、RNG／池不變；經真 MapLocation.button_up 測不可達與 can_travel=false 不改 visited/location/shop/save（目前預期紅），合法只一次、Back／重開、同 frame rebuild／free 無 callback。產物為狀態映射／線 renderer、拒絕路徑修正、專項 caller。是否加預覽 Confirm 是產品可選，不影響現有直接旅行開工。
+
+## F3 勝敗結算與返回：可開工
+
+**UI 組成。** RunScreen/RunSummaryOverlay 的 VictoryLabel、DefeatLabel、EndRunMessageLabel、StatsSummaryAutosizeLabel、EndRunButton。勝利／失敗各一分支、三欄統計，需空 stats 回退，不能只換一張勝利圖。按鈕文案 Back To Main Menu 與實際 NewRunMenu 目的地不同，應明示採現況或改導航。
+
+**圖像包。** menus-collection／motion/menus 已給勝敗標章、背景、統計框、退出按鈕與文字分層；現為文字／ColorRect，圖像 skin 需新增 consumer。統計保留資料文字，長敗北訊息的安全區取 Root 現有 label bounds。
+
+**聲音 cue。** [RunSummaryOverlay](../../game/scripts/ui/RunSummaryOverlay.gd) 在 run_victory 或 player_death_animation_finished 顯示；run_ended 是按結束後，不能拿它當結果起音。screen-cues 明定勝敗與死亡聲優先、重信號不重播、QUIT 零勝敗、離場停止結算長句／環境交 TitleScreen。title 空 path 不停止舊曲，需明確 NO_MUSIC 或 owner stop。
+
+**動畫時序。** motion/menus 指定保存最終統計→純顯示插值／逐列 reveal→Skip 立即最終值→可退出；現沒有這些動畫。不得因動畫完成重發勝敗或改 StatsHandler。退出／重入清副本、還原按鈕與 alpha；既有 EndRun 不需等過期 Tween。
+
+**實際資料 consumer。** RunSummary讀 StatsHandler.current_run_stats，SUMMARY_TEMPLATE 九項、SUMMARY_COLUMN_COUNT=3；敗北文案讀 EventData.event_death_message_bbcode。無 stats 是 breakpoint 後仍繼續讀取，需補回退而非空發 victory 當測試。EndRunButton → Global.end_run(LOSS/VICTORY) 才 delete save、win/lose_run、save_profile、run_ended；沒有重複結算 guard。Global.is_end_of_run 依最後位置／act_max，而一般 Combat victory fixture 不等於終局。
+
+**退出 owner。** RunSummary 持有 player_run_end_state 並負責隱藏與唯一提交；Global／StatsHandler 負責持久化，TitleScreen／NewRunMenu 負責返回。run_started/run_ended hide，但新 cue／Tween 必須自行取消。保存／刪檔只在後續隔離 fixture 內，不碰使用者檔。
+
+**專項驗收、第一步與產物。** 既有 Combat `_defeat_flow()` 已檢敗北顯示、Damage Taken、End Run→NewRunMenu、loss/history +1、save 移除。新增完整旅程 fixture 從有效 NewRunMenu 起局，配置單幕有效終點 Boss（player_act=max、終點無後繼）走合法 Map 按鈕與真實戰鬥勝利，不能直接 emit 空勝利；核對勝利 label／stats／history／save／只記一次／再開。另測 QUIT 無勝敗、無 stats 回退、重複結束、動畫 Skip／等待中退出。第一步建立 `ui_run_journey_probe` 的結算 fixture 與 caller 分支，沿 [vertical-slice](../../wf/workflows/game-dev/game-flow/vertical-slice.md) 與 [persistence](../../wf/workflows/game-dev/game-flow/persistence.md) 的終局鏈。產物含完整選角→起點→Map→勝／敗→EndRun→第二局的 assertion 日誌。F 三子畫面均可提出實際第一步，故僅開工 PASS。
+
+## 需 owner 補正後復查的首次缺口
+
+D-G1 由場景動畫／休息 UI owner 補具體休息用途：RestOverlay／RestActionButton 的視覺根、服務接受到完成各階段、auto_end 與選牌取消差異、等待時 Continue 政策、互斥標記刷新，以及換節點後 rest_action_ended lookup／generation 清理。需給成功、Back、等待中退出、重入四種 fixture 的實際 caller；不能只再連共通 motion。
+
+E-G1 由選牌 UI／音訊／動畫 owner 補 CardSelectionOverlay 的獨立契約：VIEW 和 SELECT，暫選／反選、足額、Confirm、Back、quick_pick、零候選自動完成、Grid wrapper 與 glow 屬性 owner、返回 opener、run_end 和子項清理。需要與 Draft 立即完成明確分開；補專屬 cue 接點與 fixture caller 才復查。
+
+這兩項是流程足以開工的缺口。其他已列實碼缺陷（stale 購買、非法 visited、重複結算、缺空態等）是已能定位的待實作事項，不因尚未修 runtime 就一概否定工作流。首次判定保留在本檔，後續復查另追加日期／來源 hash／結果，不覆蓋原判定。

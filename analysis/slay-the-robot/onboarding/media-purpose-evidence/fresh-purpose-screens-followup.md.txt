@@ -1,0 +1,69 @@
+# D／E 完整用途復查：修補後可開工
+
+2026-10-19；獨立復查者 purpose_fresh_screens。本輪只復查 FIRST 的 D-G1／E-G1，沿原 scene-pack → shop-rest／rewards-selection → 新專篇 → 實碼，不讀作者修補 artifact 或整合 ledger。FIRST 的 D／E **HOLD** 永久保留；原報告 bytes 未修改，SHA-256 仍為 `2041e5e2eb37644880735bb812bde8c961cc7a3b84476c681a920dadd04d00a8`。
+
+FOLLOWUP：D-G1 **PASS（開工契約已補齊）**；E-G1 **PASS（開工契約已補齊）**。沿用 FIRST 已核實且本輪未受影響的 D1 商店、E1 獎勵列、E2 Draft 與 F 三畫面證據，整案 D／E 現可開工，F 的原開工 PASS 維持。本判定不表示控制器、guard、素材、helper、runtime、視聽或實際輸入已完成。
+
+未啟動 Godot、GUI、桌面／視窗／截圖／焦點或音訊，未操作既有程序，未跑全倉 lint，未 commit／push。僅新增本 followup；沒有改工作流、分析、遊戲、測試或工具。
+
+## D-G1：休息七項契約復查
+
+**UI 組成：可開工。** [rest-services](../../wf/workflows/game-dev/ui/screens/rest-services.md) 明確指定 RunScreen/RestOverlay、三欄 RestActionContainer、Continue，以及正常、空服務、全 disabled、接受／等待、完成、Back、離場、重入。與 [RestOverlay](../../game/scripts/ui/RestOverlay.gd) 及 Root 節點相符。父 RestOverlay 保持可見，SELECT 接管輸入；「等待時鎖服務與 Continue」標成新增責任，沒有說原碼已鎖。
+
+**圖像包：可開工。** 服務背景、icon／名稱／說明、可用／已用／互斥狀態和 Continue 都能對到實際消費端或待新增接點。[RestActionButton](../../game/scripts/ui/RestActionButton.gd) 仍只顯示名稱；240×240、rest_action_texture_path 未被讀、沒有 description 欄位均已準確揭露。可以先增圖示／說明 consumer 或沿文字呈現，不以素材檔存在冒充接線。
+
+**聲音 cue：可開工。** [screen-cues](../../wf/workflows/game-dev/audio/screen-cues.md) 管營地環境、接受、服務結果和退出；[selection-cues](../../wf/workflows/game-dev/audio/selection-cues.md) 管子畫面暫選／反選／Confirm／Back。服務成功由同 request 的真實效果差與 rest_action_ended 證明，必要時再等 idle；selector 的 async finished 不等於升級完成。取消零服務結果聲；成功音只留一個 owner，不讓 card_upgraded、rest_action_ended 和 modal close 三處重播。短音 bus、停止 handle／替身前提沿既有 mixing；不是新建不存在的播放 API。
+
+**動畫時序：可開工，原缺鏈已補。** [rest-selection](../../wf/workflows/game-dev/art-assets/motion/rest-selection.md) 已提供實際休息根與「完整顯示→接受標記→SELECT 父畫面鎖定→子畫面關閉→等待效果→完成標記→互斥／validator 刷新→恢復輸入」。Back 取消接受標記、不補發 rest_action_ended、不耗服務；剛好 min／不足 required 等不開 modal 的旁路也能解鎖。Grid 管 layout，動畫僅動新 wrapper alpha／scale，UI 管 excluded／disabled。這是原 FIRST 缺少的獨立服務演出鏈；未要求先完成成品動畫才給開工 PASS。
+
+**實際資料 consumer：已查碼吻合。** GlobalTestDataGenerator 的 Rest 是 EXCLUSIVE、40% heal、auto_end 預設 true；Upgrade 是 repeatable、DECK min=max=1、required=true、quick=false、Back=true、auto_end=false；Remove 是 INCLUSIVE、min=1/max=2，同樣成功 child 才 END。重新讀 [ActionHandler](../../game/autoload/ActionHandler.gd) 確認 add_actions 預設把每項各推 stack，pop_back 反序執行；所以 RestOverlay push_front END、升級／移除 child 陣列先列 END 後列效果，都實際先效果後 END。[ActionRestActionEnd](../../game/scripts/actions/world_interaction_actions/ActionRestActionEnd.gd) 只發 id，沒有 request token，新增身分契約必須另外接線。excluded 只在按鈕實例，重建會重設，修補沒有宣稱跨重入持久化。
+
+**退出 owner：可開工，已涵蓋 late lookup。** 文件現在精確說明 Continue 無鎖、換點 clear dictionary，而 `_on_rest_action_ended(id)` 直接索引。新增責任要求接受前保存 action／location／generation，退出先失效 owner，完成回呼先查身分、dictionary.has 和節點有效性；舊 callback 不更新、不重開、不解鎖下一代服務。強制換點／死亡／run_end／離樹還需接 Action 取消與子畫面清理。實碼沒有這些 guard，文件也明列待實作。只 kill Tween 或加鍵存在檢查都不足以擋同 service ID 的新一代錯綁；新規格已把 generation 納入必要條件。
+
+**專項驗收、第一步／caller／產物：足夠具體。** 第一個工程步驟應建立 `tests/ui_rest_services_probe.gd` 的成功、Back、等待中退出、同 service ID 重入 fixture，走真實 REST_SITE 到訪後、RestOverlay populate 完成處 runtime load。由設施情境沿 Combat `_scenario()` 起局，先攔音訊與 Map focus，再 await helper，把結果交既有 `_check()`；靜態節點另接 Smoke Root ready 兩 frame 後。成功以兩張合法牌及一張不合法牌、真按鈕→選牌→Confirm→child idle／rest_action_ended 驗永久牌、HP／stat／excluded；Back 驗全不變。退出在選牌等待及結果排隊未刷新兩時點測換點／run_end；重入同 ID 故意交付舊 callback，要求 stale=0、只新請求更新。原 guard 缺陷先留紅測，接著加 request controller 與 guard，再接圖像／聲音／動畫。產物是 fixture＋實際 caller、controller／consumer 修改、同一 request 的資料／cue 次數證據；不是僅寫規格或 helper 檔。
+
+## E-G1：非 Draft VIEW／SELECT 七項契約復查
+
+**UI 組成：可開工。** [card-selection](../../wf/workflows/game-dev/ui/screens/card-selection.md) 已獨立分開 VIEW 與 SELECT、五欄 Grid、計數、Confirm 和 Back；零候選／恰 min／random 可能旁路完成，不能強等 UI。VIEW opener 是 Combat 四個牌堆按鈕；SELECT opener 是實際產生 ActionPickCards 的效果 owner，休息只是其中一種，不再猜所有關閉都回營地。
+
+**圖像包：可開工。** 面板、Card 圖／框、暫選／反選／不可選理由、足額／返回與空態均有消費責任。查 [Card](../../game/scripts/ui/card/Card.gd)：`init(data,0,false,true)` 接 UI／timer，不接戰鬥刷新；Overlay 的 hover callbacks 是 pass，Card 自身仍有 tooltip timer。新 wrapper 只處理視覺 alpha／scale；Grid 的 layout 和 UI 的 CardGlow.visible 分別有唯一 owner，不會把 reveal 跟暫選 glow 搶同屬性。
+
+**聲音 cue：可開工，原缺鏈已補。** selection-cues 指定 VIEW 開／Back、SELECT 真正改 picked 後的暫選／反選、足額 false→true、Confirm／quick、Back／force 和自動旁路；不是只把 draft 選一張的成功聲拿來用。emit 全域 confirmed 前先存 action、opener、generation、mode、reason 和 picked 快照，避免 listener 清參照後猜原因。VIEW 點牌不發暫選／提交／結果；強制退出不當正常 Back；旁路不發開窗／手動提交音。聲音成功由 opener 的真效果結果決定，selector 不自行播獲得／升級成功。正常例提供開頁1、暫選2、反選1、提交1及可選足額邊緣2的可核對計數。
+
+**動畫時序：可開工，原缺鏈已補。** rest-selection 給候選 ready→reveal／開輸入→暫選／反選→足額→提交鎖→子畫面收尾→效果 owner 接結果→恢復仍有效 opener。Back 清選後走取消，quick_pick 走同一次提交，動畫 completion 不再發 confirmed；零候選／恰 min 不開窗的自動完成不殘留父遮罩。VIEW 不沿用 SELECT action，重疊開啟須拒絕或先取消原 request。與 Draft 的立即點選／Skip 清楚分開。
+
+**實際資料 consumer：已查碼吻合。** [CardSelectionOverlay](../../game/scripts/ui/CardSelectionOverlay.gd) 的 `_on_card_selected` 先反選或 validate 後加入、更新 glow／text／Confirm，再查 quick_pick。Confirm handler 沒重驗數量；Back handler 只依 current action 決定清選／confirmed，沒有 can_back_out guard；set_card_mode(VIEW) 沒清舊 action。這些均標待修。重新查 [ActionBasePickCards](../../game/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd) 與 [ActionPickCards](../../game/scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd)：不足 required 只 finish，恰 min／非 required／random 可直接選並做 child；force 標 cancelled、清 picked，必要時以 confirmed 解除等待。ActionPickCards 生成 child 就 finish，文件沒有誤稱最終效果已完成。
+
+**退出 owner：可開工。** 目前 confirmed／run_ended 只 hide／清 action，VIEW Back 只 hide；卡要到下次 populate 才 queue_free。修補要求新 close 停自己 timer／tooltip／Tween／音訊、清 children／controller reference，且只恢復仍有效原 opener。run_end／換點／離樹先失效 generation，ActionHandler 管取消；舊 reveal／Confirm／child callback 不得套下一個 action。正常 Back 只取消該 request，不能清全域無關 actions；休息 result 回同服務、戰鬥 result 交原 Action、VIEW 無效果 owner，交接已完整。
+
+**專項驗收、第一步／caller／產物：足夠具體。** 第一個工程步驟是建 `tests/ui_card_selection_probe.gd` 及真正 caller。VIEW 接 Combat `_scenario()` 中 `_wait(_player_ready, ...)` 成功後、原勝敗分支前，走四個牌堆 opener→Back，驗 piles／HP／energy／queue 不變。SELECT 由休息 fixture 已 requested 後 runtime load／await；兩合法＋一不合法、min=1/max=2/required=true/quick=false，驗選／反選、上下限、Confirm、Back 允許／禁止及 owner。另 quick=true、零候選、恰 min、random，驗無 modal 也有界解鎖；reveal、暫選、提交後待 child 三階段退出，驗 async、children、tooltip、cue 清理與重入只完成一次。接著補 guard、opener adapter 和 wrapper；需要狀態真結果才補音畫。已確認現 runner 沒有自動 CardSelection／Audio suite，新增 suite 要交 runner owner 接完整 mapping。
+
+## 非阻塞限制與工程交接
+
+兩條首次「找不到完整用途鏈」的缺口已消除。新 API／generation／reason／opener controller、Continue 鎖、handler 重驗、字典 guard、close cleanup、音畫資產和 helpers 全部仍待實作；此處沒有 runtime 綠測。FIRST 列出的 stale 購買、Map visited、結算防重等其他工程缺口維持原判定，本輪不重跑或擴查。
+
+fixture 名稱是建議，不是已存在 API：動畫篇仍示意 `ui_shop_rest_probe.gd`，UI 休息專篇更精確用 `ui_rest_services_probe.gd`；整合時採後者作休息互動 owner，前者可保留商店／靜態組合，避免同一情境跑兩遍。Smoke 僅接靜態組合；有 run mutation 的互動依 UI 專篇接獨立設施情境，避免污染原 Smoke 的 character／mod 探針。這是可由工程 owner 決定的命名／分工，不構成開工阻塞。
+
+新流程把等待中 Continue 預設為拒絕，若產品要求「先取消再離開」才另定政策。音效合併、淡入時長、靜態／減少動態及服務說明內容可在 brief 選擇；不需要為了開始寫失敗 fixture 先決定美術風格。真實輸入、字形／遮擋、視覺時序、聽感及 Dummy／替身證據仍須後續有授權再驗。
+
+## 靜態驗證與精確來源版本
+
+本輪對下列受查工作流／domain 分析逐個取 SHA-256，並檢查其中 303 個本地 Markdown 連結的檔案目標：全部存在。這只是路徑存在檢查，未把它當成 anchor／內容／runtime 驗收。實碼核對另以上述函式閱讀為依據。
+
+新增休息 UI 來源 [rest-services](../../wf/workflows/game-dev/ui/screens/rest-services.md) SHA-256 為 `f30948748821ab1c2eadcd1a852feb6858fad68d6a112d56b0c242bf4ed55440`。新增選牌 UI 來源 [card-selection](../../wf/workflows/game-dev/ui/screens/card-selection.md) 為 `d27f37717116b7f907eb3b2ef30e15a122a302521a8e3a20060db3e1f0926dd3`。
+
+新增動畫來源 [rest-selection](../../wf/workflows/game-dev/art-assets/motion/rest-selection.md) SHA-256 為 `89fab3210baf6f5ad57dd8bdb9002ef8575c282c71b3c9471987083426ce8a5e`。新增聲音來源 [selection-cues](../../wf/workflows/game-dev/audio/selection-cues.md) 為 `7a9621180743e81948036b22890f14eba321f26f84764f78fb030a778ac7b975`。
+
+原用途入口 [shop-rest](../../wf/workflows/game-dev/ui/screens/shop-rest.md) SHA-256 為 `b8bc3b98c6c48497e3c3d86c616bf89f10fb2af4c134aecc0a0890e22562c587`；[rewards-selection](../../wf/workflows/game-dev/ui/screens/rewards-selection.md) 為 `bc50e32f268d781d638cf1311ca94ecd27999a77415d3cc36bdf2ed5fd0756b8`。驗收入口 [verification](../../wf/workflows/game-dev/ui/verification.md) 為 `b8a32b769c73bf111455b354814e1cc11f773ddf0926921202589026ebd8632b`。
+
+動畫導航 [motion/README](../../wf/workflows/game-dev/art-assets/motion/README.md) SHA-256 為 `ba96f17ce584f1858cb66b2bff7148ab99caf4700fdc13b5734974b89bfbf9a8`；[scene-choreography](../../wf/workflows/game-dev/art-assets/scene-choreography.md) 為 `430a79d6d1c235b0ac4e67588a60cb36206f26de6a0f8efd0a25de5c6253a171`。
+
+聲音導航 [screen-cues](../../wf/workflows/game-dev/audio/screen-cues.md) SHA-256 為 `8ff475724d0e6d898fd7d206374f01bfecffba4d6f2cb4c4eadb9ed9663e6471`；[audio/README](../../wf/workflows/game-dev/audio/README.md) 為 `488f35ffc71e9b95c538f4f8e6d22caef1c94ece51244a8949648063a6456737`。另讀取的 [presentation-delivery](../../wf/workflows/game-dev/presentation-delivery.md) 為 `9e198e1ba34d793c88a1aa1444443cfd57839a5fa2832853c40af236a06991c2`；它仍是出牌流程，沒有拿它替代兩個新用途專篇。
+
+domain 核實 [presentation](../../analysis/slay-the-robot/design/presentation.md) SHA-256 為 `55f2e010258b0c6d309e831aa75e204d940bb8da318fbb8b70294f13d9333356`；[animation](../../analysis/slay-the-robot/design/animation.md) 為 `ce31d7a4730b2084301b145f2fd4b0a8158b450d8f0926e3133d00a1df9293f1`；[audio](../../analysis/slay-the-robot/design/audio.md) 為 `b8e1cd344fc69970887868f8ba8aff506adb12c94094946c866330d467d877bc`。這些是 domain 來源，不是作者的修補報告；實際判定仍以實碼核對為準。
+
+實碼版本 [RestOverlay](../../game/scripts/ui/RestOverlay.gd) SHA-256 為 `fcc46f641862b255a2836869f72efe5878b99476a6aa6ca6ebeec1487872a42b`；[CardSelectionOverlay](../../game/scripts/ui/CardSelectionOverlay.gd) 為 `17f49abc1ed9db9b8627700e1f44be002bc6bb6bff911a6dde29c61415b7557f`。範例資料 [GlobalTestDataGenerator](../../game/autoload/GlobalTestDataGenerator.gd) 為 `6159dfd5459b134b2d1869cba4d5f6981554ac76d61f18309ea9adee8e668e96`。
+
+動作執行來源 [ActionHandler](../../game/autoload/ActionHandler.gd) SHA-256 為 `4c8f62abca6a6512f1cc2345b191f2bddf862c99fb08f7ada82ab80b1dcd9a16`；[ActionBasePickCards](../../game/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd) 為 `ee53ddb21f5b10bcd45efbc3d6a3e49c3b35475c17e61b1f9f3e0743eadbf167`；[ActionPickCards](../../game/scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd) 為 `ed39faa0837c4fd564da345775154ce85f89a928272623e6deb0e7bffddae598`。
+
+FIRST 不變、FOLLOWUP 通過只限上述來源的開工能力；這份報告完成後 freeze，不回改首次結論。

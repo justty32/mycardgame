@@ -1,0 +1,23 @@
+# 美術製作冷讀初始紀錄
+
+2026-10-19；從 WORKFLOWS → agent-session → 核心規矩 → game-dev → art-assets 冷讀。已讀全部 agent-session 核心檔及 dev-env；SESSION-LOG 有主任務，WAIT_USER 無條目。來源鎖與 game HEAD 同為 4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d，game 既有修改保留。本次只文件，不生成素材、不執行 Godot，不碰桌面／視窗／UI／截圖／焦點／音訊或既有程序，不 commit/push。
+
+## 初始可執行路由
+
+art-assets 已給出 CardData.card_texture_path、FileLoader、AnimationData 接點、部分基準尺寸、外部路徑與 fallback／cache 風險；可開始替換單張圖。UI／content／audio 跨域路由存在。分析入口為 design/presentation.md，尚未讀其實碼證據，以下為初讀缺口而非程式缺陷。
+
+## 初始阻礙
+
+任務要求先定原創美術方向再批次製作四類素材。既有入口把風格 brief、製作、接線、動畫及特效混在一篇；缺少可直接循行的風格候選→代表樣本→定版→批次變更流程。沒有描述何種既定資訊可由 agent 決定、何種題材／方向要保持未決，也未區分風格假設與已視覺確認的樣本。
+
+母稿→派生輸出→內容 ID 的版本關係、批次失敗如何局部重做與何時全批重驗、卡圖／圖示／背景／角色立繪各自不同消費端尚不夠具體。需沿既有分析實碼查背景覆寫、角色選單與戰鬥外觀、縮圖與圖鑑差異，再建立可觀察的交付契約。
+
+現有工具描述足以選 imagegen 或既有向量流程，但不能從可用 skill 推導已實測可生成或風格一致；目前禁止 GUI，必須把機械檢查、視覺審核及方向採用拆成不同證據。
+
+## 所有權與後續
+
+僅寫 art-assets.md、art-assets/README.md、style-guide.md、static-assets.md 及 design/art-production.md；animation.md、vfx.md 與共享導航由其他 owner。下一步讀 presentation 分析及其 source 鏈，必要額外搜尋記在本檔；完成局部 links／anchors／大小檢查，交主 agent 整體驗證。
+
+## 追加實碼搜尋紀錄
+
+沿 presentation 的 source 鏈後，定位 CardData 時發現 readonly 猜測路徑不存在，改以 rg --files game/data game/scripts 定位 prototype/CardData.gd；圖示角色未提供完整入口，再定位 StatusEffectData.gd、StatusEffect.gd、ColorData.gd 與 Enemy 的 TextureRect 映射。已在新分析加真實檔案連結。另對 scripts/autoload 搜尋 character_background_texture_path 消費端、查 Combat 空白背景分支；這些補查反映原入口不足，不以找不到路徑作框架 bug。四張 PNG 僅讀 IHDR，未解碼／審圖。

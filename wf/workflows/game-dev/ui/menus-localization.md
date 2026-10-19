@@ -30,7 +30,7 @@
 
 先列支援的 viewport 與縮放政策；未指定時將目前 1200×700 作基準，再提議一個較小尺寸和一個不同長寬比作候選，不能把候選當成已承諾支援。project.godot 目前 resizable=false；RunSummaryOverlay 和背景是固定 1200×700，統計為三欄，光改視窗旗標不會修好內部版面。從根容器、overlay、訊息區和按鈕逐層調 anchor／container／minimum size，保留必要的安全邊距。
 
-先用 `./tools/test-game.ps1 -Suite Smoke` 驗共享主場景，用 `-Suite Combat` 保留現有敗北結算／返回流程；僅在本次授權允許引擎時執行。這兩者都沒有多尺寸、字型或通關勝利結算專項。新增場景 helper 的接法見 [內容 bootstrap](../content/bootstrap.md)：僅新增 tests/*.gd 不會自動執行，也沒有 UI suite。
+先用 `./tools/test-game.ps1 -Suite Smoke` 驗共享主場景，用 `-Suite Combat` 保留現有敗北結算／返回流程；僅在本次授權允許引擎時執行。這兩者都沒有多尺寸、字型或通關勝利結算專項。新增場景 helper 的 UI 接法見 [專項驗證](verification.md)，候選副本見 [內容 bootstrap](../content/bootstrap.md)：僅新增 tests/*.gd 不會自動執行，也沒有 UI suite。
 
 專項先準備有效 run statistics 與 EventData fixture，避免空資料走 breakpoint；分別觸發勝利、敗北及 EndRunButton handler，核對 Label、訊息、end state 和目的地。每個目標尺寸先讓 layout／延後字級更新完成，再斷言關鍵 rect 在可用區域內、必要元件可見、最小字級與文字值符合規格。這些是待實作的針對性斷言，不是既有工具能力；不呼叫 capture，不操作真實焦點或視窗。
 

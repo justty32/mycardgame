@@ -16,7 +16,7 @@ mycardgame 是以 Slay-The-Robot 為框架、spire-codex 為參考的個人卡�
 | [analysis/slay-the-robot](../analysis/slay-the-robot/README.md) | 本專案維護的框架分析與教學 |
 | [WORKFLOWS.md](WORKFLOWS.md) | 意圖對應工作流 |
 | [agent-session](workflows/agent-session.md) | agent 冷啟動、分工與交接 |
-| [game-dev](workflows/game-dev/README.md) | 整局流程、分層關卡、卡牌／敵人、圖像／聲音／UI、第一個 mod 與驗收 |
+| [game-dev](workflows/game-dev/README.md) | 整局、關卡、卡牌／敵人，以及完整場景的美術／動畫／特效／聲音／UI、第一個 mod 與驗收 |
 | [learning](workflows/learning.md) | 將已驗證經驗整理成操作流程 |
 | [版本控制](workflows/version-control.md) | WSL justty32 提交／推送、snapshot 與可攜證據 |
 | [workflows/common](workflows/common/README.md) | 使用者偏好、code map 與慣例 |

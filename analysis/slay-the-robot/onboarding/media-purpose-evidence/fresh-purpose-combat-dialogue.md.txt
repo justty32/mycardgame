@@ -1,0 +1,155 @@
+# 完整用途冷接手：卡牌戰鬥、敵人頭目、對話
+
+2026-10-19；獨立首次接手；報告狀態：freeze。本報告是開工能力稽核，不是遊戲驗收。
+
+## 判定與邊界
+
+| 任務 | 冷接手判定 | 判定範圍 |
+|---|---|---|
+| purpose-card-combat | PASS，可開工 | 卡框／圖／費用文字／互動，以及能量、牌堆、回合、目標、tooltip 均能定位 consumer、退出責任與新增驗收接點 |
+| purpose-enemy-boss | PASS，可開工 | 普通敵與頭目分別有可實作契約；圖鑑另核；必須新建頭目測例，既有 STANDARD fixture 不算頭目驗證 |
+| purpose-dialogue | PASS，可開工 | 兩個 state 的敘事圖、事件名稱、本文、選項及失敗文字可接；角色姓名／頭像若採用則明列新增；正常完成及死亡／離場中斷都有修正入口 |
+
+PASS 僅表示能由導航取得完整七項開工契約並提出具體下一步。沒有素材產製、遊戲實作、Godot／GUI、聲音播放、視覺／真實輸入／感官或 runtime PASS。各子畫面的未實作能力不能用上表遮蔽。沒有發現會使其中一個必要子畫面完全找不到資料 consumer、退出 owner 或驗收呼叫位置的阻塞；下文列出的工程缺口仍須完成。
+
+先執行 `rg -c '^- \[' wf/SESSION-LOG.md wf/WAIT_USER.md`，只 SESSION-LOG 有 1 條，已讀。通讀根 AGENTS、agent-session 指定核心規矩及 dev-env。依本次僅准寫本報告的限制，未改 SESSION-LOG。後續導航從 `wf/WORKFLOWS.md → game-dev/README.md → scene-pack.md` 開始，沿各用途 UI、素材、音訊、動態、驗證與所連實碼追查。沒有讀 onboarding/media* 或任何既有 artifacts/media-audit 報告，沒有採其他 agent 結論。
+
+來源鎖與 `git -C game rev-parse HEAD` 均為 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`；game status 有既有 framework/lifecycle 修改，保留原狀。本次僅 Get-Content、rg、唯讀 git 與報告寫入。未執行全倉 lint、Godot、程序控制、commit 或 push。以下 helper／fixture 名稱皆是建議的後續產物，目前並不存在。
+
+## A：purpose-card-combat
+
+實際導航：scene-pack → ui/screens/combat、art-assets/cards、audio/combat-cues、art-assets/ui-motion → motion/cards、motion/menus，以及 presentation-delivery → ui/verification。共同尺寸／互動分別接 components-layout、interaction-states。
+
+### A1 卡框、卡圖、費用／文字與互動狀態
+
+**UI 組成。** Card.tscn 的根為 144×184，圖窗 96×96；Pivot/CardVisual 包卡框、圖像、名稱、描述、類型、費用及裝飾，CardButton 接輸入。卡框目前是 ColorBackground／Background 的 ColorRect，不能把透明框圖填入 card_texture_path。CardGlow 是 validator／選牌標記，不是無條件「可出牌」。費用不足用費用字色，選牌不可用由 Hand 設 alpha；卡名、稀有度、類型、費用、描述都保留文字。
+
+**圖像包。** 第一版交一張代表卡圖、一套框的透明窗／延展規格、費用 icon、必要 decorator icon，以及 normal／hover／選中／不可用的映射與安全區。框圖片 consumer 要在 Card.tscn 新增 TextureRect 或 StyleBoxTexture；不需要新框圖時可採現有程式配色，標明採用方案。費用 icon 同時用於卡角與描述小圖。卡背、稀有度框圖沒有現成獨立 consumer，要求它們時才新增正反資訊及映射契約；本任務不憑空增加翻牌玩法。
+
+**聲音 cue。** 成功出牌以 card_play_started 或 card_played 擇一 owner，一張卡只記一次；選卡、目標預覽、hover、拒絕、背景取消均不能記成功。需要拒絕音時先補 Hand／HandManager 拒絕原因通知，因現碼多處只是 return。ActionPlaySound 實際經 FileLoader.load_audio → SoundManager.play_ui_sound，屬現有 Sounds 路由；Headless 不能當無聲證據。音訊可先採明確靜音契約，另用播放出口 recorder 測語意。
+
+**動畫時序。** Hand.tween_hand（97、171 行）對 Pivot 的位置／旋轉做 0.2 秒 Tween；hover 是直接移 Card.position.y=-30，Card 中雖有 hover animation 資源，無 play 呼叫。選目標是提示文字，無既成瞄準箭頭。card_play_started 會讓 Card 產生 Line2D 尾跡後 queue_free；如要卡片飛到中央再進牌堆，必須先建唯讀視覺副本。演出不能再扣一次費用或出一次牌。選取與取消可立即完成，新增時間值屬視覺規格，不能由素材 fps 偷改 damage 時點。
+
+**實際資料 consumer。** `game/scripts/ui/card/Card.gd:82` 等一 frame 後更新 card_texture_path、get_card_name、get_card_description、稀有度與類型；103 行讀 ColorData、攔截後費用及 X 費。`Hand.gd:201` 檢查 disabled、右鍵忙碌、can_play_card、同牌排隊後才選目標或送 request；255 行敵人點擊建立帶目標 request。`HandManager.gd:304` 再算費用／先扣能量，394 行進 limbo，425 行發 started，439 行把完成 action 放前端供 stack 最後執行，447 行等 actions_ended 後才移目的牌堆。因此 card_played 不等於已入棄牌堆。
+
+**退出 owner。** Hand 管選取、提示、手牌與新增視覺副本；Card 管自己的 timer／hover 連線；Root._exit_tree 管 ActionHandler actions/interceptors，不代替 tooltip、SoundManager 或自建副本清理。現有 CardTrail.init 兩個參數自指賦值、未連 combat_ended，工作流已如實標待修。clear_hand_cards 只 queue_free 卡片與清映射，不能單憑它宣稱 current_selected_card 或全域 tooltip 已清；要在新 owner 的退出路徑明確清參照、停 timer、hide_tooltip、使延後回呼失效。
+
+**專項驗收。** 新增 `tests/purpose_card_combat_probe.gd`，由 `tests/combat_flow.gd:_scenario()` 在第 119 行 `_wait(_player_ready, ...)` 成功、取得 enemy 與原本五卡數值斷言後，且第 133 行 defeat 分支之前呼叫只讀／可還原 probe，結果交 `_check()`。驗實際卡圖非 fallback、費用 texture／文字、框節點、decorator、validator glow，再驗選目標→背景取消零費用零 HP 零移牌；正常 `_play()` 後成功 cue 一次、費用一次、HP 與目的 pile 正確。新增長文、X／0 費、多裝飾、禁止出牌、同牌排隊分支時另建 fixture，不能破壞既有固定傷害期望。後續命令為 Smoke、Combat；取消／等待修改再加 ResourceLifecycle，現有套件本身不含上述新斷言。
+
+### A2 戰鬥 HUD、回合、目標與 tooltip
+
+**UI 組成。** Root/RunScreen/Combat 的 Energy/EnergyCount、DrawPile／DiscardPile／ExhaustPile Count、EndTurnButton、TurnOverlay、SelectTargetLabel 與 Hand 必須一起交付；HealthLabel／MoneyLabel 與敵我數值提供上下文，根節點真名是 Tooptips。牌堆按鈕開實際 CardSelectionOverlay 檢視，並非只有一張牌堆圖。
+
+**圖像包。** 交能量及牌堆 icon、回合提示面板、選目標標記、tooltip panel、狀態／不可用形狀與文字安全區；目前 theme/StyleBoxFlat 可以維持程式樣式，無須每個狀態另製 PNG。新增裝飾採 mouse_filter=IGNORE；不得遮住牌堆、EndTurn 或 Enemy.SelectionButton。圖像尺寸由 Root 真實 offsets/minimum size 決定，不能僅套完整 mockup。
+
+**聲音 cue。** 能量數字刷新、重建 tooltip、牌堆檢視不代表出牌成功；本版可選這些操作靜音。回合音用 player_turn_started／enemy_turn_started，不能用 end_turn_requested。死亡使舊回合 cue 失效；位置音樂現由 Combat._on_map_location_selected 唯一呼叫 generate_location_music_action，不能再從 HUD ready 播一次。勝利／敗北收束與持續音樂停止需 encounter owner，非由 label 更新觸發。
+
+**動畫時序。** Root.tscn 的 start_turn 在 1 秒 callback 到 Combat.start_turn，end_turn 在 0.5 秒 callback 發 player_turn_ended；這些不是純裝飾，減少動態／跳過需保留一次性規則責任。Tooltip 是 0.5 秒 KeywordTimer 到 display_card_keywords，關閉需停 timer 且清子項；數字刷新本身可立即完成。新增 UI tween 由其呈現根單一 owner 控制，不與 Container/Hand 同寫位置。
+
+**實際資料 consumer。** Combat.update_combat_display 讀 Global.player_data 及 HandManager 陣列，監聽 played/drawn/shuffled/discarded/exhausted、energy_changed/refunded；queue_end_turn 經 CombatEndTurn 等待卡及 actions。Tooltips.gd 的 component_tooltip_data 訂閱 HUD hover；Card._on_keyword_timeout → Tooltips.display_card_keywords → KeywordContainer.populate_card_keywords。KeywordContainer 直接別名 card_keyword_object_ids 再 append 推導 keyword，現碼確有預覽資料副作用；工作流已明列，不能宣稱零副作用。tooltip 邊界用 window_get_size，不能把 headless 預設視窗尺寸當目標 viewport。
+
+**退出 owner。** Combat 管回合排隊物件，Hand 管目標提示；Tooptips 管自建 KeywordTooltip。新增 HUD/tooltip controller 必須在 combat/run end、modal 接管與 Root 離樹清殘留；Root 的 action 清理不自動 hide tooltip，也不停止聲音。對未改的既有清理只寫已查得行為，不宣稱全部已安全。
+
+**專項驗收。** 同 A1 helper 在有效戰鬥開頭比對能量／牌堆／HP／money，再透過既有 `_play()` 與 EndTurnButton handler 驗更新值及 disabled／等待狀態；牌堆按鈕驗開的是 VIEW 且關閉零遊戲結果。KeywordData fixture 經 timeout handler 驗文字、個數、hide 後 queue_free；前後快照 keyword IDs、能量、pile、RNG、queue，先記既有 keyword mutation，再於修正後要求不變。多次展開、同 frame 換敵人、選取／tooltip 等待中離場各要 timeout 與重入斷言。現有 Combat 只測部分 handler，沒有 tooltip、幾何、focus 或聲音覆蓋。
+
+**A 的具體第一步與產物。** 在獨立候選先鎖一張既有 targeted card 與現有五卡戰鬥 fixture，寫卡層／HUD 節點和 request 語意契約，先建立上述 helper 呼叫再做框／圖／聲音接線。產物是候選 Card.tscn/呈現 controller（若需要）、圖像版本與 cue 契約資料、purpose_card_combat_probe.gd、Combat 的實際 caller；本輪只交這份計畫。待產品決定的是美術方向、cue 成功時點、尾音能否留至獎勵、最低字級／viewport 與是否要卡背／瞄準線，不阻礙讀碼及最小 fixture。
+
+## B：purpose-enemy-boss
+
+實際導航：scene-pack → combatants／animation、combat UI／combat-cues；enemy-design → EnemyData/EnemyIntentData/Combat；圖鑑由 combatants → CodexEnemiesMenu，再沿 UI 場景目錄 → menus-collection。普通敵、頭目和圖鑑以下各有七項，不能只驗其中一項。
+
+### B1 一般敵人的戰鬥套件
+
+**UI 組成。** Enemy.tscn 包 Visible/AnimatedSprite2D、子節點 SelectionButton/LayeredHealthBar/NameLabel/ImageFadeContainer，以及 Visible/Intent、Block、StatusContainer。根 minimum size 200×144，Sprite 位於 (99,128)，SelectionButton offsets 為 (-67,-64) 到 (69,64)，放大圖不會放大選取區。意圖五種 icon 和 IntentAmount、HP 條文字、格擋數字及 status charges 必須可對照規則。
+
+**圖像包。** 同一敵人身份交戰鬥 idle/attack/hit/death frames、意圖 icon、狀態 icon、格擋／血條樣式與選取提示；各狀態共同畫布、腳底原點、方向、透明邊與安全區。圖鑑裁切另列，不以 enemy_texture_path 代替 SpriteFrames。缺圖 fallback 不算素材採用成功。
+
+**聲音 cue。** EnemyIntent 的 enemy_intent_audio_path 在 Combat.perform_enemy_turn 交 AttackGenerator；無攻擊的意圖另外 generate_sound_action。每擊聲目前 Generator 與 Attack 皆有來源，非空路徑有雙播風險，需先選唯一出口。受傷採 combatant_damaged；全格擋與等額破盾分開，等額 HP 損失為零；死亡採 enemy_killed 或 death_animation_finished 擇一，不能相同音兩次。新增 recorder 必須在任何 Root ready／進場可播之前攔截出口或驗明 Dummy。
+
+**動畫時序。** Enemy.init 接 enemy_animation_id 的 SpriteFrames 並播 idle；AttackGenerator 先播放 attack，媒體 action 不等待完成。damage 沒自動 hit，hit 必須定義非致死／格擋／多擊／致死政策後補 consumer。死亡同時播逐格 death 與 Enemy/death AnimationPlayer；真正完成 signal 來自 Enemy._on_death_animtation_finished，不是逐格 finished。Enemy.res 為二進位，這次未解碼 method track，不能承諾逐格完整播完才結算。LayeredHealthBar 有 0.75 秒傷害延後及 0.25 秒 tween，也需與連擊／退出驗收。
+
+**實際資料 consumer。** EnemyContainer._spawn_enemy 無型別分支地 Scenes.ENEMY.instantiate，再取 prototype、套難度／HP 並 init。Enemy.gd:53 取 animation，59 行 damage，162 行 update_enemy_intent 用 EnemyIntentData display types 及 preview interception 算數字。BaseCombatant 的 status 容器與 custom UI 仍有自己的資料／owner，並非更換 body 圖即全部完成。
+
+**退出 owner。** 邏輯死亡先 remove_from_group("enemies") 並發 enemy_killed；呈現完成由 Combat._on_enemy_death_animation_finished 判斷剩餘非 minion，等 actions 後 end_combat。Enemy._on_combat_ended queue_free；EnemyContainer 在重建／run_ended 清子項。新增 hit/death controller、VFX、cue listener 由 actor/encounter generation 失效，不可讓晚到 attack 把 death 蓋回 idle。SoundManager 為 autoload，owner 要明確停止持續聲。
+
+**專項驗收。** 新 `tests/purpose_enemy_probe.gd` 先接 Combat 的 `_player_ready` 後與既有 `_play`／敵方回合／致死後觀察點；普通敵 fixture 明確 STANDARD、固定 HP/intent/animation。驗 frames 資源身份、意圖 icon/數字、HP/格擋/status 與選取區；真正攻擊、非致死受傷、全格擋、等額破盾、致死／多次傷害的 cue 次數與死後無舊回呼。受傷動畫若未補 consumer 就應失敗，不以手動 play_animation 代替真實 damage 鏈。Smoke 負責載入；Combat 負責真實動作；新增等待/退出責任另接 ResourceLifecycle。
+
+### B2 頭目的戰鬥套件
+
+**UI 組成。** 頭目仍是相同 Enemy scene，沒有特殊血條／phase HUD。必須獨立核大體型的 body、意圖、HP/格擋/status、SelectionButton、傷害數字、相鄰召喚物及玩家目標區；不能由 B1 通過推論這些幾何可用。需要專屬介紹可加 presentation wrapper，不能讓它接管未定義的 phase 規則。
+
+**圖像包。** 頭目有自己的大圖與 frames 裁切、原點、安全區及圖鑑版本。已追到 GlobalTestDataGenerator.gd:2280 的 enemy_act_1_boss_1：BOSS type、enemy_red_large.png、標準動畫生成；事件在 1019 行，採 positional placement，slots 為 (0,0)/(180,0)/(360,0)。因此開工可直接用這個實際頭目身份做大圖／召喚槽參照，不只把普通敵改名 Boss。
+
+**聲音 cue。** 頭目入場、召喚、每段攻擊、受傷／格擋、死亡可共用 combat cue 語意，但以頭目 actor/encounter ID 計數；曲目由 BOSS location 分支取得 act_music_boss_file_path 或 fallback，不能只改 enemy_type 就聲稱會播 boss 曲。native boss intent audio 目前空字串；要補聲音要新增採用素材與唯一出口，不能當現成有聲。phase cue 在沒有 phase consumer 時保持未採用。
+
+**動畫時序。** 已有原生頭目標準動畫由單張大圖 add_standard_animations 生成，不能稱它已具備完整攻擊／受傷演出。需交同原點 idle/attack/hit/death，head/boss intro 可採零時長立即展示的最小方案；如採新介紹序列，指定「鎖輸入→資料 ready→介紹→解鎖」及跳過／死亡中斷。hit/死亡優先和死亡 AnimationPlayer callback 限制與普通敵一樣，卻必須在大圖／頭目實例重新驗證。
+
+**實際資料 consumer。** 真實 native boss 先走 intent_initial→intent_summon，custom action 生兩隻 minion 到 slots 1、2，再轉 intent_attack（有 7 block 與多擊）；EnemyData.type 不建立 phase 狀態機。接頭目須同時固定 EnemyData、EventData、BOSS LocationData 與 Act/event pool 鏈。現有 tests/combat_fixture.gd 只 new EnemyData 且不設 enemy_type，故是 STANDARD；其 65HP/14×1 的勝敗證據不可移植為頭目證據。
+
+**退出 owner。** 頭目死亡仍由 actor death callback→Combat 判定非 minion→actions 完成→combat_ended；只剩召喚物是必測結束情境。頭目介紹／震動／phase 候選控制器的退出 owner 是 encounter，死亡與 run end 先失效 generation、解除其輸入鎖；循環聲由音訊 owner 停。事件是否接幕尾／通關為 location/reward 流程責任，不能由 body 死亡圖片自行發 run_victory。
+
+**專項驗收。** 在 `purpose_enemy_probe.gd` 增加獨立 boss 情境，不能沿普通 fixture 的 PASS。建 `tests/purpose_boss_fixture.gd`，以 native enemy_act_1_boss_1／event_act_1_boss_1 為資料起點，固定 difficulty、seed、足夠存活的玩家與合法測試牌組；保留 slots 與 summon→attack，先核實實際 intent override（現有難度 cache 風險已由 enemy-design 明列），不假定 difficulty=0 一定得 3×2。建議由 runner owner 在現有 Combat 套件增加隔離的 CombatBoss 階段：沿用 combat_flow.gd script mapping 和 COMBAT PASS marker，傳 `--scenario=purpose-boss`，同步 results manifest；combat_flow.gd:_main 的 scenario 白名單加入該值，在 autoload/observer 就緒後原 `_scenario()` 呼叫處分流為 runtime load、await boss helper，結果逐項交原 `_check`，仍走原 Root cleanup/_finish。這些 runner/caller 變更是待實作，不存在可直接跑的 Boss suite。走真實 BOSS location 到生成、召喚、攻擊、非致死 hit、格擋、死亡，驗 actor type、資源、意圖、HP、選取與死後退出，普通敵和頭目分開輸出斷言。頭目最後勝利不得沿用原五張牌與 65HP 的硬編碼期望。
+
+### B3 圖鑑不是戰鬥身體
+
+**UI 組成。** Root/TitleScreen/CodexMenu 下 CodexEnemiesMenu 包按 Act 的敵人按鈕、名稱、TextureRect、HP 範圍、意圖開關與清單。圖像區使用父容器與 anchor_top=0.15、bottom=0.85、right=1.0，沒有可直接宣稱為固定戰鬥 200×144 的圖鑑尺寸。
+
+**圖像包。** 普通敵與頭目各有靜態 enemy_texture_path 裁切及同身份版本；不能用戰鬥 idle 成功載入代替圖鑑成功。長名稱、大小兩體型、意圖清單與空資料都有自己的版面界線。
+
+**聲音 cue。** 最小採用契約為圖鑑無 actor 攻擊／受傷／死亡音，導航確認可明確保持靜音或沿單一 menu cue owner；選中敵人不發戰鬥事件。若採導航音，快速切換只記最新接受操作，不從 texture 更新重播。
+
+**動畫時序。** 現有 populate 為立即更新，BaseMenu intro/outro hooks 預設 null；最小採用直接呈現。若要淡換圖或頁面 transition，新 owner 保存所選 enemy ID/generation，取消舊 Tween，不能沿已 queue_free 的意圖列播放。
+
+**實際資料 consumer。** CodexEnemiesMenu.gd:38 從 Act.get_act_all_enemy_ids 列表生按鈕，77 行 populate_codex_enemy 讀 enemy_texture_path／enemy_name／HP上下限；84 行生意圖列並略過 initial 與非零難度。僅 Global.register_rod(enemy) 不保證它出現在圖鑑，還須接到 Act 的 enemy/event pool 鏈。
+
+**退出 owner。** CodexEnemiesMenu.clear_menu 走 BaseMenu 隱藏並 queue_free 按鈕／意圖列；BaseMenu 導航管理子頁。新增選取換圖／聲音 controller 由該 menu 清除。clear_menu 不會清 texture/name 的資料值，只使頁面不可見；若需求是清敏感/舊資訊，另加重置，不能誤稱已全部清值。
+
+**專項驗收。** 新 `tests/purpose_enemy_codex_probe.gd` 在 Smoke `_run()` Root ready 兩 frame 後、`_check_example_mod(character)` 之前 runtime load，經 `_check` 累積結果。fixture 把普通敵及頭目放入有效 Act/EventPool，走 populate 與實際選敵 handler，分別核 texture 非 fallback、名稱、HP、意圖列；切頁→等 queue_free→重入不得疊列、無戰鬥 action/cue。這個 helper 和 Combat boss helper 是兩份覆蓋，不能互代。
+
+**B 的具體第一步與產物。** 先把 STANDARD 與 native BOSS 資料／場景根／圖鑑入口列成兩個明確測例，建立上述三個 helper/fixture 及 caller，鎖定大圖與選取 rect 後再製作素材。交付應含普通與頭目各自的 frames/圖鑑裁切、actor cue/時序契約、damage→hit/death 控制器候選及兩類完整觀察結果。產品未決為 phase、特殊頭目 HUD、介紹可否 skip、死亡／hit 優先細節與音訊優先；沒有要求時採原生規則與明確無額外 phase，不能因缺 phase 設計而捏造系統。
+
+## C：purpose-dialogue
+
+實際導航：scene-pack → ui/screens/dialogue、art-assets/interface-assets、audio/dialogue-cues、scene-choreography → motion/dialogue-shop；事件資料從 level-design/noncombat 追到 DialogueData、State、Option 與 generator；驗收由 ui/verification 接 Smoke。
+
+### C1 敘事圖／身份名稱／正文／選項與兩狀態切換
+
+**UI 組成。** Root.tscn:2338 的 DialogueOverlay 有 DialogueNameLabel、DialogueTextureRect、DialoguePromptLabel、DialogueOptionContainer；圖窗為 (88,144) 到 (544,600)，即 456×456，選項逐個實例化 DialogueOption.tscn。Name 目前是事件名稱，不是角色姓名。最小採用「事件敘事圖＋事件名＋正文＋選項／失敗理由」可以開工；如產品要求說話者姓名，必須另設 speaker/portrait mapping，不能偷用事件名冒充角色。
+
+**圖像包。** 交 state_a 與 state_b 各一張敘事圖、同版本 panel／名稱框／本文框、選項 normal/disabled/focus 樣式及長文安全區。框沿現有程式樣式也可。若採人物頭像則另定左右槽、表情與 speaker ID consumer；沒有現成欄位。兩個非空圖狀態必驗，另以空圖案例定義沿用／清空／隱藏；現碼空 path 保留前圖。
+
+**聲音 cue。** start_dialogue 成功 populate 後 dialogue_started 才是進場 cue；populate 不等於新進場。有效選項接受、效果完成抵達 state、正常結束分開，閱讀預設可明確靜音。DialogueOption 禁用時完全不發 click，因此拒絕音要新增輸入邊界通知；不能直接聽 dialogue_option_clicked 假裝含失敗。沒有 voice/逐字/line-finished 事件，採用時需新 schema 與 owner。事件 music override 的現碼錯取 act_data.event_music_file_path，audio/music 已指出，使用覆蓋時須先修測。
+
+**動畫時序。** 現況文字 parse_bbcode 一次顯示全文、圖同步更新、選項立即生成；可採零時長完整靜態展示。若新增淡換圖／逐字，流程為 panel→姓名與圖同步→正文→合法選項開放；確認是補全文還是選分支屬產品決策，不能在逐字未完時意外執行 option。新 state 先取消舊代回呼，BBCode 不能用任意切字截斷 tag。
+
+**實際資料 consumer。** DialogueOverlay.gd:23 從 current EventData.event_dialogue_object_id 取 DialogueData/initial state；53 行讀 dialogue_name_bbcode、state prompt/texture/options；DialogueOption.gd:20 只在 init 驗 validators，顯示一般或 failed-validator 字串，37 行在 enabled 且 left_click pressed 發 signal。Overlay:108 建以 Player 為 source/target 的 actions，等 actions_ended 後查死亡與 next。資料 schema 已完整定位，可建立 a→b→空 next，但沒有通用再次驗證／交易回滾。
+
+**退出 owner。** 同一 DialogueOverlay 管圖片、本文、選項與 state/data 參照，新增演出/音訊 owner 使用 dialogue ID + state ID + generation。切 state 清前 options（延後 queue_free）、停舊圖文/音訊回呼，再建新內容；不能只讓舊圖片透明卻保持舊選項可點。分支等待中的一次提交保護尚須實作，現有 handler 無鎖。
+
+**專項驗收。** 新 `tests/purpose_dialogue_probe.gd` runtime load 在 Smoke 的 Root ready 兩 frame 後、example mod probe 前，`await probe.check_scene(game_root)` 的 label/bool 逐項送 `_check()`。helper 先建立有效 run/player/Act/location/Event/DialogueData，讓 Global 當前地點指向 fixture 後走真正 EVENT location signal，不只 visible=true。a/b 兩合法 state 各有不同非空圖與正文；有效 option 做可計量的單次資源 action 並 next=b，禁用項保留失敗原因且零 action，b 有無效果空 next 正常出口。驗 state/文字/texture、效果一次、進場一次、重繪零新增進場 cue；負例另驗空圖、零合法項 fallback、missing initial state（目前會解參照 null，應先紅測再補 guard）、長文與多選項。現有 Smoke 沒有這些分支斷言。
+
+### C2 正常完成、死亡與離場中斷
+
+**UI 組成。** 正常結束隱藏 overlay 並返回地圖；死亡不應開放旅行，等待中離場或 run end 不可讓舊分支改新對話。沒有通用 Back/Skip/Esc；正常離開必須是明確空 next 的 option，錯誤 fallback 離開不是正常產品設計。
+
+**圖像包。** 不額外強製完成／死亡圖片；最小方案隱藏整組敘事 UI，正常 Map 或死亡 RunSummary 各有原本 owner。新增結束淡出或取消遮罩要列透明度／輸入還原；重入須顯示新狀態圖，不能帶上舊圖。
+
+**聲音 cue。** end_dialogue→dialogue_ended 可作正常收尾；run_started/ended、player_killed、非 EVENT location 的 reset 是中斷，不能一律當成功結束音。新增語音／環境 loop 必須撤銷 pending cue 並停止 handle，不能依 overlay.visible=false 期待 autoload 音訊停止。分支 action 致死時 Overlay 仍可能在 await 後發 dialogue_ended，正常收尾 owner 要核玩家存活與 generation，不能只數該 signal。
+
+**動畫時序。** 正常出口先確保已接受 action 完成，然後結束；致死／強制離場即取消純視覺延後工作，不等待永遠不會來的 animation_finished。採淡出時保存唯讀畫面或延後清理的 owner；原本 reset 立即 hide/queue_free，不能在已刪 option 上排 Tween。重入還原 alpha、位置及輸入，舊回呼只能失效，不能推進新 session。
+
+**實際資料 consumer。** Overlay:151 reset 清選項、prompt、圖回 icon.svg，state/data=null 並隱藏；沒有清 dialogue_name_label 本身，下一次 populate 會覆寫。這是現況，不把「完整清值」需求寫成已實作。Map.gd:131 的 dialogue_ended consumer 查 player.is_alive，活著才 can_travel=true/show_map，死者 hide_map；Player 的 death animation callback 接結算。Overlay await 後沒有 token/節點有效性/current_dialogue_data guard，run end 或轉到新 EVENT 後舊 coroutine 可能用 null／新資料繼續，文件已明列待修。
+
+**退出 owner。** Overlay.reset_dialogue 是新 generation 的單一取消入口；所有開始／正常結束／死亡／離場均應經它失效舊回呼。Map 只管後續旅行，Root._exit_tree 清全域 actions/interceptors；reset 本身目前不清 actions，也不給既有已提交效果回滾。新待選／音訊／逐字 owner 各自停止，不能為取消演出撤回已接受的遊戲結果。
+
+**專項驗收。** 同 dialogue helper 增加具有可控等待的 action fixture：正常 b 空 next 驗一次結束、地圖可旅行、無 pending action；致死分支驗 overlay 隱藏、Map 不可旅行/不可見、無正常完成 cue；等待中 run_ended、非 EVENT 離場、關閉後新開對話，驗舊 generation 不更新新文圖、不重複成本/獎勵、不留下等待／listener／Tween。ResourceLifecycle 另加對話 owner 的取消斷言，現有 ResourceLifecycle 不能自動涵蓋新增控制器。只直接 emit player_killed 不足以驗真實致死效果，需走實際 action 改 HP。任何未來背景執行仍先核無聲與焦點邊界：Map._restore_scroll 有 grab_focus，需由 runner/fixture owner 採符合當時授權的測試 seam，不能以走真實流程為由違反目前禁焦點規定。
+
+**C 的具體第一步與產物。** 先以既有事件模型做 a/b 兩狀態 fixture，將 action-await 中斷／重入紅測放在最前，給 DialogueOverlay 加 session token、接受鎖及 await 後有效性檢查的候選設計，再接圖文與 cue。產物為 DialogueData fixture／資產路徑表、purpose_dialogue_probe.gd 與 Smoke caller、Overlay 的最小 session controller 候選；若需角色姓名/頭像則另交 schema/節點映射。產品未決為說話者模型、空圖政策、逐字/語音是否採用、skip 語意、正常收尾/中斷尾音。最小事件敘事方案與測試建構不必等這些新增能力定案。
+
+## 綜合缺口與交付限制
+
+各工作流已能導向七項必要契約，且多數實碼陷阱有明確「待實作」標示。本輪未把它們誤判成文件阻塞：攻擊雙音、hit 無 consumer、死亡優先與 method track 待核、CardTrail 清理、keyword mutation、對話重入／await guard、空圖沿用、missing initial state，以及 event music override。現有 code 的不足不是自動的冷讀 FAIL；若文件假稱它已完成，或完全缺 owner/consumer/驗收鏈，才是開工阻塞。此輪沒有發現這種必要鏈斷裂。
+
+值得 owner 保留的精確邊界是：普通敵／BOSS／圖鑑測例三者獨立；頭目 type 不等於 BOSS location 曲目；圖鑑列項依 Act pool 而非全敵人 registry；對話 reset 沒清 name label、也沒取消已提交 actions；正常結束 signal 在致死分支也可能被發出，所以成功 cue 要含存活／generation 條件。這些已在本報告給出實作及斷言接點，未修改凍結文件或遊戲。
+
+實際查核為 source 靜態閱讀與交叉搜尋，不等於待建 helper 已運作。後續有引擎授權並完成無聲／焦點邊界後，才可執行 `./tools/test-game.ps1 -Suite Smoke`、`-Suite Combat`、`-Suite ResourceLifecycle`；helper 須被現有入口實際呼叫且經 `_check` 影響 PASS/exit。runner 只複製頂層 .gd，沒有 UI/Audio/Dialogue/Boss suite。不得現在寫出不存在套件的命令或直接宣稱現有 All 蓋住新用途。

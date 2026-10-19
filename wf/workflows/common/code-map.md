@@ -35,7 +35,11 @@
 
 [設計來源核實](../../../analysis/slay-the-robot/design/README.md) 串接卡牌／升級／卡包、EnemyIntent／EventPool／Map、圖像／UI 與聲音。未來 agent 先選 [領域工作流](../game-dev/README.md)，再沿該篇指向的實作與資料讀取；資料欄位存在不代表已有完整消費端。
 
-圖像與 UI 的主要接點為 FileLoader、AnimationData、Card／Hand、Root 與 theme；音訊為 [SoundManager](../../../game/addons/sound_manager/sound_manager.gd)、FileLoader 與 SettingsMenu。實際路徑、資產尺寸及未接完整的 API 集中在呈現／音訊分析，不在此重複維護。
+靜態美術沿 [素材製作](../game-dev/art-assets.md) 查 FileLoader 與資料消費端；人物動畫及短效分別沿 [動畫](../game-dev/art-assets/animation.md)、[特效](../game-dev/art-assets/vfx.md) 查 AnimationData、BaseCombatant、AnimatedCombatEffect 與 Action 接點。實際尺寸、播放／等待與回收契約保存在各領域分析。
+
+UI 的 [元件／版面與互動入口](../game-dev/ui/README.md) 導向 Root、Card／Hand、HUD、theme 與 CustomUIData；音訊的 [製作與接線入口](../game-dev/audio/README.md) 導向 [SoundManager](../../../game/addons/sound_manager/sound_manager.gd)、FileLoader 與 SettingsMenu。同一出牌事件跨領域時先用 [演出整合](../game-dev/presentation-delivery.md) 明定觸發及停止責任，不能把素材載入當成完整事件驗證。
+
+任務是完整對話、商店、戰鬥等畫面時，從 [完整場景製作](../game-dev/scene-pack.md) 分派到各用途子流程，以同一狀態轉移串接圖像包、UI、聲音和動畫；基礎元件流程不代替完整畫面的資料與操作契約。
 
 
 ## 真相層優先序

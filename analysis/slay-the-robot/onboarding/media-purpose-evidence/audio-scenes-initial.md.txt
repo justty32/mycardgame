@@ -1,0 +1,19 @@
+# 聲音場景用途冷讀缺口（擴充前）
+
+2026-10-19；接續使用者要求以完整場景用途派發。原 audio.md → audio/README.md → sfx/music/mixing 已能處理格式、播放器、事件語意與驗證，但對話、商店等需求仍須自行拼出整段聲音流程。原 audio-initial.md 保留凍結，不重寫先前結果。
+
+## 對話與商店
+
+對話需要組合進場、文字節奏或語音、選項確認／拒絕、分支、結束及中斷；現流程未把 DialogueOverlay、DialogueOption 與播放 owner 串起來。實碼直接 parse_bbcode，沒有逐字顯示或語音欄位；disabled 選項不 emit clicked；選項 actions 完成後才換 state，死亡／run／離開節點會 reset。不能宣稱已有逐字音或配音接線。
+
+商店需要瀏覽、接受購買、買不起／欄位滿、商品移除、退出整組聲包。BaseShopButton 只排 action，ActionShopPurchaseItems 判錢及消耗品欄位，purchased signal 在新增扣錢／取得 actions 並移除商品後送出；不是所有庫存與金錢變化都已完成。UI 收到 purchased 等 actions_ended 再重建。沒有通用 purchase_failed 或 sold_out 音訊事件；不能在所有 money_changed 播成交音。
+
+## 戰鬥與其他畫面
+
+sfx 已具出牌與命中語意，仍缺戰鬥進場、回合、死亡、勝敗與戰後獎勵作同一聲包的優先／中斷策略。其他畫面需明確區分獎勵打開與領取、draft 選中與 skip、地圖檢視與真旅行、休息接受與完成、選角初始化與手動切換、暫停設定與結算。NewRunMenu populate 會自動 emit 第一個角色 button_up；不能將每次角色音視為使用者選取。
+
+## 修正計畫與邊界
+
+新增 combat-cues、dialogue-cues、shop-cues 與 screen-cues，場景用途先派發，再沿既有 sfx/music/mixing 共用技術契約。對話與商店各自有狀態機、失敗與聲音停止責任，獨立成篇；其他較短畫面組合收 screen-cues。每篇寫實際接點、聲包規格、唯一 owner、視覺替代、停止／中斷及可接入的斷言情境，不建空 cue 表。
+
+本輪只有來源核實與文件；沒有 Godot、播放、資產生成、桌面／UI／焦點操作、既有程序控制，也不改 game/tests/tools。後續獨立冷讀和 runtime 音訊驗收分開。

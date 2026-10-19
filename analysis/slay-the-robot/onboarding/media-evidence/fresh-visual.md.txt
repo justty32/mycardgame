@@ -1,0 +1,75 @@
+# 美術／動畫／VFX 首次接手獨立復走
+
+日期：2026-10-19。驗證者為未參與本輪文件撰寫的獨立 agent。先讀根 AGENTS、agent-session 及其核心規矩，再從 WORKFLOWS 依需求循導航到領域工作流、分析與實碼。本輪未讀 artifacts/media-audit 的任何既有報告、onboarding/media 類報告或前任結果。只寫本報告；未改 wf、analysis、game、tests、tools，未啟動 Godot、生成素材、開啟 GUI、截圖、播放聲音、控制既有程序或 commit／push。
+
+本機 `git -C game rev-parse HEAD` 為 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`；status 顯示 13 個既有修改檔，與本機修復背景相符，但本報告不宣稱逐一重新驗過補丁 hash。來源鎖為 tools/upstream.json；判讀依當前實碼而非僅依 SHA。
+
+## 首次判定（保留，不覆寫）
+
+情境 A：**PASS，可交可開工計畫**。情境 B：**PASS，可交可開工計畫**。情境 C：**PASS，可交可開工計畫**。此 PASS 不表示素材已製作、遊戲功能已實作、測試已執行或呈現已驗收；只表示首次接手能找到第一步、具體接點、owner、需補驗的斷言與未支援能力。本輪沒有發現阻止三情境開工規劃的文件缺口，不提出為了增加文件而增加文件的修補。
+
+範圍註記：初次報告完成時主 agent 傳達新增需求，要求按卡框＋卡圖、敵人圖、UI 圖像等實際用途及完整場景音畫流程進一步分流。本報告只保存原三情境的基準，沒有驗證新增需求已充分涵蓋；後續擴充應另做獨立復走，不能由本輪三項 PASS 外推。
+
+## A：原創方向及卡圖／角色頭像／圖示／背景批次
+
+實際入口為 `wf/WORKFLOWS.md → game-dev/README.md → art-assets.md → art-assets/README.md → style-guide.md → static-assets.md`；再沿領域連結讀 design/art-production.md、content/bootstrap.md、validation.md、testing.md。方向流程將核心題材未定與工程選擇分開，也明確要求各類代表樣本先走完整鏈；足以避免拿框架機器人占位圖當成原創定案。
+
+可立即做的第一步是建立任務 brief，寫清已定題材、玩家需讀懂的主體、四類資產的用途與數量；若原創題材尚未決定，先交少量文字候選與比較依據，不捏造既定世界觀。之後固定 style v1 的輪廓、比例、光源、色盤、材質、細節密度，以及各類的實際尺寸、裁切安全區與透明政策。先製作每類一件真實待交付代表，再批次；目前本演練僅能交文字方向與製作計畫。實作時才依當前 imagegen skill 或原有 SVG 工具製作，不能以工具可用替代需求授權。
+
+第一批產物會是 brief、風格版本、代表樣本及其檢查紀錄、母稿及遊戲輸出、來源／權利／處理工具／hash 紀錄。批次同質紀錄超過 1 KB 時使用 wf-table/1、以 tabledb 讀寫；不是新增遊戲 schema。遊戲輸出使用 `game/external/mods/<mod_id>/sprites/<用途>/<內容_id>.png`，JSON 內填 `external/mods/...` 完整專案相對路徑。新 mod 的 mod_info、mod_list 登記與 properties／patch_data 包裝能沿 bootstrap 直接完成。
+
+卡圖接 `game/data/prototype/CardData.gd:8` 的 card_texture_path；`game/scripts/ui/card/Card.gd:82` 的 update_card_display 等一個 process_frame 後載入。`game/scenes/ui/card/Card.tscn:145` 實際圖框左右 24–120、上下 12–108，即 96×96；CardName 子節點 top=-4、bottom=12，故文字遮擋需納入安全區。接線 owner 為內容資料及 Card，文字由 UI 維護，不烘入圖。
+
+頭像接 CharacterData.character_icon_texture_path，由 `game/scripts/ui/CharacterSelectionButton.gd:11` 的 init 實際消費；character_background_texture_path 在資料內存在，但 scripts 搜尋沒有消費者。故這次「頭像」可以直接接，若擴成選角立繪則需要 UI 新接線，不能只填欄位。戰鬥身體是 character_animation_id／enemy_animation_id，敵人圖鑑才是 CodexEnemiesMenu 的 enemy_texture_path；文件已把三者區分清楚。
+
+圖示依用途接 ColorData.color_energy_icon_texture_path，實際消費為 Card 費用、Combat 能量及描述 BBCode；狀態接 StatusEffectData.status_effect_texture_path／status_effect_negative_charges_texture_path，get_status_effect_texture_path 在負層數選負圖。KeywordTooltip 直接用一般圖，不應假定同步負圖。敵意圖是 Enemy 既有映射及 Enemy.tscn 資源，沒有通用任意 texture JSON 接點。
+
+背景接 ActData.act_background_texture_path、`game/data/mutable/LocationData.gd:30` 的 location_background_texture_path、EventData.event_background_texture_path。`game/scripts/ui/Combat.gd:111` 明確採 Event 覆寫 Location 再覆寫 Act，全部空白時不更新 BackgroundButton。此保留前圖風險與文件一致；計畫須驗切換及空值，但不把未 runtime 重現寫成已修 bug。主選單另找 scene，不套用 Act。背景 owner 仍保留 BackgroundButton 的互動責任。
+
+載入與生命週期方面，`game/autoload/FileLoader.gd:133` 以完整路徑 cache；有檔但解碼失敗可能生成空 ImageTexture，故非 MISSING_TEXTURE 本身不充分。替換用新隔離載入驗證，不操作既有程序。靜態素材沒有額外播放／等待 owner；Card 的延遲刷新是明確等待點，UI 場景持有 texture，FileLoader 持有 cache。
+
+驗收先完整解碼、長寬、alpha／非全透明與 hash，再加入 Smoke 的目標 helper。插入點已由 bootstrap 精確指定為 framework_smoke._run 起始牌組解析後、example_mod 前，helper 經既有 _check 累計。新增斷言要驗實際 loader 非 fallback 且尺寸符合、Card 刷新後的 texture、角色按鈕 texture、每個共用圖示消費端、背景三層覆寫與全空切換。指令為 `./tools/test-game.ps1 -Suite Smoke`，不存在素材專用 suite；本輪未執行。視覺辨識、批次一致性、透明邊、最小圖示可讀性、實際背景對比及發行 external 打包仍待驗。這些能力及證據限制已明列，因此不構成文件阻塞。
+
+## B：idle／attack／hit／death 逐格及戰鬥接線
+
+入口為共通 art-assets 鏈的 `animation.md → analysis/slay-the-robot/design/animation.md`；資料接線接 bootstrap，新增觸發／等待接 mechanics.md 及 resource-lifecycle.md，測試接 validation／testing。最小四狀態 JSON、mod_info 映射與人物引用例子都能從此鏈找到，不必猜 schema。
+
+第一步是選實際角色或敵人並填狀態規格：共同畫布、腳底／重心、朝向、frame 順序、fps、各格相對 duration、next、重播／中斷政策，以及命中是否需要指定接觸格。可用文件的示意 animation_media_probe 先驗載入；若選 enemy_1，改其 enemy_animation_id；若選 character_red，改 character_animation_id。這些示意 ID 不是本輪已建立的原創內容。
+
+產物為逐張 frames、母稿與切片參數、`external/mods/<mod_id>/animations/<animation_id>.json`、人物資料 patch、mod_info／mod_list，以及測試 helper。`game/autoload/Global.gd:33` 將 AnimationData 對到 _id_to_animation_data；ready 先 generate_test_data、再 load_read_only_data、最後 generate_all_animations。`game/data/readonly/AnimationData.gd` 讀 _animation_data 中 animation_texture_file_paths、animation_frame_durations、animation_fps、animation_next_animation_name；frames 順序就是陣列順序。idle next 自身、attack／hit next idle、death next 空，duration/fps 才是單格秒數。缺 duration 補 1；同 next 設 loop；註解的 animation_speed_scale 沒有消費端。
+
+實碼核對到 add_animation 的 self-comparison loop 疑點；regenerate_animations 另以 animation_name 比 next 正確重建。測試應查正式載入後的 SpriteFrames，而非 helper 當下物件。人物資料持有最終 SpriteFrames；`Player.gd:23` reset_player、Enemy.init 設 sprite_frames 並播 idle，`BaseCombatant.gd:44` play_animation 直接 sprite.play，finished 在 :60 查 next。animation_offset 只有特效使用，不能拿它修人物腳底。Player／Enemy.tscn 的選取區獨立於圖大小；圖片放大不會自動擴大 SelectionButton。
+
+觸發 owner 已可定位：ActionAttackGenerator 播 attack_animation_name；per_attack_animation_name 可逐擊播，兩者需避免雙播。ActionPlayAnimation 是 instant BaseAction；ActionHandler 先 perform，再等待 action 的 time_delay 或 process_frame，完全沒有動畫末幀／接觸格自動扣血契約。hit 沒有內建常數或 damage 自動播放；本情境「四狀態接戰鬥」因此需要實作新的受傷接點，先定義未格擋、完全格擋、致死、多擊以及死亡優先政策。這是已明列的工程工作，文件已提供對應入口，不是資料一填就完成。
+
+死亡 owner 與逐格 finished 不同。Enemy.damage 在血量仍為零且 death_animation_player 未播時播 sprite death 及 Enemy/death，移 enemies group 並發 killed；Player.play_death_animation 受共用 animation_player.is_playing guard。兩個 `_on_death_animtation_finished` 才發死亡完成信號；Combat 收敵死亡完成、可能等 actions_ended 再結算，RunSummaryOverlay 收玩家死亡完成顯示敗北。Player.res／Enemy.res 的二進位 method tracks 時點未解碼，計畫第一個 runtime 檢查應列 tracks、length、method keys，再測完成 signal 一次；不能宣稱延長 death frames 就自動延長結算。
+
+若要動畫或接觸格等待，新的 BaseAsyncAction 是等待 owner；沿 begin_async_action／finish_async_action／force_action_end，取消先設 async_cancelled、解除自建 signal／timer，晚到回呼不再扣血。ActionHandler generation guard、Root._exit_tree 清工作只保護 action，不是 sprite 狀態機。普通同名 play 沒有重設 frame 的 wrapper，因此連擊重播及 death 不被 hit 覆寫也都要具體實作、測試。
+
+新增 Smoke helper 驗人物引用與同一 SpriteFrames、所有 track、frame 數、fps、duration、loop、next、非 fallback texture；時序 helper 用 timeout 驗 attack→idle、同名連播、hit／death 中斷、死亡完成一次、離樹無等待。Combat 走真實攻擊並同驗 HP／block，證明動畫改動沒偷改規則。涉及等待／取消再加 ResourceLifecycle。命令為 `./tools/test-game.ps1 -Suite Smoke`、`-Suite Combat`、`-Suite ResourceLifecycle`，本輪均未執行。sheet 自動切片、骨骼、通用補間目前沒有現成契約，需離線切格／烘焙或新機制；視覺連貫、接觸感與實際 method track／長死亡結算仍未驗。足以開工，不足以聲稱四狀態已接好。
+
+## C：命中／格擋／狀態 VFX、投射物與中途離場
+
+入口為 art-assets 下 `vfx.md → design/vfx.md`，交叉接 animation、bootstrap、mechanics、resource-lifecycle 與 presentation-delivery。第一步是為每個效果寫語意 brief：攻擊嘗試、實際扣 HP、獲得格擋、完全格擋、破盾或狀態成立；明定每卡／每擊／每目標計數，重複時疊加或刷新，開始／峰值／消失、最大壽命及上限。投射物先明定傷害仍在原時點或改為抵達才結算，不用視覺長度暗改規則。
+
+可先做一個已確定目標的短效切片。AnimationData 使用 animation_default、非空 frames、正 fps、next 空且最終 loop=false；既有示例 animation_vfx_impact_default 可查 generator。卡牌在 CardData.card_values 填 impact_vfx_animation_id，走 ActionAttackGenerator；獨立短效用 Scripts.ACTION_CREATE_EFFECT_ANIMATION 及 target_override。真正產物是資產／動畫 JSON／卡資料 patch、trigger 契約與專項測試；投射物另需新 scene、action 與生命週期實作，沒有可直接填的 projectile schema。
+
+實際建立鏈為 `ActionCreateEffectAnimation.perform_action → _intercept_action → target.create_effect_animation → Global.get_animation_data → Scenes.COMBAT_EFFECT_ANIMATION.instantiate → image_fade_container.add_child → init`。`BaseCombatant.gd:193` 擋不存在 AnimationData；`AnimatedCombatEffect.gd` 播 animation_default，offset 為 animation_offset 加隨機位移，finished queue_free，既不回效果 handle，也不讀 next 狀態。父節點為 Player／Enemy 的 Visible/AnimatedSprite2D/ImageFadeContainer，局部掛點受父層 transform 影響。投射物共同 scene owner 需要把來源與目標轉到同座標系，不能沿用局部 offset 當全場位置。
+
+順序已追實碼：generator 每擊先 append Attack、可選聲音／人物動畫、最後 VFX；ActionHandler 預設逐項 push，pop_back 反序，因此 VFX 先於 Attack.damage。二者分別攔截與選目標；RANDOM_ENEMY 各自抽樣，ALL_ENEMIES 各自取當下存活對象。故「傷害拒絕則無 VFX」或「一定同一隨機目標」不能由目前資料保證；若需求如此，要由機制 owner 先固定共同已決定目標與結果點。preview 必須走查詢路徑、不 perform；成功出牌入口則沿 Hand／HandManager，不能直接 spawn 代替拒絕路徑驗證。
+
+格擋／狀態 owner 也能定位。Player／Enemy.add_block(amount>0) 已有 create_block_fade 及 combatant_block_added；damage 中 block>damage 發 combatant_blocked，等額走 combatant_block_broken 且零 HP 傷害，實際扣血才發 combatant_damaged。新格擋 VFX 要選這些結果點且避免舊 ImageFade 雙播。BaseCombatant.add_status_effect_charges／add_new_status_effect 寫實際 charges、清零時 _remove_status_effect；StatusEffect 僅更新 UI，無狀態 VFX ID 消費鏈。持續效果可在真正成功變更後註冊 handle，以 status 實例／目標為 owner，刷新及 _remove_status_effect 必須收回；不要綁 enemy_intent_changed 泛用刷新而重播。
+
+短效現有清理 owner 是 AnimatedCombatEffect 自身 finished，父戰鬥角色 queue_free 亦會帶走子節點；ActionHandler.clear_all_actions 不持有這些效果。Enemy 在 combat_ended queue_free；Player 同事件只清狀態／block，不清 fade 容器。缺 animation_default 只 log 不 queue_free、loop 不發 finished，均有已記錄風險。新持續／投射物效果的 owner 必須負責目標死亡、狀態移除、combat／run 結束、Root 退出、中途取消及晚到 callback；清 timer／signal／Tween、還原改過的材質後釋放。若抵達等待使用 BaseAsyncAction，完成／取消 exactly-once 且取消後零新傷害；不能把 clear 行動誤稱已清 VFX。
+
+測試接點具體可用：framework_smoke 的新 helper 驗真正 loader／track／非 loop；combat_fixture 是原生五牌及單敵 fixture，須改專屬情境讓新資料真的被用到。combat_flow._play 走 card_selected 和敵人按鈕 handler，_reject_unaffordable_card 與 _wait 提供費用拒絕、有限 timeout 骨架。觀測實際 ImageFadeContainer child_entered_tree、效果 ID、target instance ID、damage 順序與弱參照，覆蓋單擊、多擊／merge、全體、隨機、致死後剩餘擊、費用不足、無效目標及攔截拒絕。
+
+ResourceLifecycleCases 的 effects 計數只是測試 interceptor 副作用，並非 VFX 節點；必須新加節點觀測。先斷言短效在 deadline 內自行回收，再 free fixture，另驗取消前尚未 spawn 零次、已 spawn 按約立即清除或限時結束、同 frame 離場／重入、晚到 callback 及重複取消。固定 suite 只有 All／Dictionary／Combat／SaveLoad／Smoke／ResourceLifecycle；runner 複製 tests 頂層 .gd 不會自動執行 helper，必須實際接入 run 函式。所需命令仍為 Smoke、Combat、ResourceLifecycle，本輪未跑。
+
+投射物、持續光環、粒子、shader、相機震動及全畫面管線目前是新增機制工作；文件沒有把它們誤稱已支援。視覺峰值／軌跡、透明邊、資訊遮擋、無閃爍、最壞並發及目標 GPU 性能也不能由 headless 或靜態估算證明。三情境中 C 的工程範圍最大，但入口、起始契約、具體可改實碼與測試骨架已足夠，因此首次判定仍為 PASS（可開工計畫）。
+
+## 檢查證據與界線
+
+實際執行的是 PowerShell Get-Content、rg／rg --files、Git 唯讀 status／rev-parse。曾有兩次 rg 路徑選擇錯誤：逗號串接兩個 GDScript 路徑，以及先猜 LocationData 在 readonly；已分別用分開參數與 rg --files 改正，LocationData 確認在 mutable。這是查核操作修正，沒有當成文件故障。
+
+所有結論來自本輪檔案閱讀與靜態交叉核對，沒有執行既有 suite、全倉 lint、解碼二進位動畫 library 或新素材。報告沒有借用歷史 runtime PASS。未找到真文件阻塞，故目前不要求原 owner 修補；若後續出現實際矛盾，應保留上述首次判定並追加獨立復查段落。

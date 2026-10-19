@@ -1,0 +1,19 @@
+# UI 首次接手冷讀 — 補文件前
+
+2026-10-19；只讀 wf 與既有 presentation 分析後記錄，尚未追讀本輪原始碼。入口為 WORKFLOWS → agent-session 核心規矩 → game-dev → ui → ui/README。共同 SESSION-LOG 由主 agent 維護。禁止啟動 GUI、Godot、桌面、截圖、焦點、音訊及既有程序操作；本輪只文件與背景文件檢查。
+
+## A：戰鬥 HUD、卡牌狀態、目標與 tooltip
+
+已能找到 Root、Card、Hand 與預覽副作用警示，但不足以開始安全修改：缺能量／牌堆／回合 HUD 的實際節點、資料 owner 與 refresh signal；Hand 狀態如何轉移、選目標取消和 tooltip 清除的接點尚不明。第一步應逐讀 HandManager、Hand、Card、Combat、KeywordsView、SelectionArea 及 Signals，補出一條成功和一條拒絕／取消路徑。既有測試只知 Combat 能驗單場，尚不知專項 fixture 如何接入。
+
+## B：新 modal、獎勵選牌、確認取消、鍵盤與手把
+
+既有選單／文字子流程足夠定位主選單與結算；獎勵、SelectCardsOverlay、基底 overlay、顯示／隱藏及結果信號則沒有可開工鏈。沒有證據能把 InputMap 當作手把支援。需先查場景與 consumer，區分可取消／不可取消、一次完成及焦點還原。未定需求先沿既有滑鼠行為提出最小狀態方案；手把導覽、預設焦點與返回優先序保留待規格，不能自行新增遊戲規則。
+
+## C：共用 theme、components、layout
+
+已知 Card 固定尺寸、RichLabelAutoSizer 最小字級與 panel_theme 型別陷阱，但缺可重用元件及各 theme 的真實使用範圍。第一步沿 scenes/ui、themes 與 Root 盤點實際引用；需說明共享 style 與局部 override、HUD 資訊優先序、長文字與 viewport 的最小規格。僅 anchors 不證明多尺寸，背景幾何不證明渲染／命中。
+
+## 本輪產物與驗證
+
+預計新增 interaction-states 與 components-layout，瘦身 ui 共同入口並保留錨點；既有 menus-localization 僅補必要跨接；presentation 保存來源事實。背景檢查包括本機引用與錨點、大小／資料清單及 strict lint；不執行遊戲。待實作專項必須交代測試入口、fixture 前提、assertion 與既有 suite 限制，不能寫成已完成能力。

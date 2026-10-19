@@ -47,3 +47,51 @@ SoundManager 收到焦點外移且設定啟用時 mute Master；焦點回來無�
 現有遊戲回歸沒有音訊專項斷言。本次未證明聽感、loop 無接縫、淡入淡出效果、設定冷啟動套用、音效併發或成品載入。後續任務先按 [音訊工作流](../../../wf/workflows/game-dev/audio.md) 將所需能力轉成針對性測試，再決定修哪些缺口；不將靜態發現升格為「已修復」。
 
 2026-10-19 冷接手補查 [test-game.ps1](../../../tools/test-game.ps1)：suite 名稱與測試腳本映射固定，沒有 Audio suite；runner 會複製 tests/*.gd，但新增 helper 仍須由既有測試呼叫。程序參數明列 `--headless`，未顯式指定音訊驅動；本輪未啟動引擎，因此沒有「新音訊專項不輸出至實體裝置」的實測證據。新增播放檢查前須先核實 Dummy／替身策略，不能由舊 suite 通過推論音訊輸出邊界。loader helper 接入方式見 [內容 bootstrap](../../../wf/workflows/game-dev/content/bootstrap.md)，播放、bus／pool 與聽感仍各自需要相應證據。
+
+## 事件語意與畫面轉移補查
+
+2026-10-19 子流程冷讀後核實完整函式，而非僅依搜尋命中判斷。聲音工作流已拆為 [子流程入口](../../../wf/workflows/game-dev/audio/README.md)，本節是靜態證據，沒有音訊修復或 runtime 通過宣稱。
+
+[HandManager._play_card](../../../game/autoload/HandManager.gd) 在卡移入 limbo 後發 card_play_started；[ActionCardPlayEnd](../../../game/scripts/actions/card_actions/card_play_actions/ActionCardPlayEnd.gd) 才發 card_played。前者是出牌開始，後者是該次 action 鏈的完成通知，兩者不是兩個成功音。HandManager 另有不足能量拒絕及死亡目標退款；[Hand](../../../game/scripts/ui/Hand.gd) 的 _on_card_selected 在禁用、不可出及已排隊時 return，沒有統一拒絕 signal。預覽／查詢能否出牌不能當手動拒絕事件。
+
+[ActionAttackGenerator](../../../game/scripts/actions/combatant_actions/ActionAttackGenerator.gd) 既向 ACTION_ATTACK 傳 audio_path，又在每段 action_data 追加 ACTION_PLAY_SOUND；[ActionAttack](../../../game/scripts/actions/combatant_actions/ActionAttack.gd) 對每個有效活目標又立即 generate_sound_action，且在 target.damage 之前。非空 path 因此有雙播來源，多目標可增加呼叫數；這是程式路徑證據，尚未量測實際聲音次數。音效是攻擊嘗試而非扣血確認，需先決定每卡／每段／每目標契約與唯一播放 owner。
+
+[Player.damage](../../../game/scripts/combatants/Player.gd) 與 [Enemy.damage](../../../game/scripts/combatants/Enemy.gd) 的 block > damage 發 combatant_blocked；block == damage 發 combatant_block_broken，再返回 [0,0,0]。實際正扣血發 combatant_damaged。因此「所有完全吸收傷害都有 blocked」不成立；零扣血格擋、破盾與真正命中應依產品語意另做互斥路由。Signals 本身不包含通用聲音仲裁。
+
+[Combat._on_map_location_selected](../../../game/scripts/ui/Combat.gd) 是 generate_location_music_action 的遊戲呼叫點，所有到訪戰鬥與非戰鬥節點都經過此處。單純開關地圖、戰後獎勵與結算顯示沒有獨立切曲呼叫。不能從類別名 Combat 推論非戰鬥未接音樂。
+
+[RunSummaryOverlay](../../../game/scripts/ui/RunSummaryOverlay.gd) 勝敗時先顯示結算，結束按鈕才 Global.end_run；title 在 run_ended 回來。TitleScreen 的 title path 空字串會略過 generate_music_action，不會停止仍在播的曲；NO_MUSIC 才經 action 停止。run_started 只隱藏標題，不自行停曲。尚未實作專用結算曲／地圖 overlay 音樂政策。
+
+EnemyIntent 的音效在 Combat 中只有 intent_number_of_attacks == 0 時直接播放；攻擊音路由另沿 AttackGenerator。NewRunMenu 的角色選擇音是另一個已存在接點，不能推論所有介面控件都自動播音。
+
+## 池的額外生命週期風險
+
+[sound_effects.stop](../../../game/addons/sound_manager/sound_effects.gd) 僅對相同 stream 的 busy player 延後 stop，沒有立即 mark_player_as_available。pool 的 increase_pool 在耗盡時才嘗試收回 not playing 的 busy player；而 play 本身也 deferred，同 frame 尚未開始者可能被當作可回收。此處需要同 frame 超過預建數、手動停止及重用的專項測試，不是已證實丟音或已修復。
+
+prepare 重設 bus／volume／pitch，但未明確重設 stream_paused；music 暫停後的重用需另驗。AudioStreamRandomizer 有特殊 player 查找路徑，沒有 JSON 變體策略；變體、冷卻、優先權與硬性併發上限皆須另實作。素材換檔或補檔後，cached fallback／loop 狀態也可能繼續存活，不能只改磁碟就假設目前程序會重載。
+
+最小 loader probe 與既有 Smoke 的實際接入位置收在 [mixing](../../../wf/workflows/game-dev/audio/mixing.md)；範本尚未執行。播放替身／Dummy 能力仍待確認，現有 runner 與 suite 沒有因文件新增就取得音訊覆蓋。
+
+## 完整場景的音訊接點補查
+
+2026-10-19 依場景用途需求補查，操作分流見 [聲音子流程](../../../wf/workflows/game-dev/audio/README.md)；沒有新增音效資產或遊戲功能。
+
+[DialogueOverlay](../../../game/scripts/ui/DialogueOverlay.gd) 在 start_dialogue 解析成功、populate 初始 state 後發 dialogue_started；prompt 直接 parse_bbcode，沒有逐字或配音 API。[DialogueOption](../../../game/scripts/ui/general/DialogueOption.gd) 只有 option_enabled 且 left_click 才發選項 signal，不能靠這個 signal 接禁用拒絕音。Overlay 將選項 actions 加佇列，等待 actions_ended 後檢查玩家生死並換 state；reset 也在死亡／run／非 EVENT 節點呼叫，不等於正常完成。語音、文字音與分支取消 token 均是新能力。
+
+[BaseShopButton](../../../game/scripts/ui/shop/BaseShopButton.gd) 按下只排 action；[ActionShopPurchaseItems](../../../game/scripts/actions/shop_actions/ActionShopPurchaseItems.gd) 按即時價格與錢判斷，消耗品另查槽位，成功後排扣錢／取得 actions、移除商品並發 purchased。這是交易接受接點，後續 action 完成仍需另觀察；[ShopOverlay](../../../game/scripts/ui/ShopOverlay.gd) 收訊後等 actions_ended 才重建。沒有通用 purchase_failed／sold_out 音訊事件；刷新清除控件不應重播開店或成交。continue 可只 show_map，不能只用 overlay.visible 判斷當前可互動場景。
+
+[RewardOverlay](../../../game/scripts/ui/RewardOverlay.gd) 的 reward_grant_requested 僅累積資料，戰後另等 action 完成且檢查存活／非終局才顯示，寶箱有另一展示入口。BaseRewardButton 排 action 後 queue_free，不代表已領取完成。[CardDraftSelectionOverlay](../../../game/scripts/ui/CardDraftSelectionOverlay.gd) 選中與 skip 都發 card_pick_confirmed，聲音如需區分接受／略過須保留原因，不能只聽 signal 名稱。
+
+[Map](../../../game/scripts/ui/Map.gd) 的 show_map／hide_map 沒有獨立全域顯示 signal；旅行須 can_travel 且相鄰，合法才 generate_visition_location。[RestOverlay](../../../game/scripts/ui/RestOverlay.gd) 的按鈕接受與 rest_action_ended 分開；auto_end 決定是否加入完成 action，不能一律以按下判治療／升級完成。這些資料／結果更新不是已整合的聲音 cue。
+
+[NewRunMenu](../../../game/scripts/ui/menus/NewRunMenu.gd) 建角色按鈕後自動觸發第一個 button_up，populate_character_info 播角色音，因此初始化也可能播放；純手動切換需求需調整責任。[PauseOverlay](../../../game/scripts/ui/PauseOverlay.gd) 的返回標題先 unpause 再 end_run，無差別監聽可能疊加恢復與退出音。game_paused／game_unpaused 與實際暫停、UI pool ALWAYS 的差異需按聲包政策驗證，未取得播放結果。
+
+每場景工作流已列聲音包、唯一 owner、視覺替代、中斷及 Smoke／Combat helper 橋接；這些是後續實作／驗收契約。新增文件不表示現有 suite 已覆蓋對話、交易、地圖、休息、語音或整局結算音訊。
+
+## 非 draft 選牌與結束原因補查
+
+2026-10-19 依獨立用途復查 E-G1 補查 [CardSelectionOverlay](../../../game/scripts/ui/CardSelectionOverlay.gd)。VIEW 點牌為 pass，四個牌堆入口由 Combat 呼叫；SELECT 點牌是 picked_cards 暫選／反選與 glow，不是出牌或取得。Confirm 直接 confirmed，Back 清空後也 confirmed；quick_pick 達 max 後自動進同一 Confirm。confirmed listener 會清 current action，因此新聲音 adapter 應在 emit 前保存 action／opener／原因與選取快照，而非事後猜測。handler 沒有重新驗足額／can_back_out／防重，UI 隱藏控制項不代表直接呼叫安全。
+
+[ActionBasePickCards](../../../game/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd) 候選小於 min 且 required 時不開 UI 直接 finish，剛好 min 自動選取；不足但非 required 亦可自動執行。force_action_end 設 async_cancelled、清 picked，必要時以 confirmed 解除 await，不是正常確認。ActionPickCards 的 async finish 在產生 child 後，仍不保證 child 效果完成。Back 只有在 min／required 等條件阻止空 child 時才是零效果；不能把所有 confirmed 當成功或把所有 Back 當 rollback。專屬聲包及計數契約見 [selection-cues](../../../wf/workflows/game-dev/audio/selection-cues.md)。
+
+DialogueOverlay 的選項 effects 致死後，await 回來仍會 end_dialogue→dialogue_ended。因此 dialogue_ended 不能無條件當正常收尾；聲音 owner 須驗存活、generation 與結束原因，現無 cause payload。此為靜態核實與流程修補，沒有修改遊戲或新增測試通過證據。

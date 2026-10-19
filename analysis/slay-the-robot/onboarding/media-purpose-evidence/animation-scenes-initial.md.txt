@@ -1,0 +1,19 @@
+# 場景動畫擴充：初始缺口
+
+2026-10-19；animation_workflow。這是同一作者依新需求補查的初始缺口，非 fresh agent 盲測。沿用本輪已冷讀的 WORKFLOWS → agent-session → game-dev → art-assets 路由及核心規矩，不改原 animation-initial.md。新增需求是以完整用途交付演出，不只人物逐格狀態。
+
+## 原入口能做與不能做
+
+animation.md 已提供人物 frame 規格、SpriteFrames、攻擊／hit／death 與取消契約，但不能直接組成抽牌到出牌、對話到選項、商店成交、獎勵選取、地圖移動或選單轉場。原先的 animation_offset／action 等待說明不能外推到這些 Control 場景。
+
+## 實碼初查
+
+Hand.tween_hand 實際 Tween 只管 Card.Pivot position／rotation，hover 另直接設 Card.position.y。Card.tscn 雖有 card_hover／card_unhover tracks，Card.gd 沒有播放呼叫；出牌／棄牌是 CardTrail 後釋放原 Card，升級只刷新文字。必須避免把場景中的動畫資源當成已接觸發。
+
+DialogueOverlay、ShopOverlay、RewardOverlay 主要為立即顯示／填資料／清子節點；目前沒有通用演出時間軸。Dialogue 無 speaker／portrait 專屬欄位與逐字控制，Shop 的 purchased signal 與後續 actions_ended 是不同階段，Reward 的 button 點擊不等於選牌已提交。
+
+MapLocation 有 flash_map_location 播放；Map 沒有路徑角色移動。BaseMenu 只有 intro/outro Tween hooks，預設 null，且導航先 clear_menu 再播 outro。選角與結算的資料／顯示更新不等於已有淡入或計數動畫。
+
+## 擬補範圍
+
+新增 art-assets/ui-motion.md 與 scene-choreography.md，串接卡牌、對話、商店、獎勵、地圖、選角／選單／結算的狀態事件、視覺根、素材包、輸入政策、重播／取消、減少動態與專項驗收；更新動畫分析及原入口指標。UI 作者負責狀態與互動流程，音訊作者負責 cue 音訊，本文只定演出責任與同步點。僅檔案與背景靜態，不改 game/tests/tools，不啟動 Godot，不製作素材，不操作 GUI／聲音／既有程序。
