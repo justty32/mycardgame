@@ -51,3 +51,15 @@
 ## Linux 直接開遊戲與新副本
 
 **條件與對策**：Wayland 視窗收不到點擊要加 `--display-driver x11`；新 worktree 首次開啟前要先 `--editor --import` 建 class cache，否則大量 "Could not find type"。細節與證據見 [dev-env](../dev-env.md)。
+
+## shell heredoc 要加引號
+
+**條件與對策**：用 heredoc 寫入含 `$`、反引號或 `\` 的內容（Markdown、GDScript、JSON）時寫 `<<'EOF'`。未加引號會展開變數並執行命令替換，指令可能卡住或寫進錯的內容。
+
+**驗收與邊界**：寫完用 `git diff` 或讀檔確認內容和原文一致。需要展開變數時才不加引號，並先確認內容沒有反引號。證據：2026-10-19 Manjaro zsh，本專案 session 中未加引號的 heredoc 寫文件時卡住。
+
+## 多 agent 共用 worktree 時 pull --rebase 被擋
+
+**條件與對策**：別的 agent 在同一 worktree 還有未提交修改時，`git pull --rebase` 會報 unstaged changes 並停下。不要替別人 stash、reset 或 checkout。請檔案的 owner 先 commit，或由主 agent 串行做 pull 與 push；寫入範圍大的並行工作各開 worktree。
+
+**驗收與邊界**：pull 後 `git status` 只剩自己的修改，`git log origin/main..` 列出待推的 commit。只有一個 agent 在跑時不受影響。證據：2026-10-19 戰鬥框架 Phase 實作期間，多個子 agent 同時改 repo。

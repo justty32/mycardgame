@@ -10,6 +10,7 @@
 
 ## 待使用者項
 
-- [testing] 回公司 Windows 機時跑 `./tools/test-game.ps1 -Suite All` 與 `python tests/test_runner_diagnostics.py`，確認 ps1 薄包裝、不開窗、taskkill 殺樹、APPDATA 隔離、.tools/godot-4.7 引擎探測（Python 3.12 以下的 junction 跳過）；另驗 `python tools/link_pack.py <pack>` 的 Windows junction 路徑（symlink 失敗退 mklink /J）與 ps1 新參數 `-Pack`／`-PackTests`／`-ContentProfile`（見 pack 流程）；All 已含 Ctb、Board、Wave（亦可單跑）→ 回報結果後我修正並更新 dev-env／testing
-- [game-dev] 實機打一場戰鬥，照 combat-framework phase-1～3 plan 末節看時間軸／WaveLabel／BoardView，並決定圖像是否跟棋盤移動 → 回報後我修 UI
-- [repo 結構] 拆 repo 時再問使用者：框架 repo 是否改名（如 cardframework）、題材樹是否各自獨立成 repo；改名前現有名稱與 `mycardgame-tests` 等執行期字串先不動 → 使用者決定後我做改名與連結修正
+- [testing] 回 Windows 機跑 `./tools/test-game.ps1 -Suite All`（已含 Ctb、Board、Wave）與 `python tests/test_runner_diagnostics.py`，驗 ps1 不開窗、taskkill 殺樹、APPDATA 隔離、.tools/godot-4.7 探測（Python 3.12 以下跳過 junction 項），及 `link_pack.py` 的 mklink /J 退路與 `-Pack`／`-PackTests`／`-ContentProfile`（見 [pack](workflows/game-dev/content/pack.md)）→ 回報後我修正 dev-env／testing
+- [game-dev] 實機打一場戰鬥，照 [合併清單](plans/combat-framework/phase-3.md#需使用者實機檢查headless-無法驗) 第 1–6 項回報 UI 觀感 → 我修 UI
+- [game-dev] 決定戰鬥者圖像是否站在棋盤格上跟著移動（建議要；清單第 7 項）→ 我改 BoardView
+- [repo 結構] 拆 repo 時決定框架是否改名、題材樹是否獨立成 repo（改名前 `mycardgame-tests` 等字串不動）→ 我改名修連結
