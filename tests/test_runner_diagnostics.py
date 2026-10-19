@@ -420,6 +420,39 @@ def main() -> None:
     parsed = runner.parse_args(["--suite", "All", "--pack", "a", "--pack", "b", "--pack-tests", "t"])
     assert_that(parsed.pack == ["a", "b"] and parsed.pack_tests == ["t"], "--pack and --pack-tests are repeatable and accepted with All")
 
+    # --- editor pack link (tools/link_pack.py) ---------------------------------------------------
+    import link_pack  # noqa: E402 - tools/ is already on sys.path
+    link_game = RUN_ROOT / "link_game"
+    (link_game / "external" / "mods").mkdir(parents=True, exist_ok=True)
+    shipped_list = '{\n\t"properties": {\n\t\t"mod_load_data": {\n\t\t\t"external/": {\n\t\t\t\t"enabled": true\n\t\t\t},\n\t\t},\n\t}\n}'
+    (link_game / "external" / "mod_list.json").write_text(shipped_list, encoding="utf-8", newline="")
+    if (good_pack / "linked").is_symlink():
+        (good_pack / "linked").unlink()
+    link_ok = True
+    try:
+        rc = link_pack.main([str(good_pack), "--game-dir", str(link_game), "--enable"])
+    except OSError:
+        link_ok = False
+    if link_ok and not IS_WINDOWS:
+        target = link_game / "external" / "mods" / "sample_pack"
+        assert_that(rc == 0 and target.is_symlink() and (target / "cards" / "smp_card.json").is_file()
+                    and not os.path.isabs(os.readlink(target)), "link_pack creates a relative symlink named after the pack's mod_info prefix")
+        enabled_text = (link_game / "external" / "mod_list.json").read_text(encoding="utf-8")
+        assert_that(link_pack.enable_line("sample_pack") in enabled_text and link_pack.main([str(good_pack), "--game-dir", str(link_game)]) == 0,
+                    "link_pack --enable adds one mod_list line and re-linking the same target is idempotent")
+        dropped = runner.drop_linked_mods(link_game, link_game, [str(link_game / "external" / "other")])
+        assert_that(dropped == [] and runner.drop_linked_mods(link_game, link_game, [str(target)]) == ["external/mods/sample_pack/"]
+                    and runner.drop_linked_mods(link_game, link_game, [str(target)]) == [],
+                    "runner drops mod_list entries only for links directly under external/mods/ and only when present")
+        (link_game / "external" / "mod_list.json").write_text(enabled_text, encoding="utf-8", newline="")
+        assert_that(link_pack.main([str(good_pack), "--game-dir", str(link_game), "--unlink"]) == 0 and not target.exists()
+                    and (link_game / "external" / "mod_list.json").read_text(encoding="utf-8") == shipped_list
+                    and (good_pack / "cards" / "smp_card.json").is_file(),
+                    "link_pack --unlink removes only the link and restores mod_list.json byte-for-byte")
+        (target).mkdir()
+        assert_that(link_pack.main([str(good_pack), "--game-dir", str(link_game)]) == 2 and link_pack.main([str(good_pack), "--game-dir", str(link_game), "--unlink"]) == 2
+                    and target.is_dir(), "link_pack refuses to replace or delete a real mod folder")
+
     # --- checkout identity -----------------------------------------------------------------------
     state = {"repo": str(PROJECT_ROOT / "game")}
 

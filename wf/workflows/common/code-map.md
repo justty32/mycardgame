@@ -26,7 +26,7 @@
 
 序列化與擴充：[SerializableData.gd](../../../game/data/SerializableData.gd)、[擴充契約與限制](../../../analysis/slay-the-robot/architecture/02_extension_points.md)。Dictionary merge 已修，公開 API 回歸見 [dictionary_regression.gd](../../../tests/dictionary_regression.gd)；跨程序讀寫、續玩與拒絕無效輸入見 [save_load_flow.gd](../../../tests/save_load_flow.gd)。
 
-本專案工具：[test_game.py](../../../tools/test_game.py) 為跨平台隔離回歸與流程驗證 runner（Python 3.10+），[test-game.ps1](../../../tools/test-game.ps1) 是沿用舊參數的 Windows 薄包裝；[game.ps1](../../../tools/game.ps1) 為 Windows 專用的舊 Run／Import／Smoke 入口；[upstream.json](../../../tools/upstream.json) 固定來源、引擎政策（基準 4.7.x）與本地修復。
+本專案工具：[test_game.py](../../../tools/test_game.py) 為跨平台隔離回歸與流程驗證 runner（Python 3.10+），[test-game.ps1](../../../tools/test-game.ps1) 是沿用舊參數的 Windows 薄包裝；[game.ps1](../../../tools/game.ps1) 為 Windows 專用的舊 Run／Import／Smoke 入口；[upstream.json](../../../tools/upstream.json) 固定來源、引擎政策（基準 4.7.x）與本地修復。[link_pack.py](../../../tools/link_pack.py) 把題材內容包 link 進 game/external/mods/ 供編輯器載入，用法見 [題材內容包](../game-dev/content/pack.md)。
 
 程序診斷：[test_game.py](../../../tools/test_game.py) 本身保存退出碼、原生崩潰標記與逐階段結果；[test_runner_diagnostics.py](../../../tests/test_runner_diagnostics.py) 以不開視窗的假引擎程序驗證 runner，不啟動 Godot。事故判讀見 [native-crash](../game-dev/native-crash.md)，執行前遵守 [使用者操作邊界](user.md)。
 

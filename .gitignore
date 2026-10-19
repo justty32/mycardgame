@@ -9,6 +9,9 @@
 /game/external/profile.json
 /game/external/user_settings.json
 /game/external/saves/
+# Content packs linked in by tools/link_pack.py; only the upstream example mod is tracked.
+/game/external/mods/*
+!/game/external/mods/example_mod/
 __pycache__/
 *.py[cod]
 

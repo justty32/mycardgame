@@ -471,6 +471,37 @@ def resolve_pack_name(pack_dir: Path) -> str:
     return name
 
 
+def _write_mod_list(path: Path, mod_list: Any) -> None:
+    with open(path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(mod_list, handle, indent="\t")
+
+
+def drop_linked_mods(source_game: Path, isolated_game: Path, skipped_links: list[str]) -> list[str]:
+    """Remove mod_list entries for mods that were links in the source (tools/link_pack.py).
+
+    The copy skips links, so a locally enabled linked pack would point at a missing folder;
+    a framework run must not depend on it. Use --pack to test that pack instead.
+    """
+    mods_root = _canonical(source_game / "external" / "mods")
+    keys = []
+    for link in skipped_links:
+        parent, name = os.path.split(link)
+        if _canonical(Path(parent)) == mods_root:
+            keys.append(f"{PACK_MODS_PREFIX}{name}/")
+    mod_list_path = isolated_game / "external" / "mod_list.json"
+    if not keys or not mod_list_path.is_file():
+        return []
+    try:
+        mod_list = _load_lenient_json(mod_list_path)
+        load_data = mod_list["properties"]["mod_load_data"]
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise RunnerError(f"Isolated mod_list.json cannot be read: {mod_list_path}: {error}") from error
+    removed = [key for key in keys if load_data.pop(key, None) is not None]
+    if removed:
+        _write_mod_list(mod_list_path, mod_list)
+    return removed
+
+
 def install_packs(pack_dirs: list[Path], isolated_game: Path) -> list[dict]:
     """Copy packs into the isolated copy's external/mods/ and enable them in its mod_list.json only."""
     installed: list[dict] = []
@@ -506,8 +537,7 @@ def install_packs(pack_dirs: list[Path], isolated_game: Path) -> list[dict]:
             files.append({"path": path.relative_to(destination).as_posix(), "sha256": sha256_file(path)})
         installed.append({"source": str(pack_dir), "name": name, "mod_list_key": key,
                           "load_priority": PACK_LOAD_PRIORITY_BASE + index, "files": files, "skipped": skipped})
-    with open(mod_list_path, "w", encoding="utf-8", newline="\n") as handle:
-        json.dump(mod_list, handle, indent="\t")
+    _write_mod_list(mod_list_path, mod_list)
     return installed
 
 
@@ -951,6 +981,10 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
                 shutil.copy2(test_file, isolated_tests / test_file.name)
                 test_hashes.append({"path": test_file.name, "sha256": sha256_file(isolated_tests / test_file.name)})
             manifest["test_hashes"][selected] = test_hashes
+            dropped = drop_linked_mods(source_game, isolated_game, copy_info["skipped"]["links"])
+            if dropped:
+                manifest.setdefault("linked_mods_dropped", {})[selected] = dropped
+                echo(f"NOTE: {selected} copy drops linked mod entries {dropped}; use --pack to test them")
             manifest["packs"][selected] = install_packs(pack_dirs, isolated_game)
             probes: list[Path] = []
             if selected == "Smoke" and pack_test_dirs:

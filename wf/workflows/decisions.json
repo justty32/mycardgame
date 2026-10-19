@@ -62,6 +62,12 @@
    "decision": "單 repo 分層：根目錄＝題材中立框架（game/ tools/ tests/ analysis/ wf/），各款遊戲在 games/<game>/（design、wf overlay、pack、tests），邊界由 boundary lint 機械檢查",
    "rejected_and_why": "不先切多 repo＋submodule：需新建／改名 GitHub repo 的授權，且日常改動跨 repo；不把題材直接放 game/external/mods/：design 與 wf 無處放、mod_list 混雜、題材間隔離弱",
    "premise": "某款遊戲要獨立發布或使用者要求物理分 repo 時，以 git subtree split 升級為多 repo"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "編輯器載入題材內容包用 tools/link_pack.py 建 symlink／junction 到 game/external/mods/<name>，mod_list 只在本機以 --enable 暫改",
+   "rejected_and_why": "不先做 FileLoader 外部根補丁（命令列 --pack=<abs>）：多一個本地框架補丁、上游合併成本增加，而 link 零框架改動已足夠本機開發；不把題材登記進追蹤的 mod_list.json：框架檔會混入題材",
+   "premise": "Windows junction 實測失敗、匯出版需要載入外部包，或多題材同時開發讓本機 mod_list 管理變麻煩時，改評估 FileLoader 補丁"
   }
  ]
 }
