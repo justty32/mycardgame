@@ -11,6 +11,7 @@ var results: Array[Dictionary] = []
 var snapshots: Array[Dictionary] = []
 var player_damage_records: Array[Dictionary] = []
 var counts: Dictionary = {"drawn": 0, "played": 0, "combat_started": 0, "combat_ended": 0, "enemy_turn": 0, "enemy_dead": 0, "player_dead": 0, "player_death_animation": 0, "hero_action_started": 0, "hero_action_ended": 0, "enemy_action_started": 0, "enemy_action_ended": 0}
+var wave_log: Array = []	# combat framework Phase 3: wave_started / wave_cleared / combat_ended order
 var tick_advances: Array = []
 var global_data: Node
 var hand_manager: Node
@@ -172,6 +173,7 @@ func _scenario() -> bool:
 		return false
 	_check(counts.enemy_dead == 1 and global_data.get_alive_enemies().is_empty(), "enemy dies once with no living combatants remaining")
 	_check(counts.played == 5 and counts.player_dead == 0, "combat victory follows five legitimate card plays with player alive")
+	_check(wave_log == ["started 0", "cleared 0", "ended"], "legacy single-wave combat: wave_started(0), wave_cleared(0), then combat_ended (director victory path): " + str(wave_log))
 	_check(not global_data.is_player_in_combat(), "combat stats leave the active combat state")
 	_check(global_data.player_data.player_deck.size() == 5, "combat card copies leave the persistent deck intact")
 	_snapshot("combat_won")
@@ -318,6 +320,9 @@ func _connect_observers() -> void:
 	signals.card_played.connect(func(_request): counts.played += 1)
 	signals.combat_started.connect(func(_event): counts.combat_started += 1)
 	signals.combat_ended.connect(func(): counts.combat_ended += 1)
+	signals.wave_started.connect(func(index): wave_log.append("started %d" % index))
+	signals.wave_cleared.connect(func(index): wave_log.append("cleared %d" % index))
+	signals.combat_ended.connect(func(): wave_log.append("ended"))
 	signals.enemy_turn_started.connect(func(): counts.enemy_turn += 1)
 	signals.unit_action_started.connect(func(unit):
 		if unit == global_data.get_player():

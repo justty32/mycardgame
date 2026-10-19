@@ -395,7 +395,12 @@ func get_alive_enemies() -> Array[Enemy]:
 			returned_enemies.append(enemy)
 	return returned_enemies
 
+## Living enemies, or (during combat) enemies still to come in later waves:
+## CombatDirector.has_remaining_opponents(). Short-circuits ask this, so they hold between waves.
 func are_remaining_enemies() -> bool:
+	var director: CombatDirector = get_combat_director()
+	if director != null and director.is_running:
+		return director.has_remaining_opponents()
 	return len(get_alive_enemies()) > 0
 
 ## The CombatDirector of the loaded run screen (group "combat_director"), null outside it.

@@ -533,6 +533,14 @@ def main() -> None:
     assert_that(judge("BOARD PASS: 10 checks, 0 failures", marker="BOARD PASS:")["passed"]
                 and not judge("BOARD FAIL: 10 checks, 1 failures\nFAIL: move", marker="BOARD PASS:")["passed"],
                 "Board verdict needs the BOARD PASS marker and no FAIL lines")
+    assert_that(runner.parse_args(["--suite", "wave"]).suite == "Wave" and "Wave" in runner.ALL_SUITES
+                and runner.ALL_SUITES.index("Wave") == runner.ALL_SUITES.index("Board") + 1
+                and runner.SUITE_SCRIPTS["Wave"] == "wave_flow.gd" and runner.SUITE_MARKERS["Wave"] == "WAVE PASS:"
+                and runner.build_user_args("Wave") == [] and runner.expand_suites("Wave") == ["Wave"],
+                "Wave suite (combat framework waves) is part of All after Board with its own script and marker")
+    assert_that(judge("WAVE PASS: 10 checks, 0 failures", marker="WAVE PASS:")["passed"]
+                and not judge("WAVE FAIL: 10 checks, 1 failures\nFAIL: wave", marker="WAVE PASS:")["passed"],
+                "Wave verdict needs the WAVE PASS marker and no FAIL lines")
 
     MANIFEST["completed"] = True
     MANIFEST["checks"] = CHECKS

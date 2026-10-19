@@ -110,8 +110,8 @@ signal end_turn_requested(end_turn_immediacy_level: int)	# legacy name of end_ac
 
 # combat framework: unit actions, timeline and board
 # Emitted by CombatDirector: unit_action_*, combat_tick_advanced, timeline_changed, end_action_requested;
-# by UnitRegistry: unit_spawned / unit_removed. unit_moved, unit_downed, wave_*, cell_* are declared
-# for later phases (board, waves) and not emitted yet.
+# by UnitRegistry: unit_spawned / unit_removed. wave_started / wave_cleared by the CombatDirector's
+# WaveController (Phase 3). unit_downed and the party signals are declared for later phases.
 signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: after draw, before input/decision
 signal unit_action_ended(unit: BaseCombatant)	# a unit's action ends: after discard, before delay is computed
 signal combat_tick_advanced(previous_tick: int, current_tick: int)	# the combat clock advanced

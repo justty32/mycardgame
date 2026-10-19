@@ -39,7 +39,6 @@ func _ready():
 	Signals.player_health_changed.connect(_on_player_health_changed)
 
 	Signals.enemy_killed.connect(_on_enemy_killed)
-	Signals.enemy_death_animation_finished.connect(_on_enemy_death_animation_finished)
 
 	Signals.combat_started.connect(_on_combat_started)
 	Signals.combat_ended.connect(_on_combat_ended)
@@ -193,22 +192,6 @@ func _on_enemy_killed(enemy: Enemy):
 	ActionHandler.add_actions(generated_actions)
 
 
-func _on_enemy_death_animation_finished(_enemy: Enemy):
-	# determine if all non minion enemies killed and end combat
-	var enemies: Array[Enemy] = []
-	enemies.assign(get_tree().get_nodes_in_group("enemies"))
-
-	var non_minion_enemies_remain: bool = true
-	for enemy in enemies:
-		if not enemy.enemy_data.enemy_is_minion:
-			non_minion_enemies_remain = false
-
-	if non_minion_enemies_remain:
-		# wait for actions to finish and end combat
-		if ActionHandler.actions_being_performed:
-			await ActionHandler.actions_ended
-		end_combat()
-
 func _on_combat_started(event_id: String):
 	var current_event: EventData = null
 	if event_id == "":
@@ -265,7 +248,8 @@ func _on_run_started():
 func _on_run_ended():
 	visible = false
 
-## Performs end of combat logic and signals end of combat. Runs once per combat.
+## Performs end of combat logic and signals end of combat. Runs once per combat. Called by the
+## CombatDirector's WaveController when the last wave is cleared (after a death animation).
 func end_combat() -> void:
 	if _combat_ending:
 		return

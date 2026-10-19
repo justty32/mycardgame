@@ -3,7 +3,9 @@
 ## speed (CombatRulesData). Replaces the AnimationPlayer-driven turn alternation of Combat.gd;
 ## Combat.gd keeps the HUD. Components (one per combat): BoardController builds the board from the
 ## event's EncounterData (or one synthesized for legacy events) and runs movement; UnitSpawner
-## spawns wave units / summons through the EnemyContainer unit layer; CombatActionPhases holds the
+## spawns wave units / summons through the EnemyContainer unit layer and WaveController runs the wave
+## flow (wave_started / wave_cleared, next-wave scheduling, victory when the last wave is cleared,
+## which ends the combat through Combat.end_combat); CombatActionPhases holds the
 ## fixed begin / end phases of an action and CombatStartActions the combat-start actions; enemy
 ## intents (with intent movement) run in EnemyIntentController. The Director keeps the ThreatPreview fresh.
 ## Child of RunScreen/Combat. Signals: player_turn_* = the hero's action (pre-draw / post-discard),
@@ -28,6 +30,8 @@ var is_running: bool = false
 ## Components of the current combat (null outside combat): board / movement and unit spawning.
 var board_controller: BoardController = null
 var unit_spawner: UnitSpawner = null
+## Wave progression of the current / last combat (kept after the combat stops for the victory check).
+var waves: WaveController = null
 ## Board of the current combat (null outside combat) and the encounter it was built from.
 var board: BoardData:
 	get:
@@ -54,6 +58,7 @@ func _ready() -> void:
 	Signals.unit_spawned.connect(_on_unit_spawned)
 	Signals.unit_removed.connect(_on_unit_removed)
 	Signals.enemy_killed.connect(_on_enemy_killed)
+	Signals.enemy_death_animation_finished.connect(_on_enemy_death_animation_finished)
 	Signals.unit_moved.connect(_on_unit_moved)
 	tree_exiting.connect(_stop)
 
@@ -61,14 +66,23 @@ func _ready() -> void:
 func has_living_opponents() -> bool:
 	return not Global.get_alive_enemies().is_empty()
 
-## Hero down (hero_down_ends_run) or no living opponents; also true once combat_ended fired.
+## Living opponents (minions included) or enemies still to come (a later wave, units waiting to
+## enter). Global.are_remaining_enemies() delegates here during combat, so the ActionHandler /
+## HandManager short-circuits do not fire between waves.
+func has_remaining_opponents() -> bool:
+	if has_living_opponents():
+		return true
+	return is_running and waves != null and waves.has_more_waves()
+
+## Hero down (hero_down_ends_run) or no remaining opponents (has_remaining_opponents); also true once
+## combat_ended fired. Victory itself is decided by WaveController.is_final_cleared.
 func is_combat_over() -> bool:
 	if not is_running:
 		return true
 	var hero: BaseCombatant = UnitRegistry.get_hero()
 	if hero == null or (rules.hero_down_ends_run and not hero.is_alive()):
 		return true
-	return not has_living_opponents()
+	return not has_remaining_opponents()
 
 func is_player_action_pending() -> bool:
 	return _waiting_for_player
@@ -101,6 +115,7 @@ func begin_combat(event_data: EventData = null) -> void:
 	unit_spawner = UnitSpawner.new(self)
 	var encounter_data: EncounterData = Global.get_event_encounter_data(event_data)
 	board_controller.setup(encounter_data)
+	waves = WaveController.new(self, encounter_data)
 	unit_spawner.spawn_first_wave(event_data, encounter_data)
 	for unit: BaseCombatant in UnitRegistry.get_all_units():
 		if not unit.is_alive():
@@ -116,6 +131,10 @@ func begin_combat(event_data: EventData = null) -> void:
 	is_running = true
 	refresh_threats()
 	Signals.timeline_changed.emit()
+	waves.enter_wave(0)
+	await _wait_actions(generation)
+	if _aborted(generation):
+		return
 	await CombatStartActions.perform(self, generation)
 	if generation != _generation:
 		return
@@ -174,10 +193,19 @@ func _admit_spawned_unit(unit: BaseCombatant, generation: int) -> void:
 		return
 	if board != null and not board.has_unit(unit):
 		board_controller.place_unit_nearest(unit, board_controller.default_spawn_origin())
+	_admit(unit, current_tick + timeline.wait_for(rules.default_action_delay, unit.speed))
+
+## A wave unit entering mid-combat (UnitSpawner): acts at the current tick.
+func admit_wave_unit(unit: BaseCombatant) -> void:
+	if is_running and timeline != null and unit.is_alive():
+		_admit(unit, current_tick)
+
+## Queues a unit entering mid-combat; enemies decide their intent now.
+func _admit(unit: BaseCombatant, next_tick: int) -> void:
 	unit.reset_unit_combat_state()
 	_assign_controller(unit)
 	unit.last_action_tick = current_tick
-	unit.next_action_tick = current_tick + timeline.wait_for(rules.default_action_delay, unit.speed)
+	unit.next_action_tick = next_tick
 	timeline.push(unit)
 	if unit is Enemy:
 		(unit as Enemy).decide_next_intent()
@@ -196,6 +224,13 @@ func _on_enemy_killed(enemy: Enemy) -> void:
 	if board != null:
 		board.remove(enemy)
 		refresh_threats()
+	if is_running and waves != null:
+		waves.queue_check()
+
+## Victory after a kill is decided when a death animation ends (legacy timing; WaveController).
+func _on_enemy_death_animation_finished(_enemy: Enemy) -> void:
+	if waves != null:
+		waves.on_death_animation_finished()
 
 func _on_unit_moved(_unit: BaseCombatant, _from: Vector2i, _to: Vector2i) -> void:
 	refresh_threats()
@@ -208,11 +243,17 @@ func refresh_threats() -> void:
 	var hero: Player = UnitRegistry.get_hero() as Player
 	if hero != null:
 		hero.update_incoming_damage_amount(false)
+
 #endregion
 
 #region Loop
 func _run_loop(generation: int) -> void:
 	while generation == _generation:
+		if is_combat_over():
+			break
+		await waves.enter_due_units(generation)
+		if _aborted(generation):
+			return
 		if is_combat_over():
 			break
 		var unit: BaseCombatant = timeline.pop_next()
@@ -265,6 +306,10 @@ func _aborted(generation: int) -> bool:
 		return true
 	var hero: BaseCombatant = UnitRegistry.get_hero()
 	return hero == null or not hero.is_alive()
+
+## Advances the clock to tick (combat_tick_advanced, EVERY_N_TICKS statuses); no-op if not later.
+func advance_clock(tick: int, generation: int) -> void:
+	await _advance_clock(tick, generation)
 
 func _advance_clock(tick: int, generation: int) -> void:
 	if tick <= current_tick:

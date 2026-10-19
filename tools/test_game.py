@@ -54,8 +54,8 @@ IS_WINDOWS = os.name == "nt"
 WINDOWS_CREATION_FLAGS = 0x08000000 | 0x00000200
 
 SUITE_CHOICES = ("All", "Dictionary", "Smoke", "Combat", "SaveLoad", "ResourceLifecycle",
-                 "CombatVictory", "CombatDefeat", "Ctb", "Board")
-ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "SaveLoad")
+                 "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave")
+ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "SaveLoad")
 SUITE_SCRIPTS = {
     "ResourceLifecycle": "resource_lifecycle.gd",
     "Dictionary": "dictionary_regression.gd",
@@ -64,6 +64,7 @@ SUITE_SCRIPTS = {
     "CombatDefeat": "combat_flow.gd",
     "Ctb": "ctb_flow.gd",
     "Board": "board_flow.gd",
+    "Wave": "wave_flow.gd",
     "SaveLoad": "save_load_flow.gd",
 }
 SUITE_MARKERS = {
@@ -74,6 +75,7 @@ SUITE_MARKERS = {
     "CombatDefeat": "COMBAT PASS:",
     "Ctb": "CTB PASS:",
     "Board": "BOARD PASS:",
+    "Wave": "WAVE PASS:",
     "SaveLoad": "SAVELOAD PASS:",
 }
 SOURCE_HASH_PATHS = (

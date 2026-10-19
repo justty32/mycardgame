@@ -48,6 +48,17 @@ func get_units() -> Array[BaseCombatant]:
 
 ## Removes and returns the unit that acts next, or null when nothing waits.
 func pop_next() -> BaseCombatant:
+	var best: BaseCombatant = _peek()
+	if best != null:
+		_units.erase(best)
+	return best
+
+## next_action_tick of the unit that acts next (not removed); -1 when nothing waits.
+func peek_next_tick() -> int:
+	var best: BaseCombatant = _peek()
+	return best.next_action_tick if best != null else -1
+
+func _peek() -> BaseCombatant:
 	_prune()
 	if _units.is_empty():
 		return null
@@ -55,7 +66,6 @@ func pop_next() -> BaseCombatant:
 	for unit: BaseCombatant in _units:
 		if unit != best and _is_before(unit, unit.next_action_tick, best, best.next_action_tick):
 			best = unit
-	_units.erase(best)
 	return best
 
 ## Ticks a unit of the given speed waits after an action of the given delay. Never below 1.

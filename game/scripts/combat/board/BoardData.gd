@@ -204,6 +204,13 @@ func is_in_line(unit_a: BaseCombatant, unit_b: BaseCombatant) -> bool:
 ## unit (the unit's own cells and units in ignored_units do not count).
 func can_stand(unit: BaseCombatant, anchor: Vector2i, ignored_units: Array = []) -> bool:
 	var footprint: Vector2i = unit.footprint if unit != null else Vector2i(1, 1)
+	return _footprint_fits(unit, footprint, anchor, ignored_units)
+
+## Whether a not-yet-spawned unit of this footprint fits at anchor (wave spawn policies).
+func footprint_fits(footprint: Vector2i, anchor: Vector2i) -> bool:
+	return _footprint_fits(null, footprint, anchor, [])
+
+func _footprint_fits(unit: BaseCombatant, footprint: Vector2i, anchor: Vector2i, ignored_units: Array) -> bool:
 	for cell: Vector2i in footprint_cells(anchor, footprint):
 		if not is_in_bounds(cell) or is_blocked(cell):
 			return false
@@ -269,6 +276,13 @@ func _build_path(parents: Dictionary, start: Vector2i, destination: Vector2i) ->
 ## ties: spawn-zone cells first, then smaller y, then smaller x. Falls back to the deploy zone too.
 ## BOARD_ANCHOR_NONE = the board is full.
 func nearest_empty_anchor(unit: BaseCombatant, origin: Vector2i) -> Vector2i:
+	return _nearest_empty_anchor(unit, unit.footprint if unit != null else Vector2i(1, 1), origin)
+
+## nearest_empty_anchor for a not-yet-spawned unit of this footprint.
+func nearest_empty_anchor_for_footprint(footprint: Vector2i, origin: Vector2i) -> Vector2i:
+	return _nearest_empty_anchor(null, footprint, origin)
+
+func _nearest_empty_anchor(unit: BaseCombatant, footprint: Vector2i, origin: Vector2i) -> Vector2i:
 	var best: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
 	var best_key: int = -1
 	for allow_deploy: bool in [false, true]:
@@ -276,7 +290,7 @@ func nearest_empty_anchor(unit: BaseCombatant, origin: Vector2i) -> Vector2i:
 			var cell_data: BoardCellData = get_cell(cell)
 			if cell_data.is_deploy_zone and not allow_deploy:
 				continue
-			if not can_stand(unit, cell):
+			if not _footprint_fits(unit, footprint, cell, []):
 				continue
 			var key: int = sort_key([distance(cell, origin), 0 if cell_data.is_spawn_zone else 1, cell.y, cell.x])
 			if best_key < 0 or key < best_key:
