@@ -1,6 +1,6 @@
 # core-loop — 核心玩法與一局流程
 
-[design](README.md)｜[內容範圍](content-scope.md)｜[規劃問題](../wf/workflows/planning.md#遊戲規劃)
+[design](README.md)｜[內容範圍](content-scope.md)｜[規劃問題](../../../wf/workflows/planning.md#遊戲規劃)
 
 **狀態**：部分確認（使用者 2026-10-19）。下表「決定」欄是唯一真相；「待定」項不得實作成定案。當前方向是先做「概念原型」，見下節。
 
@@ -15,7 +15,7 @@
 | 呈現／美術風格 | 待定 | — |
 | 發行目標（個人／免費公開／商業） | 免費公開同人，不商業 | 使用者 2026-10-19 |
 
-發行目標決定 spire-codex 參考內容能否採用：其授權在 [PROJECT](../wf/PROJECT.md) 記為 PolyForm Noncommercial 1.0.0（遊戲資料與 hosted API 另有條件），有商業意圖時不直接採用其內容，採用前逐項核對來源與條件。
+發行目標決定 spire-codex 參考內容能否採用：其授權在 [PROJECT](../../../wf/PROJECT.md) 記為 PolyForm Noncommercial 1.0.0（遊戲資料與 hosted API 另有條件），有商業意圖時不直接採用其內容，採用前逐項核對來源與條件。
 
 ## 當前方向：概念原型
 

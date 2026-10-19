@@ -6,7 +6,7 @@
 
 ## Done when
 
-任務 spec（`design/specs/`）記有入口、資料 owner、狀態轉移、確認／取消結果與退出契約；對應 fixture 斷言及文件 lint 回傳預期結果。新增輸入方式沒有實際輸入證據時明列待驗。
+任務 spec（`games/<game>/design/specs/`）記有入口、資料 owner、狀態轉移、確認／取消結果與退出契約；對應 fixture 斷言及文件 lint 回傳預期結果。新增輸入方式沒有實際輸入證據時明列待驗。
 
 ## 流程
 

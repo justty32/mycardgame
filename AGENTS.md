@@ -1,6 +1,6 @@
 # mycardgame — AI agent 專案備忘
 
-mycardgame = **以 Slay-The-Robot 為框架、以 spire-codex 為參考的個人卡牌遊戲專案**。遊戲原始碼在 [game/project.godot](game/project.godot)，工作流在 wf/，核實分析在 [analysis](analysis/slay-the-robot/README.md)，遊戲設計（玩法決定與任務 spec／plan）在 [design](design/README.md)。背景與來源見 [PROJECT.md](wf/PROJECT.md)；分層原則見 [STRUCTURE.md](wf/STRUCTURE.md)。
+mycardgame = **以 Slay-The-Robot 為框架、以 spire-codex 為參考的個人卡牌遊戲專案**。遊戲原始碼在 [game/project.godot](game/project.godot)，工作流在 wf/，核實分析在 [analysis](analysis/slay-the-robot/README.md)，遊戲設計（玩法決定與任務 spec／plan）在 [games](games/README.md)（各題材的 design 與內容包）。背景與來源見 [PROJECT.md](wf/PROJECT.md)；分層原則見 [STRUCTURE.md](wf/STRUCTURE.md)。
 
 ## 開場與入口
 

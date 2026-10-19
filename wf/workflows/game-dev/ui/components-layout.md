@@ -34,7 +34,7 @@
 
 從 Root 的 RunScreen/Combat 逐層記 anchor、offset、minimum size、size flags、mouse_filter 與 z_index。容器管理子節點時改 margin／separation／size flags，不用任意 offset 抵消 layout。全螢幕遮罩應覆蓋有效區，裝飾層不要攔輸入；HUD 下方需保留 hover 抬牌及 CARD_PICK_Y_OFFSET 的空間。卡牌、按鈕及 tooltip 需同查視覺框與命中框，單改圖像不會擴大 SelectionButton。
 
-CardSelectionOverlay 固定五欄 GridContainer 與 20 間距；draft 用居中 HBox；多數 overlay 背景仍固定 1200×700。不同 viewport 先明定縮放、重排／換欄、最小寬、捲動與安全邊距政策，再改根與子層；1200×700 是目前基準，不是支援清單。候選較小尺寸／不同長寬比要在任務 spec（`design/specs/`）寫出確切數字，不能只說「響應式」。Tooltips 使用 window size 判側，修改 viewport 政策時須一起處理座標系。
+CardSelectionOverlay 固定五欄 GridContainer 與 20 間距；draft 用居中 HBox；多數 overlay 背景仍固定 1200×700。不同 viewport 先明定縮放、重排／換欄、最小寬、捲動與安全邊距政策，再改根與子層；1200×700 是目前基準，不是支援清單。候選較小尺寸／不同長寬比要在任務 spec（`games/<game>/design/specs/`）寫出確切數字，不能只說「響應式」。Tooltips 使用 window size 判側，修改 viewport 政策時須一起處理座標系。
 
 ### 長文字、字型與無障礙
 

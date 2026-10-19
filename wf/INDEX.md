@@ -15,7 +15,7 @@ mycardgame 是以 Slay-The-Robot 為框架、spire-codex 為參考的個人卡�
 | [tools/game.ps1](../tools/game.ps1) | Windows 專用舊入口：啟動、匯入與 smoke |
 | [tests/framework_smoke.gd](../tests/framework_smoke.gd) | 主場景與擴充邊界驗證 |
 | [analysis/slay-the-robot](../analysis/slay-the-robot/README.md) | 本專案維護的框架分析與教學 |
-| [design](../design/README.md) | 遊戲設計：核心玩法、內容範圍，以及任務 spec／plan 落點 |
+| [games](../games/README.md) | 題材樹：各遊戲的 design（核心玩法、內容範圍、任務 spec／plan）與內容包 |
 | [WORKFLOWS.md](WORKFLOWS.md) | 意圖對應工作流 |
 | [agent-session](workflows/agent-session.md) | agent 冷啟動、分工與交接 |
 | [game-dev](workflows/game-dev/README.md) | 整局、關卡、卡牌／敵人，以及完整場景的美術／動畫／特效／聲音／UI、第一個 mod 與驗收 |

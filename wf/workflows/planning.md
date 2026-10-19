@@ -10,8 +10,8 @@
 ## Done when
 
 - idea / roadmap：對應表多一列，或既有列狀態欄更新。
-- 詳規：spec 有「方案 / 取捨」段、plan 有「步驟 / 驗證」段，位於下方「任務規格與 plan 落點」的路徑；動工完成後移 `design/archive/`。
-- 遊戲規劃：`design/core-loop.md`、`design/content-scope.md` 的必問項已填使用者答案或仍標「待定」並說明卡在哪；取捨在 decisions.json 有對應列。
+- 詳規：spec 有「方案 / 取捨」段、plan 有「步驟 / 驗證」段，位於下方「任務規格與 plan 落點」的路徑；動工完成後移 `games/<game>/design/archive/`。
+- 遊戲規劃：`games/<game>/design/core-loop.md`、`games/<game>/design/content-scope.md` 的必問項已填使用者答案或仍標「待定」並說明卡在哪；取捨在 decisions.json 有對應列。
 
 ## 階段
 
@@ -19,17 +19,17 @@
 |------|-----------|------|
 | **idea** | 要不要做？ | 下方「想法」表 |
 | **roadmap** | 會做，何時？ | 下方「roadmap」表 |
-| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放 repo 根的 `design/specs/`、`design/plans/`（見下節）。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
+| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放該題材樹的 `games/<game>/design/specs/`、`games/<game>/design/plans/`（見下節）。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
 | **執行** | — | 開發：feature-dev；非開發：未導入 |
 
 ## 任務規格與 plan 落點
 
-全 repo 唯一落點，各工作流 Done when 的「任務 spec／plan」都指這裡：
+每款遊戲唯一落點（`<game>` 由派工指定，現有：apocalypse），各工作流 Done when 的「任務 spec／plan」都指這裡：
 
-- spec（方案、取捨、設計 brief）：`design/specs/YYYY-MM-DD-<slug>.md`。
-- plan（步驟、驗證、實際驗收記錄）：`design/plans/YYYY-MM-DD-<slug>.md`，與 spec 同名。
+- spec（方案、取捨、設計 brief）：`games/<game>/design/specs/YYYY-MM-DD-<slug>.md`。
+- plan（步驟、驗證、實際驗收記錄）：`games/<game>/design/plans/YYYY-MM-DD-<slug>.md`，與 spec 同名。
 - 小改不開 spec／plan：任務記錄寫在 commit 訊息與交付回報。
-- 目錄在第一份出現時建立；動工完成移 `design/archive/`。導航見 [design/](../../design/README.md)。
+- 目錄在第一份出現時建立；動工完成移 `games/<game>/design/archive/`。導航見 [games/](../../games/README.md)。
 
 ## 遊戲規劃
 
@@ -48,7 +48,7 @@
 
 **預設**：清單外的細節（數值、卡名、UI 布局、存檔時機等）agent 自擬預設，標「預設（agent 提議，可改）」，不另開確認回合。
 
-**記錄**：答案寫入 [design/core-loop.md](../../design/core-loop.md) 與 [design/content-scope.md](../../design/content-scope.md)，註明「使用者 YYYY-MM-DD」；未答保持「待定」，卡住後續工作時記 WAIT_USER 一行。有兩個以上可行方案的取捨，依 [decisions](decisions.md) 用 tabledb 追加到 decisions.json，`rejected_and_why`、`premise` 必填。
+**記錄**：答案寫入 `games/<game>/design/core-loop.md` 與 `games/<game>/design/content-scope.md`，註明「使用者 YYYY-MM-DD」；未答保持「待定」，卡住後續工作時記 WAIT_USER 一行。有兩個以上可行方案的取捨，依 [decisions](decisions.md) 用 tabledb 追加到 decisions.json，`rejected_and_why`、`premise` 必填。
 
 **開發順序**：設計可用後依 [最小可玩版本](game-dev/game-flow/vertical-slice.md) 排步驟，首份 spec／plan 放上節落點，執行接 [game-dev](game-dev/README.md)。
 
@@ -61,7 +61,7 @@
 
 | 事項 | 何時 / 順序 | 前提 |
 |------|------------|---------|
-| 定義原創玩法與最小可玩內容 | 進行中：先做概念原型（使用者 2026-10-19，見 [core-loop](../../design/core-loop.md)） | 決定核心玩法，再依 game-flow 建立新局、選擇、戰鬥／非戰鬥、結算與續玩的最小閉環 |
+| 定義原創玩法與最小可玩內容 | 進行中：先做概念原型（使用者 2026-10-19，見 [apocalypse core-loop](../../games/apocalypse/design/core-loop.md)） | 決定核心玩法，再依 game-flow 建立新局、選擇、戰鬥／非戰鬥、結算與續玩的最小閉環 |
 
 框架已匯入、修復 Dictionary 與資源生命週期並建立流程回歸，見 [當前驗證](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。上表仍屬後續玩法方向，基準測試通過不代表原創內容已完成；落地順序見 [整體遊戲流程](game-dev/game-flow.md)。
 

@@ -1,6 +1,6 @@
 # content-scope — 內容範圍
 
-[design](README.md)｜[核心玩法](core-loop.md)｜[開發順序](../wf/workflows/game-dev/game-flow/vertical-slice.md)
+[design](README.md)｜[核心玩法](core-loop.md)｜[開發順序](../../../wf/workflows/game-dev/game-flow/vertical-slice.md)
 
 **狀態**：部分確認（使用者 2026-10-19）；當前先做概念原型，見 [核心玩法](core-loop.md#當前方向概念原型)。數量只描述本次切片，不是產品固定配額。
 
