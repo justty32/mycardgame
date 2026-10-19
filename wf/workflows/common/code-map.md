@@ -19,6 +19,10 @@
 
 戰鬥與 UI：[ActionHandler.gd](../../../game/autoload/ActionHandler.gd)、[HandManager.gd](../../../game/autoload/HandManager.gd)、[Root.tscn](../../../game/scenes/Root.tscn)。資料流見 [架構總覽](../../../analysis/slay-the-robot/architecture/01_overview.md)；[combat_flow.gd](../../../tests/combat_flow.gd) 搭配 [fixture](../../../tests/combat_fixture.gd) 驗單場戰鬥、獎勵與返回地圖。
 
+整局狀態與結算：[NewRunMenu.gd](../../../game/scripts/ui/menus/NewRunMenu.gd)、[RunSummaryOverlay.gd](../../../game/scripts/ui/RunSummaryOverlay.gd)、[ProfileData.gd](../../../game/data/mutable/ProfileData.gd)、[StatsHandler.gd](../../../game/autoload/StatsHandler.gd)。起局、跨幕、終局與持久化邊界由 [整局流程](../game-dev/game-flow.md) 串接；既有單場測試不代表這些轉移全部覆蓋。
+
+非戰鬥節點：[DialogueData.gd](../../../game/data/readonly/DialogueData.gd)、[DialogueOverlay.gd](../../../game/scripts/ui/DialogueOverlay.gd)、[ShopOverlay.gd](../../../game/scripts/ui/ShopOverlay.gd)、[RestOverlay.gd](../../../game/scripts/ui/RestOverlay.gd)。選項效果、設施與寶箱接線沿 [關卡設計](../game-dev/level-design.md) 的子流程查來源與專項驗收。
+
 序列化與擴充：[SerializableData.gd](../../../game/data/SerializableData.gd)、[擴充契約與限制](../../../analysis/slay-the-robot/architecture/02_extension_points.md)。Dictionary merge 已修，公開 API 回歸見 [dictionary_regression.gd](../../../tests/dictionary_regression.gd)；跨程序讀寫、續玩與拒絕無效輸入見 [save_load_flow.gd](../../../tests/save_load_flow.gd)。
 
 本專案工具：[game.ps1](../../../tools/game.ps1) 啟動／匯入／Smoke，[test-game.ps1](../../../tools/test-game.ps1) 隔離回歸與流程驗證，[upstream.json](../../../tools/upstream.json) 固定來源、引擎與本地修復。

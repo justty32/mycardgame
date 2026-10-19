@@ -1,6 +1,6 @@
 # ui — 畫面、文字與互動接線
 
-[遊戲開發入口](README.md)｜[圖像素材](art-assets.md)｜[驗收分流](validation.md)｜[呈現架構](../../../analysis/slay-the-robot/design/presentation.md)
+[遊戲開發入口](README.md)｜[子流程目錄](ui/README.md)｜[圖像素材](art-assets.md)｜[驗收分流](validation.md)｜[呈現架構](../../../analysis/slay-the-robot/design/presentation.md)
 
 將玩家任務轉成可操作的畫面與狀態，保留資料、場景、規則各自的責任。
 
@@ -29,6 +29,8 @@
 卡牌對照 [Card.tscn](../../../game/scenes/ui/card/Card.tscn)、[Card.gd](../../../game/scripts/ui/card/Card.gd) 和 [Hand.gd](../../../game/scripts/ui/Hand.gd)。Card 為 144×184，圖框 96×96；改牌寬須同步 Hand 的 `CARD_WIDTH`、間距、pivot 與 tween。透明 CardButton 的命中框、畫面框和 hover 動畫是不同節點，不能只改插圖尺寸。
 
 主選單由 [MainMenu.gd](../../../game/scripts/ui/menus/MainMenu.gd) 與 [TitleScreen.gd](../../../game/scripts/ui/menus/TitleScreen.gd) 接線；動態戰鬥 UI 從 [CustomUIData](../../../game/data/readonly/modding/CustomUIData.gd)、[BaseCustomUI](../../../game/scripts/ui/custom/BaseCustomUI.gd) 及 BaseCombatant 的註冊／移除入口追蹤。只有資料欄位存在不代表已接畫面，例如角色背景欄位目前未見消費端；實作前以 rg 重查。
+
+主選單／結算改版、繁中字型與多尺寸接 [選單、文字與尺寸](ui/menus-localization.md)，包含 RunSummaryOverlay 的勝敗／返回狀態和既有測試的文案耦合。新卡跨圖像、音效與 UI 的最小接線見 [素材流程](art-assets.md#一張新卡的跨領域接線)。
 
 ### 實作版面與文字
 

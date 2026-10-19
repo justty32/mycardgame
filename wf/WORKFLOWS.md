@@ -12,8 +12,8 @@
 
 | 需求 | 入口 |
 |---|---|
-| 新 agent 接手、拆任務、多 agent 協作、跨 session 交接 | [agent-session](workflows/agent-session.md) |
-| 卡牌設計／評量、敵人、關卡、圖像、聲音、UI、內容接線與機制 | [game-dev](workflows/game-dev/README.md) |
+| 新 agent 接手、冷接手演練、拆任務、多 agent 協作與交接 | [agent-session](workflows/agent-session.md) |
+| 整體遊戲流程、戰鬥／非戰鬥關卡、卡牌／敵人、素材／UI、內容與機制 | [game-dev](workflows/game-dev/README.md) |
 | 把可重複經驗變成工作流、更新開發慣例 | [learning](workflows/learning.md) |
 | WSL commit／push、snapshot、來源補丁與發布證據 | [版本控制](workflows/version-control.md) |
 

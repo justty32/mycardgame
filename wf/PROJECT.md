@@ -36,6 +36,8 @@ Slay-The-Robot 已固定版本；spire-codex 仍是未匯入的研究參考。
 
 使用者將 wf/ 定位為結構化記憶與操作技能。圖像／聲音／UI、卡牌設計／評量、敵人與關卡工作流都先對照實際框架，再建立輸入、步驟與驗收契約；核實事實集中在 [設計與呈現分析](../analysis/slay-the-robot/design/README.md)。目前沒有自動平衡模擬器或額外 MCP；只有日後反覆任務與穩定工具介面確實需要時，才評估服務化。
 
+後續以不同任務做 [首次接手演練](../analysis/slay-the-robot/onboarding/README.md)，依實際阻礙補第一個 mod、分層關卡、整局與持久化流程。文件復走、候選範例實跑及正式遊戲驗收各自留證據，不能互相代替；具體子流程由遊戲開發入口派發。
+
 來源為本機 `C:/code/mine/workflows`，讀取時 HEAD 為 `794d6d23322a93e0f65e3748375351904fa67066`，模板標記 v0.6。使用其 tools/wf-init.sh，以 `--flavor dev --non-invasive wf` 產生骨架；沒有修改來源 repo。授權副本見 [LICENSE.workflows](LICENSE.workflows)。
 
 環境、驗證、code map 與偏好已更新為目前事實；尚未建立發行版 export 驗證。後續升級依來源 IMPORT.md 的 kernel-owned / project-owned 分類處理，保留已填的專案內容。

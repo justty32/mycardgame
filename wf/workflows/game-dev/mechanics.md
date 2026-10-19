@@ -20,6 +20,8 @@
 
 新增原語時按同類實作接 `ActionGenerator` 的 `init()` 契約，處理可能為 null 的 parent／card／target。需要被加成或拒絕的效果經 `_intercept_action()`，從 processor 取值；不要先改動世界再驗證。參數層級及 `custom_key_names` 都由既有讀值 API 處理，避免另寫一套優先序。
 
+最短接線是新腳本繼承 BaseAction、覆寫 `perform_action()`，內容以完整腳本路徑為 key。`create_actions(parent, request, targets, actions_data, parent_action)` 只建立並 init；回傳值交 `ActionHandler.add_actions()` 才執行。Scripts 常數是便利入口，不是必填註冊表。若新增 action 仍讀現有 CardData 欄位，不須改 schema。讀值的 CardData 分支會在缺 key 時直接回 default，細節見 [擴充契約](../../../analysis/slay-the-robot/architecture/02_extension_points.md)，不可假設必然回落 player_values。
+
 ### 順序與等待
 
 預設 `add_actions([A, B])` 將每個 action 推成獨立 queue，stack 的 `pop_back()` 使 B 先於 A；`enqueue = true` 使用 queue，queue `pop_front()` 保持加入順序。已有 stack／current queue 時須追蹤實際插入位置，測試子行動與完成 sentinel；勿只換陣列順序就宣稱所有情境已正確。
@@ -31,6 +33,10 @@
 ### 攔截與 validators
 
 核對攔截腳本、被攔截 action 路徑、來源／目標端及 priority。以 `set_shadowed_action_values()` 寫入，保留自訂 key 映射。`preview_mode` 下不得消耗充能、抽 RNG、改牌組或送出有遊戲效果的訊號；重複預覽前後比較狀態，再比較一次真正執行的結果。
+
+預覽也不能回 REJECTED：Card 描述直接取 processor `[0]`。只有需顯示自訂攔截值時，才配置 `card_description_preview_overrides`；非空會取代預設 damage／block 預覽。新 action 不一律需要它。依 [卡面預覽契約](../../../analysis/slay-the-robot/design/cards.md#卡面攔截預覽的消費端契約) 核對 key、空 payload 與 null 目標；專項驗無缺鍵／空結果、基礎／升級／加成顯示及狀態不變。第三欄自訂映射目前未被消費，不能照 schema 註解假定有效。
+
+只有 ActionInterceptorData 入表還不會生效。狀態用 `StatusEffectData.status_effect_interceptor_ids`，由 [BaseCombatant](../../../game/scripts/combatants/BaseCombatant.gd) 在首次建立／最後移除時註冊／撤銷；其他 owner 須追到 `ActionHandler.register_action_interceptor(combatant, id)` 與對應 unregister。同 ID 不重複註冊，不應由多個 owner 各自擁有。Interceptor 覆寫 `process_action_interception(processor, preview_mode)`：CONTINUE 繼續，STOPPED 保留本目標但停止後續鏈，REJECTED 捨棄本目標。priority 由大到小，同值以 object_id 反向排序；上述接線於 2026-10-19 冷讀核實，新增機制仍需自己的執行證據。
 
 Validator 覆寫 `_validation()`，呼叫者使用 `validate()` 以保留反轉等包裝契約；依呼叫情境處理 null card／action。新增條件至少檢查一個允許、一個拒絕及邊界值。若條件只是阻擋玩家出牌，核對是否也該限制自動出牌或 action；不要因掛在 `card_play_validators` 就假設涵蓋所有路徑。
 

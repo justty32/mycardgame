@@ -29,6 +29,34 @@
 
 clone 本專案即包含已修復的 game，不要再次套用補丁。依來源鎖下載官方 Godot 4.6 Windows x64，核對 SHA-512 後解壓，或指定現有執行檔，再執行隔離 All。不需 PAS、Node/npm 或 export template 即可跑現有背景套件；本專案尚未驗證發行匯出。
 
+先在專案根唯讀核對工具與佈局；`$PSVersionTable.PSVersion` 須為 7 以上，Python 與 Git Bash 用於文件檢查。缺工具時只記錄缺項，再依當前安裝授權處理；Git 身份與 WSL 認證不是背景遊戲測試前提。
+
+```powershell
+$PSVersionTable.PSVersion
+Get-Command git, python, pwsh
+python --version
+Test-Path 'C:/Program Files/Git/bin/bash.exe'
+Test-Path game/project.godot
+Test-Path game/.git
+git rev-parse --show-toplevel
+git -C game rev-parse --show-toplevel
+```
+
+Godot 下載後先驗 ZIP，勿直接以檔名推定版本。以下假設已依來源鎖下載到 `.tools/Godot_v4.6-stable_win64.exe.zip`；尚未下載則先使用來源鎖的 engine_download，沒有下載／安裝授權時不要執行取得或解壓步驟。
+
+```powershell
+$sourceLock = Get-Content tools/upstream.json -Raw | ConvertFrom-Json
+$engineZip = '.tools/Godot_v4.6-stable_win64.exe.zip'
+if ((Get-FileHash $engineZip -Algorithm SHA512).Hash -ne $sourceLock.engine_sha512) {
+    throw 'Godot archive SHA-512 mismatch'
+}
+# 僅首次解壓；已有檔案時核對或使用 -GodotPath，不覆蓋。
+Expand-Archive -LiteralPath $engineZip -DestinationPath '.tools/godot-4.6'
+Test-Path '.tools/godot-4.6/Godot_v4.6-stable_win64_console.exe'
+```
+
+runner 的版本探測與隔離 All 才產生本機執行證據；上述雜湊只證明 ZIP 符合來源鎖。環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
+
 只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前先 framework-fixes.patch，再 resource-lifecycle.patch。已套用與未套用的目錄分開辨認，不能重複套用或覆寫既有修改。上游更新走 [upstream](game-dev/upstream.md)。
 
 `.tools/`、artifacts/、Godot cache、個人 profile／settings／saves 不屬於發布原始碼。必要的歷史驗證已另選入 analysis/slay-the-robot/evidence/；原件保留本機，發布副本記錄原件與副本 hash 及路徑遮罩，不能當成未處理的原始日誌。

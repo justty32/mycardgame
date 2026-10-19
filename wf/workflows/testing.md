@@ -38,6 +38,14 @@ runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash �
 
 [Dictionary](../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[SaveLoad](../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；測試設定不代表所有卡牌／遭遇或自訂內容已驗證。
 
+## 新內容如何接到 runner
+
+目前 suite 是上面列出的固定集合，沒有 Custom、Mod 或任意 script 參數。runner 複製其專案 `tests/` 頂層所有 `.gd` 到每個隔離 suite 的 tests 目錄，再執行固定入口；新增 helper 只會被複製，必須由既有入口明確呼叫才有驗證。
+
+新 mod 的可操作範例見 [第一個 mod](game-dev/content/bootstrap.md)：將專屬 helper 放 tests，以執行中腳本的相鄰路徑載入，於 Smoke 的 autoload ready 後、example_mod probe 前呼叫，交由既有 `_check()` 累計及退出。保留失敗傳遞、timeout、資源清理與完成標記。新 suite 需另改 runner 的選單、入口、標記與隔離契約，不可僅在文件寫出新命令。
+
+`-SourceGame` 只換遊戲來源，不換 tests；完整候選演練須把 tools 與 tests 一併放到獨立候選根再呼叫該 runner。source_hashes 目前是 13 個框架檔的清單，新內容另記檔案雜湊。Combat 的五張原生牌 fixture 會覆寫角色起手 append；SaveLoad 也有自己的語意情境。這些 suite 通過不等於新增卡／敵人／事件／音效已被實際執行，報告須列明新 assertion 及到達入口。
+
 ## 文件檢查（修改後必跑）
 
 從專案根執行。Windows 明確指定 Git Bash；用 Python 函式避免 python3 商店別名。

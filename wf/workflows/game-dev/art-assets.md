@@ -50,4 +50,10 @@
 
 ## 交接
 
+### 一張新卡的跨領域接線
+
+先由 [內容 bootstrap](content/bootstrap.md) 固定 mod、card 與取得入口，再沿 `CardData.card_texture_path → FileLoader.load_texture → Card.update_card_display → CardTexture` 接圖。音效獨立接 `card_play_actions` 的 `Scripts.ACTION_PLAY_SOUND`，填完整專案相對 `audio_path`；成功出牌或命中時機須依 [audio](audio.md) 定義，並核對 action 陣列後項先執行。卡名、費用與描述仍由資料／UI 提供。
+
+同一份交接記錄串起內容 ID、圖／音路徑、顯示框、播放事件及驗收。先驗資產解碼及 ID，再由 bootstrap 的 helper 接入既有 Smoke 驗目標 loader 非 fallback、Card 等待刷新後的 texture／文字；新卡音效的成功一次、拒絕與預覽零次須另加無聲專項。既有 Smoke 不會自動驗這條鏈，背景通過仍留下視覺／聽感待驗。
+
 交 UI agent：最終路徑、尺寸／原點／安全區、狀態變體、動畫時序與未驗項。交內容 agent：內容 ID→資料欄位→素材路徑，並列需註冊的 AnimationData／mod。批次紀錄超過 1 KB 時依 [data-files](../common/data-files.md) 用 `wf-table/1`，透過 tabledb 讀寫；不在多篇 md 複製素材清單。同步本次分析、工作流與 [strict lint](../testing.md)，不把工具改造成 MCP 當作素材製作的前置條件。

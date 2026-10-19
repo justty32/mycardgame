@@ -1,0 +1,91 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-19",
+ "link_columns": [
+  "copy_path"
+ ],
+ "columns": [
+  "id",
+  "source_file",
+  "raw_sha256",
+  "copy_path",
+  "copy_sha256",
+  "bytes",
+  "transform"
+ ],
+ "rows": [
+  {
+   "id": "recipe-manifest.json",
+   "source_file": "artifacts/cold-start/recipe-20261019-143746-3005575c/recipe-manifest.json",
+   "raw_sha256": "82fb55b34cf4fc8929c1b5ae38c37f90def3a4b07b59c766655f476b4e9fcc64",
+   "copy_path": "recipe-manifest.json",
+   "copy_sha256": "0f6706a8a9a5540c5727a61dd1a130dcf33e5ba43f2cbdc45a39c6fd93557855",
+   "bytes": "3265",
+   "transform": "UTF-8 LF；專案根與使用者家目錄替換為佔位；其餘保留。"
+  },
+  {
+   "id": "final-results.json",
+   "source_file": "artifacts/cold-start/recipe-20261019-143746-3005575c/artifacts/verification/20261019-144001-1a30d2da/results.json",
+   "raw_sha256": "8b5234cb19a063cad8dfbdb742bb1015abb25a108ede40293379cfc666416207",
+   "copy_path": "final-results.json",
+   "copy_sha256": "30367ea340cacd751942424da791c6a4e1d46bc72951969c4a41a61f2332f456",
+   "bytes": "9435",
+   "transform": "UTF-8 LF；專案根與使用者家目錄替換為佔位；其餘保留。"
+  },
+  {
+   "id": "final-smoke.log",
+   "source_file": "artifacts/cold-start/recipe-20261019-143746-3005575c/artifacts/verification/20261019-144001-1a30d2da/Smoke/smoke.log",
+   "raw_sha256": "2a8542d1e39188729cd4499a4ade58ff4d458281ebfebda105d5dae891c6deca",
+   "copy_path": "final-smoke.log",
+   "copy_sha256": "85b62f9672b745147e68eb37700754e507d8f116ab6743fe61c831484ef4f553",
+   "bytes": "10314",
+   "transform": "UTF-8 LF；專案根與使用者家目錄替換為佔位；其餘保留。"
+  },
+  {
+   "id": "first-results.json",
+   "source_file": "artifacts/cold-start/recipe-20261019-143746-3005575c/artifacts/verification/20261019-143847-d79d0ff8/results.json",
+   "raw_sha256": "31b25cba61434aab39b3924f54d3d9b8982446fa9bd3ee375a81128b86ecf0e7",
+   "copy_path": "first-results.json",
+   "copy_sha256": "dabee3578fad6fb020127e7507647a965981c8fc49bbc5294812b5ec0cc674db",
+   "bytes": "7204",
+   "transform": "UTF-8 LF；專案根與使用者家目錄替換為佔位；其餘保留。"
+  },
+  {
+   "id": "first-import.log",
+   "source_file": "artifacts/cold-start/recipe-20261019-143746-3005575c/artifacts/verification/20261019-143847-d79d0ff8/Smoke/import.log",
+   "raw_sha256": "2f016ac19c7a488634b8179e5978f3a12af89a4db36933d7596695f3e14d99f5",
+   "copy_path": "first-import.log",
+   "copy_sha256": "2f016ac19c7a488634b8179e5978f3a12af89a4db36933d7596695f3e14d99f5",
+   "bytes": "17091",
+   "transform": "UTF-8 LF；專案根與使用者家目錄替換為佔位；其餘保留。"
+  },
+  {
+   "id": "candidate-inputs.json",
+   "source_file": "artifacts/cold-start/recipe-20261019-143746-3005575c/candidate-input-hashes.csv",
+   "raw_sha256": "3c7ac59eee2e87cf189705f5824a7ebd94fddefdc3aab0707ceb238f549b1efe",
+   "copy_path": "candidate-inputs.json",
+   "copy_sha256": "9029d03a81f24e3749eb6763ff2a7554d228954ee0e7e4ecfd184d06fc55d33c",
+   "bytes": "1971",
+   "transform": "經 tabledb 將 14 筆候選檔／文件快照 hash 轉為 wf-table/1；file 是候選內識別字，非公開 checkout 連結。"
+  },
+  {
+   "id": "world-review.md",
+   "source_file": "artifacts/cold-start/fresh-world-review.md",
+   "raw_sha256": "1a3678c826f1a45b0517208e6b99c22a1765cdd5e09c14aa027da7b31e30fadc",
+   "copy_path": "world-review.md",
+   "copy_sha256": "1a3678c826f1a45b0517208e6b99c22a1765cdd5e09c14aa027da7b31e30fadc",
+   "bytes": "16482",
+   "transform": "UTF-8 LF；專案根與使用者家目錄替換為佔位；保留首次 blocked 與 freeze 後 recheck。"
+  },
+  {
+   "id": "content-review.md",
+   "source_file": "artifacts/cold-start/fresh-content-review.md",
+   "raw_sha256": "066955732306796ccef73d69ef5feda571ebe6faae0c307f49675de4325cd82d",
+   "copy_path": "content-review.md",
+   "copy_sha256": "879b0167e9335d334a5a77e4165fb57f57f1d9f71db2f0415599f23bfff8ae32",
+   "bytes": "25667",
+   "transform": "UTF-8 LF；專案根與使用者家目錄替換為佔位；保留新機制首次 blocked 及文件修補後復查。"
+  }
+ ]
+}

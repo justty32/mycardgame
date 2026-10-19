@@ -11,6 +11,9 @@
 |---|---|---|
 | 卡牌、升級、卡包與評量邊界 | [卡牌](cards.md) | [設計](../../../wf/workflows/game-dev/card-design.md)、[評量](../../../wf/workflows/game-dev/card-evaluation.md) |
 | 敵人意圖、遭遇、事件池與地圖 | [敵人及關卡](encounters.md) | [敵人](../../../wf/workflows/game-dev/enemy-design.md)、[關卡](../../../wf/workflows/game-dev/level-design.md) |
+| 對話選項、商店、休息與寶箱 | [非戰鬥節點](noncombat.md) | [關卡子流程](../../../wf/workflows/game-dev/level-design.md) |
+| 新局、跨幕、勝敗、續玩與局外進度 | [整局流程](game-flow.md) | [整局開發](../../../wf/workflows/game-dev/game-flow.md) |
+| 第一個 mod、候選副本與專項測試接線 | [Mod 起步](mod-bootstrap.md) | [內容開發](../../../wf/workflows/game-dev/content.md) |
 | 圖像、動畫、版面與輸入 | [呈現](presentation.md) | [素材](../../../wf/workflows/game-dev/art-assets.md)、[UI](../../../wf/workflows/game-dev/ui.md) |
 | 聲音載入、播放、bus 與設定 | [音訊](audio.md) | [聲音](../../../wf/workflows/game-dev/audio.md) |
 

@@ -1,0 +1,67 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "file",
+  "sha256"
+ ],
+ "rows": [
+  {
+   "file": "bootstrap-input.md.txt",
+   "sha256": "fcf1e33bc1ace302c3c765bb5413bb4885efc521c6409e148bd204049975268f"
+  },
+  {
+   "file": "beginner-input.md.txt",
+   "sha256": "7cd370fc193c8a7b2c9a90b1700544c65e6cef800ad909ffbd5786f3dcc7dfcd"
+  },
+  {
+   "file": "game/external/mods/mycardgame/mod_info.json",
+   "sha256": "13d1c1a7077524471e6969b878006c6e3165cbac678e814bfd8bc1188edaa07d"
+  },
+  {
+   "file": "game/external/mods/mycardgame/cards/card_heavy_strike.json",
+   "sha256": "68e2fbaa3cf321d1656940288e2fc896a6a4e8824a65d39938465e86989ae579"
+  },
+  {
+   "file": "game/external/mods/mycardgame/characters/character_red.json",
+   "sha256": "ded1eae3166b9747ae842bc9bcf1a70f07c0c712697236e9a5e699a33f84b2b8"
+  },
+  {
+   "file": "game/external/mod_list.json",
+   "sha256": "80e3717df8ade81237b44380aea5c72228e9b1e73c68bc81157c096ecb04a482"
+  },
+  {
+   "file": "tests/framework_smoke.gd",
+   "sha256": "6042e29f1e6d6500030fb12f5bb7629ebf52ff158edda006c3ef786d3bc322e2"
+  },
+  {
+   "file": "tests/mod_bootstrap_probe.gd",
+   "sha256": "2b0b6d24c9302a7cc9dd0d769a20e49b44b1065794a73dd0d7ee99e4f6704ed8"
+  },
+  {
+   "file": "tools/test-game.ps1",
+   "sha256": "76e6b76091e4964cf590014cb82179b64114f2644f2146484e698fd2604b0486"
+  },
+  {
+   "file": "tools/test-game-diagnostics.ps1",
+   "sha256": "98fb8ab15f62bf073fb7342f1d8bb294c4ed4203ab24a12e786a6b9a1f4186fe"
+  },
+  {
+   "file": "tools/upstream.json",
+   "sha256": "ed171b01706afbc030eeb0196b02c2fa9ad9e8bdd6979361a02f042a625591c2"
+  },
+  {
+   "file": "prepare.ps1",
+   "sha256": "4db5d20868ac4689b57d1eee99d1734e3bf4576478772b75257e4306cd2ae0f8"
+  },
+  {
+   "file": "assemble.py",
+   "sha256": "853338845c671d12a133f2164258ead809947a2f8e314a145803bea4046e6a1e"
+  },
+  {
+   "file": "run.ps1",
+   "sha256": "6d25e82e36d4e8f5cd72fe0d09ac3bc63db9c1e16de4e21f3bd96fe539eb1f0e"
+  }
+ ]
+}

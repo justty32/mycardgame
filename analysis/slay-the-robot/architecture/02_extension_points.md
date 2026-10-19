@@ -18,7 +18,7 @@
 
 一般可攔截 action 應以 `_intercept_action()` 取得各目標的 processor，再從 `get_shadowed_action_values()` 讀參數。參考 [ActionAttack.gd](../../../game/scripts/actions/combatant_actions/ActionAttack.gd)；正常攻擊常由 [ActionAttackGenerator.gd](../../../game/scripts/actions/combatant_actions/ActionAttackGenerator.gd) 生成逐擊 action，包含次數與動畫處理，不能把直接呼叫 `target.damage()` 當成完整攻擊管線。
 
-`BaseAction.get_action_value()` 實際優先序是 action.values → CardPlayRequest.card_values → CardData.card_values → PlayerData.player_values → 呼叫端預設值；`custom_key_names` 可改用另一個 key。攔截器提供更高層的 shadow values。直接讀 `values["damage"]` 會繞過這些能力。
+`BaseAction.get_action_value()` 先以 `custom_key_names` 映射 key，再查 action.values、CardPlayRequest.card_values。若 request 有 CardData，會直接返回 `card_values.get(key, default)`，即使缺 key 也不再查 player；只有未進入此分支才查 PlayerData.player_values、最後回傳預設值。這不是無條件的線性 fallback。攔截器另提供 shadow values；直接讀 `values["damage"]` 會繞過這些能力。2026-10-19 冷接手重新核對此分支，與 [卡牌核實](../design/cards.md) 一致；屬靜態證據。
 
 排程採 LIFO：假設同次 `add_actions([A, B])` 且未 enqueue，B 先於 A。卡牌的 action 陣列亦受此規則影響；見 [HandManager.gd](../../../game/autoload/HandManager.gd) `_play_card()` 將「完成 action」放在陣列前端，讓它最後執行。需要抽牌後才依手牌數計傷害時，務必先驗證實際執行序。
 

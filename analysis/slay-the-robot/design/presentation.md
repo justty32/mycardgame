@@ -54,4 +54,14 @@ Card 的 gui_input 在 action released 時發 selected／right_clicked，mouse_e
 
 ## 後續驗證界線
 
+### 主選單與結算的冷接手補查
+
+2026-10-19 同基準靜態追讀：[Root.tscn](../../../game/scenes/Root.tscn) 的主選單位於 `TitleScreen/MainMenu`，由 [MainMenu.gd](../../../game/scripts/ui/menus/MainMenu.gd) 依 save 存在與否切換 Continue／Forfeit／New Run；[BaseMenu](../../../game/scripts/ui/menus/BaseMenu.gd) 綁定匯出 navigation dictionary。修改階層需保留 NodePath 與測試的實際取節點路徑。
+
+結算位於 `RunScreen/RunSummaryOverlay`，附 [RunSummaryOverlay.gd](../../../game/scripts/ui/RunSummaryOverlay.gd)。overlay 及背景固定 1200×700；VictoryLabel／DefeatLabel／EndRunMessageLabel／EndRunButton 使用固定 offsets，統計用 RichLabelAutoSizer。`SUMMARY_TEMPLATE` 將九項統計排成三欄 BBCode，勝利訊息為 `U R WINNER`，敗北讀 `EventData.event_death_message_bbcode`。沒有 current_run_stats 的路徑含 breakpoint，fixture 不能只空發 signal。
+
+`run_victory` 與 `player_death_animation_finished` 設勝敗狀態；EndRunButton 呼叫 Global.end_run。按鈕字串 Back To Main Menu 不足以推論返回位置：[combat_flow.gd](../../../tests/combat_flow.gd) 的敗北分支斷言返回 TitleScreen/NewRunMenu，且硬編 `contains("Damage Taken")` 查統計。翻譯 SUMMARY_TEMPLATE 需要同步這個文案耦合的斷言。該測試的 victory 分支停在一般戰鬥獎勵／回地圖，不涵蓋通關勝利結算。
+
+現有 title_screen_theme 未指定字型，結算另有局部字級；更換主選單 theme 不代表結算或所有 RichTextLabel 都取得相同字型。背景可另建字元涵蓋、實際字型取得及多尺寸 rect 斷言，尚無專項證據。可執行的操作與限制見 [選單、文字與尺寸](../../../wf/workflows/game-dev/ui/menus-localization.md)。
+
 背景可驗圖片解碼、目標資料路徑、SpriteFrames 屬性、scene 實例化與 handler 狀態；尚需依實際改動新增 fixture，現有 Smoke 並不涵蓋任意新畫面。視覺可讀性、alpha 邊緣、動畫美術一致性、不同尺寸與真實輸入均未在本次驗證。工作流已保留後續驗收條件，當前限制下不呼叫 Run、capture 或桌面工具。

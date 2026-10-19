@@ -67,6 +67,12 @@
 
 完整重啟隔離副本重建 Global pack cache，以新 run 驗起手；查玩家 draft cache、稀有度 bucket，再走實際獎勵選牌加入 deck。稀有度權重、保底狀態、池內同稀有卡數共同影響出現率；改成 RARE 不是單純改標籤。空／耗盡 bucket 可能給不足張數，不能用「卡已註冊」代替取得驗證。改 ID 或永久牌欄位時接存讀相容驗證。
 
+不要為每張卡另建 pack。當任務沿用 `character_red`，現有 `card_pack_red` 已篩 `color_red`；COMMON ATTACK 且 appears=true 的新卡可直接納入，仍須斷言 cache／bucket 與真實取得。只有需要獨立取得範圍才新增 pack。模組從零登記依 content，勿把官方 example_mod 全卡欄位當新 schema。
+
+### 將驗收接進可跑的測試
+
+2026-10-19 冷讀 [runner](../../../tools/test-game.ps1) 與 [fixture](../../../tests/combat_fixture.gd)：現有 Combat 會覆寫起始牌組，`combat_flow._play()` 的扣費斷言固定為 1；它不會因 mod 新增卡而自動測到該卡。安排專項載入／出牌／升級／取得 assertions，交 runner owner 接入隔離執行與完成標記。現在沒有 `-Suite Cards` 或任意腳本參數，不得虛構命令；已有 Smoke／Combat 成功只作基準。此結論為靜態核對，非新卡執行證據。
+
 ## 交接
 
 交 [card-evaluation](card-evaluation.md) 時附 brief、版本／mod 次序、實際 card／pack／character ID、基礎與升級期望、可到達情境、測試與未驗項。圖片、聲音、UI 文案仍需相應領域驗收；目前禁止視窗與桌面操作，背景資料證據不能當作視覺／可玩樂趣評價。更新領域分析與流程，導航由整合 agent 維護。

@@ -1,6 +1,6 @@
 # content — 卡牌與內容擴充
 
-[遊戲開發入口](README.md)｜[驗收分流](validation.md)｜[testing](../testing.md)
+[遊戲開發入口](README.md)｜[子流程目錄](content/README.md)｜[驗收分流](validation.md)｜[testing](../testing.md)
 
 **何時用**：新增／調整卡牌、敵人、角色、遺物、事件，以及它們的卡包、事件池與 mod 資料。**何時不用**：需要新行為原語時接 [mechanics](mechanics.md)；只改畫面接 [ui](ui.md)；單純查證先走 investigation。
 
@@ -15,6 +15,8 @@
 依本次內容選讀 [CardData](../../../game/data/prototype/CardData.gd)、[EnemyData](../../../game/data/prototype/EnemyData.gd)、[CharacterData](../../../game/data/readonly/CharacterData.gd)、[ArtifactData](../../../game/data/prototype/ArtifactData.gd) 或 [EventData](../../../game/data/readonly/EventData.gd)。以 [GlobalTestDataGenerator.gd](../../../game/autoload/GlobalTestDataGenerator.gd) 的相近真實內容為範本，沿引用讀其行動與 validator；不要只複製外觀相似的 JSON。
 
 ## 操作流程
+
+首次從空目錄建立 mod，先照 [第一個 mod 與隔離驗收](content/bootstrap.md)：它串起最小檔案、登記、候選副本及 Smoke helper 接線。下列規則適用後續內容擴充；不要把既有 example_mod 通過當成本次內容證據。
 
 1. 寫下內容 ID、玩家取得入口與可觀察結果，用 `rg` 查 ID 及關聯引用，確認新增或修改既有內容。先定義一個最小可到達的測試情境，例如固定起始牌組或指定戰鬥事件。
 2. 依既有自訂內容位置增量修改；新模組須登記資料夾、class 與 Global table，並在 mod 清單啟用與設定優先順序。使用新 ID 區隔新內容；使用相同 ID 時逐欄說明補丁意圖。

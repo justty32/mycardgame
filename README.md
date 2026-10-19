@@ -4,7 +4,7 @@
 
 ## 開始開發
 
-Agent 先讀 [AGENTS.md](AGENTS.md)，再依 [工作流入口](wf/workflows/game-dev/README.md) 選擇卡牌設計／評量、敵人、關卡、圖像、聲音、UI 或機制。各流程均附實際程式來源與驗收邊界；[框架分析](analysis/slay-the-robot/README.md) 保存核實事實與已知缺口。
+Agent 先讀 [AGENTS.md](AGENTS.md)，再依 [工作流入口](wf/workflows/game-dev/README.md) 選擇第一個 mod、整局流程、卡牌設計／評量、敵人、戰鬥／非戰鬥關卡、圖像、聲音、UI 或機制。各流程均附實際程式來源與驗收邊界；[框架分析](analysis/slay-the-robot/README.md) 保存核實事實與已知缺口，[首次接手演練](analysis/slay-the-robot/onboarding/README.md) 記錄不同任務的文件可用性。
 
 `game/` 包含框架程式及本地修復。來源版本、引擎校驗值與重建補丁在 [tools/upstream.json](tools/upstream.json)；詳細安裝及 Git 佈局見 [開發環境](wf/workflows/dev-env.md)。本機引擎、快取與個人存檔不隨程式碼發布。
 

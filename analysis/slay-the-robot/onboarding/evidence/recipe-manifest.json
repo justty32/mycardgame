@@ -1,0 +1,97 @@
+{
+  "date": "2026-10-19",
+  "candidate": "{PROJECT_ROOT}\\artifacts\\cold-start\\recipe-20261019-143746-3005575c",
+  "validation_kind": "document-led candidate implementation; not blind independent cold start",
+  "original_source_file_count": 868,
+  "original_source_changed_files": [],
+  "candidate_input_hashes_still_match": true,
+  "executed_mod_matches_candidate": true,
+  "executed_tests_match_candidate": true,
+  "recipe_sha256": "fcf1e33bc1ace302c3c765bb5413bb4885efc521c6409e148bd204049975268f",
+  "engine": "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe",
+  "engine_version": "4.6.stable.official.89cea1439",
+  "attempts": [
+    {
+      "run_id": "20261019-143847-d79d0ff8",
+      "completed": false,
+      "verdict": null,
+      "error": "import failed. Inspect {PROJECT_ROOT}\\artifacts\\cold-start\\recipe-20261019-143746-3005575c\\artifacts\\verification\\20261019-143847-d79d0ff8\\Smoke\\import.log and import.console.log",
+      "phases": [
+        {
+          "name": "version",
+          "exit_code": 0,
+          "passed": true,
+          "timed_out": false,
+          "cold_cache_uid_requires_recheck": false
+        },
+        {
+          "name": "import",
+          "exit_code": 0,
+          "passed": false,
+          "timed_out": false,
+          "cold_cache_uid_requires_recheck": true
+        }
+      ]
+    },
+    {
+      "run_id": "20261019-144001-1a30d2da",
+      "completed": true,
+      "verdict": "PASS",
+      "error": null,
+      "phases": [
+        {
+          "name": "version",
+          "exit_code": 0,
+          "passed": true,
+          "timed_out": false,
+          "cold_cache_uid_requires_recheck": false
+        },
+        {
+          "name": "import",
+          "exit_code": 0,
+          "passed": true,
+          "timed_out": false,
+          "cold_cache_uid_requires_recheck": true
+        },
+        {
+          "name": "import-verified",
+          "exit_code": 0,
+          "passed": true,
+          "timed_out": false,
+          "cold_cache_uid_requires_recheck": false
+        },
+        {
+          "name": "smoke",
+          "exit_code": 0,
+          "passed": true,
+          "timed_out": false,
+          "cold_cache_uid_requires_recheck": false
+        }
+      ]
+    }
+  ],
+  "new_assertions_count": 8,
+  "new_assertions": [
+    "PASS: MOD: heavy strike registered",
+    "PASS: MOD: red character registered",
+    "PASS: MOD: starting deck contains one heavy strike",
+    "PASS: MOD: existing basic attacks retained",
+    "PASS: MOD: existing basic blocks retained",
+    "PASS: MOD: declared cost and damage",
+    "PASS: MOD: starting-only card",
+    "PASS: MOD: attack action reference"
+  ],
+  "smoke_marker": [
+    "SMOKE PASS: 52 checks, 0 failures"
+  ],
+  "warnings": {
+    "icon_uid_fallback": 20,
+    "image_export_warning": 2
+  },
+  "smoke_forbidden_error_matches": [],
+  "limits": [
+    "No action execution, target legality, preview, combat effect, balance, upgrade, save/load, card reward pool, full run, GUI, audio playback, or export verified.",
+    "No original game, tests, or tools source changes; demonstration exists only in candidate.",
+    "First sandbox attempt rejected certificate-store ERROR; approved background retry used unchanged runner and candidate."
+  ]
+}

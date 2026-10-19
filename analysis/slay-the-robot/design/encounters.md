@@ -1,6 +1,6 @@
 # 敵人、遭遇與關卡：來源核實
 
-[敵人工作流](../../../wf/workflows/game-dev/enemy-design.md)｜[關卡工作流](../../../wf/workflows/game-dev/level-design.md)｜[架構](../architecture/01_overview.md)
+[敵人工作流](../../../wf/workflows/game-dev/enemy-design.md)｜[關卡工作流](../../../wf/workflows/game-dev/level-design.md)｜[非戰鬥與設施](noncombat.md)｜[架構](../architecture/01_overview.md)
 
 2026-10-19 靜態查核本機 `game/`，HEAD `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`，另有本地修復。本筆記依程式與資料接線歸納，沒有啟動 Godot、執行新敵人／完整 act 測試或操作 UI。設計工作流中的節奏、budget 與評量建議是供後續任務使用的方法，不是框架已內建的平衡規則。
 
@@ -46,9 +46,9 @@ LocationData 只在 event ID 空且 pool 非空時抽選並寫入 event ID，已
 
 ## 獎勵、overlay 與存檔邊界
 
-[RewardOverlay.gd](../../../game/scripts/ui/RewardOverlay.gd) 在 combat_started 且允許獎勵時生成獎勵，combat_ended 等 actions 完成後顯示，玩家死亡則清除。Continue 依 act／run 結束判定生成下一幕、返回 map 或 run_victory。[Random.gd](../../../game/autoload/Random.gd) 依節點種類選卡牌／遺物稀有度，金錢固定 25–49；沒有 EventData 的通用 reward budget 欄位。
+[RewardOverlay.gd](../../../game/scripts/ui/RewardOverlay.gd) 在 combat_started 且允許獎勵時生成獎勵；非終局戰的 combat_ended 等 actions 完成後顯示，玩家死亡則清除。非終局幕 Boss 經 Continue 生成下一幕；最終戰由 [RunSummaryOverlay.gd](../../../game/scripts/ui/RunSummaryOverlay.gd) 的 combat_ended 直接發 run_victory，RewardOverlay 不顯示一般獎勵。Continue 的 run_victory 分支不能概括為最終戰的必經出口。[Random.gd](../../../game/autoload/Random.gd) 依節點種類選卡牌／遺物稀有度，金錢固定 25–49；沒有 EventData 的通用 reward budget 欄位。
 
-Combat 的訪問 handler 啟動戰鬥或顯示 chest/shop；[DialogueOverlay.gd](../../../game/scripts/ui/DialogueOverlay.gd) 與 [RestOverlay.gd](../../../game/scripts/ui/RestOverlay.gd) 各自接 EVENT、REST_SITE。設計 event 不能只確認 ID 載入，還要走每個選項與退出／死亡；設計商店／休息也應驗真實 overlay handler 與資源變化。
+Combat 的訪問 handler 啟動戰鬥或顯示 chest/shop；[DialogueOverlay.gd](../../../game/scripts/ui/DialogueOverlay.gd) 與 [RestOverlay.gd](../../../game/scripts/ui/RestOverlay.gd) 各自接 EVENT、REST_SITE。選項 schema、validator/action 時序、商店價格／購買、休息次數與寶箱未完成欄位見 [非戰鬥核實](noncombat.md)。Shop／Reward Continue 有轉幕分支，Rest Continue 沒有 generate_next_act，Dialogue 結束只回 Map；EVENT／REST 作幕尾不能假定與 Boss 同樣轉幕。此補充於 2026-10-19 靜態核對，未跑新流程測試。
 
 ActionVisitLocation 先更新位置、清 shop、autosave，才發訪問訊號。[FileLoader.load_game](../../../game/autoload/FileLoader.gd) 還原 PlayerData 後重發 run_started 與訪問目前位置。PlayerData 匯出地圖、池、RNG 等，但 player_energy/block 未保存，場上敵人與 action queue 亦不在其快照；這是位置邊界續玩，不能宣稱戰鬥中途完整還原。
 

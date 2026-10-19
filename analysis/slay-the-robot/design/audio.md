@@ -45,3 +45,5 @@ SoundManager 收到焦點外移且設定啟用時 mute Master；焦點回來無�
 另兩個 API 邊界可從本地碼看到：get_currently_playing_music_tracks 呼叫 music.get_current_tracks，但實際方法名為 get_currently_playing_tracks；get_last_played_music_track 直接取 history[0]，未保護空歷史。新接線不要假定這些 wrapper 已可靠。
 
 現有遊戲回歸沒有音訊專項斷言。本次未證明聽感、loop 無接縫、淡入淡出效果、設定冷啟動套用、音效併發或成品載入。後續任務先按 [音訊工作流](../../../wf/workflows/game-dev/audio.md) 將所需能力轉成針對性測試，再決定修哪些缺口；不將靜態發現升格為「已修復」。
+
+2026-10-19 冷接手補查 [test-game.ps1](../../../tools/test-game.ps1)：suite 名稱與測試腳本映射固定，沒有 Audio suite；runner 會複製 tests/*.gd，但新增 helper 仍須由既有測試呼叫。程序參數明列 `--headless`，未顯式指定音訊驅動；本輪未啟動引擎，因此沒有「新音訊專項不輸出至實體裝置」的實測證據。新增播放檢查前須先核實 Dummy／替身策略，不能由舊 suite 通過推論音訊輸出邊界。loader helper 接入方式見 [內容 bootstrap](../../../wf/workflows/game-dev/content/bootstrap.md)，播放、bus／pool 與聽感仍各自需要相應證據。

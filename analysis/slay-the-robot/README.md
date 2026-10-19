@@ -15,6 +15,7 @@
 - [回歸與流程驗證](architecture/04_regression_validation.md)：Dictionary／存讀修復、單場戰鬥勝敗、跨程序續玩與資源清理限制。
 - [資源生命週期](architecture/05_resource_lifecycle.md)：退出資源問題的後續修復與驗收狀態，和原生崩潰調查分開記錄。
 - [設計與呈現能力](design/README.md)：卡牌、敵人、關卡、圖像／UI 與音訊的實際接線及已知缺口。
+- [首次接手演練](onboarding/README.md)：不同任務從 wf 出發的缺口、補強與獨立復走證據。
 - [教學更正紀錄](tutorial/verification.md)：舊範例與目前原始碼的差異。
 - [操作日誌](session_log.md)：保留原始遷移紀錄，後續追加本專案進度。
 

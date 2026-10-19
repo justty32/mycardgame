@@ -30,9 +30,9 @@
 
 | 事項 | 何時 / 順序 | 前提 |
 |------|------------|---------|
-| 定義原創玩法與最小可玩內容 | 框架基準後 | 決定核心玩法，再用最小卡牌與起始牌組驗證一場戰鬥 |
+| 定義原創玩法與最小可玩內容 | 框架基準後 | 決定核心玩法，再依 game-flow 建立新局、選擇、戰鬥／非戰鬥、結算與續玩的最小閉環 |
 
-框架已匯入、修復 Dictionary 合併並建立流程回歸，見 [當前驗證](../../analysis/slay-the-robot/architecture/04_regression_validation.md)。上表仍屬後續玩法方向，基準測試通過不代表原創內容已完成。
+框架已匯入、修復 Dictionary 與資源生命週期並建立流程回歸，見 [當前驗證](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。上表仍屬後續玩法方向，基準測試通過不代表原創內容已完成；落地順序見 [整體遊戲流程](game-dev/game-flow.md)。
 
 ## 交接
 
