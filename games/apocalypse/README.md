@@ -8,4 +8,5 @@
 | 路徑 | 內容 |
 |------|------|
 | [design/](design/README.md) | 玩法決定、內容範圍、任務 spec／plan |
-| `pack/` | 內容包（Slay-The-Robot mod） |
+| [pack/](pack/mod_info.json) | 內容包（Slay-The-Robot mod） |
+| `tests/` | 題材 probe（`apocalypse_probe.gd`，待 runner `--pack` 支援後接入） |
