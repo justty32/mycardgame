@@ -1,0 +1,2177 @@
+diff --git a/autoload/Global.gd b/autoload/Global.gd
+index 343251b..463d84b 100644
+--- a/autoload/Global.gd
++++ b/autoload/Global.gd
+@@ -396,6 +396,10 @@ func get_alive_enemies() -> Array[Enemy]:
+ func are_remaining_enemies() -> bool:
+ 	return len(get_alive_enemies()) > 0
+ 
++## The CombatDirector of the loaded run screen (group "combat_director"), null outside it.
++func get_combat_director() -> CombatDirector:
++	return Global.get_tree().get_first_node_in_group(CombatDirector.GROUP_NAME) as CombatDirector
++
+ func get_combat_stats() -> CombatStatsData:
+ 	# shorthand helper method
+ 	# gets player's combat stats for this combat
+diff --git a/autoload/GlobalTestDataGenerator.gd b/autoload/GlobalTestDataGenerator.gd
+index 4983185..21d4ac4 100644
+--- a/autoload/GlobalTestDataGenerator.gd
++++ b/autoload/GlobalTestDataGenerator.gd
+@@ -3294,7 +3294,7 @@ func add_test_cards() -> void:
+ 	card_end_turn.card_rarity = CardData.CARD_RARITIES.RARE
+ 	card_end_turn.card_requires_target = false
+ 	card_end_turn.card_keyword_object_ids = ["keyword_block"]
+-	card_end_turn.card_values = {"block": 5, "end_turn_immediacy_level": CombatEndTurn.END_TURN_QUEUE_IMMEDIACY.IMMEDIATE}
++	card_end_turn.card_values = {"block": 5, "end_turn_immediacy_level": CombatEndAction.END_ACTION_QUEUE_IMMEDIACY.IMMEDIATE}
+ 	card_end_turn.card_upgrade_value_improvements = {"block": 5}
+ 	card_end_turn.card_play_actions = [
+ 	{Scripts.ACTION_BLOCK: {"target_override": BaseAction.TARGET_OVERRIDES.PARENT}},
+diff --git a/autoload/HandManager.gd b/autoload/HandManager.gd
+index 2daa1eb..92beddd 100644
+--- a/autoload/HandManager.gd
++++ b/autoload/HandManager.gd
+@@ -11,8 +11,13 @@ const PLAYER_CARD_DRAW_PER_TURN: int = 5
+ 
+ ## The default max number of cards available in player's hand. Exceeding this will discard the cards.
+ ## Intercept ActionAddCardsToHand and ActionDraw's hand_card_count_max to adjust the max hand size.
++## NOTE: Legacy default; the hand limit now reads CombatRulesData.hand_limit via get_hand_limit().
+ const PLAYER_DEFAULT_HAND_CARD_COUNT_MAX: int = 10
+ 
++## Max cards in hand from the combat rules (CombatRulesData.hand_limit, default 10).
++func get_hand_limit() -> int:
++	return Global.get_combat_rules().hand_limit
++
+ ## If multipe cards are queueed how long it takes between them. Tweaking this will speed up plays slightly
+ const TIME_BETWEEN_CARD_PLAYS: float = 0.2
+ 
+@@ -452,13 +457,17 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
+ 	var card_destination_strategy: int = card_play_request.card_destination_strategy
+ 	var is_duplicate_play: bool = card_play_request.is_duplicate_play
+ 	var send_signal: bool = not is_duplicate_play
+-	HandManager.move_card_to_pile(card_play_request.card_data, card_origin_pile, card_destination_pile, card_destination_strategy, PLAYER_DEFAULT_HAND_CARD_COUNT_MAX, true, send_signal)
+-	
++	HandManager.move_card_to_pile(card_play_request.card_data, card_origin_pile, card_destination_pile, card_destination_strategy, get_hand_limit(), true, send_signal)
++
+ 	hand.combat.update_combat_display()
+ 
+-## Discard non-retained cards, exhaust ethereal cards, and perform specific end of turn card actions
+-## NOTE: Called from Combat.
++## Legacy name of perform_end_of_action_hand_actions().
+ func perform_end_of_turn_hand_actions() -> void:
++	await perform_end_of_action_hand_actions()
++
++## Discard non-retained cards, exhaust ethereal cards, and perform specific end of turn card actions
++## NOTE: Called from CombatDirector at the end of a party unit's action (rules.discard_hand_on_action_end).
++func perform_end_of_action_hand_actions() -> void:
+ 	# only the cards in hand at the end of turn matter for the purposes of performing actions on them
+ 	# this prevents things like drawing a card end of turn then exhausting it because it's ethereal or whatever
+ 	var duplicated_player_hand: Array[CardData] = HandManager.player_hand.duplicate(false)
+@@ -526,7 +535,7 @@ func perform_end_of_turn_hand_actions() -> void:
+ 		if duplicated_player_hand.has(card_data):
+ 			var card_end_of_turn_destination: String = card_data.card_end_of_turn_destination
+ 			var card_end_of_turn_destination_strategy: int = card_data.card_end_of_turn_destination_strategy
+-			move_card_to_pile(card_data, HAND_PILE, card_end_of_turn_destination, card_end_of_turn_destination_strategy, PLAYER_DEFAULT_HAND_CARD_COUNT_MAX, true, true)
++			move_card_to_pile(card_data, HAND_PILE, card_end_of_turn_destination, card_end_of_turn_destination_strategy, get_hand_limit(), true, true)
+ 			
+ 			## wait for tween/card actions to finish
+ 			#await Global.get_tree().create_timer(hand.CARD_TWEEN_TIME).timeout
+@@ -631,7 +640,7 @@ func draw_cards(number_of_cards: int, hand_card_count_max: int) -> void:
+ func add_cards_to_draw(cards: Array[CardData], card_destination_strategy: int = PILE_INSERTION_STRATEGIES.TOP) -> void:
+ 	for card_data: CardData in cards:
+ 		var card_origin_pile: String = get_card_pile_location_name(card_data)
+-		move_card_to_pile(card_data, card_origin_pile, HandManager.DRAW_PILE, card_destination_strategy, PLAYER_DEFAULT_HAND_CARD_COUNT_MAX, true, true)
++		move_card_to_pile(card_data, card_origin_pile, HandManager.DRAW_PILE, card_destination_strategy, get_hand_limit(), true, true)
+ 	
+ 	hand.tween_hand()
+ 	hand.update_hand_card_display()
+@@ -639,7 +648,9 @@ func add_cards_to_draw(cards: Array[CardData], card_destination_strategy: int =
+ ## Adds cards directly to hand, discarding any additional ones if it's too full.
+ ## Does not count as a draw.
+ ## Can take a hand_card_count_max which restricts cards beyond the hand size limit.
+-func add_cards_to_hand(cards: Array[CardData], hand_card_count_max: int = HandManager.PLAYER_DEFAULT_HAND_CARD_COUNT_MAX) -> void:
++func add_cards_to_hand(cards: Array[CardData], hand_card_count_max: int = -1) -> void:
++	if hand_card_count_max < 0:
++		hand_card_count_max = get_hand_limit()
+ 	var discarded_cards: Array[CardData] = []
+ 	var added_cards: Array[CardData] = []
+ 	for card_data: CardData in cards:
+diff --git a/autoload/Signals.gd b/autoload/Signals.gd
+index 227a622..79d1063 100644
+--- a/autoload/Signals.gd
++++ b/autoload/Signals.gd
+@@ -97,30 +97,32 @@ signal rest_action_ended(rest_action_id: String) # a rest action has finished
+ #endregion
+ 
+ #region Combat
+-# turns
++# actions on the combat timeline (CombatDirector). Legacy turn signals are kept with new meaning:
++# player_turn_* = the hero's action started (before energy/draw) / ended (after discard);
++# enemy_turn_* = one enemy's action started / ended. Prefer unit_action_* in new code.
+ signal combat_started(event_id: String) # invokes combat when emitted. If empty string for event_id, will use the location's combat event
+ signal combat_ended
+ signal player_turn_started
+ signal player_turn_ended
+ signal enemy_turn_started
+ signal enemy_turn_ended
+-signal end_turn_requested(end_turn_immediacy_level: int)	# requests to end the turn. See CombatEndTurn
++signal end_turn_requested(end_turn_immediacy_level: int)	# legacy name of end_action_requested; still served by CombatDirector
+ 
+ # combat framework: unit actions, timeline and board
+-# NOTE: The legacy turn flow emits unit_action_started/ended for the hero only (alongside
+-# player_turn_*); the remaining signals are declared for the action-timeline combat loop and
+-# are not emitted yet. player_turn_* = hero's action, enemy_turn_* = one enemy's action.
++# Emitted by CombatDirector: unit_action_*, combat_tick_advanced, timeline_changed, end_action_requested;
++# by UnitRegistry: unit_spawned / unit_removed. unit_moved, unit_downed, wave_*, cell_* are declared
++# for later phases (board, waves) and not emitted yet.
+ signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: after draw, before input/decision
+ signal unit_action_ended(unit: BaseCombatant)	# a unit's action ends: after discard, before delay is computed
+ signal combat_tick_advanced(previous_tick: int, current_tick: int)	# the combat clock advanced
+ signal timeline_changed	# any unit's next_action_tick changed (UI should re-project the timeline)
+ signal unit_moved(unit: BaseCombatant, from: Vector2i, to: Vector2i)	# a unit finished moving on the board
+-signal unit_spawned(unit: BaseCombatant)
++signal unit_spawned(unit: BaseCombatant)	# a unit registered in UnitRegistry (entered the scene tree)
+ signal unit_downed(unit: BaseCombatant)
+-signal unit_removed(unit: BaseCombatant)
++signal unit_removed(unit: BaseCombatant)	# a unit unregistered from UnitRegistry (left the scene tree)
+ signal wave_started(wave_index: int)
+ signal wave_cleared(wave_index: int)
+-signal end_action_requested(immediacy: int)	# replaces end_turn_requested for the action timeline
++signal end_action_requested(immediacy: int)	# requests the acting player unit's action to end. See CombatEndAction
+ signal cell_clicked(cell: Vector2i)	# board input; enemy_clicked/hovered stay for units on clicked cells
+ signal cell_hovered(cell: Vector2i)
+ 
+diff --git a/autoload/StatsHandler.gd b/autoload/StatsHandler.gd
+index c30a730..28f39b0 100644
+--- a/autoload/StatsHandler.gd
++++ b/autoload/StatsHandler.gd
+@@ -2,13 +2,21 @@
+ ## Manages win/loss data across player profile.
+ extends Node
+ 
+-## Tracks whether it is currently the player's turn in a central location.
++## Whether the hero's action is in progress (between player_turn_started and player_turn_ended).
+ var is_player_turn: bool = false
+ 
++## Card plays of the hero's current action; "turn" = hero action on the combat timeline.
+ var cards_played_this_turn: Array[CardPlayRequest] = []
+ var cards_played_this_combat: Array[Array] = []
+ 
++## Number of hero actions started this combat (1 during the first action). Validators and
++## artifacts read it as the "turn count"; enemy actions do not advance it.
+ var turn_count: int = 1
++## Combat clock (CombatDirector.current_tick) as last reported by combat_tick_advanced.
++var combat_tick: int = 0
++## unit_uid -> actions started this combat (every unit, including enemies).
++var unit_action_counts: Dictionary[String, int] = {}
++var _hero_actions_started: int = 0
+ 
+ ## The current combat. This will be appended to the run stats when combat ends.
+ var current_combat_stats: CombatStatsData = null
+@@ -43,8 +51,9 @@ func _connect_signals():
+ 	
+ 	Signals.player_turn_started.connect(_on_player_turn_started)
+ 	Signals.player_turn_ended.connect(_on_player_turn_ended)
+-	
+-	Signals.enemy_turn_ended.connect(_on_enemy_turn_ended)
++
++	Signals.unit_action_started.connect(_on_unit_action_started)
++	Signals.combat_tick_advanced.connect(_on_combat_tick_advanced)
+ 	Signals.card_played.connect(_on_card_played)
+ 	
+ 	Signals.combat_started.connect(_on_combat_started)
+@@ -252,6 +261,11 @@ func _on_run_ended() -> void:
+ 
+ func _on_combat_started(event_id: String) -> void:
+ 	turn_count = 1
++	combat_tick = 0
++	unit_action_counts.clear()
++	_hero_actions_started = 0
++	cards_played_this_turn = []
++	cards_played_this_combat = []
+ 	# derive floor from the current location's floor number
+ 	var current_floor: int = Global.get_player_current_floor()
+ 	# generate new combat stats instance
+@@ -280,20 +294,30 @@ func _on_combat_ended() -> void:
+ 				current_run_stats.add_to_enum_stat(RunStatsData.STATS.COMBAT_BOSS_COUNT, 1)
+ 				
+ 
++## Called by CombatDirector when the hero's action begins (before the overlay animation and
++## player_turn_started): the turn count is the number of hero actions, so per-turn stats reset here.
++func begin_hero_action() -> void:
++	_hero_actions_started += 1
++	if _hero_actions_started > 1:
++		turn_count += 1
++		if current_combat_stats != null:
++			current_combat_stats.turn_count += 1
++			current_combat_stats.reset_turn_stats()
++			# move cards played over and reset it
++			cards_played_this_combat.append(cards_played_this_turn)
++			cards_played_this_turn = []
++
+ func _on_player_turn_started():
+ 	is_player_turn = true
+ 
+ func _on_player_turn_ended():
+ 	is_player_turn = false
+ 
+-func _on_enemy_turn_ended():
+-	turn_count += 1
+-	if current_combat_stats != null:
+-		current_combat_stats.turn_count += 1
+-		current_combat_stats.reset_turn_stats()
+-		# move cards played over and reset it
+-		cards_played_this_combat.append(cards_played_this_turn)
+-		cards_played_this_turn = []
++func _on_unit_action_started(unit: BaseCombatant) -> void:
++	unit_action_counts[unit.unit_uid] = unit_action_counts.get(unit.unit_uid, 0) + 1
++
++func _on_combat_tick_advanced(_previous_tick: int, current_tick: int) -> void:
++	combat_tick = current_tick
+ 
+ #endregion
+ 
+diff --git a/data/prototype/CardData.gd b/data/prototype/CardData.gd
+index 716533c..aa8b163 100644
+--- a/data/prototype/CardData.gd
++++ b/data/prototype/CardData.gd
+@@ -98,6 +98,10 @@ const STANDARD_CARD_RARITIES: Array[int] = [CARD_RARITIES.COMMON, CARD_RARITIES.
+ 	# ["damage", Scripts.ACTION_ATTACK, "damage_1"], # Optional third parameter for mapping custom values
+ ]
+ 
++## Combat timeline delay of the action this card is played in: -1 = CombatRulesData.default_action_delay.
++## The action's delay is the largest value among the cards played during it.
++@export var card_action_delay: int = -1
++
+ ### Card Actions
+ @export var card_play_actions: Array[Dictionary] = [
+ 	#{
+diff --git a/data/prototype/EnemyData.gd b/data/prototype/EnemyData.gd
+index 53e7eb5..34cebf3 100644
+--- a/data/prototype/EnemyData.gd
++++ b/data/prototype/EnemyData.gd
+@@ -34,6 +34,10 @@ enum ENEMY_TYPES {STANDARD, MINIBOSS, BOSS}
+ ## Maps status effect ids to charge count at start of combat.
+ @export var enemy_initial_status_effects: Dictionary[String, int] = {}
+ 
++## Combat timeline speed: wait between actions = action delay * scale / speed (see CombatRulesData).
++## 10 for every unit reproduces the original fixed alternation.
++@export var enemy_speed: int = BaseCombatant.DEFAULT_SPEED
++
+ ## Time in seconds between each enemy attack.
+ const ENEMY_ATTACK_DELAY: float = 0.5
+ 
+diff --git a/data/readonly/CharacterData.gd b/data/readonly/CharacterData.gd
+index 640eedb..38637b4 100644
+--- a/data/readonly/CharacterData.gd
++++ b/data/readonly/CharacterData.gd
+@@ -42,4 +42,6 @@ class_name CharacterData
+ ## Money added to player on start
+ @export var character_starting_money: int = 999
+ @export var character_starting_health: int = 50
++## Combat timeline speed of the character's unit (see CombatRulesData; 10 = original alternation).
++@export var character_speed: int = BaseCombatant.DEFAULT_SPEED
+ #endregion
+diff --git a/data/readonly/StatusEffectData.gd b/data/readonly/StatusEffectData.gd
+index b85c015..59a7784 100644
+--- a/data/readonly/StatusEffectData.gd
++++ b/data/readonly/StatusEffectData.gd
+@@ -75,17 +75,25 @@ enum STATUS_EFFECT_SECONDARY_CHARGE_COLLISION_STRATEGIES {
+ ## When a status effect should be processed relative to the others. Higher numbers processed earlier.
+ @export var status_effect_priority: int = 0
+ 
++## Values are serialized as integers: only append, never reorder. On the combat timeline a "turn"
++## is one unit's action, so the legacy names mean (CombatDirector):
+ enum STATUS_EFFECT_PROCESS_TIMES {
+-	PRE_DRAW_PLAYER_START_TURN, # Actions taken before the player has drawn cards
+-	POST_DRAW_PLAYER_START_TURN, # Actions taken after the player has drawn cards (but before they can act)
+-	PRE_DISCARD_PLAYER_END_TURN, # Actions taken after the player has ended their turn but before enemy turns and discarding cards
+-	POST_DISCARD_PLAYER_END_TURN, # Actions taken after the player has ended their turn and discarding cards but before enemy turns
+-	PRE_ENEMY_TURN, # Actions taken before any enemy has performed their intents on the enemy's turn. This is run for all enemies at once.
+-	POST_ENEMY_TURN, # Actions taken after all enemies have performed their intent but before the turn is over. This is run for all enemies at once.
+-	PRE_ENEMY_INTENT, # Actions taken before an enemy has performed an intent. This is run for each enemy in order.
+-	POST_ENEMY_INTENT, # Actions taken after an enemy has performed an intent. This is run for each enemy in order.
++	PRE_DRAW_PLAYER_START_TURN, # party unit's action start, before it draws cards
++	POST_DRAW_PLAYER_START_TURN, # party unit's action start, after it drew cards (but before it can act)
++	PRE_DISCARD_PLAYER_END_TURN, # party unit's action end, before discarding cards
++	POST_DISCARD_PLAYER_END_TURN, # party unit's action end, after discarding cards
++	PRE_ENEMY_TURN, # enemy's own action start (fires together with PRE_ENEMY_INTENT, before it)
++	POST_ENEMY_TURN, # enemy's own action end (fires together with POST_ENEMY_INTENT, after it)
++	PRE_ENEMY_INTENT, # enemy's own action start, before it performs its intent
++	POST_ENEMY_INTENT, # enemy's own action end, after it performed its intent
++	UNIT_ACTION_START, # any unit's own action start (after draw / after the PRE_ENEMY_* pair)
++	UNIT_ACTION_END, # any unit's own action end (after discard / after the POST_ENEMY_* pair)
++	EVERY_N_TICKS, # every status_effect_tick_interval ticks of the combat clock, whoever is acting
+ 	}
+ 
++## Interval in combat ticks for EVERY_N_TICKS (processed once per crossed multiple).
++@export var status_effect_tick_interval: int = 100
++
+ ## Indicates when the effect should proc. This can control when and for what entities a status effect applies.
+ ## This is also when a status effect will decay if it does.
+ ## NOTE: Having a status time for both enemy and player simply means it will work for both enemies and players,
+diff --git a/data/readonly/embedded/EnemyIntentData.gd b/data/readonly/embedded/EnemyIntentData.gd
+index f5cd166..8a2297b 100644
+--- a/data/readonly/embedded/EnemyIntentData.gd
++++ b/data/readonly/embedded/EnemyIntentData.gd
+@@ -84,6 +84,9 @@ enum INTENT_DISPLAY_TYPES {
+ ## random weighted integer chance of the next intent, defining a random walk.
+ @export var enemy_intent_next_intent_weights: Dictionary[String, int] = {}
+ 
++## Combat timeline delay of the action performing this intent: -1 = CombatRulesData.default_action_delay.
++@export var enemy_intent_action_delay: int = -1
++
+ ## Figures out the display types (overhead symbols) based on intent's parameters and custom actions.
+ func infer_intent_display_types() -> void:
+ 	# infer blocking display type
+diff --git a/scenes/Root.tscn b/scenes/Root.tscn
+index 6d79814..5c08c83 100644
+--- a/scenes/Root.tscn
++++ b/scenes/Root.tscn
+@@ -56,31 +56,19 @@
+ [ext_resource type="Theme" uid="uid://2714jm71pkv4" path="res://themes/keyword_tooltip_theme.tres" id="41_0h1ar"]
+ [ext_resource type="Script" uid="uid://d2fxhtmdfmtdf" path="res://scripts/ui/general/KeywordContainer.gd" id="42_wtekq"]
+ [ext_resource type="Script" uid="uid://c5i0sjwlko88l" path="res://addons/label_font_auto_sizer/rich_label_auto_sizer.gd" id="43_gs3rm"]
++[ext_resource type="Script" uid="uid://b0qny5z55zuwm" path="res://scripts/combat/CombatDirector.gd" id="44_cdir"]
++[ext_resource type="PackedScene" uid="uid://biduniav9kp24" path="res://scenes/ui/TimelineBar.tscn" id="45_tlbar"]
+ 
+ [sub_resource type="Animation" id="Animation_m5prp"]
+ resource_name = "end_turn"
+ length = 0.5
+-tracks/0/type = "method"
++tracks/0/type = "value"
+ tracks/0/imported = false
+ tracks/0/enabled = true
+-tracks/0/path = NodePath(".")
++tracks/0/path = NodePath("EndTurnButton:disabled")
+ tracks/0/interp = 1
+ tracks/0/loop_wrap = true
+ tracks/0/keys = {
+-"times": PackedFloat32Array(0.5),
+-"transitions": PackedFloat32Array(1),
+-"values": [{
+-"args": [],
+-"method": &"_on_player_end_turn_animation_finished"
+-}]
+-}
+-tracks/1/type = "value"
+-tracks/1/imported = false
+-tracks/1/enabled = true
+-tracks/1/path = NodePath("EndTurnButton:disabled")
+-tracks/1/interp = 1
+-tracks/1/loop_wrap = true
+-tracks/1/keys = {
+ "times": PackedFloat32Array(0, 0.5),
+ "transitions": PackedFloat32Array(1, 1),
+ "update": 1,
+@@ -89,39 +77,25 @@ tracks/1/keys = {
+ 
+ [sub_resource type="Animation" id="Animation_beguj"]
+ resource_name = "start_turn"
+-tracks/0/type = "method"
++tracks/0/type = "value"
+ tracks/0/imported = false
+ tracks/0/enabled = true
+-tracks/0/path = NodePath(".")
++tracks/0/path = NodePath("TurnOverlay:modulate")
+ tracks/0/interp = 1
+ tracks/0/loop_wrap = true
+ tracks/0/keys = {
+-"times": PackedFloat32Array(1),
+-"transitions": PackedFloat32Array(1),
+-"values": [{
+-"args": [],
+-"method": &"_on_player_start_turn_animation_finished"
+-}]
++"times": PackedFloat32Array(0, 0.3, 0.7, 1),
++"transitions": PackedFloat32Array(1, 1, 1, 1),
++"update": 0,
++"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+ }
+-tracks/1/type = "value"
++tracks/1/type = "method"
+ tracks/1/imported = false
+ tracks/1/enabled = true
+-tracks/1/path = NodePath("TurnOverlay:modulate")
++tracks/1/path = NodePath("TurnOverlay")
+ tracks/1/interp = 1
+ tracks/1/loop_wrap = true
+ tracks/1/keys = {
+-"times": PackedFloat32Array(0, 0.3, 0.7, 1),
+-"transitions": PackedFloat32Array(1, 1, 1, 1),
+-"update": 0,
+-"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+-}
+-tracks/2/type = "method"
+-tracks/2/imported = false
+-tracks/2/enabled = true
+-tracks/2/path = NodePath("TurnOverlay")
+-tracks/2/interp = 1
+-tracks/2/loop_wrap = true
+-tracks/2/keys = {
+ "times": PackedFloat32Array(0),
+ "transitions": PackedFloat32Array(1),
+ "values": [{
+@@ -129,25 +103,13 @@ tracks/2/keys = {
+ "method": &"update_turn_label"
+ }]
+ }
+-tracks/3/type = "value"
+-tracks/3/imported = false
+-tracks/3/enabled = true
+-tracks/3/path = NodePath("TurnOverlay:visible")
+-tracks/3/interp = 1
+-tracks/3/loop_wrap = true
+-tracks/3/keys = {
+-"times": PackedFloat32Array(0, 1),
+-"transitions": PackedFloat32Array(1, 1),
+-"update": 1,
+-"values": [true, false]
+-}
+-tracks/4/type = "value"
+-tracks/4/imported = false
+-tracks/4/enabled = true
+-tracks/4/path = NodePath("EndTurnButton:disabled")
+-tracks/4/interp = 1
+-tracks/4/loop_wrap = true
+-tracks/4/keys = {
++tracks/2/type = "value"
++tracks/2/imported = false
++tracks/2/enabled = true
++tracks/2/path = NodePath("TurnOverlay:visible")
++tracks/2/interp = 1
++tracks/2/loop_wrap = true
++tracks/2/keys = {
+ "times": PackedFloat32Array(0, 1),
+ "transitions": PackedFloat32Array(1, 1),
+ "update": 1,
+@@ -2183,6 +2145,17 @@ text = "Turn"
+ horizontal_alignment = 1
+ vertical_alignment = 1
+ 
++[node name="TimelineBar" parent="RunScreen/Combat" instance=ExtResource("45_tlbar")]
++visible = false
++layout_mode = 0
++offset_left = 240.0
++offset_top = 12.0
++offset_right = 1000.0
++offset_bottom = 52.0
++
++[node name="CombatDirector" type="Node" parent="RunScreen/Combat"]
++script = ExtResource("44_cdir")
++
+ [node name="CombatAnimation" type="AnimationPlayer" parent="RunScreen/Combat" unique_id=85031201]
+ libraries/ = SubResource("AnimationLibrary_yww7o")
+ 
+diff --git a/scenes/ui/TimelineBar.tscn b/scenes/ui/TimelineBar.tscn
+new file mode 100644
+index 0000000..1dcc1a4
+--- /dev/null
++++ b/scenes/ui/TimelineBar.tscn
+@@ -0,0 +1,17 @@
++[gd_scene load_steps=2 format=3 uid="uid://biduniav9kp24"]
++
++[ext_resource type="Script" uid="uid://b55uetkliwo0i" path="res://scripts/ui/TimelineBar.gd" id="1_tlbar"]
++
++[node name="TimelineBar" type="HBoxContainer"]
++offset_right = 760.0
++offset_bottom = 40.0
++theme_override_constants/separation = 12
++script = ExtResource("1_tlbar")
++
++[node name="TickLabel" type="Label" parent="."]
++layout_mode = 2
++text = "Tick 0"
++
++[node name="Entries" type="HBoxContainer" parent="."]
++layout_mode = 2
++theme_override_constants/separation = 8
+diff --git a/scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd b/scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd
+index 1eec013..f6187d3 100644
+--- a/scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd
++++ b/scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd
+@@ -5,7 +5,7 @@ extends BaseCardsetAction
+ func perform_action() -> void:
+ 	var action_interceptor_processors: Array[ActionInterceptorProcessor] = _intercept_action([])
+ 	for action_interceptor_processor in action_interceptor_processors:
+-		var hand_card_count_max: int = action_interceptor_processor.get_shadowed_action_values("hand_card_count_max", HandManager.PLAYER_DEFAULT_HAND_CARD_COUNT_MAX)
++		var hand_card_count_max: int = action_interceptor_processor.get_shadowed_action_values("hand_card_count_max", HandManager.get_hand_limit())
+ 	
+ 		var picked_cards: Array[CardData] = _get_picked_cards()
+ 		HandManager.add_cards_to_hand(picked_cards, hand_card_count_max)
+diff --git a/scripts/actions/combatant_actions/player_actions/ActionDraw.gd b/scripts/actions/combatant_actions/player_actions/ActionDraw.gd
+index b4d1c1a..da83499 100644
+--- a/scripts/actions/combatant_actions/player_actions/ActionDraw.gd
++++ b/scripts/actions/combatant_actions/player_actions/ActionDraw.gd
+@@ -5,7 +5,7 @@ extends BaseAction
+ func perform_action():
+ 	var action_interceptor_processors: Array[ActionInterceptorProcessor] = _intercept_action([])
+ 	for action_interceptor_processor in action_interceptor_processors:
+-		var hand_card_count_max: int = action_interceptor_processor.get_shadowed_action_values("hand_card_count_max", HandManager.PLAYER_DEFAULT_HAND_CARD_COUNT_MAX)
++		var hand_card_count_max: int = action_interceptor_processor.get_shadowed_action_values("hand_card_count_max", HandManager.get_hand_limit())
+ 		HandManager.draw_cards(1, hand_card_count_max)
+ 
+ func _to_string():
+diff --git a/scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd b/scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd
+index 9398663..9177398 100644
+--- a/scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd
++++ b/scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd
+@@ -1,7 +1,7 @@
+-# Ends the player's turn when processed
+-# See CombatEndTurn for different levels of immediacy for ending turns
++# Ends the acting player unit's action (formerly "ends the turn") when processed
++# See CombatEndAction for different levels of immediacy for ending actions
+ extends BaseAction
+ 
+ func perform_action():
+-	var end_turn_immediacy_level: int = get_action_value("end_turn_immediacy_level", CombatEndTurn.END_TURN_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS)
+-	Signals.end_turn_requested.emit(end_turn_immediacy_level)
++	var end_turn_immediacy_level: int = get_action_value("end_turn_immediacy_level", CombatEndAction.END_ACTION_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS)
++	Signals.end_action_requested.emit(end_turn_immediacy_level)
+diff --git a/scripts/combat/CombatDirector.gd b/scripts/combat/CombatDirector.gd
+new file mode 100644
+index 0000000..09a1b6c
+--- /dev/null
++++ b/scripts/combat/CombatDirector.gd
+@@ -0,0 +1,434 @@
++## Runs one combat as an action timeline (CTB): pops the unit with the smallest next_action_tick,
++## performs its action (player input or enemy intent) and re-queues it after a delay scaled by its
++## speed (CombatRulesData). Replaces the AnimationPlayer-driven turn alternation of Combat.gd;
++## Combat.gd keeps the HUD, enemy spawning (EnemyContainer) and ends combat from the death animation.
++## Child of RunScreen/Combat. Signals: player_turn_* = the hero's action (pre-draw / post-discard),
++## enemy_turn_* = one enemy's action, unit_action_started/ended for every unit, combat_tick_advanced,
++## timeline_changed. With equal speeds and the default rules the order equals the old turn flow.
++extends Node
++class_name CombatDirector
++
++const GROUP_NAME: String = "combat_director"
++const ANIMATION_ACTION_START: String = "start_turn"	# TurnOverlay fade on Combat's AnimationPlayer
++const ANIMATION_ACTION_END: String = "end_turn"
++
++## Emitted (deferred) when the acting player unit's action is finished by CombatEndAction.
++signal player_action_finished
++
++var timeline: CombatTimeline = null
++var rules: CombatRulesData = null
++## The unit whose action is in progress; null between actions and outside combat.
++var acting_unit: BaseCombatant = null
++var current_tick: int = 0
++var is_running: bool = false
++
++var _generation: int = 0	# invalidates suspended loops when combat/run ends
++var _waiting_for_player: bool = false
++var _player_finish_pending: bool = false
++var _end_action_request: CombatEndAction = null
++var _cards_played_this_action: Array[CardData] = []
++
++func _ready() -> void:
++	add_to_group(GROUP_NAME)
++	Signals.combat_ended.connect(_on_combat_ended)
++	Signals.run_ended.connect(_on_run_ended)
++	Signals.player_killed.connect(_on_player_killed)
++	Signals.end_action_requested.connect(request_end_action)
++	Signals.end_turn_requested.connect(request_end_action)	# legacy name, same request
++	Signals.card_played.connect(_on_card_played)
++	Signals.unit_spawned.connect(_on_unit_spawned)
++	Signals.unit_removed.connect(_on_unit_removed)
++	tree_exiting.connect(_stop)
++
++#region Public queries
++func has_living_opponents() -> bool:
++	return not Global.get_alive_enemies().is_empty()
++
++## Hero down (hero_down_ends_run) or no living opponents; also true once combat_ended fired.
++func is_combat_over() -> bool:
++	if not is_running:
++		return true
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	if hero == null or (rules.hero_down_ends_run and not hero.is_alive()):
++		return true
++	return not has_living_opponents()
++
++func is_player_action_pending() -> bool:
++	return _waiting_for_player
++
++## Upcoming actions for the UI: [{"unit", "tick"}], acting unit first.
++func project_timeline(count: int) -> Array[Dictionary]:
++	if timeline == null:
++		return []
++	return timeline.project(count, acting_unit)
++#endregion
++
++#region Combat start / stop
++## Called by Combat once the event's enemies are spawned. Runs the whole combat loop.
++func begin_combat() -> void:
++	_generation += 1
++	var generation: int = _generation
++	rules = Global.get_combat_rules()
++	timeline = CombatTimeline.new(rules)
++	current_tick = 0
++	acting_unit = null
++	_waiting_for_player = false
++	_player_finish_pending = false
++	_cards_played_this_action.clear()
++	_reset_end_action()
++	for unit: BaseCombatant in UnitRegistry.get_all_units():
++		if not unit.is_alive():
++			continue
++		unit.reset_unit_combat_state()
++		_assign_controller(unit)
++		timeline.push(unit)
++	# enemies decide their first intent while waiting for their first action
++	for enemy: Enemy in Global.get_alive_enemies():
++		enemy.decide_next_intent()
++	is_running = true
++	Signals.timeline_changed.emit()
++	await _perform_initial_combat_actions(generation)
++	if generation != _generation:
++		return
++	await _run_loop(generation)
++	if generation == _generation:
++		acting_unit = null
++
++func _stop() -> void:
++	_generation += 1
++	is_running = false
++	acting_unit = null
++	_reset_end_action()
++	_cards_played_this_action.clear()
++	if timeline != null:
++		timeline.clear()
++		timeline = null
++	_player_finish_pending = false
++	if _waiting_for_player:
++		player_action_finished.emit()	# release the suspended loop; it returns on the generation check
++
++func _on_combat_ended() -> void:
++	_stop()
++
++func _on_run_ended() -> void:
++	_stop()
++
++func _on_player_killed(_player: Player) -> void:
++	_stop()
++
++func _assign_controller(unit: BaseCombatant) -> void:
++	if unit.controller != null:
++		return
++	if unit.faction == BaseCombatant.FACTIONS.PARTY:
++		unit.controller = PlayerInputController.new()
++	else:
++		unit.controller = EnemyIntentController.new()
++
++## Units spawned mid-combat (summons) enter the timeline as if they had just acted.
++func _on_unit_spawned(unit: BaseCombatant) -> void:
++	if not is_running or timeline == null or unit == acting_unit or timeline.has(unit):
++		return
++	if not unit.is_alive():
++		return
++	unit.reset_unit_combat_state()
++	_assign_controller(unit)
++	unit.last_action_tick = current_tick
++	unit.next_action_tick = current_tick + timeline.wait_for(rules.default_action_delay, unit.speed)
++	timeline.push(unit)
++	if unit is Enemy:
++		(unit as Enemy).decide_next_intent()
++	Signals.timeline_changed.emit()
++
++func _on_unit_removed(unit: BaseCombatant) -> void:
++	if timeline != null and timeline.has(unit):
++		timeline.remove(unit)
++		Signals.timeline_changed.emit()
++#endregion
++
++#region Loop
++func _run_loop(generation: int) -> void:
++	while generation == _generation:
++		if is_combat_over():
++			break
++		var unit: BaseCombatant = timeline.pop_next()
++		if unit == null:
++			break
++		acting_unit = unit
++		_cards_played_this_action.clear()
++		await _advance_clock(unit.next_action_tick, generation)
++		if _aborted(generation):
++			return
++		await _begin_action(unit, generation)
++		if _aborted(generation):
++			return
++		if is_combat_over():
++			break
++		await unit.controller.decide(self, unit)
++		if _aborted(generation):
++			return
++		if is_combat_over():
++			break
++		await _end_action(unit, generation)
++		if _aborted(generation):
++			return
++		var delay: int = _compute_action_delay(unit)
++		unit.last_action_tick = current_tick
++		unit.next_action_tick = current_tick + timeline.wait_for(delay, unit.speed)
++		if unit is Enemy and unit.is_alive():
++			(unit as Enemy).decide_next_intent()	# decided on entering the wait (replaces the old player-turn-start cycle)
++		if unit.is_alive():
++			timeline.push(unit)
++		acting_unit = null
++		Signals.timeline_changed.emit()
++	if generation == _generation:
++		acting_unit = null
++
++## True when the loop must return without touching state (combat/run ended or hero died).
++func _aborted(generation: int) -> bool:
++	if generation != _generation:
++		return true
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	return hero == null or not hero.is_alive()
++
++func _advance_clock(tick: int, generation: int) -> void:
++	if tick <= current_tick:
++		return
++	var previous_tick: int = current_tick
++	current_tick = tick
++	timeline.current_tick = tick
++	Signals.combat_tick_advanced.emit(previous_tick, tick)
++	for unit: BaseCombatant in UnitRegistry.get_all_units():
++		if unit.is_alive():
++			unit.perform_tick_status_effects(previous_tick, tick)
++	await _wait_actions(generation)
++
++func _wait_actions(_generation: int) -> void:
++	if ActionHandler.actions_being_performed:
++		await ActionHandler.actions_ended
++
++func _begin_action(unit: BaseCombatant, generation: int) -> void:
++	if unit.faction == BaseCombatant.FACTIONS.PARTY:
++		await _begin_party_action(unit, generation)
++	else:
++		await _begin_enemy_action(unit, generation)
++
++func _end_action(unit: BaseCombatant, generation: int) -> void:
++	if unit.faction == BaseCombatant.FACTIONS.PARTY:
++		await _end_party_action(unit, generation)
++	else:
++		await _end_enemy_action(unit, generation)
++
++## Delay of the action just performed: the largest card_action_delay played (party) or the
++## intent's enemy_intent_action_delay; rules.default_action_delay when unspecified.
++func _compute_action_delay(unit: BaseCombatant) -> int:
++	var delay: int = -1
++	if unit is Enemy:
++		var intent: EnemyIntentData = (unit as Enemy).enemy_data.get_current_intent()
++		if intent != null:
++			delay = intent.enemy_intent_action_delay
++	else:
++		for card_data: CardData in _cards_played_this_action:
++			delay = max(delay, card_data.card_action_delay)
++	_cards_played_this_action.clear()
++	if delay < 0:
++		delay = rules.default_action_delay
++	return delay
++
++func _on_card_played(card_play_request: CardPlayRequest) -> void:
++	if is_running and card_play_request.card_data != null:
++		_cards_played_this_action.append(card_play_request.card_data)
++#endregion
++
++#region Party (hero) action
++func _begin_party_action(unit: BaseCombatant, generation: int) -> void:
++	HandManager.set_disable_hand(true)
++	if unit.is_hero():
++		StatsHandler.begin_hero_action()	# turn count = hero actions; before the overlay reads it
++	await _play_combat_animation(ANIMATION_ACTION_START)
++	if _aborted(generation):
++		return
++	# hero's action has started: legacy signal (StatsHandler turn count, artifacts, intent cycle listeners)
++	Signals.player_turn_started.emit()
++	ActionGenerator.generate_start_of_turn_energy_actions()
++	if unit is Player:
++		(unit as Player).update_incoming_damage_amount(true)
++	if rules.reset_block_on_action_start:
++		unit.generate_reset_block_action()
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DRAW_PLAYER_START_TURN)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	ActionGenerator.generate_start_of_turn_draw_actions()
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DRAW_PLAYER_START_TURN)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	Signals.unit_action_started.emit(unit)
++	HandManager.set_disable_hand(false)
++	if HandManager.hand != null:
++		HandManager.hand.update_hand_card_display()
++
++## Awaited by PlayerInputController until CombatEndAction finishes the action.
++func wait_for_player_action() -> void:
++	if _player_finish_pending:
++		_player_finish_pending = false
++		return
++	_waiting_for_player = true
++	await player_action_finished
++	_waiting_for_player = false
++
++## Queues the end of the acting player unit's action; a higher immediacy replaces a waiting request.
++func request_end_action(immediacy: int = CombatEndAction.END_ACTION_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS) -> void:
++	if not is_running or acting_unit == null or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
++		return
++	if _end_action_request == null:
++		_end_action_request = CombatEndAction.new(self, immediacy)
++		_end_action_request.wait()
++	elif immediacy > _end_action_request.immediacy:
++		_end_action_request.disable()	# stop the old one working
++		_end_action_request = CombatEndAction.new(self, immediacy)
++		_end_action_request.wait()
++
++## Called by CombatEndAction once its wait condition is met.
++func finish_player_action(end_action: CombatEndAction = null) -> void:
++	if end_action != null and end_action != _end_action_request:
++		return	# a replaced request
++	_end_action_request = null
++	if not is_running:
++		return
++	if _waiting_for_player:
++		player_action_finished.emit.call_deferred()
++	else:
++		_player_finish_pending = true
++
++func _reset_end_action() -> void:
++	if _end_action_request != null:
++		_end_action_request.disable()
++		_end_action_request = null
++
++func _end_party_action(unit: BaseCombatant, generation: int) -> void:
++	HandManager.set_disable_hand(true)
++	_reset_end_action()
++	await _play_combat_animation(ANIMATION_ACTION_END)
++	if _aborted(generation):
++		return
++	Signals.player_turn_ended.emit()
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DISCARD_PLAYER_END_TURN)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	if rules.discard_hand_on_action_end:
++		await HandManager.perform_end_of_action_hand_actions()
++		await _wait_actions(generation)
++		if _aborted(generation):
++			return
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DISCARD_PLAYER_END_TURN)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	Signals.unit_action_ended.emit(unit)
++
++## Plays an animation on Combat's AnimationPlayer (TurnOverlay) and waits for it. No-op headless-safe.
++func _play_combat_animation(animation_name: String) -> void:
++	var combat: Node = get_parent()
++	if combat == null or not combat.has_node("CombatAnimation"):
++		return
++	var animation_player: AnimationPlayer = combat.get_node("CombatAnimation") as AnimationPlayer
++	if animation_player == null or not animation_player.has_animation(animation_name):
++		return
++	animation_player.play(animation_name)
++	await animation_player.animation_finished
++#endregion
++
++#region Enemy action
++func _begin_enemy_action(unit: BaseCombatant, generation: int) -> void:
++	Signals.enemy_turn_started.emit()	# legacy signal: one enemy's action begins
++	# both legacy pairs fire for this enemy's own action (old data stays valid)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_INTENT)
++	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	Signals.unit_action_started.emit(unit)
++
++## Performs the enemy's current intent against the hero (EnemyIntentController).
++func perform_enemy_intent(enemy: Enemy) -> void:
++	var generation: int = _generation
++	if enemy == null or not enemy.is_alive():
++		return
++	var enemy_intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
++	var enemy_actions_data: Array[Dictionary] = enemy.build_intent_actions_data(enemy_intent, rules.reset_block_on_action_start)
++	# play intent sound if one exists and no attacks
++	if enemy_intent != null and enemy_intent.enemy_intent_audio_path != "" and enemy_intent.enemy_intent_number_of_attacks == 0:
++		ActionGenerator.generate_sound_action(enemy_intent.enemy_intent_audio_path, false)
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	var targets: Array[BaseCombatant] = []
++	if hero != null:
++		targets.append(hero)
++	var enemy_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, targets, enemy_actions_data, null)
++	ActionHandler.add_actions(enemy_actions)
++	await _wait_actions(generation)
++
++func _end_enemy_action(unit: BaseCombatant, generation: int) -> void:
++	if unit.is_alive():
++		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_INTENT)
++		await _wait_actions(generation)
++		if _aborted(generation):
++			return
++		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_TURN)
++		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
++		await _wait_actions(generation)
++		if _aborted(generation):
++			return
++	Signals.unit_action_ended.emit(unit)
++	Signals.enemy_turn_ended.emit()
++#endregion
++
++#region First-action setup (moved from Combat.gd's first player turn)
++func _perform_initial_combat_actions(generation: int) -> void:
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	var location_data: LocationData = Global.get_player_location_data()
++	if location_data != null:
++		var card_play_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
++		card_play_request.card_data = null
++		card_play_request.selected_target = null
++		# location initial actions
++		var location_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], location_data.location_initial_combat_actions, null)
++		ActionHandler.add_actions(location_initial_combat_actions)
++		await _wait_actions(generation)
++		if _aborted(generation):
++			return
++		# event initial actions
++		var event_data: EventData = Global.get_player_event_data()
++		if event_data != null:
++			var event_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], event_data.event_initial_combat_actions, null)
++			ActionHandler.add_actions(event_initial_combat_actions)
++			await _wait_actions(generation)
++			if _aborted(generation):
++				return
++	# combat start consumable actions
++	for consumable_slot_index: int in Global.player_data.player_consumable_slot_count:
++		var consumable_data: ConsumableData = Global.get_player_consumable_in_slot_index(consumable_slot_index)
++		if consumable_data != null and len(consumable_data.consumable_initial_combat_actions) > 0:
++			var consumable_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
++			var consumable_actions: Array[BaseAction] = ActionGenerator.create_actions(null, consumable_request, [], consumable_data.consumable_initial_combat_actions, null)
++			ActionHandler.add_actions(consumable_actions)
++	await _wait_actions(generation)
++	if _aborted(generation):
++		return
++	# combat start card actions
++	for card_data: CardData in HandManager.player_draw:
++		var card_request: CardPlayRequest = HandManager.create_card_play_request(card_data, null, true, true)
++		var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_request, [], card_data.card_initial_combat_actions, null)
++		ActionHandler.add_actions(card_play_actions)
++	await _wait_actions(generation)
++#endregion
+diff --git a/scripts/combat/CombatDirector.gd.uid b/scripts/combat/CombatDirector.gd.uid
+new file mode 100644
+index 0000000..adbb162
+--- /dev/null
++++ b/scripts/combat/CombatDirector.gd.uid
+@@ -0,0 +1 @@
++uid://b0qny5z55zuwm
+diff --git a/scripts/combat/CombatTimeline.gd b/scripts/combat/CombatTimeline.gd
+new file mode 100644
+index 0000000..9a31ccf
+--- /dev/null
++++ b/scripts/combat/CombatTimeline.gd
+@@ -0,0 +1,120 @@
++## Action timeline of one combat (CTB clock): the units waiting for their next action, ordered by
++## next_action_tick with CombatRulesData.tie_break, plus a read-only projection of upcoming actions
++## for the UI. Created per combat by CombatDirector; a RefCounted, never saved.
++## wait = action_delay * timeline_delay_scale / speed, so equal speeds reproduce fixed alternation.
++extends RefCounted
++class_name CombatTimeline
++
++var rules: CombatRulesData = null
++## Clock value of the action currently being performed (mirrors CombatDirector.current_tick).
++var current_tick: int = 0
++## Units waiting for their next action (the acting unit is popped while it acts).
++var _units: Array[BaseCombatant] = []
++## unit_uid -> first insertion index; final tie-break and the SPAWN_ORDER rule.
++var _spawn_order: Dictionary[String, int] = {}
++var _next_spawn_index: int = 0
++
++func _init(_rules: CombatRulesData) -> void:
++	rules = _rules
++
++## Adds a waiting unit. Re-pushing a queued unit is a no-op.
++func push(unit: BaseCombatant) -> void:
++	if unit == null or _units.has(unit):
++		return
++	if not _spawn_order.has(unit.unit_uid):
++		_spawn_order[unit.unit_uid] = _next_spawn_index
++		_next_spawn_index += 1
++	_units.append(unit)
++
++func remove(unit: BaseCombatant) -> void:
++	_units.erase(unit)
++
++func has(unit: BaseCombatant) -> bool:
++	return _units.has(unit)
++
++func clear() -> void:
++	_units.clear()
++	_spawn_order.clear()
++	_next_spawn_index = 0
++
++func is_empty() -> bool:
++	_prune()
++	return _units.is_empty()
++
++## Waiting units (unordered copy; freed or dead units already dropped).
++func get_units() -> Array[BaseCombatant]:
++	_prune()
++	return _units.duplicate()
++
++## Removes and returns the unit that acts next, or null when nothing waits.
++func pop_next() -> BaseCombatant:
++	_prune()
++	if _units.is_empty():
++		return null
++	var best: BaseCombatant = _units[0]
++	for unit: BaseCombatant in _units:
++		if unit != best and _is_before(unit, unit.next_action_tick, best, best.next_action_tick):
++			best = unit
++	_units.erase(best)
++	return best
++
++## Ticks a unit of the given speed waits after an action of the given delay. Never below 1.
++func wait_for(action_delay: int, speed: int) -> int:
++	var scale: int = max(1, rules.timeline_delay_scale)
++	@warning_ignore("integer_division")
++	var wait: int = (max(0, action_delay) * scale) / max(1, speed)
++	return max(1, wait)
++
++## Projects the next `count` actions as [{"unit": BaseCombatant, "tick": int}] without mutating
++## the queue, assuming every unit then waits for rules.default_action_delay.
++## `acting_unit` (the unit currently acting, not queued) is listed first at the current tick when given.
++func project(count: int, acting_unit: BaseCombatant = null) -> Array[Dictionary]:
++	_prune()
++	var ticks: Dictionary[BaseCombatant, int] = {}
++	var entries: Array[Dictionary] = []
++	for unit: BaseCombatant in _units:
++		ticks[unit] = unit.next_action_tick
++	if acting_unit != null and is_instance_valid(acting_unit) and not _units.has(acting_unit):
++		entries.append({"unit": acting_unit, "tick": current_tick})
++		if acting_unit.is_alive():
++			ticks[acting_unit] = current_tick + wait_for(rules.default_action_delay, acting_unit.speed)
++	while entries.size() < count and not ticks.is_empty():
++		var best: BaseCombatant = null
++		for unit: BaseCombatant in ticks.keys():
++			if best == null or _is_before(unit, ticks[unit], best, ticks[best]):
++				best = unit
++		entries.append({"unit": best, "tick": ticks[best]})
++		ticks[best] = ticks[best] + wait_for(rules.default_action_delay, best.speed)
++	return entries
++
++## Drops freed and dead units; a unit that dies while waiting never acts again.
++func _prune() -> void:
++	var kept: Array[BaseCombatant] = []
++	for unit: BaseCombatant in _units:
++		if is_instance_valid(unit) and unit.is_inside_tree() and unit.is_alive():
++			kept.append(unit)
++	_units = kept
++
++## Ordering: smaller tick first; ties by rules.tie_break, then party before enemy, then spawn order.
++func _is_before(a: BaseCombatant, tick_a: int, b: BaseCombatant, tick_b: int) -> bool:
++	if tick_a != tick_b:
++		return tick_a < tick_b
++	var a_party: bool = a.faction == BaseCombatant.FACTIONS.PARTY
++	var b_party: bool = b.faction == BaseCombatant.FACTIONS.PARTY
++	match rules.tie_break:
++		CombatRulesData.TIE_BREAKS.PARTY_FIRST:
++			if a_party != b_party:
++				return a_party
++			if a.speed != b.speed:
++				return a.speed > b.speed
++		CombatRulesData.TIE_BREAKS.SPAWN_ORDER:
++			pass
++		_: # HIGHER_SPEED_FIRST
++			if a.speed != b.speed:
++				return a.speed > b.speed
++			if a_party != b_party:
++				return a_party
++	return _spawn_index(a) < _spawn_index(b)
++
++func _spawn_index(unit: BaseCombatant) -> int:
++	return _spawn_order.get(unit.unit_uid, _next_spawn_index)
+diff --git a/scripts/combat/CombatTimeline.gd.uid b/scripts/combat/CombatTimeline.gd.uid
+new file mode 100644
+index 0000000..8dc64a7
+--- /dev/null
++++ b/scripts/combat/CombatTimeline.gd.uid
+@@ -0,0 +1 @@
++uid://orzfjx4lgduj
+diff --git a/scripts/combat/UnitRegistry.gd b/scripts/combat/UnitRegistry.gd
+index e4ee349..f7cba56 100644
+--- a/scripts/combat/UnitRegistry.gd
++++ b/scripts/combat/UnitRegistry.gd
+@@ -16,15 +16,20 @@ func register_unit(unit: BaseCombatant) -> void:
+ 		return
+ 	if unit.unit_uid == "":
+ 		unit.unit_uid = _generate_uid()
++	if _uid_to_unit.get(unit.unit_uid, null) == unit:
++		return
+ 	_uid_to_unit[unit.unit_uid] = unit
+ 	if unit.is_hero() and get_hero() == null:
+ 		_hero_uid = unit.unit_uid
++	Signals.unit_spawned.emit(unit)
+ 
+ func unregister_unit(unit: BaseCombatant) -> void:
+ 	if unit == null or unit.unit_uid == "":
+ 		return
+-	if _uid_to_unit.get(unit.unit_uid, null) == unit:
++	var was_registered: bool = _uid_to_unit.get(unit.unit_uid, null) == unit
++	if was_registered:
+ 		_uid_to_unit.erase(unit.unit_uid)
++		Signals.unit_removed.emit(unit)
+ 	if _hero_uid == unit.unit_uid:
+ 		_hero_uid = ""
+ 		# promote another registered hero-capable unit, if any
+diff --git a/scripts/combat/controllers/BaseUnitController.gd b/scripts/combat/controllers/BaseUnitController.gd
+new file mode 100644
+index 0000000..84da81c
+--- /dev/null
++++ b/scripts/combat/controllers/BaseUnitController.gd
+@@ -0,0 +1,9 @@
++## Decides what a unit does during its own action on the combat timeline.
++## CombatDirector awaits decide(); a player controller waits for input, an enemy controller
++## performs the current intent. Phase 4 adds AI party controllers returning an AiPlan.
++extends RefCounted
++class_name BaseUnitController
++
++## Performs the unit's action. May await. Returns the plan (null until AiPlan exists).
++func decide(_director: CombatDirector, _unit: BaseCombatant) -> Variant:
++	return null
+diff --git a/scripts/combat/controllers/BaseUnitController.gd.uid b/scripts/combat/controllers/BaseUnitController.gd.uid
+new file mode 100644
+index 0000000..734d6ff
+--- /dev/null
++++ b/scripts/combat/controllers/BaseUnitController.gd.uid
+@@ -0,0 +1 @@
++uid://whvs4yp1vmbb
+diff --git a/scripts/combat/controllers/EnemyIntentController.gd b/scripts/combat/controllers/EnemyIntentController.gd
+new file mode 100644
+index 0000000..a6d63de
+--- /dev/null
++++ b/scripts/combat/controllers/EnemyIntentController.gd
+@@ -0,0 +1,8 @@
++## Enemy unit: performs the intent decided when it last entered the timeline
++## (Enemy.decide_next_intent), targeting the hero. Board movement and shapes arrive in Phase 2.
++extends BaseUnitController
++class_name EnemyIntentController
++
++func decide(director: CombatDirector, unit: BaseCombatant) -> Variant:
++	await director.perform_enemy_intent(unit as Enemy)
++	return null
+diff --git a/scripts/combat/controllers/EnemyIntentController.gd.uid b/scripts/combat/controllers/EnemyIntentController.gd.uid
+new file mode 100644
+index 0000000..76cd81a
+--- /dev/null
++++ b/scripts/combat/controllers/EnemyIntentController.gd.uid
+@@ -0,0 +1 @@
++uid://9ubo54zvifg8
+diff --git a/scripts/combat/controllers/PlayerInputController.gd b/scripts/combat/controllers/PlayerInputController.gd
+new file mode 100644
+index 0000000..f68793f
+--- /dev/null
++++ b/scripts/combat/controllers/PlayerInputController.gd
+@@ -0,0 +1,9 @@
++## Player-controlled unit: the action lasts until end_action_requested is served
++## (CombatEndAction -> CombatDirector.finish_player_action). Cards are played through the
++## normal Hand / HandManager path meanwhile.
++extends BaseUnitController
++class_name PlayerInputController
++
++func decide(director: CombatDirector, _unit: BaseCombatant) -> Variant:
++	await director.wait_for_player_action()
++	return null
+diff --git a/scripts/combat/controllers/PlayerInputController.gd.uid b/scripts/combat/controllers/PlayerInputController.gd.uid
+new file mode 100644
+index 0000000..5c3602a
+--- /dev/null
++++ b/scripts/combat/controllers/PlayerInputController.gd.uid
+@@ -0,0 +1 @@
++uid://by5zvohp1z5q6
+diff --git a/scripts/combatants/BaseCombatant.gd b/scripts/combatants/BaseCombatant.gd
+index e4dbf91..129a8ce 100644
+--- a/scripts/combatants/BaseCombatant.gd
++++ b/scripts/combatants/BaseCombatant.gd
+@@ -50,8 +50,9 @@ var next_action_tick: int = 0
+ var last_action_tick: int = 0
+ ## Number of own actions started this combat (unit_action_started with unit == self).
+ var action_count: int = 0
+-## Decides the unit's actions. Typed as RefCounted until BaseUnitController exists; null = legacy flow.
+-var controller: RefCounted = null
++## Decides the unit's actions on the combat timeline; CombatDirector assigns a default
++## (PlayerInputController for PARTY, EnemyIntentController otherwise) when null at combat start.
++var controller: BaseUnitController = null
+ #endregion
+ 
+ func _ready():
+@@ -86,6 +87,10 @@ func is_hero() -> bool:
+ func get_speed() -> int:
+ 	return base_speed
+ 
++## Override. Short name for timeline / HUD display.
++func get_unit_display_name() -> String:
++	return name
++
+ func _on_unit_tree_exiting() -> void:
+ 	UnitRegistry.unregister_unit(self)
+ 
+@@ -485,14 +490,33 @@ func _on_player_turn_ended():
+ 	pass
+ 
+ 
+-## Processes and then decays all status effects belonging to a given process type (turn phase)
++## Processes and then decays all status effects belonging to a given process type (action phase)
+ func perform_status_effect_process_actions(status_effect_process_time: int = StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DRAW_PLAYER_START_TURN):
+ 	var status_effect_ids: Array = _get_status_effects_with_process_time(status_id_to_status_effects.keys(), status_effect_process_time)
+-	
++	_process_status_effects(status_effect_ids)
++
++## Processes EVERY_N_TICKS statuses once per crossed multiple of status_effect_tick_interval
++## between the two clock values. Called by CombatDirector when the combat clock advances.
++func perform_tick_status_effects(previous_tick: int, current_tick: int) -> void:
++	var status_effect_ids: Array = _get_status_effects_with_process_time(status_id_to_status_effects.keys(), StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.EVERY_N_TICKS)
++	for status_effect_object_id in status_effect_ids:
++		var status_effect_data: StatusEffectData = Global.get_status_effect_data(status_effect_object_id)
++		var interval: int = max(1, status_effect_data.status_effect_tick_interval)
++		@warning_ignore("integer_division")
++		var times: int = (current_tick / interval) - (previous_tick / interval)
++		for _i: int in max(0, times):
++			if not status_id_to_status_effects.has(status_effect_object_id):
++				break	# decayed away
++			_process_status_effects([status_effect_object_id])
++
++## Performs and then decays the given statuses in priority order.
++func _process_status_effects(status_effect_ids: Array) -> void:
+ 	# sort the statuses by their process priority
+ 	status_effect_ids.sort_custom(_sort_status_effect_priorities)
+-	
++
+ 	for status_effect_object_id in status_effect_ids:
++		if not status_id_to_status_effects.has(status_effect_object_id):
++			continue
+ 		var status_effect_data: StatusEffectData = Global.get_status_effect_data(status_effect_object_id)	
+ 		# perform the status effect
+ 		var status_effects: Array[StatusEffect] = status_id_to_status_effects[status_effect_object_id]
+diff --git a/scripts/combatants/Enemy.gd b/scripts/combatants/Enemy.gd
+index 4131a4a..2f8a467 100644
+--- a/scripts/combatants/Enemy.gd
++++ b/scripts/combatants/Enemy.gd
+@@ -32,7 +32,8 @@ var enemy_intent_number_of_attacks: int = 0
+ 
+ func init(_enemy_data: EnemyData):
+ 	enemy_data = _enemy_data
+-	
++	base_speed = enemy_data.enemy_speed
++
+ 	selection_button.mouse_entered.connect(_on_mouse_entered)
+ 	selection_button.mouse_exited.connect(_on_mouse_exited)
+ 	
+@@ -52,6 +53,11 @@ func init(_enemy_data: EnemyData):
+ func _get_default_faction() -> int:
+ 	return FACTIONS.ENEMY
+ 
++func get_unit_display_name() -> String:
++	if enemy_data != null and enemy_data.enemy_name != "":
++		return enemy_data.enemy_name
++	return name
++
+ func get_animation_data() -> AnimationData:
+ 	var animation_data: AnimationData = Global.get_animation_data(enemy_data.enemy_animation_id)
+ 	return animation_data
+@@ -161,6 +167,68 @@ func cycle_enemy_intent():
+ 	update_enemy_intent()
+ 	Signals.enemy_intent_changed.emit()
+ 
++## Decides and displays the intent for the enemy's next action. Called by CombatDirector when the
++## enemy enters the timeline (combat start / spawn) and after each of its actions.
++func decide_next_intent() -> void:
++	cycle_enemy_intent()
++
++## Action payload performing the given intent: reset block (optional), block, attacks and the
++## intent's custom actions. NOTE: ActionHandler pops these in reverse order, so reset block runs first.
++func build_intent_actions_data(enemy_intent: EnemyIntentData, include_reset_block: bool = true) -> Array[Dictionary]:
++	var enemy_actions_data: Array[Dictionary] = []
++	var intent_attack_damage: int = 0
++	var intent_number_of_attacks: int = 0
++	var intent_block: int = 0
++	var intent_audio_path: String = ""
++	var intent_attack_impact_animation_id: String = ""
++	if enemy_intent != null:
++		# add custom actions
++		enemy_actions_data.assign(enemy_intent.enemy_intent_custom_actions)
++		# get attack data
++		intent_attack_damage = enemy_intent.enemy_intent_attack_damage
++		intent_number_of_attacks = enemy_intent.enemy_intent_number_of_attacks
++		intent_block = enemy_intent.enemy_intent_block
++		intent_audio_path = enemy_intent.enemy_intent_audio_path
++		intent_attack_impact_animation_id = enemy_intent.enemy_intent_attack_impact_animation_id
++
++	# add attacks
++	if intent_number_of_attacks > 0:
++		enemy_actions_data.append(
++		{
++		Scripts.ACTION_ATTACK_GENERATOR:
++			{
++			"damage": intent_attack_damage,
++			"number_of_attacks": intent_number_of_attacks,
++			"impact_vfx_animation_id": intent_attack_impact_animation_id,
++			"time_delay": EnemyData.ENEMY_ATTACK_DELAY,
++			"audio_path": intent_audio_path
++			}
++		})
++
++	# add block
++	if intent_block > 0:
++		enemy_actions_data.append(
++			{
++			Scripts.ACTION_BLOCK: {
++				"block": intent_block,
++				"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
++				"time_delay": 0.0,
++				}
++			}
++	)
++
++	# add reset block action (runs first on the stack)
++	if include_reset_block:
++		enemy_actions_data.append(
++		{
++		Scripts.ACTION_RESET_BLOCK:  {
++			"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
++			"time_delay": 0.0
++			}
++		}
++		)
++	return enemy_actions_data
++
+ ## Displays the enemy's intentions above them based on their current intent.
+ func update_enemy_intent():
+ 	# get current intent's attack
+@@ -243,9 +311,6 @@ func _on_combat_started(_event_id: String):
+ func _on_combat_ended():
+ 	queue_free()
+ 
+-func _on_player_turn_started():
+-	cycle_enemy_intent()
+-
+ func _on_selection_button_up():
+ 	if is_alive():
+ 		Signals.enemy_clicked.emit(self)
+diff --git a/scripts/combatants/Player.gd b/scripts/combatants/Player.gd
+index d840501..4b3a95e 100644
+--- a/scripts/combatants/Player.gd
++++ b/scripts/combatants/Player.gd
+@@ -24,7 +24,9 @@ func reset_player() -> void:
+ 	var character_data: CharacterData = Global.get_player_character_data()
+ 	animated_sprite_2d.sprite_frames = get_animation_sprite_frames()
+ 	animated_sprite_2d.play(AnimationData.ANIMATION_IDLE)
+-	
++	if character_data != null:
++		base_speed = character_data.character_speed
++
+ 	reset_block()
+ 	clear_all_status_effects()
+ 	unregister_all_custom_ui()
+@@ -51,6 +53,12 @@ func _get_default_faction() -> int:
+ func is_hero() -> bool:
+ 	return true
+ 
++func get_unit_display_name() -> String:
++	var character_data: CharacterData = Global.get_player_character_data()
++	if character_data != null and character_data.character_name != "":
++		return character_data.character_name
++	return name
++
+ func get_animation_data() -> AnimationData:
+ 	var character_data: CharacterData = Global.get_player_character_data()
+ 	var animation_data: AnimationData = Global.get_animation_data(character_data.character_animation_id)
+diff --git a/scripts/ui/Combat.gd b/scripts/ui/Combat.gd
+index 9440f43..9164adc 100644
+--- a/scripts/ui/Combat.gd
++++ b/scripts/ui/Combat.gd
+@@ -1,4 +1,4 @@
+-# maintains combat UI
++# maintains combat UI; the action timeline loop lives in CombatDirector (child node)
+ extends Control
+ 
+ @onready var money_label: Label = $%MoneyLabel
+@@ -19,6 +19,8 @@ extends Control
+ 
+ @onready var combat_animation_player: AnimationPlayer = $CombatAnimation
+ @onready var enemy_container = $EnemyContainer
++@onready var combat_director: CombatDirector = $CombatDirector
++@onready var timeline_bar: Control = $TimelineBar
+ 
+ @onready var player = $Player
+ @onready var hand = $Hand
+@@ -28,51 +30,50 @@ extends Control
+ @onready var background_button: TextureButton = %BackgroundButton
+ 
+ @onready var end_turn_button: Button = $EndTurnButton
+-var end_turn_object: CombatEndTurn = null
++
++var _combat_ending: bool = false	# end_combat() runs once per combat
+ 
+ func _ready():
+ 	Signals.player_money_changed.connect(_on_player_money_changed)
+ 	Signals.player_health_changed.connect(_on_player_health_changed)
+-	
++
+ 	Signals.enemy_killed.connect(_on_enemy_killed)
+ 	Signals.enemy_death_animation_finished.connect(_on_enemy_death_animation_finished)
+-	
++
+ 	Signals.combat_started.connect(_on_combat_started)
+ 	Signals.combat_ended.connect(_on_combat_ended)
+-	
+-	Signals.player_turn_started.connect(_on_player_turn_started)
+-	Signals.player_turn_ended.connect(_on_player_turn_ended)
+-	Signals.enemy_turn_ended.connect(_on_enemy_turn_ended)
+-	Signals.enemy_turn_started.connect(_on_enemy_turn_started)
+-	
+-	Signals.end_turn_requested.connect(_on_end_turn_requested)
+-	
++
++	Signals.unit_action_started.connect(_on_unit_action_started)
++	Signals.unit_action_ended.connect(_on_unit_action_ended)
++	Signals.end_action_requested.connect(_on_end_action_requested)
++	Signals.end_turn_requested.connect(_on_end_action_requested)
++
+ 	end_turn_button.button_up.connect(_on_end_turn_button_up)
+-	
++
+ 	update_combat_display()
+ 	player.update_player_display(Global.player_data)
+-	
++
+ 	# pile buttons
+ 	deck_button.button_up.connect(_on_deck_button_up)
+ 	draw_pile_button.button_up.connect(_on_draw_pile_button_up)
+ 	discard_pile_button.button_up.connect(_on_discard_pile_button_up)
+ 	exhaust_pile_button.button_up.connect(_on_exhaust_pile_button_up)
+-	
++
+ 	# updating pile counts when cards do things
+ 	Signals.card_played.connect(_on_card_played)	# player is playing card
+ 	Signals.card_drawn.connect(_on_card_drawn)
+ 	Signals.card_deck_shuffled.connect(_on_card_deck_shuffled)
+ 	Signals.card_discarded.connect(_on_card_discarded)
+ 	Signals.card_exhausted.connect(_on_card_exhausted)
+-	
++
+ 	Signals.energy_changed.connect(_on_energy_changed)
+ 	Signals.card_queue_refunded.connect(_on_card_queue_refunded)
+-	
++
+ 	Signals.run_started.connect(_on_run_started)
+ 	Signals.run_ended.connect(_on_run_ended)
+-	
++
+ 	Signals.map_location_selected.connect(_on_map_location_selected)
+-	
++
+ 	# map back references
+ 	HandManager.card_destination_to_ui_elements[HandManager.DECK] = deck_button
+ 	HandManager.card_destination_to_ui_elements[HandManager.DRAW_PILE] = draw_pile_button
+@@ -82,12 +83,12 @@ func _ready():
+ func _on_map_location_selected(location_data: LocationData):
+ 	# determine what to do when the player visits a new location
+ 	var location_type: int = location_data.location_type
+-	
++
+ 	chest.visible = false
+ 	shop.visible = false
+-	
++
+ 	set_combat_display_visibility(false)
+-	
++
+ 	match location_type:
+ 		LocationData.LOCATION_TYPES.COMBAT, LocationData.LOCATION_TYPES.MINIBOSS, LocationData.LOCATION_TYPES.BOSS:
+ 			ActionGenerator.generate_combat_start("") # emit empty event to get location's combat event
+@@ -95,9 +96,9 @@ func _on_map_location_selected(location_data: LocationData):
+ 			chest.visible = true
+ 		LocationData.LOCATION_TYPES.SHOP:
+ 			shop.visible = true
+-	
++
+ 	_update_background()
+-	
++
+ 	ActionGenerator.generate_location_music_action()
+ 
+ func update_combat_display():
+@@ -111,11 +112,11 @@ func update_combat_display():
+ func _update_background() -> void:
+ 	# set the background if possible
+ 	var background_texture_path: String = ""
+-	
++
+ 	var act_id: String = Global.player_data.player_act_id
+ 	var act_data: ActData = Global.get_act_data(act_id)
+ 	var location_data: LocationData = Global.get_player_location_data()
+-	
++
+ 	# act background
+ 	if act_data.act_background_texture_path != "":
+ 		background_texture_path = act_data.act_background_texture_path
+@@ -128,10 +129,10 @@ func _update_background() -> void:
+ 		var event_data: EventData = Global.get_event_data(location_event_object_id)
+ 		if event_data.event_background_texture_path != "":
+ 			background_texture_path = event_data.event_background_texture_path
+-	
++
+ 	if background_texture_path != "":
+ 		background_button.texture_normal = FileLoader.load_texture(background_texture_path)
+-	
++
+ 
+ func set_combat_display_visibility(display_visibility: bool) -> void:
+ 	energy.visible = display_visibility
+@@ -139,6 +140,7 @@ func set_combat_display_visibility(display_visibility: bool) -> void:
+ 	discard_pile_button.visible = display_visibility
+ 	exhaust_pile_button.visible = display_visibility
+ 	end_turn_button.visible = display_visibility
++	timeline_bar.visible = display_visibility and combat_director.is_running
+ 
+ func _on_card_played(_card_play_request: CardPlayRequest):
+ 	update_combat_display()
+@@ -178,23 +180,23 @@ func _on_discard_pile_button_up():
+ func _on_exhaust_pile_button_up():
+ 	card_selection_overlay.view_exhaust()
+ 
+-### Turn Handling
++### Combat lifecycle
+ 
+ func _on_enemy_killed(enemy: Enemy):
+ 	var generated_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, [], enemy.enemy_data.enemy_actions_on_death, null)
+ 	ActionHandler.add_actions(generated_actions)
+-	
+-	
++
++
+ func _on_enemy_death_animation_finished(_enemy: Enemy):
+ 	# determine if all non minion enemies killed and end combat
+ 	var enemies: Array[Enemy] = []
+ 	enemies.assign(get_tree().get_nodes_in_group("enemies"))
+-	
++
+ 	var non_minion_enemies_remain: bool = true
+ 	for enemy in enemies:
+ 		if not enemy.enemy_data.enemy_is_minion:
+ 			non_minion_enemies_remain = false
+-	
++
+ 	if non_minion_enemies_remain:
+ 		# wait for actions to finish and end combat
+ 		if ActionHandler.actions_being_performed:
+@@ -210,347 +212,59 @@ func _on_combat_started(event_id: String):
+ 		current_location.location_visited = true
+ 	else:
+ 		current_event = Global.get_event_data(event_id)
+-	
++
++	_combat_ending = false
++	end_turn_button.disabled = true
+ 	enemy_container.populate_enemies_from_event(current_event)
+-	start_turn_animation()
+-	
++
+ 	Global.player_data.player_energy = Global.player_data.player_energy_max
+ 	set_combat_display_visibility(true)
+ 	update_combat_display()
+-	
++
++	# hand the spawned units to the action timeline
++	combat_director.begin_combat()
++	timeline_bar.visible = true
++
+ func _on_combat_ended():
+ 	set_combat_display_visibility(false)
+-	
+-## Helper method to cut down on code bloat. Used in player/enemy turn logic to short circuit
+-## the turn logic if either player or enemies are dead.
+-func _end_combat_check() -> bool:
+-	var combat_is_ended: bool = false
+-	if not Global.are_remaining_enemies():
+-		end_combat()
+-		combat_is_ended = true
+-	if not player.is_alive():
+-		player.play_death_animation()
+-		combat_is_ended = true
+-	return combat_is_ended
+-
+-func perform_enemy_turn():
+-	# generates enemy actions and performs them in order
+-	var enemies: Array[Enemy] = Global.get_alive_enemies()
+-	if _end_combat_check():
+-		return
+-	
+-	# Perform start of turn status logic for all enemies
+-	for enemy: Enemy in enemies:
+-		if enemy.is_alive():
+-			enemy.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-	if _end_combat_check():
+-		return
+-	
+-	### Perform intent for all enemies
+-	for e in enemies:
+-		# get enemy standard attack data
+-		var enemy: Enemy = e	# typecast iterator
+-		var enemy_intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
+-		
+-		### perform enemy start of turn statuses
+-		if enemy.is_alive():
+-			enemy.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_INTENT)
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-		
+-		### perform intent
+-		# NOTE: remember these go in reverse order on the stack
+-		if enemy.is_alive():
+-			var enemy_actions_data: Array[Dictionary] = []
+-			var intent_attack_damage: int = 0
+-			var intent_number_of_attacks: int = 0
+-			var intent_block: int = 0
+-			var intent_audio_path: String = ""
+-			var intent_attack_impact_animation_id: String = ""
+-			if enemy_intent != null:
+-				# add custom actions
+-				enemy_actions_data.assign(enemy_intent.enemy_intent_custom_actions)
+-				# get attack data
+-				intent_attack_damage = enemy_intent.enemy_intent_attack_damage
+-				intent_number_of_attacks = enemy_intent.enemy_intent_number_of_attacks
+-				intent_block = enemy_intent.enemy_intent_block
+-				intent_audio_path = enemy_intent.enemy_intent_audio_path
+-				intent_attack_impact_animation_id = enemy_intent.enemy_intent_attack_impact_animation_id
+-			
+-			# add attacks
+-			if intent_number_of_attacks > 0:
+-				enemy_actions_data.append(
+-				{
+-				Scripts.ACTION_ATTACK_GENERATOR: 
+-					{
+-					"damage": intent_attack_damage,
+-					"number_of_attacks": intent_number_of_attacks,
+-					"impact_vfx_animation_id": intent_attack_impact_animation_id,
+-					"time_delay": EnemyData.ENEMY_ATTACK_DELAY,
+-					"audio_path": intent_audio_path
+-					}
+-				})
+-			
+-			# add block
+-			if intent_block > 0:
+-				enemy_actions_data.append(
+-					{
+-					Scripts.ACTION_BLOCK: {
+-						"block": intent_block,
+-						"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
+-						"time_delay": 0.0,
+-						}
+-					}
+-			)
+-			
+-			# add reset block action
+-			enemy_actions_data.append(
+-			{
+-			Scripts.ACTION_RESET_BLOCK:  {
+-				"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
+-				"time_delay": 0.0
+-				}
+-			}
+-			)
+-			
+-			# play intent sound if one exists and no attacks
+-			if enemy_intent.enemy_intent_audio_path != "" and intent_number_of_attacks == 0:
+-				ActionGenerator.generate_sound_action(enemy_intent.enemy_intent_audio_path, false)
+-			
+-			# perform them and wait
+-			var enemy_attack_actions: Array = ActionGenerator.create_actions(enemy, null, [player], enemy_actions_data, null)
+-			ActionHandler.add_actions(enemy_attack_actions)
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-			
+-			# if player is dead stop
+-			if _end_combat_check():
+-				return
+-		
+-		### Perform enemy end of turn statuses
+-		if enemy.is_alive():
+-			enemy.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_INTENT)
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-		
+-		if _end_combat_check():
+-			return
+-	
+-	if ActionHandler.actions_being_performed:
+-		await ActionHandler.actions_ended
+-	
+-	
+-	# Perform end of turn status logic for all enemies
+-	for enemy: Enemy in enemies:
+-		if enemy.is_alive():
+-			enemy.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_TURN)
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-
+-	# all enemies dead
+-	if _end_combat_check():
+-		return
+-	else:
+-		Signals.enemy_turn_ended.emit()
+-
+-
+-	
+-func _on_player_turn_started():
+-	# prevent player from playing cards manually
+-	HandManager.set_disable_hand(true)
+-	
+-	# first turn actions
+-	if StatsHandler.get_turn_count() == 1:
+-		# location initial actions
+-		var location_data: LocationData = Global.get_player_location_data()
+-		assert(location_data != null)
+-		if location_data != null:
+-			var card_play_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
+-			card_play_request.card_data = null
+-			card_play_request.selected_target = null
+-			
+-			# perform location initial actions
+-			var location_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(player, card_play_request, [], location_data.location_initial_combat_actions, null)
+-			ActionHandler.add_actions(location_initial_combat_actions)
+-		
+-			# wait for first turn actions
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-			
+-			# perform event initial actions
+-			var event_data: EventData = Global.get_player_event_data()
+-			var event_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(player, card_play_request, [], event_data.event_initial_combat_actions, null)
+-			ActionHandler.add_actions(event_initial_combat_actions)
+-			
+-			# wait for first turn actions
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-			
+-			if _end_combat_check():
+-				return
+-		
+-		# combat start consumable actions
+-		for consumable_slot_index: int in Global.player_data.player_consumable_slot_count:
+-			var consumable_data: ConsumableData = Global.get_player_consumable_in_slot_index(consumable_slot_index)
+-			if consumable_data != null:
+-				if len(consumable_data.consumable_initial_combat_actions) > 0:
+-					var card_play_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true) # generate fake request
+-					
+-					# perform initial actions
+-					var consumable_actions: Array[BaseAction] = ActionGenerator.create_actions(null, card_play_request, [], consumable_data.consumable_initial_combat_actions, null)
+-					ActionHandler.add_actions(consumable_actions)
+-	
+-		# wait for first turn actions
+-		if ActionHandler.actions_being_performed:
+-			await ActionHandler.actions_ended
+-		# if player is dead stop
+-		if _end_combat_check():
+-			return
+-		
+-		# combat start card actions
+-		for card_data: CardData in HandManager.player_draw:
+-			var card_play_request: CardPlayRequest = HandManager.create_card_play_request(card_data, null, true, true) # generate fake request
+-			
+-			# perform initial actions
+-			var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(player, card_play_request, [], card_data.card_initial_combat_actions, null)
+-			ActionHandler.add_actions(card_play_actions)
+-	
+-		# wait for first turn actions
+-		if ActionHandler.actions_being_performed:
+-			await ActionHandler.actions_ended
+-		# if player is dead stop
+-		if _end_combat_check():
+-			return
+-	
+-	# reset energy
+-	ActionGenerator.generate_start_of_turn_energy_actions()
+-	
+-	# perform pre draw actions
+-	player.update_incoming_damage_amount(true)
+-	player.generate_reset_block_action()
+-	player.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DRAW_PLAYER_START_TURN)
+-	if ActionHandler.actions_being_performed:
+-		await ActionHandler.actions_ended
+-	if _end_combat_check():
+-		return
+-	
+-	# draw cards
+-	ActionGenerator.generate_start_of_turn_draw_actions()
+-	if ActionHandler.actions_being_performed:
+-		await ActionHandler.actions_ended
+-	# if player is dead stop
+-	if _end_combat_check():
+-		return
+-	
+-	# perform post draw actions
+-	player.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DRAW_PLAYER_START_TURN)
+-	# if player is dead stop
+-	if _end_combat_check():
+-		return
+-	
+-	# hero's action has started (combat framework signal, emitted alongside player_turn_started)
+-	Signals.unit_action_started.emit(player)
+-	
+-	# unlock and update hand
+-	HandManager.set_disable_hand(false)
+-	hand.update_hand_card_display()
+-
+-func _on_player_turn_ended():
+-	# prevent player from playing cards
+-	HandManager.set_disable_hand(true)
+-	
+-	# perform all end of turn actions and await
+-	player.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DISCARD_PLAYER_END_TURN)
+-	if ActionHandler.actions_being_performed:
+-		await ActionHandler.actions_ended
+-	if _end_combat_check():
+-		return
+-	
+-	# discard non retained cards and perform card actions
+-	HandManager.perform_end_of_turn_hand_actions()
+-	if ActionHandler.actions_being_performed:
+-		await ActionHandler.actions_ended
+-	if _end_combat_check():
+-		return
+-	
+-	# perform all end of turn actions and await
+-	player.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DISCARD_PLAYER_END_TURN)
+-	if ActionHandler.actions_being_performed:
+-		await ActionHandler.actions_ended
+-	if _end_combat_check():
+-		return
+-	
+-	# hero's action has ended (combat framework signal, emitted alongside player_turn_ended)
+-	Signals.unit_action_ended.emit(player)
+-
+-func _on_player_start_turn_animation_finished():
+-	# called from animation player
+-	start_turn()
+-
+-func _on_player_end_turn_animation_finished():
+-	# called from animation player
+-	Signals.player_turn_ended.emit()
+-	
+-	# wait for all end of turn actions to process
+-	if ActionHandler.actions_being_performed:
+-		await ActionHandler.actions_ended
+-	
+-	# start enemy turn if they're alive
+-	if len(get_tree().get_nodes_in_group("enemies")) > 0:
+-		Signals.enemy_turn_started.emit()
+-
+-func _on_enemy_turn_started():
+-	perform_enemy_turn()
+-	
+-func _on_enemy_turn_ended():
+-	start_turn_animation()
+-	
++
++### Action handling (hero's own action; CombatDirector drives the timeline)
++
++func _on_unit_action_started(unit: BaseCombatant) -> void:
++	if unit.faction == BaseCombatant.FACTIONS.PARTY:
++		end_turn_button.disabled = false
++	update_combat_display()
++
++func _on_unit_action_ended(_unit: BaseCombatant) -> void:
++	end_turn_button.disabled = true
++	update_combat_display()
++
+ func _on_end_turn_button_up():
+-	queue_end_turn(CombatEndTurn.END_TURN_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS)
+-
+-func _on_end_turn_requested(immediacy: int):
+-	queue_end_turn(immediacy)
+-
+-func queue_end_turn(immediacy: int = CombatEndTurn.END_TURN_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS):
+-	# queues up an end turn, using async objects with priority to determine how to handle it
+-	if end_turn_object == null:
+-		end_turn_object = CombatEndTurn.new(self, immediacy)
+-		end_turn_object.wait()
+-		end_turn_button.disabled = true
+-	elif immediacy > end_turn_object.end_turn_queue_value:
+-		# higher priority end turn, replace the old with a newer one
+-		end_turn_object.disable()	# stop the old one working
+-		end_turn_object = CombatEndTurn.new(self, immediacy)
+-		end_turn_object.wait()
+-
+-func _reset_turn_end_queue() -> void:
+-	if end_turn_object != null:
+-		end_turn_object.disable()
+-		end_turn_object = null
++	Signals.end_action_requested.emit(CombatEndAction.END_ACTION_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS)
++
++func _on_end_action_requested(_immediacy: int):
++	end_turn_button.disabled = true
+ 
+ func _on_run_started():
+ 	visible = true
+ 	_on_player_health_changed()
+ 	_on_player_money_changed()
+-	
++
+ 	# load energy
+ 	var character_data: CharacterData = Global.get_player_character_data()
+ 	if character_data != null:
+ 		var color_data: ColorData = Global.get_color_data(character_data.character_color_id)
+ 		if color_data != null:
+ 			energy.texture_normal = FileLoader.load_texture(color_data.color_energy_icon_texture_path)
+-	
++
+ func _on_run_ended():
+ 	visible = false
+-	_reset_turn_end_queue()
+-
+-func start_combat() -> void:
+-	_reset_turn_end_queue()
+ 
+-## Performs end of combat logic and signals end of combat
++## Performs end of combat logic and signals end of combat. Runs once per combat.
+ func end_combat() -> void:
++	if _combat_ending:
++		return
++	_combat_ending = true
+ 	var event_data: EventData = Global.get_player_event_data()
+ 	if event_data != null:
+ 		# perform event initial actions
+@@ -559,22 +273,5 @@ func end_combat() -> void:
+ 
+ 		if ActionHandler.actions_being_performed:
+ 			await ActionHandler.actions_ended
+-	
+-	_reset_turn_end_queue()
+-	Signals.combat_ended.emit()
+ 
+-func end_turn():
+-	pass
+-
+-func start_turn():
+-	# called from animation player
+-	_reset_turn_end_queue()
+-	update_combat_display()
+-	Signals.player_turn_started.emit()
+-
+-func end_turn_animation() -> void:
+-	_reset_turn_end_queue()
+-	combat_animation_player.play("end_turn")
+-	
+-func start_turn_animation() -> void:
+-	combat_animation_player.play("start_turn")
++	Signals.combat_ended.emit()
+diff --git a/scripts/ui/CombatEndAction.gd b/scripts/ui/CombatEndAction.gd
+new file mode 100644
+index 0000000..bd5bd88
+--- /dev/null
++++ b/scripts/ui/CombatEndAction.gd
+@@ -0,0 +1,46 @@
++# Utility object for CombatDirector: ends the acting player unit's action asynchronously with
++# hierarchical levels of immediacy. A request with higher immediacy replaces the waiting one
++# (CombatDirector.request_end_action). Formerly CombatEndTurn; behavior unchanged.
++extends RefCounted
++class_name CombatEndAction
++
++enum END_ACTION_QUEUE_IMMEDIACY {	# Do not rearrange
++	WAIT_FOR_ALL_CARD_PLAYS,
++	WAIT_FOR_ACTIONS,
++	IMMEDIATE
++	}
++
++var _director: CombatDirector = null	# the director to call back; null once disabled
++var immediacy: int = END_ACTION_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS
++
++func _init(director: CombatDirector, _immediacy: int = END_ACTION_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS):
++	_director = director
++	immediacy = _immediacy
++
++func wait() -> void:
++	match immediacy:
++		END_ACTION_QUEUE_IMMEDIACY.IMMEDIATE:
++			# forces the action to instantly end, removing all remaining card plays and actions
++			HandManager.refund_card_queue()
++			ActionHandler.clear_all_actions()
++			end_action()
++		END_ACTION_QUEUE_IMMEDIACY.WAIT_FOR_ACTIONS:
++			# prevents further card plays but finishes the rest of the current action stack
++			HandManager.refund_card_queue()
++			HandManager.set_disable_hand(true)
++			if ActionHandler.actions_being_performed:
++				await ActionHandler.actions_ended
++			end_action()
++		END_ACTION_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS, _:
++			# default: wait for all queued card plays and their actions before ending the action
++			HandManager.set_disable_hand(true)
++			while len(HandManager.card_play_queue) > 0 or ActionHandler.actions_being_performed:
++				await ActionHandler.actions_ended
++			end_action()
++
++func disable() -> void:
++	_director = null
++
++func end_action() -> void:
++	if _director != null:
++		_director.finish_player_action(self)
+diff --git a/scripts/ui/CombatEndAction.gd.uid b/scripts/ui/CombatEndAction.gd.uid
+new file mode 100644
+index 0000000..a6a0057
+--- /dev/null
++++ b/scripts/ui/CombatEndAction.gd.uid
+@@ -0,0 +1 @@
++uid://z28rviky8grf
+diff --git a/scripts/ui/CombatEndTurn.gd b/scripts/ui/CombatEndTurn.gd
+deleted file mode 100644
+index be330c9..0000000
+--- a/scripts/ui/CombatEndTurn.gd
++++ /dev/null
+@@ -1,45 +0,0 @@
+-# a utility object for Combat to allow asynchronous turn ending with hierarchical levels of end turn immediacy
+-# if a higher level of immediacy is detected in Combat a new object will be created, replacing the await
+-extends RefCounted
+-class_name CombatEndTurn
+-
+-var _combat = null	# the parent combat ui node, just used for a callback
+-enum END_TURN_QUEUE_IMMEDIACY {	# Do not rearrange
+-	WAIT_FOR_ALL_CARD_PLAYS,
+-	WAIT_FOR_ACTIONS,
+-	IMMEDIATE
+-	}
+-var end_turn_queue_immediacy: int = END_TURN_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS
+-
+-func _init(combat, _end_turn_queue_immediacy = END_TURN_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS):
+-	_combat = combat
+-	end_turn_queue_immediacy = _end_turn_queue_immediacy
+-
+-func wait() -> void:
+-	match end_turn_queue_immediacy:
+-		END_TURN_QUEUE_IMMEDIACY.IMMEDIATE:
+-			# forces the turn to instantly end, removing all remaining card plays and actions
+-			HandManager.refund_card_queue()
+-			ActionHandler.clear_all_actions()
+-			end_turn()
+-		END_TURN_QUEUE_IMMEDIACY.WAIT_FOR_ACTIONS:
+-			# prevents further card plays but finishes the rest of the current action stack
+-			HandManager.refund_card_queue()
+-			HandManager.set_disable_hand(true)
+-			if ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-			end_turn()
+-		END_TURN_QUEUE_IMMEDIACY.WAIT_FOR_ALL_CARD_PLAYS, _:
+-			# default
+-			# continuously wait for all card plays to finish before ending the player's turn
+-			HandManager.set_disable_hand(true)
+-			while len(HandManager.card_play_queue) > 0 or ActionHandler.actions_being_performed:
+-				await ActionHandler.actions_ended
+-			end_turn()
+-
+-func disable():
+-	_combat = null
+-
+-func end_turn():
+-	if _combat != null:
+-		_combat.end_turn_animation()
+diff --git a/scripts/ui/CombatEndTurn.gd.uid b/scripts/ui/CombatEndTurn.gd.uid
+deleted file mode 100644
+index 5925857..0000000
+--- a/scripts/ui/CombatEndTurn.gd.uid
++++ /dev/null
+@@ -1 +0,0 @@
+-uid://c4nyn5lhm1g87
+diff --git a/scripts/ui/TimelineBar.gd b/scripts/ui/TimelineBar.gd
+new file mode 100644
+index 0000000..e40abaf
+--- /dev/null
++++ b/scripts/ui/TimelineBar.gd
+@@ -0,0 +1,51 @@
++## Combat HUD strip listing the current tick and the next projected actions of the timeline
++## ("name@tick"), read from CombatDirector.project_timeline(). Labels are rebuilt on every
++## timeline_changed / combat_tick_advanced; hidden outside combat.
++extends HBoxContainer
++
++## How many upcoming actions to show (the acting unit counts as the first entry).
++const PROJECTION_COUNT: int = 8
++
++@onready var tick_label: Label = $TickLabel
++@onready var entry_container: HBoxContainer = $Entries
++
++func _ready() -> void:
++	Signals.combat_started.connect(_on_combat_started)
++	Signals.combat_ended.connect(_on_combat_ended)
++	Signals.run_ended.connect(_on_run_ended)
++	Signals.timeline_changed.connect(refresh)
++	Signals.combat_tick_advanced.connect(_on_combat_tick_advanced)
++	Signals.unit_action_started.connect(_on_unit_action_started)
++	visible = false
++
++func refresh() -> void:
++	for child: Node in entry_container.get_children():
++		child.queue_free()
++	var director: CombatDirector = Global.get_combat_director()
++	if director == null or not director.is_running:
++		visible = false
++		return
++	visible = true
++	tick_label.text = "Tick %d" % director.current_tick
++	for entry: Dictionary in director.project_timeline(PROJECTION_COUNT):
++		var unit: BaseCombatant = entry["unit"]
++		var label: Label = Label.new()
++		label.text = "%s@%d" % [unit.get_unit_display_name(), entry["tick"]]
++		if unit == director.acting_unit:
++			label.text = "[%s]" % label.text
++		entry_container.add_child(label)
++
++func _on_combat_started(_event_id: String) -> void:
++	refresh()
++
++func _on_combat_ended() -> void:
++	refresh()
++
++func _on_run_ended() -> void:
++	refresh()
++
++func _on_combat_tick_advanced(_previous_tick: int, _current_tick: int) -> void:
++	refresh()
++
++func _on_unit_action_started(_unit: BaseCombatant) -> void:
++	refresh()
+diff --git a/scripts/ui/TimelineBar.gd.uid b/scripts/ui/TimelineBar.gd.uid
+new file mode 100644
+index 0000000..c3c7151
+--- /dev/null
++++ b/scripts/ui/TimelineBar.gd.uid
+@@ -0,0 +1 @@
++uid://b55uetkliwo0i
+diff --git a/scripts/ui/TurnOverlay.gd b/scripts/ui/TurnOverlay.gd
+index 556aa79..48f6cd3 100644
+--- a/scripts/ui/TurnOverlay.gd
++++ b/scripts/ui/TurnOverlay.gd
+@@ -3,5 +3,9 @@ extends Control
+ @onready var turn_label: Label = $TurnLabel
+ 
+ func update_turn_label() -> void:
+-	# called from animation player
+-	turn_label.text = "Turn %s" % StatsHandler.get_turn_count()
++	# called from animation player at the start of the hero's action
++	var tick: int = 0
++	var director: CombatDirector = Global.get_combat_director()
++	if director != null:
++		tick = director.current_tick
++	turn_label.text = "Tick %s - Action %s" % [tick, StatsHandler.get_turn_count()]

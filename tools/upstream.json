@@ -27,6 +27,12 @@
       "sha256": "465a53f2a159c61feb16d16e426545dbaf815156578cc7e9d9841ccfbf0a4e43",
       "description": "Combat framework Phase 0 (wf/specs/combat-framework): BaseCombatant unit identity fields and _on_own_action_* hooks, UnitRegistry autoload (Global.get_player/get_alive_enemies delegate), CombatRulesData schema + combat_rules_default with original-behavior defaults (draw/energy read it), unit/timeline/party signal declarations, hero unit_action_started/ended in the legacy turn flow.",
       "validation": "wf/plans/combat-framework/phase-0.md"
+    },
+    {
+      "file": "tools/patches/combat-framework-phase1.patch",
+      "sha256": "3c58636adf85c4919da0051b74686461e527bb8ca367d8b04ae17c9b5237d359",
+      "description": "Combat framework Phase 1 (wf/specs/combat-framework): CombatDirector + CombatTimeline action timeline (CTB) replaces Combat.gd's turn alternation; BaseUnitController/PlayerInputController/EnemyIntentController; CombatEndTurn renamed CombatEndAction; enemies decide intent on entering the timeline; rules reset_block_on_action_start/discard_hand_on_action_end/hand_limit consumed; enemy_speed/character_speed/card_action_delay/enemy_intent_action_delay fields; StatusEffectData UNIT_ACTION_START/END + EVERY_N_TICKS; StatsHandler turn_count = hero actions, combat_tick; TimelineBar HUD; Root.tscn director/timeline nodes and animation tracks.",
+      "validation": "wf/plans/combat-framework/phase-1.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",
