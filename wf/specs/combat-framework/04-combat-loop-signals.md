@@ -53,7 +53,7 @@ HandManager
 
 ## 3.4 訊號重新定義與監聽者遷移
 
-新增（`Signals.gd`）：
+新增（`Signals.gd`）（修訂 2026-10-19：Phase 0 已宣告；`member`／`plan` 參數在 PartyMemberData／AiPlan 出現前不標型別）：
 
 （表）已抽到 [signals.json](signals.json)（11 列）。欄位：訊號、參數、時點。
 

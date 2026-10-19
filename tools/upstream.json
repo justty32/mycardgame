@@ -21,6 +21,12 @@
       "sha256": "bab32741edf84d042ba564d3877dbbd321b3eae09582dc98d4db18a4eabd46a2",
       "description": "Content profile switch: Global.get_content_profile() (--content-profile=test|pack user arg, else project setting game/content_profile, default test) skips GlobalTestDataGenerator in pack profile; NewRunMenu tolerates an empty standard difficulty modifier list.",
       "validation": "wf/workflows/game-dev/content/pack.md"
+    },
+    {
+      "file": "tools/patches/combat-framework-phase0.patch",
+      "sha256": "465a53f2a159c61feb16d16e426545dbaf815156578cc7e9d9841ccfbf0a4e43",
+      "description": "Combat framework Phase 0 (wf/specs/combat-framework): BaseCombatant unit identity fields and _on_own_action_* hooks, UnitRegistry autoload (Global.get_player/get_alive_enemies delegate), CombatRulesData schema + combat_rules_default with original-behavior defaults (draw/energy read it), unit/timeline/party signal declarations, hero unit_action_started/ended in the legacy turn flow.",
+      "validation": "wf/plans/combat-framework/phase-0.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

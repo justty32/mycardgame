@@ -8,13 +8,13 @@
 
 ## 目前執行邊界
 
-目前有效授權只允許檔案修改與不開視窗的背景檢查；不得操作 UI／桌面、截圖、切換焦點、開啟 GUI，或干預既有程序。原生崩潰調查已依使用者要求擱置。後續任務依當時有效授權判斷；`game.ps1 -Mode Run` 會開啟視窗，不自動執行，歷史 capture 指令也不適用。
+目前有效授權只允許檔案修改與不開視窗的背景檢查；不得操作 UI／桌面、截圖、切換焦點、開啟 GUI，或干預既有程序。原生崩潰調查已依使用者要求擱置。後續依當時授權判斷；`game.ps1 -Mode Run` 會開視窗，不自動跑，歷史 capture 命令亦不適用。
 
 背景驗證優先使用下節的 `test_game.py`，選擇與變更相關的 suite；它使用隔離副本及 headless 引擎，避免直接在 `game/` 建立遊戲進度。純文件修改只跑文件 lint，不為更新流程而啟動 Godot。
 
 ## Smoke 契約
 
-首次匯入或資源變動需要 Import，隔離 runner 會處理；框架、資料格式、載入流程變動需 Smoke。檢查 [framework_smoke.gd](../../tests/framework_smoke.gd) 的主場景、主選單、角色與起手牌、Array append，以及真實 FileLoader 的 example_mod 新卡、起手牌追加和 script takeover。mod 清單只在測試記憶體覆寫，不修改 game/external/mod_list.json；測試不開始 run。
+首次匯入或資源變動需要 Import，隔離 runner 會處理；框架、資料格式、載入流程變動需 Smoke。檢查 [framework_smoke.gd](../../tests/framework_smoke.gd) 的主場景、主選單、角色與起手牌、Array append，真實 FileLoader 的 example_mod 新卡、起手牌追加和 script takeover，以及戰鬥框架 [probe](../../tests/unit_registry_probe.gd)。mod 清單只在測試記憶體覆寫，不修改 game/external/mod_list.json；測試不開始 run。
 
 Smoke 必須 exit 0、有 SMOKE PASS 標記、無 SCRIPT ERROR 或 FAIL。腳本有 45 秒事件迴圈 timeout；若程序同步卡死，外層需停止該測試程序。`--force-failure`（ps1 為 `-ForceFailure`）是失敗出口控制，必須 exit 1，不能列為正常驗證失敗。
 
@@ -39,7 +39,7 @@ runner 為每個程序設外層期限（預設 180 秒，`--timeout-seconds` 可
 
 runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash 標記，啟動前確認 log 可寫；欄位與 wrapper PID 限制見 [native-crash](game-dev/native-crash.md)。[合成測試](../../tests/test_runner_diagnostics.py)（`python3 tests/test_runner_diagnostics.py`，134 項）以假引擎程序驗 runner，包含資源訊息即使 exit 0 也須失敗；不啟動 Godot，也不證明使用者 crash 已重現／修復。
 
-[Dictionary](../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[SaveLoad](../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；測試設定不代表所有卡牌／遭遇或自訂內容已驗證。
+[Dictionary](../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[SaveLoad](../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；不代表所有卡牌／遭遇或自訂內容已驗證。
 
 ## 新內容如何接到 runner
 
@@ -57,7 +57,7 @@ runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash �
 python3 --version && bash wf/tools/wf-lint.sh --strict . && python3 tools/boundary_lint.py
 ```
 
-Linux／macOS 直接用原生 bash；Windows 經 WSL 或 Git Bash，步驟與商店別名／Win32 error 5 處理見 [dev-env/windows](dev-env/windows.md)。2026-10-19 Manjaro 原生與 Windows WSL 皆回傳全部零項。
+Linux／macOS 用 bash；Windows 經 WSL 或 Git Bash，步驟與商店別名／Win32 error 5 處理見 [dev-env/windows](dev-env/windows.md)。2026-10-19 Manjaro 原生與 Windows WSL 皆回傳全部零項。
 
 WSL 的 CRLF 錯誤依 [版本控制](version-control.md) 查 shell 換行。
 

@@ -20,6 +20,8 @@
 
 戰鬥與 UI：[ActionHandler.gd](../../../game/autoload/ActionHandler.gd)、[HandManager.gd](../../../game/autoload/HandManager.gd)、[Root.tscn](../../../game/scenes/Root.tscn)。資料流見 [架構總覽](../../../analysis/slay-the-robot/architecture/01_overview.md)；[combat_flow.gd](../../../tests/combat_flow.gd) 搭配 [fixture](../../../tests/combat_fixture.gd) 驗單場戰鬥、獎勵與返回地圖。
 
+戰鬥框架（[spec](../../specs/combat-framework/README.md)，Phase 0）：[UnitRegistry.gd](../../../game/scripts/combat/UnitRegistry.gd) 是 autoload，管 unit_uid、陣營查詢與主角；[BaseCombatant.gd](../../../game/scripts/combatants/BaseCombatant.gd) 帶單位身分欄位與 `_on_own_action_*` hook；[CombatRulesData.gd](../../../game/data/readonly/CombatRulesData.gd) 定戰鬥節奏，`Global.get_combat_rules()` 取用。由 Smoke 呼叫 [unit_registry_probe.gd](../../../tests/unit_registry_probe.gd) 驗證。
+
 整局狀態與結算：[NewRunMenu.gd](../../../game/scripts/ui/menus/NewRunMenu.gd)、[RunSummaryOverlay.gd](../../../game/scripts/ui/RunSummaryOverlay.gd)、[ProfileData.gd](../../../game/data/mutable/ProfileData.gd)、[StatsHandler.gd](../../../game/autoload/StatsHandler.gd)。起局、跨幕、終局與持久化邊界由 [整局流程](../game-dev/game-flow.md) 串接；既有單場測試不代表這些轉移全部覆蓋。
 
 非戰鬥節點：[DialogueData.gd](../../../game/data/readonly/DialogueData.gd)、[DialogueOverlay.gd](../../../game/scripts/ui/DialogueOverlay.gd)、[ShopOverlay.gd](../../../game/scripts/ui/ShopOverlay.gd)、[RestOverlay.gd](../../../game/scripts/ui/RestOverlay.gd)。選項效果、設施與寶箱接線沿 [關卡設計](../game-dev/level-design.md) 的子流程查來源與專項驗收。

@@ -19,12 +19,12 @@ BaseCombatant
   + faction: int = {PARTY, ENEMY, NEUTRAL}
   + board_anchor: Vector2i
   + footprint: Vector2i
-  + speed: int（getter；內容由狀態效果攔截器修飾，見 §3.6）
+  + speed: int（getter；內容由狀態效果攔截器修飾，見 §3.6；修訂 2026-10-19：實作為 base_speed + 唯讀 speed／get_speed()）
   + move_range: int
   + next_action_tick: int
   + last_action_tick: int
   + action_count: int
-  + controller: BaseUnitController
+  + controller: BaseUnitController（修訂 2026-10-19：Phase 0 暫型別 RefCounted，Phase 4 換）
 ```
 
 ## 3.1.4 遭遇與波次（讀取資料）

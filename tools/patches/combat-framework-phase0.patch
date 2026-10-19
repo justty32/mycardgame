@@ -1,0 +1,555 @@
+diff --git a/autoload/ActionGenerator.gd b/autoload/ActionGenerator.gd
+index 9a5c8c1..7fb1487 100644
+--- a/autoload/ActionGenerator.gd
++++ b/autoload/ActionGenerator.gd
+@@ -42,7 +42,10 @@ func generate_card_play_finished(card_play_request: CardPlayRequest) -> BaseActi
+ 	return generated_action
+ 
+ ## Used in Hand to draw cards at the start of a turn.
+-func generate_start_of_turn_draw_actions(number_of_cards: int = HandManager.PLAYER_CARD_DRAW_PER_TURN) -> void:
++## number_of_cards < 0 reads CombatRulesData.draw_per_action (default 5 = HandManager.PLAYER_CARD_DRAW_PER_TURN).
++func generate_start_of_turn_draw_actions(number_of_cards: int = -1) -> void:
++	if number_of_cards < 0:
++		number_of_cards = Global.get_combat_rules().draw_per_action
+ 	var action_data: Array[Dictionary] = [{
+ 		Scripts.ACTION_DRAW_GENERATOR: {
+ 			"draw_count": number_of_cards,
+@@ -54,10 +57,15 @@ func generate_start_of_turn_draw_actions(number_of_cards: int = HandManager.PLAY
+ 	# immediately process this action without ActionHandler
+ 	generated_action.perform_action()
+ 
+-## Used in Combat to reset the player's energy and add energy
++## Used in Combat to reset the player's energy and add energy.
++## Follows CombatRulesData.energy_per_action: ENERGY_REFILL (default) resets to 0 and adds max energy;
++## >= 0 keeps current energy and adds that amount, capped by energy_cap.
+ func generate_start_of_turn_energy_actions() -> void:
++	var combat_rules_data: CombatRulesData = Global.get_combat_rules()
++	var is_refill: bool = combat_rules_data.energy_per_action == CombatRulesData.ENERGY_REFILL
++	var energy_gain: int = combat_rules_data.get_start_of_action_energy_gain(Global.player_data.player_energy, Global.player_data.player_energy_max)
+ 	var action_data: Array[Dictionary] = [
+-		{Scripts.ACTION_ADD_ENERGY: {"energy_amount": Global.player_data.player_energy_max, "time_delay": 0}},
++		{Scripts.ACTION_ADD_ENERGY: {"energy_amount": energy_gain, "time_delay": 0}},
+ 		{Scripts.ACTION_RESET_ENERGY: {}}
+ 		]
+ 	var generated_actions: Array[BaseAction] = ActionGenerator.create_actions(Global.get_player(), null, [], action_data, null)
+@@ -66,7 +74,8 @@ func generate_start_of_turn_energy_actions() -> void:
+ 	var reset_energy_action: BaseAction = generated_actions[1]
+ 	
+ 	# immediately process this action without ActionHandler
+-	reset_energy_action.perform_action()
++	if is_refill:
++		reset_energy_action.perform_action()
+ 	add_energy_action.perform_action()
+ 
+ 
+diff --git a/autoload/Global.gd b/autoload/Global.gd
+index f7c9e07..343251b 100644
+--- a/autoload/Global.gd
++++ b/autoload/Global.gd
+@@ -38,6 +38,7 @@ extends Node
+ 	["ConsumablePackData", ConsumablePackData, "_id_to_consumable_pack_data", ["consumable_packs/"]],
+ 	["CustomUIData", CustomUIData, "_id_to_custom_ui_data", ["custom_ui/"]],
+ 	["CustomSignalData", CustomSignalData, "_id_to_custom_signal_data", ["custom_signals/"]],
++	["CombatRulesData", CombatRulesData, "_id_to_combat_rules_data", ["combat_rules/"]],
+ 	# prototype data
+ 	["EnemyData", EnemyData,"_id_to_enemy_data", ["enemies/"]],
+ 	["CardData", CardData, "_id_to_card_data", ["cards/"]],
+@@ -79,6 +80,7 @@ var _id_to_artifact_pack_data: Dictionary[String, ArtifactPackData] = {}
+ var _id_to_consumable_pack_data: Dictionary[String, ConsumablePackData] = {}
+ var _id_to_custom_ui_data: Dictionary[String, CustomUIData] = {}
+ var _id_to_custom_signal_data: Dictionary[String, CustomSignalData] = {}
++var _id_to_combat_rules_data: Dictionary[String, CombatRulesData] = {}
+ 
+ # prototyped data; Read only data that are duplicated into mutable data instances
+ var _id_to_enemy_data: Dictionary[String, EnemyData] = {}
+@@ -374,14 +376,20 @@ func unpause_game() -> void:
+ #endregion
+ 
+ #region Combat and Combat Stats
+-## Gets the BaseCombatant representing the player character
++## Gets the BaseCombatant representing the player character (the hero in UnitRegistry).
++## Falls back to the "players" group if no hero is registered.
+ func get_player() -> Player:
++	var hero: Player = UnitRegistry.get_hero() as Player
++	if hero != null:
++		return hero
+ 	return Global.get_tree().get_first_node_in_group("players")
+ 
++## Living enemy-faction units in scene-tree order (UnitRegistry).
+ func get_alive_enemies() -> Array[Enemy]:
+ 	var returned_enemies: Array[Enemy] = []
+-	for enemy: Enemy in Global.get_tree().get_nodes_in_group("enemies_alive_or_dead"):
+-		if enemy.is_alive():
++	for unit: BaseCombatant in UnitRegistry.get_units_by_faction(BaseCombatant.FACTIONS.ENEMY, true):
++		var enemy: Enemy = unit as Enemy
++		if enemy != null:
+ 			returned_enemies.append(enemy)
+ 	return returned_enemies
+ 
+@@ -524,6 +532,24 @@ func get_custom_signal_data(custom_signal_object_id: String) -> CustomSignalData
+ 	return _id_to_custom_signal_data.get(custom_signal_object_id, null)
+ #endregion
+ 
++#region Combat Rules
++## Built-in fallback used when no CombatRulesData with DEFAULT_OBJECT_ID is registered
++## (e.g. the pack content profile without a combat_rules/ patch). Values = original behavior.
++var _fallback_combat_rules_data: CombatRulesData = null
++
++func get_combat_rules_data(combat_rules_object_id: String) -> CombatRulesData:
++	return _id_to_combat_rules_data.get(combat_rules_object_id, null)
++
++## The rules every combat reads: CombatRulesData.DEFAULT_OBJECT_ID, or the built-in default.
++func get_combat_rules() -> CombatRulesData:
++	var combat_rules_data: CombatRulesData = get_combat_rules_data(CombatRulesData.DEFAULT_OBJECT_ID)
++	if combat_rules_data != null:
++		return combat_rules_data
++	if _fallback_combat_rules_data == null:
++		_fallback_combat_rules_data = CombatRulesData.new(CombatRulesData.DEFAULT_OBJECT_ID)
++	return _fallback_combat_rules_data
++#endregion
++
+ #region Locations
+ func get_location_data(location_id: String) -> LocationData:
+ 	return player_data.location_id_to_location_data.get(location_id, null)
+diff --git a/autoload/GlobalTestDataGenerator.gd b/autoload/GlobalTestDataGenerator.gd
+index 442772a..4983185 100644
+--- a/autoload/GlobalTestDataGenerator.gd
++++ b/autoload/GlobalTestDataGenerator.gd
+@@ -5,6 +5,7 @@ extends Node
+ ## Wrapper method used to generate all data used in testing.
+ ## After running this you can use Fileloader.export_read_only_data() to output to json files.
+ func generate_test_data() -> void:
++	add_test_combat_rules()
+ 	add_test_rest_actions()
+ 	add_test_consumables()
+ 	
+@@ -39,6 +40,13 @@ func generate_test_data() -> void:
+ 	add_test_consumable_packs()
+ 
+ 
++#region Combat Rules
++## Registers the framework default rules; every value is the class default (= original behavior).
++func add_test_combat_rules() -> void:
++	var combat_rules_default: CombatRulesData = CombatRulesData.new(CombatRulesData.DEFAULT_OBJECT_ID)
++	Global.register_rod(combat_rules_default)
++#endregion
++
+ #region Artifacts
+ func add_test_artifacts_to_player() -> void:
+ 	Global.player_data.add_artifact("artifact_draw_on_kill")
+diff --git a/autoload/HandManager.gd b/autoload/HandManager.gd
+index 0b187b6..2daa1eb 100644
+--- a/autoload/HandManager.gd
++++ b/autoload/HandManager.gd
+@@ -6,6 +6,7 @@
+ extends Node
+ 
+ ## How many cards player naturally draws at start of turn. See: ActionGenerator.generate_start_of_turn_draw_actions().
++## NOTE: Legacy default; the start-of-turn draw now reads CombatRulesData.draw_per_action (same value by default).
+ const PLAYER_CARD_DRAW_PER_TURN: int = 5
+ 
+ ## The default max number of cards available in player's hand. Exceeding this will discard the cards.
+diff --git a/autoload/Signals.gd b/autoload/Signals.gd
+index 6695e25..227a622 100644
+--- a/autoload/Signals.gd
++++ b/autoload/Signals.gd
+@@ -106,6 +106,24 @@ signal enemy_turn_started
+ signal enemy_turn_ended
+ signal end_turn_requested(end_turn_immediacy_level: int)	# requests to end the turn. See CombatEndTurn
+ 
++# combat framework: unit actions, timeline and board
++# NOTE: The legacy turn flow emits unit_action_started/ended for the hero only (alongside
++# player_turn_*); the remaining signals are declared for the action-timeline combat loop and
++# are not emitted yet. player_turn_* = hero's action, enemy_turn_* = one enemy's action.
++signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: after draw, before input/decision
++signal unit_action_ended(unit: BaseCombatant)	# a unit's action ends: after discard, before delay is computed
++signal combat_tick_advanced(previous_tick: int, current_tick: int)	# the combat clock advanced
++signal timeline_changed	# any unit's next_action_tick changed (UI should re-project the timeline)
++signal unit_moved(unit: BaseCombatant, from: Vector2i, to: Vector2i)	# a unit finished moving on the board
++signal unit_spawned(unit: BaseCombatant)
++signal unit_downed(unit: BaseCombatant)
++signal unit_removed(unit: BaseCombatant)
++signal wave_started(wave_index: int)
++signal wave_cleared(wave_index: int)
++signal end_action_requested(immediacy: int)	# replaces end_turn_requested for the action timeline
++signal cell_clicked(cell: Vector2i)	# board input; enemy_clicked/hovered stay for units on clicked cells
++signal cell_hovered(cell: Vector2i)
++
+ # custom ui
+ signal custom_ui_requested
+ 
+@@ -138,3 +156,12 @@ signal consumable_purchased(consumable_object_id: String)
+ 
+ signal add_consumable_requested(consumable_object_id: String)
+ #endregion
++
++#region Party (combat framework; declared, not emitted yet)
++# member is a PartyMemberData once that class exists; untyped until then.
++signal party_member_recruited(member)
++signal party_member_left(member)
++signal party_member_advanced(member)
++# plan is an AiPlan once that class exists; untyped until then. Debug/test observation.
++signal ai_plan_decided(unit: BaseCombatant, plan)
++#endregion
+diff --git a/data/readonly/CombatRulesData.gd b/data/readonly/CombatRulesData.gd
+new file mode 100644
+index 0000000..6f8da17
+--- /dev/null
++++ b/data/readonly/CombatRulesData.gd
+@@ -0,0 +1,68 @@
++## Read only combat rules shared by every combat (action timeline, energy, draw, board, party).
++## The framework registers one object, DEFAULT_OBJECT_ID, whose values reproduce the original
++## single-character, turn-based behavior. Content packs patch that object to change pacing.
++## NOTE: Phase 0 only consumes draw_per_action, energy_per_action and energy_cap
++## (see ActionGenerator start-of-action helpers); the remaining fields are read by later phases.
++extends SerializableData
++class_name CombatRulesData
++
++## Object id of the rules object every combat reads. See Global.get_combat_rules().
++const DEFAULT_OBJECT_ID: String = "combat_rules_default"
++## energy_per_action / energy_cap value meaning "refill to max" / "cap is the unit's max energy".
++const ENERGY_REFILL: int = -1
++
++enum DISTANCE_METRICS {MANHATTAN, CHEBYSHEV}
++enum DOWNED_MEMBER_POLICIES {REVIVE_AFTER_COMBAT_1HP, LEAVE_PARTY, PERMADEATH}
++enum TIE_BREAKS {HIGHER_SPEED_FIRST, PARTY_FIRST, SPAWN_ORDER}
++
++#region Timeline
++## wait = action_delay * timeline_delay_scale / speed
++@export var timeline_delay_scale: int = 100
++@export var default_action_delay: int = 100
++## Delay of an action that only waits.
++@export var wait_action_delay: int = 50
++@export var extra_move_delay_per_cell: int = 0
++@export var tie_break: int = TIE_BREAKS.HIGHER_SPEED_FIRST
++#endregion
++
++#region Energy, draw and hand
++## ENERGY_REFILL (-1) = refill to max at the start of each action (original behavior);
++## >= 0 = add this much energy at the start of each action.
++@export var energy_per_action: int = ENERGY_REFILL
++## ENERGY_REFILL (-1) = cap is the unit's max energy; >= 0 = explicit cap for per-action gains.
++@export var energy_cap: int = ENERGY_REFILL
++## Cards drawn at the start of each action.
++@export var draw_per_action: int = 5
++@export var hand_limit: int = 10
++@export var discard_hand_on_action_end: bool = true
++@export var reset_block_on_action_start: bool = true
++#endregion
++
++#region Board and movement
++@export var free_move_per_action: int = 0
++@export var distance_metric: int = DISTANCE_METRICS.MANHATTAN
++@export var board_min_size: Vector2i = Vector2i(5, 5)
++@export var default_board_size: Vector2i = Vector2i(5, 5)
++#endregion
++
++#region Party
++@export var party_size_max: int = 1
++@export var deploy_size_max: int = 1
++@export var downed_member_policy: int = DOWNED_MEMBER_POLICIES.REVIVE_AFTER_COMBAT_1HP
++@export var hero_down_ends_run: bool = true
++#endregion
++
++func _get_native_properties() -> Dictionary:
++	return {
++		"board_min_size": Vector2i(),
++		"default_board_size": Vector2i(),
++	}
++
++## Energy to add at the start of an action, given the unit's current and max energy.
++## With ENERGY_REFILL the caller resets energy to 0 first, so the gain is the full max.
++## Interceptors still adjust the generated ActionAddEnergy amount.
++func get_start_of_action_energy_gain(current_energy: int, energy_max: int) -> int:
++	if energy_per_action == ENERGY_REFILL:
++		return energy_max
++	var cap: int = energy_max if energy_cap == ENERGY_REFILL else energy_cap
++	return clampi(energy_per_action, 0, max(0, cap - current_energy))
+diff --git a/data/readonly/CombatRulesData.gd.uid b/data/readonly/CombatRulesData.gd.uid
+new file mode 100644
+index 0000000..0d95ffa
+--- /dev/null
++++ b/data/readonly/CombatRulesData.gd.uid
+@@ -0,0 +1 @@
++uid://bkdrcx4wwm45d
+diff --git a/external/data/mod_info.json b/external/data/mod_info.json
+index 8c0fff3..06851c3 100644
+--- a/external/data/mod_info.json
++++ b/external/data/mod_info.json
+@@ -43,6 +43,10 @@
+ 				"class_name": "ColorData",
+ 				"table_name": "_id_to_color_data"
+ 			},
++			"external/data/combat_rules/": {
++				"class_name": "CombatRulesData",
++				"table_name": "_id_to_combat_rules_data"
++			},
+ 			"external/data/consumable_packs/": {
+ 				"class_name": "ConsumablePackData",
+ 				"table_name": "_id_to_consumable_pack_data"
+diff --git a/project.godot b/project.godot
+index 9a02df1..6483167 100644
+--- a/project.godot
++++ b/project.godot
+@@ -31,6 +31,7 @@ Scripts="*res://autoload/Scripts.gd"
+ FileLoader="*res://autoload/FileLoader.gd"
+ Random="*res://autoload/Random.gd"
+ Global="*res://autoload/Global.gd"
++UnitRegistry="*res://scripts/combat/UnitRegistry.gd"
+ GlobalTestDataGenerator="*res://autoload/GlobalTestDataGenerator.gd"
+ GlobalProdDataGenerator="*res://autoload/GlobalProdDataGenerator.gd"
+ ActionHandler="*res://autoload/ActionHandler.gd"
+diff --git a/scripts/combat/UnitRegistry.gd b/scripts/combat/UnitRegistry.gd
+new file mode 100644
+index 0000000..e4ee349
+--- /dev/null
++++ b/scripts/combat/UnitRegistry.gd
+@@ -0,0 +1,73 @@
++## Autoload registry of the combatant units currently in the scene tree.
++## Maps unit_uid -> BaseCombatant, answers faction queries and tracks the hero
++## (the party unit that represents the run's main character). BaseCombatant registers itself
++## on _ready and unregisters on tree_exiting, so the registry mirrors scene-tree membership.
++## Faction queries return units in scene-tree order, matching SceneTree.get_nodes_in_group().
++extends Node
++
++## Values are untyped so a freed unit can be skipped with is_instance_valid() instead of erroring.
++var _uid_to_unit: Dictionary[String, Variant] = {}
++var _hero_uid: String = ""
++var _next_uid_index: int = 0
++
++## Registers a unit, assigning a unit_uid if it has none. Re-registering is a no-op.
++func register_unit(unit: BaseCombatant) -> void:
++	if unit == null:
++		return
++	if unit.unit_uid == "":
++		unit.unit_uid = _generate_uid()
++	_uid_to_unit[unit.unit_uid] = unit
++	if unit.is_hero() and get_hero() == null:
++		_hero_uid = unit.unit_uid
++
++func unregister_unit(unit: BaseCombatant) -> void:
++	if unit == null or unit.unit_uid == "":
++		return
++	if _uid_to_unit.get(unit.unit_uid, null) == unit:
++		_uid_to_unit.erase(unit.unit_uid)
++	if _hero_uid == unit.unit_uid:
++		_hero_uid = ""
++		# promote another registered hero-capable unit, if any
++		for other: BaseCombatant in get_all_units():
++			if other.is_hero():
++				_hero_uid = other.unit_uid
++				break
++
++func get_unit(unit_uid: String) -> BaseCombatant:
++	var value: Variant = _uid_to_unit.get(unit_uid, null)
++	if value != null and is_instance_valid(value):
++		return value
++	return null
++
++## The hero unit (Global.get_player() delegates here). Null outside a loaded run screen.
++func get_hero() -> BaseCombatant:
++	if _hero_uid == "":
++		return null
++	return get_unit(_hero_uid)
++
++## All registered units in scene-tree order.
++func get_all_units() -> Array[BaseCombatant]:
++	var units: Array[BaseCombatant] = []
++	for value: Variant in _uid_to_unit.values():
++		if is_instance_valid(value) and (value as BaseCombatant).is_inside_tree():
++			units.append(value)
++	units.sort_custom(_is_before_in_tree)
++	return units
++
++## Registered units of a faction (BaseCombatant.FACTIONS) in scene-tree order.
++func get_units_by_faction(faction: int, alive_only: bool = false) -> Array[BaseCombatant]:
++	var units: Array[BaseCombatant] = []
++	for unit: BaseCombatant in get_all_units():
++		if unit.faction != faction:
++			continue
++		if alive_only and not unit.is_alive():
++			continue
++		units.append(unit)
++	return units
++
++func _generate_uid() -> String:
++	_next_uid_index += 1
++	return "unit_%d" % _next_uid_index
++
++func _is_before_in_tree(a: BaseCombatant, b: BaseCombatant) -> bool:
++	return b.is_greater_than(a)
+diff --git a/scripts/combat/UnitRegistry.gd.uid b/scripts/combat/UnitRegistry.gd.uid
+new file mode 100644
+index 0000000..c04ba0c
+--- /dev/null
++++ b/scripts/combat/UnitRegistry.gd.uid
+@@ -0,0 +1 @@
++uid://dad38tbdptvhe
+diff --git a/scripts/combatants/BaseCombatant.gd b/scripts/combatants/BaseCombatant.gd
+index 2ac4dd0..e4dbf91 100644
+--- a/scripts/combatants/BaseCombatant.gd
++++ b/scripts/combatants/BaseCombatant.gd
+@@ -25,11 +25,46 @@ var custom_ui_object_id_to_custom_ui: Dictionary = {} # maps a custom ui id to t
+ 
+ const BLOCK_TEXTURE: Texture = preload("res://icon.svg")
+ 
++#region Unit identity (combat framework)
++## Side a unit fights for. PARTY = the player's side, ENEMY = opponents, NEUTRAL = neither.
++enum FACTIONS {PARTY, ENEMY, NEUTRAL}
++## Speed every unit has unless data or interceptors change it (equal speeds = original turn order).
++const DEFAULT_SPEED: int = 10
++const BOARD_ANCHOR_NONE: Vector2i = Vector2i(-1, -1)
++
++## Unique id within the process, assigned by UnitRegistry on _ready. Not saved.
++var unit_uid: String = ""
++var faction: int = FACTIONS.NEUTRAL
++## Top-left board cell of the unit; BOARD_ANCHOR_NONE while not placed on a board.
++var board_anchor: Vector2i = BOARD_ANCHOR_NONE
++## Board cells covered by the unit.
++var footprint: Vector2i = Vector2i(1, 1)
++## Unmodified speed (from data); read the effective value through speed / get_speed().
++var base_speed: int = DEFAULT_SPEED
++## Effective speed. Read-only; subclasses override get_speed() to apply modifiers.
++var speed: int:
++	get:
++		return get_speed()
++var move_range: int = 1
++var next_action_tick: int = 0
++var last_action_tick: int = 0
++## Number of own actions started this combat (unit_action_started with unit == self).
++var action_count: int = 0
++## Decides the unit's actions. Typed as RefCounted until BaseUnitController exists; null = legacy flow.
++var controller: RefCounted = null
++#endregion
++
+ func _ready():
++	faction = _get_default_faction()
++	UnitRegistry.register_unit(self)
++	tree_exiting.connect(_on_unit_tree_exiting)
++	
+ 	Signals.combat_started.connect(_on_combat_started)
+ 	Signals.combat_ended.connect(_on_combat_ended)
+ 	Signals.player_turn_started.connect(_on_player_turn_started)
+ 	Signals.player_turn_ended.connect(_on_player_turn_ended)
++	Signals.unit_action_started.connect(_on_unit_action_started)
++	Signals.unit_action_ended.connect(_on_unit_action_ended)
+ 	
+ 	animated_sprite_2d.animation_finished.connect(_on_animation_finished)
+ 	
+@@ -38,6 +73,40 @@ func _ready():
+ func _on_selection_button_up():
+ 	breakpoint
+ 
++#region Unit identity (combat framework)
++## Override. Faction assigned on _ready.
++func _get_default_faction() -> int:
++	return FACTIONS.NEUTRAL
++
++## Override. Whether this unit represents the run's main character (see UnitRegistry.get_hero()).
++func is_hero() -> bool:
++	return false
++
++## Override to apply speed modifiers (e.g. status effects in later phases).
++func get_speed() -> int:
++	return base_speed
++
++func _on_unit_tree_exiting() -> void:
++	UnitRegistry.unregister_unit(self)
++
++func _on_unit_action_started(unit: BaseCombatant) -> void:
++	if unit == self:
++		action_count += 1
++		_on_own_action_started()
++
++func _on_unit_action_ended(unit: BaseCombatant) -> void:
++	if unit == self:
++		_on_own_action_ended()
++
++## Override. Called when this unit's own action starts (after draw, before input).
++func _on_own_action_started() -> void:
++	pass
++
++## Override. Called when this unit's own action ends (after discard).
++func _on_own_action_ended() -> void:
++	pass
++#endregion
++
+ #region Animations
+ 
+ ## Keep.
+@@ -403,6 +472,12 @@ func _on_combat_started(_event_id: String):
+ func _on_combat_ended():
+ 	pass
+ 
++## Resets per-combat timeline counters. Called by subclasses' combat start handling.
++func reset_unit_combat_state() -> void:
++	next_action_tick = 0
++	last_action_tick = 0
++	action_count = 0
++
+ func _on_player_turn_started():
+ 	pass
+ 
+diff --git a/scripts/combatants/Enemy.gd b/scripts/combatants/Enemy.gd
+index e5c5016..4131a4a 100644
+--- a/scripts/combatants/Enemy.gd
++++ b/scripts/combatants/Enemy.gd
+@@ -49,6 +49,9 @@ func init(_enemy_data: EnemyData):
+ 	# update_health_bar()
+ 	layered_health_bar.init(enemy_data.enemy_health, enemy_data.enemy_health_max)
+ 	
++func _get_default_faction() -> int:
++	return FACTIONS.ENEMY
++
+ func get_animation_data() -> AnimationData:
+ 	var animation_data: AnimationData = Global.get_animation_data(enemy_data.enemy_animation_id)
+ 	return animation_data
+diff --git a/scripts/combatants/Player.gd b/scripts/combatants/Player.gd
+index 09979fb..d840501 100644
+--- a/scripts/combatants/Player.gd
++++ b/scripts/combatants/Player.gd
+@@ -45,6 +45,12 @@ func reset_player() -> void:
+ 	if location_data.location_type == LocationData.LOCATION_TYPES.STARTING:
+ 		animation_player.play("Player/run_start")
+ 
++func _get_default_faction() -> int:
++	return FACTIONS.PARTY
++
++func is_hero() -> bool:
++	return true
++
+ func get_animation_data() -> AnimationData:
+ 	var character_data: CharacterData = Global.get_player_character_data()
+ 	var animation_data: AnimationData = Global.get_animation_data(character_data.character_animation_id)
+@@ -208,6 +214,7 @@ func _on_run_ended():
+ 
+ func _on_combat_started(_event_id: String):
+ 	clear_all_status_effects()
++	reset_unit_combat_state()
+ 	
+ func _on_combat_ended():
+ 	clear_all_status_effects()
+diff --git a/scripts/ui/Combat.gd b/scripts/ui/Combat.gd
+index 1f958b3..9440f43 100644
+--- a/scripts/ui/Combat.gd
++++ b/scripts/ui/Combat.gd
+@@ -450,6 +450,9 @@ func _on_player_turn_started():
+ 	if _end_combat_check():
+ 		return
+ 	
++	# hero's action has started (combat framework signal, emitted alongside player_turn_started)
++	Signals.unit_action_started.emit(player)
++	
+ 	# unlock and update hand
+ 	HandManager.set_disable_hand(false)
+ 	hand.update_hand_card_display()
+@@ -478,6 +481,9 @@ func _on_player_turn_ended():
+ 		await ActionHandler.actions_ended
+ 	if _end_combat_check():
+ 		return
++	
++	# hero's action has ended (combat framework signal, emitted alongside player_turn_ended)
++	Signals.unit_action_ended.emit(player)
+ 
+ func _on_player_start_turn_animation_finished():
+ 	# called from animation player

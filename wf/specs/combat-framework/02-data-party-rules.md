@@ -40,7 +40,8 @@ PartyMemberData extends PrototypeData（新；SCHEMA 不登記為讀取資料夾
 ### 3.1.2 戰鬥規則（單一物件，內容包 patch）
 
 ```
-CombatRulesData extends SerializableData（SCHEMA: "combat_rules/"；框架在測試資料註冊 object_id "combat_rules_default"）
+CombatRulesData extends SerializableData（SCHEMA: "combat_rules/"；框架在測試資料註冊 object_id "combat_rules_default"；
+  修訂 2026-10-19：pack 側寫不跑測試資料，Global.get_combat_rules() 無此 id 時退回內建預設物件）
   timeline_delay_scale: int = 100        # wait = action_delay * scale / speed
   default_action_delay: int = 100
   wait_action_delay: int = 50            # 空等

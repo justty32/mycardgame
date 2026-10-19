@@ -32,6 +32,8 @@
 
 [RunScreen.gd](../../../game/scripts/ui/menus/RunScreen.gd) 監聽 `run_started`／`run_ended` 切換可見性；[Combat.gd](../../../game/scripts/ui/Combat.gd) 的 `_ready()` 接線 UI，`_on_map_location_selected()` 決定戰鬥、寶箱或商店，並更新背景／音樂。[Map.gd](../../../game/scripts/ui/Map.gd) 選點後呼叫 ActionGenerator 的 `generate_visition_location()`（名稱保留上游拼法）。
 
+戰鬥框架 Phase 0（本地補丁，見 [spec](../../../wf/specs/combat-framework/README.md)）加了 `UnitRegistry` autoload。`Global.get_player()` 取它登記的主角，`get_alive_enemies()` 取 ENEMY 陣營並依場景樹順序排列，所以結果仍和原本的群組查詢相同。開局能量與抽牌數改讀 `CombatRulesData`，預設值即原行為。舊回合流程只對主角發 `unit_action_started/ended`。
+
 戰鬥規則與 UI 有直接耦合：[BaseCombatant.gd](../../../game/scripts/combatants/BaseCombatant.gd) 繼承 Control，包含狀態、動畫與生命介面；[Enemy.gd](../../../game/scripts/combatants/Enemy.gd) 同時負責傷害、intent 推進及顯示。[HandManager.gd](../../../game/autoload/HandManager.gd) 的 `_play_card()` 會存取 `hand.player`、呼叫手牌 tween。新增無畫面模擬器不能只 new 一個 PlayerData 就假設整套戰鬥可執行。
 
 ## 出牌與 action 路徑

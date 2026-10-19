@@ -44,6 +44,8 @@ pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容
 - 素材（sprites／audio）：路徑留空或指向包內檔案；缺圖的行為未驗。
 - 驗證：probe 逐項斷言這些 id 已註冊（比照題材 probe 的「own color registered」類斷言）。
 
+戰鬥規則（`CombatRulesData`，`combat_rules/`，表 `_id_to_combat_rules_data`）為選填。沒有時 `Global.get_combat_rules()` 退回內建預設，即原行為。要改節奏，就提供框架 id `combat_rules_default`（列入 `allowed_unprefixed_ids`），只寫要改的欄位：test 側寫會 patch 既有物件，pack 側寫以類別預設新建，兩種結果相同。目前只有 `draw_per_action`、`energy_per_action`、`energy_cap` 有消費端，見 [戰鬥框架 spec](../../../specs/combat-framework/README.md)。
+
 ## 編輯器載入（本機）
 
 `python3 tools/link_pack.py games/<game>/pack` 建 `game/external/mods/<name>` 相對 symlink（Windows 先試 symlink、再退 `mklink /J` junction，**Windows 路徑未實測**）；該路徑由 .gitignore 的 `/game/external/mods/*`（只放行 example_mod）蓋住，link 後 `git status` 不變。要在編輯器實際載入再加 `--enable`：在追蹤中的 `mod_list.json` 插一行，`git status` 會顯示已修改，**不得 commit**；`--unlink` 移除 link 並逐位元組還原該行。runner 複製時略過 link，並從隔離副本的 mod_list 拿掉被 link 的 mod，框架 Smoke 不受本機 `--enable` 影響；要測該包一律用 `--pack`。拒絕取代或刪除真實 mod 資料夾。
