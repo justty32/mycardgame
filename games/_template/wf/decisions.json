@@ -1,0 +1,12 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "",
+ "columns": [
+  "date",
+  "decision",
+  "rejected_and_why",
+  "premise"
+ ],
+ "rows": []
+}

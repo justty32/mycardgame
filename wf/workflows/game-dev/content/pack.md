@@ -14,6 +14,10 @@
 - 資料 JSON 的 object_id 帶該題材前綴；刻意 patch 框架 id 時在題材樹登記例外（boundary lint 檢查）。
 - probe：`games/<game>/tests/<name>_probe.gd`，`extends RefCounted`，定義 `check_loaded(global_data: Node) -> Dictionary`，回傳 `{斷言標籤: bool}`。標籤以題材前綴開頭，Smoke 逐項印 `PASS:`／`FAIL:`，完成後印 `PACK PROBE DONE: <檔名>`。同目錄其他 `.gd` 只複製、不呼叫，probe 以自身路徑相鄰載入。
 
+## 開新題材樹
+
+`python3 tools/new_pack.py <name> --prefix <pfx>` 從範本樹複製骨架（AGENTS／NOTICE／design／wf 詞表與 boundary.json／含一個自備顏色的 pack／probe），並把名稱與前綴加進新樹的詞表；已存在的目標、範本自身名稱與已被占用的前綴會被拒絕。合成測試 `python3 -I tests/test_new_pack.py`。
+
 ## runner 做什麼
 
 - `--pack DIR`（可重複）：在每個 suite 的隔離副本複製到 `external/mods/<name>/`（略過 symlink），改寫**副本**的 `mod_list.json`（enabled、`load_priority` 從 10 起依序），manifest 的 `packs` 記每檔 SHA-256。來源 `game/` 與 `game/external/mod_list.json` 不動；安裝名與既有 mod 資料夾衝突即失敗。

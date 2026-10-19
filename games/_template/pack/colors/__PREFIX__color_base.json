@@ -1,0 +1,9 @@
+{
+	"patch_data": {},
+	"properties": {
+		"color": "#c8c8c8ff",
+		"color_energy_icon_texture_path": "",
+		"color_name": "Base",
+		"object_id": "__PREFIX__color_base"
+	}
+}

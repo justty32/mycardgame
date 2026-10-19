@@ -1,0 +1,5 @@
+{
+  "pack_dir": "pack",
+  "pack_prefix": "__PREFIX__",
+  "allowed_unprefixed_ids": []
+}

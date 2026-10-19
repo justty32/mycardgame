@@ -1,0 +1,35 @@
+{
+	"patch_data": {},
+	"properties": {
+		"mod_author": "",
+		"mod_dependency_mod_ids": [],
+		"mod_description": "__NAME__ content pack skeleton: one base color.",
+		"mod_folder_to_load_data": {
+			"external/mods/__NAME__/colors/": {
+				"class_name": "ColorData",
+				"table_name": "_id_to_color_data"
+			},
+			"external/mods/__NAME__/cards/": {
+				"class_name": "CardData",
+				"table_name": "_id_to_card_data"
+			},
+			"external/mods/__NAME__/characters/": {
+				"class_name": "CharacterData",
+				"table_name": "_id_to_character_data"
+			}
+		},
+		"mod_game_version": {
+			"major": 0,
+			"minor": 0,
+			"patch": 0
+		},
+		"mod_name": "__NAME__",
+		"mod_version": {
+			"major": 0,
+			"minor": 0,
+			"patch": 1
+		},
+		"mod_script_file_paths": {},
+		"object_id": "mod_data___NAME__"
+	}
+}
