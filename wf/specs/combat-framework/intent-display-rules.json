@@ -1,0 +1,27 @@
+{
+ "contract": "wf-table/1",
+ "source": "05-intent-and-ai.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "no",
+  "text"
+ ],
+ "rows": [
+  {
+   "no": "1",
+   "text": "決定時點：敵人**行動結束、進入等待**時依 `enemy_intent_next_intent_weights` 抽下一個意圖，並依 `enemy_intent_target_rule` 預選目標單位（記 `intended_target_uid`）；每次 `unit_moved`／`unit_downed`／`timeline_changed` 後由 `ThreatPreview.refresh()` 重新解析（目標可能已移出射程 → 顯示「無法命中」灰色圖示；實際行動時再以 `enemy_intent_move` 補位）。"
+  },
+  {
+   "no": "2",
+   "text": "顯示三處：敵人頭上意圖圖示（沿用 `Enemy.gd:4-22`）+ 數值（沿用攔截預覽 `Enemy.gd:189-221`，目標改 `intended_target`）；時間軸條目上的小圖示；滑鼠懸停敵人或其時間軸條目時，`BoardView` 高亮 `cells_in_shape(enemy.anchor, intended_target.anchor, shape, pierce)`。"
+  },
+  {
+   "no": "3",
+   "text": "我方每個單位頭上顯示「下一次自己行動前預計受傷」：`ThreatPreview` 把所有 `next_action_tick < unit.next_action_tick` 的敵人意圖累加到其命中的單位（取代 `Player.gd:138-160`）。"
+  },
+  {
+   "no": "4",
+   "text": "所有解析皆為純函式（`BoardData` + 意圖資料 → 格與單位），同一函式供 AI 評分使用，避免 UI 與 AI 看到不同事實。"
+  }
+ ]
+}

@@ -1,0 +1,87 @@
+{
+ "contract": "wf-table/1",
+ "source": "08-phases.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "phase",
+  "title",
+  "playable",
+  "changes",
+  "size",
+  "risk",
+  "done_when",
+  "agent"
+ ],
+ "rows": [
+  {
+   "phase": "0",
+   "title": "基礎重構——combatant 抽象化、單位註冊表、規則物件",
+   "playable": "與現在完全相同",
+   "changes": "`BaseCombatant.gd`（+unit_uid/faction/footprint/speed/move_range/anchor/controller 欄位與 `_on_own_action_*` hook）；新 `game/scripts/combat/UnitRegistry.gd`（autoload 或 CombatDirector 子物件：uid→節點、依陣營查詢、`get_hero()`）；`Global.gd:354-365` 改委派 Registry（`get_player()` = hero）；新 `CombatRulesData.gd` + SCHEMA 列 + `GlobalTestDataGenerator` 註冊 `combat_rules_default`（預設＝現行值）；`ActionGenerator.gd:45-70` 的抽牌數／能量改讀 rules；`Signals.gd` 新增 §3.4 訊號（先只宣告 + 在舊流程中於對應時點**同時**發出 `unit_action_started/ended(hero)`）；`FileLoader._generate_base_mod_data()` 重跑更新 `external/data/mod_info.json`",
+   "size": "~500 行；10 檔",
+   "risk": "低；SCHEMA 新類別要確認 `SerializableData.build_serializable_script_cache()` 掃得到（`Global.gd:168`）",
+   "done_when": "V1–V3 全綠、`--suite All` 綠；新 `tests/unit_registry_probe.gd` 由 Smoke 呼叫：hero 註冊、faction 正確、`combat_rules_default` 可讀、`unit_action_started` 在舊回合開始時發出一次",
+   "agent": "普通（opus）"
+  },
+  {
+   "phase": "1",
+   "title": "CTB + 單一主角",
+   "playable": "一名主角 vs 多敵，依速度排隊",
+   "changes": "新 `CombatDirector.gd`、`CombatTimeline.gd`（優先佇列 + 投影）、`PlayerInputController.gd`；`Combat.gd` 刪回合流程（`360-574`）、改 HUD；`CombatEndTurn` → `CombatEndAction`；`ActionEndTurn` 發新訊號；`Enemy.gd:243` 改為進入等待時決定意圖；`EnemyData` + `enemy_speed`；`CharacterData` + `character_speed`；`CardData` + `card_action_delay`；`StatusEffectData` 尾端新增枚舉與 `status_effect_tick_interval`，`BaseCombatant.perform_status_effect_process_actions` 支援 `EVERY_N_TICKS`；`StatsHandler` 的 turn_count／is_player_turn 新語意 + `combat_tick`；`BaseArtifact`、`ArtifactEasyMode`、`ArtifactRetainHand`、`CardDecoratorDynamicValueModifier` 改連 `unit_action_*`；`TurnOverlay`；新 UI `TimelineBar.tscn/gd`（Root.tscn 加節點）；`ActionHandler.gd:93-96`／`HandManager.gd:366` 改問 Director",
+   "size": "~900 行新增、~400 行刪除；18 檔 + Root.tscn",
+   "risk": "中高：AnimationPlayer 驅動的 `start_turn/end_turn` 動畫（`Combat.gd:482-574`）要改成 Director 播放再 await；`combat_flow.gd` 訊號計數需改；資源生命週期（Director 的 await 在 combat_ended／run_ended 後要能取消，沿 `ActionHandler._action_generation` 的世代做法）",
+   "done_when": "新 `tests/ctb_flow.gd`（suite `Ctb`）：fixture 兩個敵人速度 20 與 5、主角 10，斷言前 8 筆行動順序與刻數、`combat_tick_advanced` 遞增、`EVERY_N_TICKS` 狀態觸發次數、格擋在行動開始清空、`turn_count` = 主角行動數；`combat_flow.gd` 改用新訊號後仍驗 14 傷害消 10 格擋等數值；`--suite All` 綠；`ResourceLifecycle` 綠（Director 退出無 leak）",
+   "agent": "需思考（fable）寫 Director/Timeline 與訊號遷移；雜活（sonnet）改 artifacts/decorator/TurnOverlay 等機械替換"
+  },
+  {
+   "phase": "2",
+   "title": "棋盤 + 移動 + 範圍／形狀卡",
+   "playable": "主角在 5×5 移動並用射程卡",
+   "changes": "新 `BoardData.gd`、`BoardTargeting.gd`（shape 純函式）、`BoardView.tscn/gd`、`BoardCell.tscn/gd`、`ThreatPreview.gd`、`ActionMoveUnit.gd`（Scripts 常數）；`EncounterData.gd` + `EncounterWaveData.gd`（本階段只用第 0 波）+ SCHEMA；`EventData` + `event_encounter_object_id` 與合成器；`EnemyContainer` 改為 `UnitLayer`（生成改走 Director）；`EnemyData` + footprint/move/ignores_occupancy；`EnemyIntentData` + range/shape/target_rule/move；`CardData` + range/shape/faction/move_distance；`CardPlayRequest` + acting_unit/selected_cell/resolved_targets；`Hand.gd:255-271` 改以 `cell_clicked` 選目標、`TargetPreview`；`HandManager._play_card` 以 resolved_targets 建動作；`BaseAction.TARGET_OVERRIDES` 新值；`Enemy.update_enemy_intent` 用 intended_target；`Player.update_incoming_damage_amount` 改 ThreatPreview；`ActionSummonEnemies` 改成「指定格或最近空格」",
+   "size": "~1200 行；20 檔 + Root.tscn",
+   "risk": "高：目標選擇 UI 流程改動最大；大型單位佔格與距離定義要先固定；`example_mod` 的卡沒有 range（-1 = 不檢查）必須仍可玩",
+   "done_when": "新 `tests/board_flow.gd`（suite `Board`）：7×5 遭遇、主角移動 1 格後距離正確、`card_range=1` 對距離 2 的目標被拒、CROSS 形狀命中 3 單位、LINE_PIERCE 穿透、2×2 敵人佔 4 格且任一格都可選、敵人 APPROACH 後命中、`ThreatPreview` 數值等於實際受傷；`Smoke` 驗 legacy 事件（無 encounter id）自動合成；`--suite All` 綠",
+   "agent": "需思考（fable）：BoardTargeting／意圖解析／Hand 目標流程；普通（opus）：BoardView/BoardCell UI；雜活：資料欄位與 SCHEMA"
+  },
+  {
+   "phase": "3",
+   "title": "波次",
+   "playable": "一場遭遇兩波",
+   "changes": "`CombatDirector._check_wave()`、`wave_started/cleared`、登場延遲與錯開插入時間軸、`wave_on_*_actions`；`is_combat_over` 改看最後一波；`WaveLabel` UI；`Global.are_remaining_enemies()` 委派",
+   "size": "~300 行；5 檔",
+   "risk": "低；注意波間 `ActionHandler` short-circuit 與 `HandManager._perform_card_plays` 的「無敵人即清佇列」（`HandManager.gd:366`）",
+   "done_when": "新 `tests/wave_flow.gd`（suite `Wave`）：第 1 波清空後 `wave_cleared(0)`、第 2 波單位在指定刻進場、波間打出的格擋牌不被短路、第 2 波清空才 `combat_ended`；獎勵按波數累計可由 `wave_on_cleared_actions` 加錢驗證",
+   "agent": "普通（opus）"
+  },
+  {
+   "phase": "4",
+   "title": "多主角資料模型 + AI 隊員戰鬥行動",
+   "playable": "主角 + 2 名 AI 隊員",
+   "changes": "`PartyMemberData.gd`（新）、`PlayerData` 改造 + proxy（§4.4）、`Global.start_run` 建隊伍、`CharacterData` 新欄位、`PartyUnit.tscn/gd`（由 `Player.tscn` 衍生，綁 member）、`Player.gd` 改為讀 member（傷害／格擋／血條／攔截器註冊：run modifiers 全員、遺物依 `artifact_trigger_scope`）、`HandManager.unit_piles` + proxy、`Hand` 綁行動單位、`AiProfileData.gd` + SCHEMA、`BaseUnitController`／`GreedyAiController`／`AiContext`／`AiPlan`、`CardData.card_ai_hints`、`BaseAction.get_action_value` 的 values 層改查行動單位 member_values、倒下流程（`unit_downed`、`downed_member_policy`）、`ActiveUnitPanel` UI、`StatsHandler` 的 players 群組統計改以 faction 判斷（`StatsHandler.gd:457-477`）",
+   "size": "~1300 行；25 檔",
+   "risk": "高：proxy 期間雙真相；`register_artifact_interceptors` 掛錯單位會讓遺物對隊員失效或重複觸發；AI 用 preview 攔截估值時攔截器必須尊重 `preview_mode`（既有慣例，`BaseAction.gd:221-224`）",
+   "done_when": "新 `tests/party_flow.gd`（suite `Party`）：fixture 隊伍 3 人（主角 PLAYER、兩名 AI 用框架測試 `ai_profile_test_aggressive`／`_defensive`），斷言各自牌堆獨立（主角出牌不影響隊員手牌）、各自能量、AI 隊員在自己的行動中發出 `ai_plan_decided` 且至少打出一張牌、攻擊型靠近敵人、防禦型對 HP<50% 主角出格擋、一名隊員倒下後主角仍可行動且戰後依 policy 回 1 HP；新 `tests/party_data_regression.gd`：主角 proxy 讀寫 == `player_party[0]`；`--suite All` 綠",
+   "agent": "需思考（fable）：資料模型/ proxy / AI 規劃器；普通（opus）：PartyUnit 與 UI；雜活：欄位、測試資料"
+  },
+  {
+   "phase": "5",
+   "title": "招募／培養／AI 選牌獎與購卡／升階",
+   "playable": "局中招募、戰後各自選牌",
+   "changes": "`ActionRecruitPartyMember`、`ActionDismissPartyMember`、`ActionSetActiveMembers`、`ActionAddCardToMemberDeck`、`ActionAdvanceMember`（+ `CharacterTierData`）；`Random.get_location_card_rewards` 每成員；`RewardOverlay`／`CardDraftSelectionOverlay` 顯示成員；`AiDraftScorer`、`AiShopper`；`ShopOverlay._on_continue_button_up` 觸發 AI 購買；`RestActionData.rest_action_targets_member` + `RestOverlay` 選成員；`PlayerData.add_card_to_deck` 系列搬 member；`ValidatorDeckHas*`（`validators/deck/`）改讀指定成員牌組",
+   "size": "~900 行；18 檔",
+   "risk": "中：獎勵與商店流程有多個 overlay 與 `map_location_selected` 清理耦合（`RewardOverlay.gd:186-235`）",
+   "done_when": "新 `tests/recruit_flow.gd`（suite `Recruit`）：事件選項招募 → `party_member_recruited`、名冊 2 人、超過上限被拒；戰後兩組牌獎各加入正確牌組；AI 成員預算 30% 時商店購買一張且金錢扣對；升階動作加卡並改 `member_tier_id`；`--suite All` 綠",
+   "agent": "普通（opus）；AiDraftScorer 雜活"
+  },
+  {
+   "phase": "6",
+   "title": "存檔版本拒絕與收尾",
+   "playable": "舊存檔被拒絕並提示；proxy 清除",
+   "changes": "`FileLoader.load_game` 接版本檢查與拒絕提示、`PlayerData.player_save_version`（不做遷移、不寫 `SaveMigration`；使用者 2026-10-19 決定）；刪 `PlayerData`／`HandManager` proxy 並改完剩餘引用（rg `player_data.player_energy|player_health|player_block|player_deck|HandManager.player_hand`）；`Signals` 舊訊號加一次性 warning；code-map／analysis 架構文件／`game-dev/mechanics.md` 同步；`analysis/slay-the-robot/architecture/02_extension_points.md` 補新 SCHEMA 類別與訊號",
+   "size": "~300 行 + 文件",
+   "risk": "低：舊格式 fixture 要用真實 v1 存檔（從現行 `save_load_flow.gd` write 階段產生並固化進 tests，只用來驗證被拒絕）；Phase 4–5 期間開發用存檔不保證相容",
+   "done_when": "`save_load_flow.gd` 新階段 `reject_legacy`：載入 v1 fixture → 被拒絕並顯示提示、不改動目前狀態、進 rejected 清單；`invalid_version` 同樣進 rejected 清單；v2 存檔存讀正常；`rg` 證明 proxy 引用為 0；V1–V3、`--suite All`、所有新 suite 綠；code-map 更新",
+   "agent": "普通（opus）；文件雜活"
+  }
+ ]
+}

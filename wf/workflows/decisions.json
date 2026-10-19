@@ -74,6 +74,42 @@
    "decision": "加內容側寫開關：--content-profile=test|pack（或專案設定 game/content_profile），pack 時不呼叫 GlobalTestDataGenerator；預設 test，框架測試不變",
    "rejected_and_why": "不直接移除或改寫範例資料生成：框架回歸全靠它；不讓題材包永遠疊在範例內容上：題材會在不知不覺中依賴 MIT 範例 id，無法驗證自備內容是否完整；不另做 prod 側寫：GlobalProdDataGenerator 上游已停用",
    "premise": "框架範例內容改成資料檔或題材全部自備基礎資料後，可改成預設 pack 或移除開關"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "遺物觸發歸屬：每件遺物在資料指定觸發範圍（主角／持有者／全隊），未指定時歸主角（使用者決定）",
+   "rejected_and_why": "不預設每名隊員都觸發：遺物效果重複、數值膨脹；不做指派持有者 UI：第一版成本高，資料欄位已能表達",
+   "premise": "出現必須全隊觸發的遺物或玩家要自選持有者時，改評估預設值與 UI"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "隊員倒下＝本場退場、戰後以 1 HP 回歸；主角倒下＝敗北（使用者決定）",
+   "rejected_and_why": "不採永久死亡或離隊為框架預設：培養投入大、損耗過重；兩者保留為資料選項供題材包 patch",
+   "premise": "題材需要硬派難度或隊員損耗機制時，由題材包改規則物件，不改框架預設"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "舊格式存檔不支援：拒絕載入並提示，不做舊版到隊伍制的遷移（使用者決定）",
+   "rejected_and_why": "不寫存檔遷移：要長期維護遷移碼與真實舊存檔 fixture，且存檔格式仍在開發期",
+   "premise": "存檔格式穩定、且有需要保留的長期存檔時，再評估遷移"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "戰術指令（對 AI 隊員集火／護衛）介面第一版不做，AI 上下文的指令欄恆為空，戰鬥框架 Phase 5 之後再加（使用者決定）",
+   "rejected_and_why": "不在第一版做：要多一套 UI 與指令語意，AI 先以傾向參數可讀、可測為優先",
+   "premise": "AI 隊員行為在實戰中難以掌控、玩家抱怨無法介入時"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "戰前部署先用遭遇資料的預設格，不做部署 UI（使用者決定）",
+   "rejected_and_why": "不做擺位 UI 與開始戰鬥按鈕：不影響核心閉環，可後補",
+   "premise": "預設格讓站位決策過於單調，或遭遇需要玩家自選站位時"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "框架級 spec／plan 放 wf/specs/、wf/plans/，題材級放 games/<game>/design/（使用者決定）",
+   "rejected_and_why": "不放題材樹：框架能力與題材無關，會讓題材樹含框架設計；不放 wf/workflows/game-dev/：workflows 有 8 KB 單檔上限，且 spec 不是操作流程",
+   "premise": "框架級 spec 數量多到需要再分類，或流程文檔與 spec 的界線改變時"
   }
  ]
 }

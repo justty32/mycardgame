@@ -19,15 +19,16 @@
 |------|-----------|------|
 | **idea** | 要不要做？ | 下方「想法」表 |
 | **roadmap** | 會做，何時？ | 下方「roadmap」表 |
-| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放該題材樹的 `games/<game>/design/specs/`、`games/<game>/design/plans/`（見下節）。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
+| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放該題材樹的 `games/<game>/design/specs/`、`games/<game>/design/plans/`；框架級放 `wf/specs/`、`wf/plans/`（見下節）。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
 | **執行** | — | 開發：feature-dev；非開發：未導入 |
 
 ## 任務規格與 plan 落點
 
-每款遊戲唯一落點（`<game>` 由派工指定），各工作流 Done when 的「任務 spec／plan」都指這裡：
+題材級每款遊戲一個落點（`<game>` 由派工指定），框架級（題材中立的框架能力）另有 `wf/specs/`、`wf/plans/`（使用者 2026-10-19 核准）。各工作流 Done when 的「任務 spec／plan」都指這裡：
 
 - spec（方案、取捨、設計 brief）：`games/<game>/design/specs/YYYY-MM-DD-<slug>.md`。
 - plan（步驟、驗證、實際驗收記錄）：`games/<game>/design/plans/YYYY-MM-DD-<slug>.md`，與 spec 同名。
+- 框架級 spec：`wf/specs/<topic>/README.md` 為入口，依 lint 大小拆成多檔（大表走資料檔）；plan：`wf/plans/<topic>/`，按階段一檔記錄實際驗收。框架 spec 不放 `games/`，題材樹只放需求與驗收一頁連回框架 spec。
 - 小改不開 spec／plan：任務記錄寫在 commit 訊息與交付回報。
 - 目錄在第一份出現時建立；動工完成移 `games/<game>/design/archive/`。題材樹導航由根 AGENTS.md 路由。
 

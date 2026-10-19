@@ -1,0 +1,85 @@
+{
+ "contract": "wf-table/1",
+ "source": "10-pack-requirements.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "資料夾（SCHEMA）",
+  "類別",
+  "必填",
+  "選填"
+ ],
+ "rows": [
+  {
+   "資料夾（SCHEMA）": "`combat_rules/`",
+   "類別": "`CombatRulesData`",
+   "必填": "patch `combat_rules_default`：能量節奏（`energy_per_action`/`energy_cap`）、`draw_per_action`、`hand_limit`、`discard_hand_on_action_end`、`default_action_delay`、`wait_action_delay`、`party_size_max`、`deploy_size_max`、`default_board_size`",
+   "選填": "`free_move_per_action`、`extra_move_delay_per_cell`、`downed_member_policy`、`tie_break`、`distance_metric`"
+  },
+  {
+   "資料夾（SCHEMA）": "`characters/`",
+   "類別": "`CharacterData`",
+   "必填": "名稱／描述／顏色／動畫、起始牌組 id、起始 HP／金錢、`character_speed`、`character_move_range`、牌池 pack id、`character_default_control_mode`、`character_default_ai_profile_id`",
+   "選填": "`character_recruit_validators`、`character_tiers`（階位 id、分支、需求 validators、升階動作、AI 分支權重）、起始遺物"
+  },
+  {
+   "資料夾（SCHEMA）": "`cards/`",
+   "類別": "`CardData`",
+   "必填": "現有欄位 + `card_range`、`card_shape`、`card_target_faction`",
+   "選填": "`card_move_distance`、`card_action_delay`（快／重牌）、`card_ai_hints`（role、value_key、danger；沒有則 AI 以 0 分對待）"
+  },
+  {
+   "資料夾（SCHEMA）": "`enemies/`",
+   "類別": "`EnemyData`",
+   "必填": "現有欄位 + `enemy_speed`、`enemy_move_range`、`enemy_footprint`；每個意圖的 `enemy_intent_range`、`enemy_intent_shape`、`enemy_intent_target_rule`",
+   "選填": "`enemy_intent_move`、`enemy_intent_action_delay`、`enemy_ignores_occupancy`、`enemy_is_minion`（召喚物）"
+  },
+  {
+   "資料夾（SCHEMA）": "`encounters/`",
+   "類別": "`EncounterData`",
+   "必填": "`encounter_board_size`、`encounter_waves`（每波：單位加權清單＋進場格＋登場延遲）",
+   "選填": "`encounter_deploy_cells`、`wave_stagger_ticks`、`wave_on_start/cleared_actions`、格貼圖／背景"
+  },
+  {
+   "資料夾（SCHEMA）": "`events/`",
+   "類別": "`EventData`",
+   "必填": "`event_encounter_object_id` 指向遭遇（否則退回舊的加權清單）",
+   "選填": "招募事件：對話選項帶 `ActionRecruitPartyMember`"
+  },
+  {
+   "資料夾（SCHEMA）": "`ai_profiles/`",
+   "類別": "`AiProfileData`",
+   "必填": "`ai_weights`（至少 damage/block/heal）、`ai_draft_weights`",
+   "選填": "`ai_thresholds`、`ai_target_bias`、`ai_position_weights`"
+  },
+  {
+   "資料夾（SCHEMA）": "`status_effects/`",
+   "類別": "`StatusEffectData`",
+   "必填": "以 `UNIT_ACTION_START/END` 或 `EVERY_N_TICKS`（`status_effect_tick_interval`）定義持續語意",
+   "選填": "速度修飾類狀態用攔截器改 `speed`／`action_delay`"
+  },
+  {
+   "資料夾（SCHEMA）": "`artifacts/`",
+   "類別": "`ArtifactData`",
+   "必填": "現有欄位",
+   "選填": "`artifact_trigger_scope`（主角／持有者／全隊）"
+  },
+  {
+   "資料夾（SCHEMA）": "`rest_actions/`、`dialogue/`、`consumables/`",
+   "類別": "既有",
+   "必填": "升階／指導／招募入口用既有 Action 串接",
+   "選填": "`rest_action_targets_member`"
+  },
+  {
+   "資料夾（SCHEMA）": "素材",
+   "類別": "—",
+   "必填": "時間軸頭像（角色與敵人 icon 已有欄位）、棋盤格貼圖、意圖圖示（沿用五類）",
+   "選填": "形狀預覽配色（`ColorData`）"
+  },
+  {
+   "資料夾（SCHEMA）": "題材測試",
+   "類別": "`games/<game>/tests/*_probe.gd`",
+   "必填": "驗自家遭遇／角色／AI 設定載入與欄位值",
+   "選填": "可加題材版 headless 流程，但不得改 `tests/` 框架回歸"
+  }
+ ]
+}

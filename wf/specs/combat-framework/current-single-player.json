@@ -1,0 +1,57 @@
+{
+ "contract": "wf-table/1",
+ "source": "01-goals-current-state.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "假設",
+  "出處",
+  "影響"
+ ],
+ "rows": [
+  {
+   "假設": "唯一玩家節點來自 `players` 群組；`get_player()` 回傳第一個",
+   "出處": "`Global.gd:354-355`；`Player.tscn:42` `groups=[\"players\"]`",
+   "影響": "21 個檔呼叫 `Global.get_player()` 或 `get_nodes_in_group(\"players\")`（ActionGenerator、HandManager、BaseAction、Enemy、Card、RewardOverlay、Map、DialogueOverlay、ShopPurchase、OpenChest、UseConsumable、PlayerData、ArtifactData、EnemyIntentData、兩個狀態效果、RunModifier…）"
+  },
+  {
+   "假設": "角色戰鬥狀態寫在 `PlayerData`：`player_health/_max`、`player_energy/_max`、`player_block`、`player_deck`",
+   "出處": "`PlayerData.gd:7-17, 195`",
+   "影響": "23 個檔共 60 處直接讀寫 `Global.player_data.player_energy/health/block/deck`（Card、CardData、HandManager、ActionAddEnergy、ActionResetEnergy、RewardOverlay、CardSelectionOverlay、validators…）"
+  },
+  {
+   "假設": "`Player` 節點把傷害、格擋、血條都轉到 `Global.player_data`",
+   "出處": "`Player.gd:56-131`",
+   "影響": "多名我方單位需要每個節點綁定自己的資料物件"
+  },
+  {
+   "假設": "遺物與局修正攔截器全註冊在唯一 `Player` 節點",
+   "出處": "`Player.gd:172-196`",
+   "影響": "多隊員時要決定攔截器掛在誰身上（持有者）；`ActionHandler.register_action_interceptor` 本身已是 per-combatant（`ActionHandler.gd:157-170`），不必改"
+  },
+  {
+   "假設": "開局只接受一個 `character_object_id`，起始牌組直接塞進 `player_data.player_deck`",
+   "出處": "`Global.gd:208-241`",
+   "影響": "需改成「建立隊伍、第 0 名為主角」"
+  },
+  {
+   "假設": "獎勵抽牌池快取存在 `PlayerData`（`reward_draft_card_pack_ids`、`player_reward_card_*_cache`）",
+   "出處": "`PlayerData.gd:112-136, 585-612`",
+   "影響": "每名隊員要有自己的牌池"
+  },
+  {
+   "假設": "存檔只序列化 `PlayerData`，無版本欄位",
+   "出處": "`FileLoader.gd:408-460`",
+   "影響": "新結構要加版本欄位；舊版（無版本或版本 1）存檔拒絕載入並提示，不做遷移（使用者 2026-10-19）"
+  },
+  {
+   "假設": "卡牌的能量判定直接讀 `Global.player_data.player_energy`",
+   "出處": "`CardData.gd:191-211`；`Card.gd:160`",
+   "影響": "要改讀「行動中單位」的能量"
+  },
+  {
+   "假設": "`BaseAction.get_action_value()` 最後一層查 `Global.player_data.player_values`",
+   "出處": "`BaseAction.gd:191-192`",
+   "影響": "多角色時應查「行動單位」的 values，再退到共用"
+  }
+ ]
+}

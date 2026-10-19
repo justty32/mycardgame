@@ -1,0 +1,92 @@
+{
+ "contract": "wf-table/1",
+ "source": "04-combat-loop-signals.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "監聽者",
+  "現況",
+  "遷移"
+ ],
+ "rows": [
+  {
+   "監聽者": "`Combat.gd:43-48, 360-502`",
+   "現況": "整段回合流程",
+   "遷移": "刪除，流程搬 `CombatDirector`；`Combat.gd` 只監聽 `unit_action_started/ended` 更新 HUD（顯示行動單位的能量／牌堆）"
+  },
+  {
+   "監聽者": "`BaseCombatant.gd:28-32, 406-410`",
+   "現況": "連 player_turn 空 hook",
+   "遷移": "改連 `unit_action_started/ended` 並過濾 `unit == self`；子類覆寫 `_on_own_action_started/ended`"
+  },
+  {
+   "監聽者": "`Enemy.gd:243-244`",
+   "現況": "玩家回合開始切意圖",
+   "遷移": "刪除；改在 `CombatDirector` 於該敵人進入等待時呼叫 `decide_next_intent()`"
+  },
+  {
+   "監聽者": "`Player.gd:138-160, 217-221`",
+   "現況": "即將受傷加總所有敵人到單一玩家",
+   "遷移": "搬到 `ThreatPreview`（§3.5），每個我方單位自己顯示"
+  },
+  {
+   "監聽者": "`StatsHandler.gd:44-47, 283-296`",
+   "現況": "`is_player_turn`、`turn_count` 靠敵方回合末遞增",
+   "遷移": "`is_player_turn` = 行動中單位為玩家控制且等待輸入；`turn_count` = **主角 action_count**（`unit_action_started` 且 unit 為主角時 +1 並 `reset_turn_stats`）；新增 `combat_tick`、`unit_action_counts`；`cards_played_this_turn` 改以主角行動為界（`PLAYED_THIS_TURN/LAST_TURN` 語意跟著）"
+  },
+  {
+   "監聽者": "`ValidatorPlayerTurn.gd`",
+   "現況": "`Global.is_player_turn()`",
+   "遷移": "不改（語意已更新）"
+  },
+  {
+   "監聽者": "`ValidatorTurnCount.gd`",
+   "現況": "`combat_stats.turn_count`",
+   "遷移": "不改；文件註明＝主角行動數"
+  },
+  {
+   "監聽者": "`ValidatorEnemyAttacking.gd:6-10`",
+   "現況": "任一敵人意圖為攻擊",
+   "遷移": "改為「任一敵人的已解析意圖會命中**行動單位**」（透過 ThreatPreview）"
+  },
+  {
+   "監聽者": "`TurnOverlay.gd:7`",
+   "現況": "顯示 Turn N",
+   "遷移": "顯示「刻 T／主角第 N 次行動」"
+  },
+  {
+   "監聽者": "`BaseArtifact.gd:15-17, 49-61`",
+   "現況": "回合開始／結束動作、首回合、計數器重置",
+   "遷移": "改連 `unit_action_started/ended`；`ArtifactData` 新增 `artifact_trigger_scope: {HERO, BEARER, ANY_PARTY_UNIT}`（**已決，使用者 2026-10-19**：每件遺物在資料指定；未指定時歸主角 HERO = 現行行為）；`artifact_counter_reset_on_turn_start` 欄位名保留"
+  },
+  {
+   "監聽者": "`ArtifactEasyMode.gd:6-9`、`ArtifactRetainHand.gd:9`",
+   "現況": "同上",
+   "遷移": "隨 BaseArtifact"
+  },
+  {
+   "監聽者": "`CardDecoratorDynamicValueModifier.gd:15-20`",
+   "現況": "回合開始重算",
+   "遷移": "改連 `unit_action_started`，過濾 unit 為卡牌持有者"
+  },
+  {
+   "監聽者": "`ActionEndTurn.gd:7`",
+   "現況": "發 `end_turn_requested`",
+   "遷移": "發 `end_action_requested`"
+  },
+  {
+   "監聽者": "`CombatEndTurn.gd`",
+   "現況": "等待出牌佇列後 `end_turn_animation`",
+   "遷移": "改呼叫 `CombatDirector.finish_player_action()`"
+  },
+  {
+   "監聽者": "`HandManager.gd:97-103, 553-580`",
+   "現況": "combat_started 重置單一牌堆",
+   "遷移": "改為建立每個出戰單位的 `UnitPiles`；`player_killed` → `unit_downed`"
+  },
+  {
+   "監聽者": "`tests/combat_flow.gd:150-156, 318-320, 337`",
+   "現況": "數 `enemy_turn_started`、`turn_count==2`、`is_player_turn`",
+   "遷移": "改數 `unit_action_started`（enemy）與 `unit_action_ended`；在框架預設規則下數值斷言（抽 5、能量 3、14 傷害消 10 格擋）不變"
+  }
+ ]
+}

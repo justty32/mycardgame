@@ -1,0 +1,102 @@
+{
+ "contract": "wf-table/1",
+ "source": "01-goals-current-state.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "假設",
+  "出處",
+  "影響"
+ ],
+ "rows": [
+  {
+   "假設": "四個回合訊號 `player_turn_started/ended`、`enemy_turn_started/ended` 與 `end_turn_requested`",
+   "出處": "`Signals.gd:100-107`",
+   "影響": "監聽者見 §3.4 遷移表"
+  },
+  {
+   "假設": "`Combat.gd` 以 AnimationPlayer 串接回合：`start_turn_animation → start_turn → player_turn_started`；`end_turn_animation → player_turn_ended → enemy_turn_started → perform_enemy_turn → enemy_turn_ended → start_turn_animation`",
+   "出處": "`Combat.gd:482-502, 560-574`",
+   "影響": "整段迴圈要被行動佇列取代"
+  },
+  {
+   "假設": "敵方回合：一次跑完**所有**敵人的狀態／意圖／狀態",
+   "出處": "`Combat.gd:236-356`",
+   "影響": "CTB 下每個敵人各自輪到才行動"
+  },
+  {
+   "假設": "玩家回合開始：補滿能量、重置格擋、抽 5 張、處理首回合事件／藥物／卡牌初始動作",
+   "出處": "`Combat.gd:360-455`；`ActionGenerator.gd:45-70`；`HandManager.gd:9`",
+   "影響": "要變成「單位行動開始」流程並依 `CombatRulesData` 參數化"
+  },
+  {
+   "假設": "玩家回合結束：棄非保留手牌、Ethereal 耗盡",
+   "出處": "`Combat.gd:457-480`；`HandManager.gd:460-535`",
+   "影響": "變成可關閉的「行動末棄牌」"
+  },
+  {
+   "假設": "回合計數靠 `enemy_turn_ended` 遞增；`is_player_turn` 旗標",
+   "出處": "`StatsHandler.gd:6-11, 283-296`；`Global.gd:379-380`",
+   "影響": "`ValidatorTurnCount.gd:9`、`ValidatorPlayerTurn.gd:6`、`TurnOverlay.gd:7`、`BaseArtifact.gd:54`、`ArtifactEasyMode.gd:9`、`HandManager.PLAYED_THIS_TURN/LAST_TURN`（`HandManager.gd:253-256`）都依賴它"
+  },
+  {
+   "假設": "敵人在玩家回合開始時切換意圖",
+   "出處": "`Enemy.gd:243-244`；`EnemyData.gd:127-139`",
+   "影響": "改成「敵人行動結束、進入等待時決定下一個意圖」"
+  },
+  {
+   "假設": "狀態效果的處理時點是「玩家回合前抽／後抽、回合末棄前／棄後、敵方回合前／後、敵人意圖前／後」",
+   "出處": "`StatusEffectData.gd:78-98`；`BaseCombatant.gd:414-435`",
+   "影響": "枚舉整數會被序列化進 JSON，只能**重釋語意、尾端新增**，不能重排"
+  },
+  {
+   "假設": "結束回合按鈕與 `CombatEndTurn` 等待佇列",
+   "出處": "`Combat.gd:504-525`；`CombatEndTurn.gd`",
+   "影響": "改名「結束行動」，語意不變"
+  },
+  {
+   "假設": "敵人意圖預覽把 `Global.get_player()` 當唯一目標；玩家頭上的「即將受傷」加總所有敵人",
+   "出處": "`Enemy.gd:187-221`；`Player.gd:138-160`",
+   "影響": "要依意圖的目標規則與射程解析成棋盤上的格與單位"
+  },
+  {
+   "假設": "敵人攻擊目標固定 `[player]`",
+   "出處": "`Combat.gd:323`",
+   "影響": "由意圖目標規則決定"
+  },
+  {
+   "假設": "戰鬥結束判定＝`enemies` 群組清空（含死亡動畫後檢查）",
+   "出處": "`Combat.gd:188-202, 226-234`；`Global.gd:357-365`；`ActionHandler.gd:93-96` 的 short-circuit；`HandManager.gd:366`",
+   "影響": "波次下「本波清空 ≠ 戰鬥結束」，要改問 `CombatDirector`"
+  },
+  {
+   "假設": "敵人生成：事件的加權清單 + HBox 自動排或固定座標；召喚用 slot 索引",
+   "出處": "`EventData.gd:39-52`；`EnemyContainer.gd:13-82`；`ActionSummonEnemies.gd`",
+   "影響": "改成遭遇資料的波次 + 棋盤格"
+  },
+  {
+   "假設": "卡牌目標只有布林 `card_requires_target`，目標型別是 `Enemy`；手牌點敵人即出牌",
+   "出處": "`CardData.gd:86, 260`；`Hand.gd:255-266`；`CardPlayRequest.gd` 只有 `selected_target`",
+   "影響": "要加射程／形狀／陣營／空格目標與 `selected_cell`"
+  },
+  {
+   "假設": "動作目標覆寫枚舉以「玩家／全部敵人／最左敵人／隨機敵人」為中心",
+   "出處": "`BaseAction.gd:37-46, 112-165`",
+   "影響": "加陣營相對與範圍型目標"
+  },
+  {
+   "假設": "`Hand` 把 `$%Player` 當卡牌動作的 parent",
+   "出處": "`Hand.gd:13`；`HandManager.gd:435, 769`",
+   "影響": "要用「行動單位」"
+  },
+  {
+   "假設": "HandManager 四個牌堆是單例欄位",
+   "出處": "`HandManager.gd:35-38, 109-128`",
+   "影響": "14 個外部檔直接讀 `HandManager.player_hand/draw/discard/exhaust`"
+  },
+  {
+   "假設": "框架測試以上述語意為契約：抽 5／能量 3／結束回合後 `enemy_turn_started` 計數與 `turn_count==2`／`_player_ready()` 看 `stats.is_player_turn`",
+   "出處": "`tests/combat_flow.gd:127-128, 150-156, 318-320, 337`；`tests/combat_fixture.gd` 單角色 + `EventData` 加權敵人",
+   "影響": "測試需隨訊號改名調整，但在框架預設規則下數值契約可保持"
+  }
+ ]
+}

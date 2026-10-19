@@ -1,0 +1,67 @@
+{
+ "contract": "wf-table/1",
+ "source": "04-combat-loop-signals.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "訊號",
+  "參數",
+  "時點"
+ ],
+ "rows": [
+  {
+   "訊號": "`unit_action_started`",
+   "參數": "`unit: BaseCombatant`",
+   "時點": "單位行動開始（抽牌後、可操作前）"
+  },
+  {
+   "訊號": "`unit_action_ended`",
+   "參數": "`unit`",
+   "時點": "棄牌後、延遲計算前"
+  },
+  {
+   "訊號": "`combat_tick_advanced`",
+   "參數": "`previous_tick: int, current_tick: int`",
+   "時點": "時鐘前進"
+  },
+  {
+   "訊號": "`timeline_changed`",
+   "參數": "—",
+   "時點": "任何 next_action_tick 變動（給 UI 重投影）"
+  },
+  {
+   "訊號": "`unit_moved`",
+   "參數": "`unit, from: Vector2i, to: Vector2i`",
+   "時點": "移動完成"
+  },
+  {
+   "訊號": "`unit_spawned` / `unit_downed` / `unit_removed`",
+   "參數": "`unit`",
+   "時點": "生成／倒下／離場"
+  },
+  {
+   "訊號": "`wave_started` / `wave_cleared`",
+   "參數": "`wave_index: int`",
+   "時點": "波次"
+  },
+  {
+   "訊號": "`end_action_requested`",
+   "參數": "`immediacy: int`",
+   "時點": "取代 `end_turn_requested`"
+  },
+  {
+   "訊號": "`cell_clicked` / `cell_hovered`",
+   "參數": "`cell: Vector2i`",
+   "時點": "棋盤輸入（取代 `enemy_clicked/hovered` 作為目標選擇主路徑；舊兩個保留，由 BoardView 在點到佔格單位時一併發）"
+  },
+  {
+   "訊號": "`party_member_recruited` / `party_member_left` / `party_member_advanced`",
+   "參數": "`member: PartyMemberData`",
+   "時點": "局外"
+  },
+  {
+   "訊號": "`ai_plan_decided`",
+   "參數": "`unit, plan: AiPlan`",
+   "時點": "除錯／測試可觀察"
+  }
+ ]
+}
