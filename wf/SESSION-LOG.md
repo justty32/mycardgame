@@ -11,7 +11,6 @@
 
 ## 最新進度
 
-- [game-dev] 戰鬥框架 Phase 3 波次進行中：先拆 CombatDirector（BoardController／UnitSpawner），再做波次與 Wave suite → 完成後寫 wf/plans/combat-framework/phase-3.md 並刪本行
 
 ## 各工作流 session-log
 

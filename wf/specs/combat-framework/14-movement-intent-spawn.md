@@ -2,7 +2,7 @@
 
 [README](README.md)
 
-**整合修訂**：Phase 1 已實作 `EnemyIntentController` 與 `CombatDirector.perform_enemy_intent`（`Enemy.build_intent_actions_data`），敵人意圖在進入等待時決定；`IntentResolver` 的移動解析插在意圖動作之前（先算 `planned_move_cell` 再執行意圖動作），`enemy_intent_move_after` 反之。`enemy_intent_action_delay` 已於 Phase 1 加入。波次進場的 `wave_*` 欄位隨 Phase 3 的 `CombatDirector._check_wave()` 實作；Phase 2 只做 `NEAREST_EMPTY`。
+**整合修訂**：Phase 1 已實作 `EnemyIntentController` 與 `CombatDirector.perform_enemy_intent`（`Enemy.build_intent_actions_data`），敵人意圖在進入等待時決定；`IntentResolver` 的移動解析插在意圖動作之前（先算 `planned_move_cell` 再執行意圖動作），`enemy_intent_move_after` 反之。`enemy_intent_action_delay` 已於 Phase 1 加入。波次進場的 `wave_*` 欄位隨 Phase 3 的 `CombatDirector._check_wave()` 實作；Phase 2 只做 `NEAREST_EMPTY`。修訂 2026-10-19（實作 Phase 3）：三種策略已由 `UnitSpawner` 實作（取代 `_check_wave()` 的是 `WaveController`）；NEAREST_EMPTY 整張滿時依 retry 欄位等待、仍滿則跳過；跳過只記 log；預計格淡色標記未做。
 
 ## 6. 敵人移動意圖擴充
 

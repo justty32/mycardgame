@@ -9,7 +9,7 @@
  "rows": [
   {
    "no": "1",
-   "text": "`Global.are_remaining_enemies()` 改為委派 `CombatDirector.has_living_opponents()`，`ActionHandler.gd:93-96` 的 short-circuit 改問 `CombatDirector.is_combat_over()`，否則波間空檔會把所有攻擊短路。**修訂 2026-10-19（Phase 1）**：委派延到 Phase 3 波次一起做；`Global.are_remaining_enemies()` 與 short-circuit 暫不變，`CombatDirector` 已提供 `has_living_opponents()`／`is_combat_over()`。"
+   "text": "`Global.are_remaining_enemies()` 改為委派 `CombatDirector.has_living_opponents()`，`ActionHandler.gd:93-96` 的 short-circuit 改問 `CombatDirector.is_combat_over()`，否則波間空檔會把所有攻擊短路。**修訂 2026-10-19（Phase 1）**：委派延到 Phase 3 波次一起做；`Global.are_remaining_enemies()` 與 short-circuit 暫不變，`CombatDirector` 已提供 `has_living_opponents()`／`is_combat_over()`。**修訂 2026-10-19（Phase 3）**：已委派：`Global.are_remaining_enemies()` 在戰鬥中回傳 `CombatDirector.has_remaining_opponents()`（存活敵人或尚有後續波次／待進場單位），`ActionHandler`／`HandManager` 呼叫點不變；short-circuit 不直接問 `is_combat_over()`，以保留雜兵存活時不短路的舊行為。"
   },
   {
    "no": "2",

@@ -20,7 +20,7 @@
 
 戰鬥與 UI：[ActionHandler.gd](../../../game/autoload/ActionHandler.gd)、[HandManager.gd](../../../game/autoload/HandManager.gd)、[Root.tscn](../../../game/scenes/Root.tscn)；[Combat.gd](../../../game/scripts/ui/Combat.gd) 只剩 HUD（流程見下段）。資料流見 [架構總覽](../../../analysis/slay-the-robot/architecture/01_overview.md)；[combat_flow.gd](../../../tests/combat_flow.gd) 搭配 [fixture](../../../tests/combat_fixture.gd) 驗單場戰鬥、獎勵與返回地圖。
 
-戰鬥框架（[spec](../../specs/combat-framework/README.md)，Phase 2）：CTB 時間軸、單位註冊、棋盤／遭遇／移動與 Board／Ctb 測試的檔案導航見 [code-map/combat-framework](code-map/combat-framework.md)；入口為 [CombatDirector.gd](../../../game/scripts/combat/CombatDirector.gd)。
+戰鬥框架（[spec](../../specs/combat-framework/README.md)，Phase 3）：CTB 時間軸、單位註冊、棋盤／遭遇／移動、波次與 Board／Ctb／Wave 測試的檔案導航見 [code-map/combat-framework](code-map/combat-framework.md)；入口為 [CombatDirector.gd](../../../game/scripts/combat/CombatDirector.gd)。
 
 整局狀態與結算：[NewRunMenu.gd](../../../game/scripts/ui/menus/NewRunMenu.gd)、[RunSummaryOverlay.gd](../../../game/scripts/ui/RunSummaryOverlay.gd)、[ProfileData.gd](../../../game/data/mutable/ProfileData.gd)、[StatsHandler.gd](../../../game/autoload/StatsHandler.gd)。起局、跨幕、終局與持久化由 [整局流程](../game-dev/game-flow.md) 串接；單場測試不代表全部轉移已覆蓋。
 
