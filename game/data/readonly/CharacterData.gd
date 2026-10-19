@@ -42,4 +42,6 @@ class_name CharacterData
 ## Money added to player on start
 @export var character_starting_money: int = 999
 @export var character_starting_health: int = 50
+## Combat timeline speed of the character's unit (see CombatRulesData; 10 = original alternation).
+@export var character_speed: int = BaseCombatant.DEFAULT_SPEED
 #endregion

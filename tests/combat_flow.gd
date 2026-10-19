@@ -10,7 +10,8 @@ var scenario: String = "victory"
 var results: Array[Dictionary] = []
 var snapshots: Array[Dictionary] = []
 var player_damage_records: Array[Dictionary] = []
-var counts: Dictionary = {"drawn": 0, "played": 0, "combat_started": 0, "combat_ended": 0, "enemy_turn": 0, "enemy_dead": 0, "player_dead": 0, "player_death_animation": 0, "hero_action_started": 0, "hero_action_ended": 0}
+var counts: Dictionary = {"drawn": 0, "played": 0, "combat_started": 0, "combat_ended": 0, "enemy_turn": 0, "enemy_dead": 0, "player_dead": 0, "player_death_animation": 0, "hero_action_started": 0, "hero_action_ended": 0, "enemy_action_started": 0, "enemy_action_ended": 0}
+var tick_advances: Array = []
 var global_data: Node
 var hand_manager: Node
 var action_handler: Node
@@ -153,6 +154,8 @@ func _scenario() -> bool:
 	_check(player.get_block() == 0, "spent block does not remain on turn two")
 	_check(global_data.player_data.player_energy == 3, "turn two replenishes energy")
 	_check(counts.hero_action_started == 2 and counts.hero_action_ended == 1 and player.action_count == 2, "hero unit action signals track the legacy player turns")
+	_check(counts.enemy_action_started == 1 and counts.enemy_action_ended == 1 and enemy.action_count == 1, "the enemy's own action emitted unit_action_started/ended once")
+	_check(tick_advances == [[0, 1000]] and combat.combat_director.current_tick == 1000, "equal speeds: hero and enemy act at tick 0, the second hero action at tick 1000")
 	_check(hand_manager.player_hand.size() == 5 and counts.drawn == 10, "discarded/played cards reshuffle and draw again on turn two")
 	_check(counts.player_dead == 0 and counts.combat_ended == 0, "first enemy turn neither kills player nor ends combat")
 	_snapshot("turn_two_ready")
@@ -193,6 +196,7 @@ func _defeat_flow() -> bool:
 	_check(player_damage_records.size() == 1 and player_damage_records[0] == {"unblocked": 14, "capped": 10, "overkill": 4}, "real damage signal records fourteen damage, ten lost HP and four overkill")
 	_check(counts.enemy_turn == 1 and counts.player_dead == 1 and counts.player_death_animation == 1, "one enemy turn emits one player death and one completed death animation")
 	_check(counts.hero_action_started == 1 and counts.hero_action_ended == 1, "defeat: one hero action started and ended before the lethal enemy turn")
+	_check(counts.enemy_action_started == 1 and counts.enemy_action_ended == 0 and not combat.combat_director.is_running, "defeat: the lethal enemy action started, never ended, and the director stopped")
 	_check(enemy.is_alive() and enemy.get_combatant_health() == 65 and counts.enemy_dead == 0, "defeat leaves the attacking enemy alive and untouched")
 	_check(summary.defeat_label.visible and not summary.victory_label.visible and summary.player_run_end_state == 1, "summary presents defeat with the native LOSS end state")
 	_check(summary.stats_summary_autosize_label.get_parsed_text().contains("Damage Taken"), "defeat summary contains generated run statistics")
@@ -315,11 +319,16 @@ func _connect_observers() -> void:
 	signals.unit_action_started.connect(func(unit):
 		if unit == global_data.get_player():
 			counts.hero_action_started += 1
+		else:
+			counts.enemy_action_started += 1
 	)
 	signals.unit_action_ended.connect(func(unit):
 		if unit == global_data.get_player():
 			counts.hero_action_ended += 1
+		else:
+			counts.enemy_action_ended += 1
 	)
+	signals.combat_tick_advanced.connect(func(previous, current): tick_advances.append([previous, current]))
 	signals.enemy_killed.connect(func(_enemy): counts.enemy_dead += 1)
 	signals.player_killed.connect(func(_player): counts.player_dead += 1)
 	signals.player_death_animation_finished.connect(func(_player): counts.player_death_animation += 1)

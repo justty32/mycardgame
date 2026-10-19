@@ -98,6 +98,10 @@ const STANDARD_CARD_RARITIES: Array[int] = [CARD_RARITIES.COMMON, CARD_RARITIES.
 	# ["damage", Scripts.ACTION_ATTACK, "damage_1"], # Optional third parameter for mapping custom values
 ]
 
+## Combat timeline delay of the action this card is played in: -1 = CombatRulesData.default_action_delay.
+## The action's delay is the largest value among the cards played during it.
+@export var card_action_delay: int = -1
+
 ### Card Actions
 @export var card_play_actions: Array[Dictionary] = [
 	#{

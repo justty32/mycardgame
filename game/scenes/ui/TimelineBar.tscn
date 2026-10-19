@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://biduniav9kp24"]
+
+[ext_resource type="Script" uid="uid://b55uetkliwo0i" path="res://scripts/ui/TimelineBar.gd" id="1_tlbar"]
+
+[node name="TimelineBar" type="HBoxContainer"]
+offset_right = 760.0
+offset_bottom = 40.0
+theme_override_constants/separation = 12
+script = ExtResource("1_tlbar")
+
+[node name="TickLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Tick 0"
+
+[node name="Entries" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8

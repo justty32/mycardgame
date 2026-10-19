@@ -75,16 +75,24 @@ enum STATUS_EFFECT_SECONDARY_CHARGE_COLLISION_STRATEGIES {
 ## When a status effect should be processed relative to the others. Higher numbers processed earlier.
 @export var status_effect_priority: int = 0
 
+## Values are serialized as integers: only append, never reorder. On the combat timeline a "turn"
+## is one unit's action, so the legacy names mean (CombatDirector):
 enum STATUS_EFFECT_PROCESS_TIMES {
-	PRE_DRAW_PLAYER_START_TURN, # Actions taken before the player has drawn cards
-	POST_DRAW_PLAYER_START_TURN, # Actions taken after the player has drawn cards (but before they can act)
-	PRE_DISCARD_PLAYER_END_TURN, # Actions taken after the player has ended their turn but before enemy turns and discarding cards
-	POST_DISCARD_PLAYER_END_TURN, # Actions taken after the player has ended their turn and discarding cards but before enemy turns
-	PRE_ENEMY_TURN, # Actions taken before any enemy has performed their intents on the enemy's turn. This is run for all enemies at once.
-	POST_ENEMY_TURN, # Actions taken after all enemies have performed their intent but before the turn is over. This is run for all enemies at once.
-	PRE_ENEMY_INTENT, # Actions taken before an enemy has performed an intent. This is run for each enemy in order.
-	POST_ENEMY_INTENT, # Actions taken after an enemy has performed an intent. This is run for each enemy in order.
+	PRE_DRAW_PLAYER_START_TURN, # party unit's action start, before it draws cards
+	POST_DRAW_PLAYER_START_TURN, # party unit's action start, after it drew cards (but before it can act)
+	PRE_DISCARD_PLAYER_END_TURN, # party unit's action end, before discarding cards
+	POST_DISCARD_PLAYER_END_TURN, # party unit's action end, after discarding cards
+	PRE_ENEMY_TURN, # enemy's own action start (fires together with PRE_ENEMY_INTENT, before it)
+	POST_ENEMY_TURN, # enemy's own action end (fires together with POST_ENEMY_INTENT, after it)
+	PRE_ENEMY_INTENT, # enemy's own action start, before it performs its intent
+	POST_ENEMY_INTENT, # enemy's own action end, after it performed its intent
+	UNIT_ACTION_START, # any unit's own action start (after draw / after the PRE_ENEMY_* pair)
+	UNIT_ACTION_END, # any unit's own action end (after discard / after the POST_ENEMY_* pair)
+	EVERY_N_TICKS, # every status_effect_tick_interval ticks of the combat clock, whoever is acting
 	}
+
+## Interval in combat ticks for EVERY_N_TICKS (processed once per crossed multiple).
+@export var status_effect_tick_interval: int = 100
 
 ## Indicates when the effect should proc. This can control when and for what entities a status effect applies.
 ## This is also when a status effect will decay if it does.

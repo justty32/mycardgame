@@ -24,7 +24,9 @@ func reset_player() -> void:
 	var character_data: CharacterData = Global.get_player_character_data()
 	animated_sprite_2d.sprite_frames = get_animation_sprite_frames()
 	animated_sprite_2d.play(AnimationData.ANIMATION_IDLE)
-	
+	if character_data != null:
+		base_speed = character_data.character_speed
+
 	reset_block()
 	clear_all_status_effects()
 	unregister_all_custom_ui()
@@ -50,6 +52,12 @@ func _get_default_faction() -> int:
 
 func is_hero() -> bool:
 	return true
+
+func get_unit_display_name() -> String:
+	var character_data: CharacterData = Global.get_player_character_data()
+	if character_data != null and character_data.character_name != "":
+		return character_data.character_name
+	return name
 
 func get_animation_data() -> AnimationData:
 	var character_data: CharacterData = Global.get_player_character_data()

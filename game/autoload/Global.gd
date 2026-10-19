@@ -396,6 +396,10 @@ func get_alive_enemies() -> Array[Enemy]:
 func are_remaining_enemies() -> bool:
 	return len(get_alive_enemies()) > 0
 
+## The CombatDirector of the loaded run screen (group "combat_director"), null outside it.
+func get_combat_director() -> CombatDirector:
+	return Global.get_tree().get_first_node_in_group(CombatDirector.GROUP_NAME) as CombatDirector
+
 func get_combat_stats() -> CombatStatsData:
 	# shorthand helper method
 	# gets player's combat stats for this combat

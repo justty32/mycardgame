@@ -16,15 +16,20 @@ func register_unit(unit: BaseCombatant) -> void:
 		return
 	if unit.unit_uid == "":
 		unit.unit_uid = _generate_uid()
+	if _uid_to_unit.get(unit.unit_uid, null) == unit:
+		return
 	_uid_to_unit[unit.unit_uid] = unit
 	if unit.is_hero() and get_hero() == null:
 		_hero_uid = unit.unit_uid
+	Signals.unit_spawned.emit(unit)
 
 func unregister_unit(unit: BaseCombatant) -> void:
 	if unit == null or unit.unit_uid == "":
 		return
-	if _uid_to_unit.get(unit.unit_uid, null) == unit:
+	var was_registered: bool = _uid_to_unit.get(unit.unit_uid, null) == unit
+	if was_registered:
 		_uid_to_unit.erase(unit.unit_uid)
+		Signals.unit_removed.emit(unit)
 	if _hero_uid == unit.unit_uid:
 		_hero_uid = ""
 		# promote another registered hero-capable unit, if any

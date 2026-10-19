@@ -97,30 +97,32 @@ signal rest_action_ended(rest_action_id: String) # a rest action has finished
 #endregion
 
 #region Combat
-# turns
+# actions on the combat timeline (CombatDirector). Legacy turn signals are kept with new meaning:
+# player_turn_* = the hero's action started (before energy/draw) / ended (after discard);
+# enemy_turn_* = one enemy's action started / ended. Prefer unit_action_* in new code.
 signal combat_started(event_id: String) # invokes combat when emitted. If empty string for event_id, will use the location's combat event
 signal combat_ended
 signal player_turn_started
 signal player_turn_ended
 signal enemy_turn_started
 signal enemy_turn_ended
-signal end_turn_requested(end_turn_immediacy_level: int)	# requests to end the turn. See CombatEndTurn
+signal end_turn_requested(end_turn_immediacy_level: int)	# legacy name of end_action_requested; still served by CombatDirector
 
 # combat framework: unit actions, timeline and board
-# NOTE: The legacy turn flow emits unit_action_started/ended for the hero only (alongside
-# player_turn_*); the remaining signals are declared for the action-timeline combat loop and
-# are not emitted yet. player_turn_* = hero's action, enemy_turn_* = one enemy's action.
+# Emitted by CombatDirector: unit_action_*, combat_tick_advanced, timeline_changed, end_action_requested;
+# by UnitRegistry: unit_spawned / unit_removed. unit_moved, unit_downed, wave_*, cell_* are declared
+# for later phases (board, waves) and not emitted yet.
 signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: after draw, before input/decision
 signal unit_action_ended(unit: BaseCombatant)	# a unit's action ends: after discard, before delay is computed
 signal combat_tick_advanced(previous_tick: int, current_tick: int)	# the combat clock advanced
 signal timeline_changed	# any unit's next_action_tick changed (UI should re-project the timeline)
 signal unit_moved(unit: BaseCombatant, from: Vector2i, to: Vector2i)	# a unit finished moving on the board
-signal unit_spawned(unit: BaseCombatant)
+signal unit_spawned(unit: BaseCombatant)	# a unit registered in UnitRegistry (entered the scene tree)
 signal unit_downed(unit: BaseCombatant)
-signal unit_removed(unit: BaseCombatant)
+signal unit_removed(unit: BaseCombatant)	# a unit unregistered from UnitRegistry (left the scene tree)
 signal wave_started(wave_index: int)
 signal wave_cleared(wave_index: int)
-signal end_action_requested(immediacy: int)	# replaces end_turn_requested for the action timeline
+signal end_action_requested(immediacy: int)	# requests the acting player unit's action to end. See CombatEndAction
 signal cell_clicked(cell: Vector2i)	# board input; enemy_clicked/hovered stay for units on clicked cells
 signal cell_hovered(cell: Vector2i)
 

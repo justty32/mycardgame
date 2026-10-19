@@ -3294,7 +3294,7 @@ func add_test_cards() -> void:
 	card_end_turn.card_rarity = CardData.CARD_RARITIES.RARE
 	card_end_turn.card_requires_target = false
 	card_end_turn.card_keyword_object_ids = ["keyword_block"]
-	card_end_turn.card_values = {"block": 5, "end_turn_immediacy_level": CombatEndTurn.END_TURN_QUEUE_IMMEDIACY.IMMEDIATE}
+	card_end_turn.card_values = {"block": 5, "end_turn_immediacy_level": CombatEndAction.END_ACTION_QUEUE_IMMEDIACY.IMMEDIATE}
 	card_end_turn.card_upgrade_value_improvements = {"block": 5}
 	card_end_turn.card_play_actions = [
 	{Scripts.ACTION_BLOCK: {"target_override": BaseAction.TARGET_OVERRIDES.PARENT}},

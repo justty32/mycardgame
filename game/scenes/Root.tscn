@@ -56,31 +56,19 @@
 [ext_resource type="Theme" uid="uid://2714jm71pkv4" path="res://themes/keyword_tooltip_theme.tres" id="41_0h1ar"]
 [ext_resource type="Script" uid="uid://d2fxhtmdfmtdf" path="res://scripts/ui/general/KeywordContainer.gd" id="42_wtekq"]
 [ext_resource type="Script" uid="uid://c5i0sjwlko88l" path="res://addons/label_font_auto_sizer/rich_label_auto_sizer.gd" id="43_gs3rm"]
+[ext_resource type="Script" uid="uid://b0qny5z55zuwm" path="res://scripts/combat/CombatDirector.gd" id="44_cdir"]
+[ext_resource type="PackedScene" uid="uid://biduniav9kp24" path="res://scenes/ui/TimelineBar.tscn" id="45_tlbar"]
 
 [sub_resource type="Animation" id="Animation_m5prp"]
 resource_name = "end_turn"
 length = 0.5
-tracks/0/type = "method"
+tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath(".")
+tracks/0/path = NodePath("EndTurnButton:disabled")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0.5),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"_on_player_end_turn_animation_finished"
-}]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("EndTurnButton:disabled")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
@@ -89,39 +77,25 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_beguj"]
 resource_name = "start_turn"
-tracks/0/type = "method"
+tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath(".")
+tracks/0/path = NodePath("TurnOverlay:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(1),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"_on_player_start_turn_animation_finished"
-}]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("TurnOverlay:modulate")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.3, 0.7, 1),
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
-tracks/2/type = "method"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("TurnOverlay")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TurnOverlay")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "values": [{
@@ -129,25 +103,13 @@ tracks/2/keys = {
 "method": &"update_turn_label"
 }]
 }
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("TurnOverlay:visible")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 1),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [true, false]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("EndTurnButton:disabled")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TurnOverlay:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
@@ -2182,6 +2144,17 @@ grow_vertical = 2
 text = "Turn"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="TimelineBar" parent="RunScreen/Combat" instance=ExtResource("45_tlbar")]
+visible = false
+layout_mode = 0
+offset_left = 240.0
+offset_top = 12.0
+offset_right = 1000.0
+offset_bottom = 52.0
+
+[node name="CombatDirector" type="Node" parent="RunScreen/Combat"]
+script = ExtResource("44_cdir")
 
 [node name="CombatAnimation" type="AnimationPlayer" parent="RunScreen/Combat" unique_id=85031201]
 libraries/ = SubResource("AnimationLibrary_yww7o")

@@ -11,7 +11,12 @@ const PLAYER_CARD_DRAW_PER_TURN: int = 5
 
 ## The default max number of cards available in player's hand. Exceeding this will discard the cards.
 ## Intercept ActionAddCardsToHand and ActionDraw's hand_card_count_max to adjust the max hand size.
+## NOTE: Legacy default; the hand limit now reads CombatRulesData.hand_limit via get_hand_limit().
 const PLAYER_DEFAULT_HAND_CARD_COUNT_MAX: int = 10
+
+## Max cards in hand from the combat rules (CombatRulesData.hand_limit, default 10).
+func get_hand_limit() -> int:
+	return Global.get_combat_rules().hand_limit
 
 ## If multipe cards are queueed how long it takes between them. Tweaking this will speed up plays slightly
 const TIME_BETWEEN_CARD_PLAYS: float = 0.2
@@ -452,13 +457,17 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 	var card_destination_strategy: int = card_play_request.card_destination_strategy
 	var is_duplicate_play: bool = card_play_request.is_duplicate_play
 	var send_signal: bool = not is_duplicate_play
-	HandManager.move_card_to_pile(card_play_request.card_data, card_origin_pile, card_destination_pile, card_destination_strategy, PLAYER_DEFAULT_HAND_CARD_COUNT_MAX, true, send_signal)
-	
+	HandManager.move_card_to_pile(card_play_request.card_data, card_origin_pile, card_destination_pile, card_destination_strategy, get_hand_limit(), true, send_signal)
+
 	hand.combat.update_combat_display()
 
-## Discard non-retained cards, exhaust ethereal cards, and perform specific end of turn card actions
-## NOTE: Called from Combat.
+## Legacy name of perform_end_of_action_hand_actions().
 func perform_end_of_turn_hand_actions() -> void:
+	await perform_end_of_action_hand_actions()
+
+## Discard non-retained cards, exhaust ethereal cards, and perform specific end of turn card actions
+## NOTE: Called from CombatDirector at the end of a party unit's action (rules.discard_hand_on_action_end).
+func perform_end_of_action_hand_actions() -> void:
 	# only the cards in hand at the end of turn matter for the purposes of performing actions on them
 	# this prevents things like drawing a card end of turn then exhausting it because it's ethereal or whatever
 	var duplicated_player_hand: Array[CardData] = HandManager.player_hand.duplicate(false)
@@ -526,7 +535,7 @@ func perform_end_of_turn_hand_actions() -> void:
 		if duplicated_player_hand.has(card_data):
 			var card_end_of_turn_destination: String = card_data.card_end_of_turn_destination
 			var card_end_of_turn_destination_strategy: int = card_data.card_end_of_turn_destination_strategy
-			move_card_to_pile(card_data, HAND_PILE, card_end_of_turn_destination, card_end_of_turn_destination_strategy, PLAYER_DEFAULT_HAND_CARD_COUNT_MAX, true, true)
+			move_card_to_pile(card_data, HAND_PILE, card_end_of_turn_destination, card_end_of_turn_destination_strategy, get_hand_limit(), true, true)
 			
 			## wait for tween/card actions to finish
 			#await Global.get_tree().create_timer(hand.CARD_TWEEN_TIME).timeout
@@ -631,7 +640,7 @@ func draw_cards(number_of_cards: int, hand_card_count_max: int) -> void:
 func add_cards_to_draw(cards: Array[CardData], card_destination_strategy: int = PILE_INSERTION_STRATEGIES.TOP) -> void:
 	for card_data: CardData in cards:
 		var card_origin_pile: String = get_card_pile_location_name(card_data)
-		move_card_to_pile(card_data, card_origin_pile, HandManager.DRAW_PILE, card_destination_strategy, PLAYER_DEFAULT_HAND_CARD_COUNT_MAX, true, true)
+		move_card_to_pile(card_data, card_origin_pile, HandManager.DRAW_PILE, card_destination_strategy, get_hand_limit(), true, true)
 	
 	hand.tween_hand()
 	hand.update_hand_card_display()
@@ -639,7 +648,9 @@ func add_cards_to_draw(cards: Array[CardData], card_destination_strategy: int = 
 ## Adds cards directly to hand, discarding any additional ones if it's too full.
 ## Does not count as a draw.
 ## Can take a hand_card_count_max which restricts cards beyond the hand size limit.
-func add_cards_to_hand(cards: Array[CardData], hand_card_count_max: int = HandManager.PLAYER_DEFAULT_HAND_CARD_COUNT_MAX) -> void:
+func add_cards_to_hand(cards: Array[CardData], hand_card_count_max: int = -1) -> void:
+	if hand_card_count_max < 0:
+		hand_card_count_max = get_hand_limit()
 	var discarded_cards: Array[CardData] = []
 	var added_cards: Array[CardData] = []
 	for card_data: CardData in cards:

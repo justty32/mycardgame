@@ -2,13 +2,21 @@
 ## Manages win/loss data across player profile.
 extends Node
 
-## Tracks whether it is currently the player's turn in a central location.
+## Whether the hero's action is in progress (between player_turn_started and player_turn_ended).
 var is_player_turn: bool = false
 
+## Card plays of the hero's current action; "turn" = hero action on the combat timeline.
 var cards_played_this_turn: Array[CardPlayRequest] = []
 var cards_played_this_combat: Array[Array] = []
 
+## Number of hero actions started this combat (1 during the first action). Validators and
+## artifacts read it as the "turn count"; enemy actions do not advance it.
 var turn_count: int = 1
+## Combat clock (CombatDirector.current_tick) as last reported by combat_tick_advanced.
+var combat_tick: int = 0
+## unit_uid -> actions started this combat (every unit, including enemies).
+var unit_action_counts: Dictionary[String, int] = {}
+var _hero_actions_started: int = 0
 
 ## The current combat. This will be appended to the run stats when combat ends.
 var current_combat_stats: CombatStatsData = null
@@ -43,8 +51,9 @@ func _connect_signals():
 	
 	Signals.player_turn_started.connect(_on_player_turn_started)
 	Signals.player_turn_ended.connect(_on_player_turn_ended)
-	
-	Signals.enemy_turn_ended.connect(_on_enemy_turn_ended)
+
+	Signals.unit_action_started.connect(_on_unit_action_started)
+	Signals.combat_tick_advanced.connect(_on_combat_tick_advanced)
 	Signals.card_played.connect(_on_card_played)
 	
 	Signals.combat_started.connect(_on_combat_started)
@@ -252,6 +261,11 @@ func _on_run_ended() -> void:
 
 func _on_combat_started(event_id: String) -> void:
 	turn_count = 1
+	combat_tick = 0
+	unit_action_counts.clear()
+	_hero_actions_started = 0
+	cards_played_this_turn = []
+	cards_played_this_combat = []
 	# derive floor from the current location's floor number
 	var current_floor: int = Global.get_player_current_floor()
 	# generate new combat stats instance
@@ -280,20 +294,30 @@ func _on_combat_ended() -> void:
 				current_run_stats.add_to_enum_stat(RunStatsData.STATS.COMBAT_BOSS_COUNT, 1)
 				
 
+## Called by CombatDirector when the hero's action begins (before the overlay animation and
+## player_turn_started): the turn count is the number of hero actions, so per-turn stats reset here.
+func begin_hero_action() -> void:
+	_hero_actions_started += 1
+	if _hero_actions_started > 1:
+		turn_count += 1
+		if current_combat_stats != null:
+			current_combat_stats.turn_count += 1
+			current_combat_stats.reset_turn_stats()
+			# move cards played over and reset it
+			cards_played_this_combat.append(cards_played_this_turn)
+			cards_played_this_turn = []
+
 func _on_player_turn_started():
 	is_player_turn = true
 
 func _on_player_turn_ended():
 	is_player_turn = false
 
-func _on_enemy_turn_ended():
-	turn_count += 1
-	if current_combat_stats != null:
-		current_combat_stats.turn_count += 1
-		current_combat_stats.reset_turn_stats()
-		# move cards played over and reset it
-		cards_played_this_combat.append(cards_played_this_turn)
-		cards_played_this_turn = []
+func _on_unit_action_started(unit: BaseCombatant) -> void:
+	unit_action_counts[unit.unit_uid] = unit_action_counts.get(unit.unit_uid, 0) + 1
+
+func _on_combat_tick_advanced(_previous_tick: int, current_tick: int) -> void:
+	combat_tick = current_tick
 
 #endregion
 

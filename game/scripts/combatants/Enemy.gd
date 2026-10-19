@@ -32,7 +32,8 @@ var enemy_intent_number_of_attacks: int = 0
 
 func init(_enemy_data: EnemyData):
 	enemy_data = _enemy_data
-	
+	base_speed = enemy_data.enemy_speed
+
 	selection_button.mouse_entered.connect(_on_mouse_entered)
 	selection_button.mouse_exited.connect(_on_mouse_exited)
 	
@@ -51,6 +52,11 @@ func init(_enemy_data: EnemyData):
 	
 func _get_default_faction() -> int:
 	return FACTIONS.ENEMY
+
+func get_unit_display_name() -> String:
+	if enemy_data != null and enemy_data.enemy_name != "":
+		return enemy_data.enemy_name
+	return name
 
 func get_animation_data() -> AnimationData:
 	var animation_data: AnimationData = Global.get_animation_data(enemy_data.enemy_animation_id)
@@ -161,6 +167,68 @@ func cycle_enemy_intent():
 	update_enemy_intent()
 	Signals.enemy_intent_changed.emit()
 
+## Decides and displays the intent for the enemy's next action. Called by CombatDirector when the
+## enemy enters the timeline (combat start / spawn) and after each of its actions.
+func decide_next_intent() -> void:
+	cycle_enemy_intent()
+
+## Action payload performing the given intent: reset block (optional), block, attacks and the
+## intent's custom actions. NOTE: ActionHandler pops these in reverse order, so reset block runs first.
+func build_intent_actions_data(enemy_intent: EnemyIntentData, include_reset_block: bool = true) -> Array[Dictionary]:
+	var enemy_actions_data: Array[Dictionary] = []
+	var intent_attack_damage: int = 0
+	var intent_number_of_attacks: int = 0
+	var intent_block: int = 0
+	var intent_audio_path: String = ""
+	var intent_attack_impact_animation_id: String = ""
+	if enemy_intent != null:
+		# add custom actions
+		enemy_actions_data.assign(enemy_intent.enemy_intent_custom_actions)
+		# get attack data
+		intent_attack_damage = enemy_intent.enemy_intent_attack_damage
+		intent_number_of_attacks = enemy_intent.enemy_intent_number_of_attacks
+		intent_block = enemy_intent.enemy_intent_block
+		intent_audio_path = enemy_intent.enemy_intent_audio_path
+		intent_attack_impact_animation_id = enemy_intent.enemy_intent_attack_impact_animation_id
+
+	# add attacks
+	if intent_number_of_attacks > 0:
+		enemy_actions_data.append(
+		{
+		Scripts.ACTION_ATTACK_GENERATOR:
+			{
+			"damage": intent_attack_damage,
+			"number_of_attacks": intent_number_of_attacks,
+			"impact_vfx_animation_id": intent_attack_impact_animation_id,
+			"time_delay": EnemyData.ENEMY_ATTACK_DELAY,
+			"audio_path": intent_audio_path
+			}
+		})
+
+	# add block
+	if intent_block > 0:
+		enemy_actions_data.append(
+			{
+			Scripts.ACTION_BLOCK: {
+				"block": intent_block,
+				"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
+				"time_delay": 0.0,
+				}
+			}
+	)
+
+	# add reset block action (runs first on the stack)
+	if include_reset_block:
+		enemy_actions_data.append(
+		{
+		Scripts.ACTION_RESET_BLOCK:  {
+			"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
+			"time_delay": 0.0
+			}
+		}
+		)
+	return enemy_actions_data
+
 ## Displays the enemy's intentions above them based on their current intent.
 func update_enemy_intent():
 	# get current intent's attack
@@ -242,9 +310,6 @@ func _on_combat_started(_event_id: String):
 
 func _on_combat_ended():
 	queue_free()
-
-func _on_player_turn_started():
-	cycle_enemy_intent()
 
 func _on_selection_button_up():
 	if is_alive():

@@ -34,6 +34,10 @@ enum ENEMY_TYPES {STANDARD, MINIBOSS, BOSS}
 ## Maps status effect ids to charge count at start of combat.
 @export var enemy_initial_status_effects: Dictionary[String, int] = {}
 
+## Combat timeline speed: wait between actions = action delay * scale / speed (see CombatRulesData).
+## 10 for every unit reproduces the original fixed alternation.
+@export var enemy_speed: int = BaseCombatant.DEFAULT_SPEED
+
 ## Time in seconds between each enemy attack.
 const ENEMY_ATTACK_DELAY: float = 0.5
 

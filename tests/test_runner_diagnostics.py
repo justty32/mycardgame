@@ -518,6 +518,13 @@ def main() -> None:
     parsed = runner.parse_args(["--suite", "saveload"])
     assert_that(parsed.suite == "SaveLoad" and runner.expand_suites("Combat") == ["CombatVictory", "CombatDefeat"]
                 and runner.expand_suites("All") == list(runner.ALL_SUITES), "suite names are case-insensitive and expand like the PowerShell runner")
+    assert_that(runner.parse_args(["--suite", "ctb"]).suite == "Ctb" and "Ctb" in runner.ALL_SUITES
+                and runner.SUITE_SCRIPTS["Ctb"] == "ctb_flow.gd" and runner.SUITE_MARKERS["Ctb"] == "CTB PASS:"
+                and runner.build_user_args("Ctb") == [] and runner.expand_suites("Ctb") == ["Ctb"],
+                "Ctb suite (combat framework action timeline) is part of All with its own script and marker")
+    assert_that(judge("CTB PASS: 10 checks, 0 failures", marker="CTB PASS:")["passed"]
+                and not judge("CTB FAIL: 10 checks, 1 failures\nFAIL: order", marker="CTB PASS:")["passed"],
+                "Ctb verdict needs the CTB PASS marker and no FAIL lines")
 
     MANIFEST["completed"] = True
     MANIFEST["checks"] = CHECKS

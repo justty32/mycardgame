@@ -84,6 +84,9 @@ enum INTENT_DISPLAY_TYPES {
 ## random weighted integer chance of the next intent, defining a random walk.
 @export var enemy_intent_next_intent_weights: Dictionary[String, int] = {}
 
+## Combat timeline delay of the action performing this intent: -1 = CombatRulesData.default_action_delay.
+@export var enemy_intent_action_delay: int = -1
+
 ## Figures out the display types (overhead symbols) based on intent's parameters and custom actions.
 func infer_intent_display_types() -> void:
 	# infer blocking display type

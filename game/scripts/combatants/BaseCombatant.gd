@@ -50,8 +50,9 @@ var next_action_tick: int = 0
 var last_action_tick: int = 0
 ## Number of own actions started this combat (unit_action_started with unit == self).
 var action_count: int = 0
-## Decides the unit's actions. Typed as RefCounted until BaseUnitController exists; null = legacy flow.
-var controller: RefCounted = null
+## Decides the unit's actions on the combat timeline; CombatDirector assigns a default
+## (PlayerInputController for PARTY, EnemyIntentController otherwise) when null at combat start.
+var controller: BaseUnitController = null
 #endregion
 
 func _ready():
@@ -85,6 +86,10 @@ func is_hero() -> bool:
 ## Override to apply speed modifiers (e.g. status effects in later phases).
 func get_speed() -> int:
 	return base_speed
+
+## Override. Short name for timeline / HUD display.
+func get_unit_display_name() -> String:
+	return name
 
 func _on_unit_tree_exiting() -> void:
 	UnitRegistry.unregister_unit(self)
@@ -485,14 +490,33 @@ func _on_player_turn_ended():
 	pass
 
 
-## Processes and then decays all status effects belonging to a given process type (turn phase)
+## Processes and then decays all status effects belonging to a given process type (action phase)
 func perform_status_effect_process_actions(status_effect_process_time: int = StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DRAW_PLAYER_START_TURN):
 	var status_effect_ids: Array = _get_status_effects_with_process_time(status_id_to_status_effects.keys(), status_effect_process_time)
-	
+	_process_status_effects(status_effect_ids)
+
+## Processes EVERY_N_TICKS statuses once per crossed multiple of status_effect_tick_interval
+## between the two clock values. Called by CombatDirector when the combat clock advances.
+func perform_tick_status_effects(previous_tick: int, current_tick: int) -> void:
+	var status_effect_ids: Array = _get_status_effects_with_process_time(status_id_to_status_effects.keys(), StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.EVERY_N_TICKS)
+	for status_effect_object_id in status_effect_ids:
+		var status_effect_data: StatusEffectData = Global.get_status_effect_data(status_effect_object_id)
+		var interval: int = max(1, status_effect_data.status_effect_tick_interval)
+		@warning_ignore("integer_division")
+		var times: int = (current_tick / interval) - (previous_tick / interval)
+		for _i: int in max(0, times):
+			if not status_id_to_status_effects.has(status_effect_object_id):
+				break	# decayed away
+			_process_status_effects([status_effect_object_id])
+
+## Performs and then decays the given statuses in priority order.
+func _process_status_effects(status_effect_ids: Array) -> void:
 	# sort the statuses by their process priority
 	status_effect_ids.sort_custom(_sort_status_effect_priorities)
-	
+
 	for status_effect_object_id in status_effect_ids:
+		if not status_id_to_status_effects.has(status_effect_object_id):
+			continue
 		var status_effect_data: StatusEffectData = Global.get_status_effect_data(status_effect_object_id)	
 		# perform the status effect
 		var status_effects: Array[StatusEffect] = status_id_to_status_effects[status_effect_object_id]
