@@ -10,22 +10,22 @@ mod 三個資料檔與清單登記存在；專屬 helper 已接入既有 suite�
 
 ## 準備候選副本
 
-正式實作可直接修改授權中的 game／tests，再由 runner 隔離；若只是試教學、不應改原檔，先在 PowerShell 7 建唯一候選根。以下只複製 game、tools、tests，沒有複製個人存檔、Git 或引擎，也不刪來源。
+正式實作可直接修改授權中的 game／tests，再由 runner 隔離；若只是試教學、不應改原檔，先建唯一候選根。以下只複製 game、tools、tests，排除個人存檔、Git、cache 與連結，不複製引擎，也不刪來源。bash 用 heredoc；PowerShell 把同一段 Python 包成 `@' … '@ | python -`。
 
-```powershell
-$repoRoot = (Get-Location).Path
-$candidateRoot = Join-Path $repoRoot ('artifacts/mod-bootstrap-' + [guid]::NewGuid().ToString('N'))
-$candidateGame = Join-Path $candidateRoot 'game'
-$enginePath = Join-Path $repoRoot '.tools/godot-4.6/Godot_v4.6-stable_win64_console.exe'
-New-Item -ItemType Directory -Path $candidateRoot | Out-Null
-$sourceGame = Join-Path $repoRoot 'game'
-& robocopy $sourceGame $candidateGame /E /R:0 /W:0 /NFL /NDL /NJH /NJS /NP /XJ /XD .git .godot .import .saves .screenshots (Join-Path $sourceGame 'external/saves') /XF profile.json user_settings.json
-if ($LASTEXITCODE -ge 8) { throw 'Candidate game copy failed' }
-foreach ($part in @('tools', 'tests')) {
-    & robocopy (Join-Path $repoRoot $part) (Join-Path $candidateRoot $part) /E /R:0 /W:0 /NFL /NDL /NJH /NJS /NP /XJ
-    if ($LASTEXITCODE -ge 8) { throw "Candidate $part copy failed" }
-}
-$candidateRoot
+```bash
+python3 - <<'EOF'
+import shutil, uuid
+from pathlib import Path
+root = Path.cwd()
+cand = root / 'artifacts' / f'mod-bootstrap-{uuid.uuid4().hex}'
+base = shutil.ignore_patterns('.git', '.godot', '.import', '.saves', '.screenshots', 'profile.json', 'user_settings.json')
+def skip(d, names):
+    return set(base(d, names)) | ({'saves'} if Path(d).name == 'external' else set())
+shutil.copytree(root / 'game', cand / 'game', symlinks=True, ignore=skip)
+for part in ('tools', 'tests'):
+    shutil.copytree(root / part, cand / part, symlinks=True)
+print(cand)
+EOF
 ```
 
 以下檔案只寫到候選根。內容、fixture 與測試呼叫須在同一副本；來源鎖仍指上游。
@@ -73,23 +73,17 @@ func check_loaded(global_data: Node) -> Dictionary:
         _check(mod_results[label], label)
 ```
 
-runner 只接受固定 suite；沒有 `-Suite Mod` 或 `Custom`。它會複製 tests 頂層全部 `.gd`，但不會自動執行新 helper；上述呼叫才建立執行鏈。不要修改 `_finish()` 的 SMOKE PASS 標記或把失敗改成單純 print。
+runner 只接受固定 suite；沒有 `--suite Mod` 或 `Custom`。它會複製 tests 頂層全部 `.gd`，但不會自動執行新 helper；上述呼叫才建立執行鏈。不要修改 `_finish()` 的 SMOKE PASS 標記或把失敗改成單純 print。
 
 ## 實際命令與交付範圍
 
-確認引擎位置後，在同一 PowerShell session 執行候選 runner。暫時將當次程序 APPDATA 指到候選私有目錄，讓 user:// 也留在可寫範圍；finally 還原，不改永久環境設定：
+以候選根自己的 runner 執行（`<candidateRoot>` 換成上一步印出的路徑）。引擎省略時由 runner 探測；候選根沒有 `.tools/`，引擎不在 PATH（例如 Windows 的可攜版）就加 `--godot-path`。user:// 與 APPDATA／XDG 目錄由 runner 導到該次 run 目錄，不必手動改環境變數：
 
-```powershell
-$previousAppData = $env:APPDATA
-try {
-    $env:APPDATA = Join-Path $candidateRoot 'user-data'
-    New-Item -ItemType Directory -Path $env:APPDATA -Force | Out-Null
-    & (Join-Path $candidateRoot 'tools/test-game.ps1') -Suite Smoke -GodotPath $enginePath
-}
-finally { $env:APPDATA = $previousAppData }
+```bash
+python3 <candidateRoot>/tools/test_game.py --suite Smoke --project-root <candidateRoot>
 ```
 
-日誌位於候選根的 artifacts/verification；讀其 results.json、smoke.log 及 console log。成功需 `completed=true`、`verdict=PASS`、各階段符合 testing 規則，且出現八項 `PASS: MOD:`，不能只看到舊 Smoke PASS。正式接回專案 game／tests 後命令是 `./tools/test-game.ps1 -Suite Smoke`；若另用 `-SourceGame`，tests 仍取執行中 runner 所屬專案，不會跟到候選 game 的旁邊。
+日誌位於候選根的 artifacts/verification；讀其 results.json、smoke.log 及 console log。成功需 `completed=true`、`verdict=PASS`、各階段符合 testing 規則，且出現八項 `PASS: MOD:`，不能只看到舊 Smoke PASS。正式接回專案 game／tests 後命令是 `python3 tools/test_game.py --suite Smoke`；若另用 `--source-game`，tests 仍取執行中 runner 所屬專案，不會跟到候選 game 的旁邊。
 
 runner 的 source_hashes 只涵蓋 13 個框架檔；另記 mod 三檔、mod_list 及修改 tests 的 SHA-256、候選根與日誌。候選與正式檔不一致時不能沿用證據。實作後依內容入口同步文件及 lint；只演練則保留未落地標記。
 
@@ -97,4 +91,4 @@ runner 的 source_hashes 只涵蓋 13 個框架檔；另記 mod 三檔、mod_lis
 
 圖像／UI／音訊 fixture 另依領域流程。headless 不證明畫面正確或音訊無實體輸出；播放測試先隔離音訊裝置。教學手動驗收僅在有效 GUI 授權下執行。
 
-2026-10-19 依上游 4dac5abe 加本地修復核對；後續候選 Smoke 為 52／0，八項新斷言均執行。首次失敗、重試證據與未驗範圍見 [實跑分析](../../../../analysis/slay-the-robot/design/mod-bootstrap.md)，不代表正式遊戲已加入此 mod。
+2026-10-19 依上游 4dac5abe 加本地修復核對；後續候選 Smoke 為 52／0，八項新斷言均執行（當時為 Godot 4.6 與 PowerShell 候選流程）。首次失敗、重試證據與未驗範圍見 [實跑分析](../../../../analysis/slay-the-robot/design/mod-bootstrap.md)，不代表正式遊戲已加入此 mod。

@@ -1,0 +1,140 @@
+Godot Engine v4.7.2.stable.mono.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+SMOKE: Global autoload _ready has already run; initial profile/settings reads or writes precede this script.
+PASS: test-runtime directory can be created
+PASS: profile writes resolve to artifacts/test-runtime
+PASS: configured main scene loads
+PASS: configured main scene instantiates
+PASS: main menu is visible after ready
+PASS: new run button initializes
+PASS: character_red is registered
+PASS: card prototypes are registered
+PASS: red character has a starting deck
+PASS: starting card resolves: card_attack_basic
+PASS: starting card resolves: card_attack_basic
+PASS: starting card resolves: card_attack_basic
+PASS: starting card resolves: card_block_basic
+PASS: starting card resolves: card_block_basic
+PASS: starting card resolves: card_block_basic
+PASS: starting card resolves: card_attack_all
+PASS: starting card resolves: card_attack_in_center
+PASS: starting card resolves: card_attack_money_on_lethal
+PASS: starting card resolves: card_next_attack_free
+PASS: starting card resolves: card_law
+PASS: starting card resolves: card_law
+PASS: starting card resolves: card_attack_with_conditional_block
+PASS: starting card resolves: card_damage_increase
+PASS: starting card resolves: card_attack_ignore_damage_increase
+PASS: starting card resolves: card_weaken_enemies
+PASS: starting card resolves: card_vulnerable_enemies
+PASS: starting card resolves: card_grant_energy
+PASS: starting card resolves: card_right_click_transform_mode_a
+PASS: SerializableData JSON patch appends to CharacterData Array
+PASS: array patch probe completed
+PASS: Dictionary JSON patch merge_keep preserves its strategy contract
+PASS: Dictionary JSON patch merge_overwrite preserves its strategy contract
+PASS: Dictionary JSON patch overwrite preserves its strategy contract
+PASS: Dictionary JSON patch unknown_strategy preserves its strategy contract
+PASS: dictionary patch assertions completed
+PASS: test-only mod list adapter compiles after autoload initialization
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+       [1] _check_example_mod ({PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke/tests/framework_smoke.gd:110)
+       [2] _run ({PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke/tests/framework_smoke.gd:62)
+PASS: real FileLoader registers example_mod card
+PASS: example_mod appends one starting card and preserves original order
+PASS: example_mod probe leaves mod_list.json unchanged
+PASS: example_mod deserializes its play action
+PASS: example_mod takes over the debug action resource path
+PASS: ActionGenerator creates the card action with the replacement script
+SMOKE: example_mod enabled only in this process; no run started, save-game or mod-list file written by this probe.
+PASS: example_mod probe completed
+SMOKE PASS: 43 checks, 0 failures

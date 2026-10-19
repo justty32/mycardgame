@@ -15,7 +15,7 @@
 | 新 agent 接手、冷接手演練、拆任務、多 agent 協作與交接 | [agent-session](workflows/agent-session.md) |
 | 整體遊戲流程、關卡／卡牌／敵人，以及完整場景的美術／動畫／特效／音訊／UI | [game-dev](workflows/game-dev/README.md) |
 | 把可重複經驗變成工作流、更新開發慣例 | [learning](workflows/learning.md) |
-| WSL commit／push、snapshot、來源補丁與發布證據 | [版本控制](workflows/version-control.md) |
+| commit／push、snapshot、來源補丁與發布證據 | [版本控制](workflows/version-control.md) |
 
 遊戲需求先用 game-dev 分類，再接下方 feature-dev 的共同流程；不必逐篇讀取全部工作流。
 

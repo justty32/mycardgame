@@ -22,19 +22,19 @@
 
 **條件與對策**：fresh checkout 尚無 Godot class／UID cache 時，先執行 [dev-env](../dev-env.md) 的 Import，再啟動或 Smoke。不要在首次解析失敗時直接替換上游 UID 或刪除引用。
 
-**驗收與邊界**：確認匯入完成、Smoke 有 PASS 且無 SCRIPT ERROR；仍保留固定版本的舊 icon UID 警告。此步不保證所有 UID 問題消失，匯入後持續失敗須查資源本身。證據：2026-10-19、Godot 4.6／上游 `4dac5abe`，[啟動驗證](../../../analysis/slay-the-robot/architecture/03_startup_validation.md) 的 cache 與啟動結果。
+**驗收與邊界**：確認匯入完成、Smoke 有 PASS 且無 SCRIPT ERROR；仍保留固定版本的舊 icon UID 警告。此步不保證所有 UID 問題消失，匯入後持續失敗須查資源本身。證據：2026-10-19、Godot 4.6／上游 `4dac5abe`，[啟動驗證](../../../analysis/slay-the-robot/architecture/03_startup_validation.md) 的 cache 與啟動結果。同日於 Godot 4.7.2（Linux）隔離 Smoke 通過，冷匯入也未出現指定 UID 錯誤，見 [upstream.json](../../../tools/upstream.json) `engine_policy.migration_from_4_6`。
 
 ## 外部測試入口避開過早解析 autoload 依賴
 
 **條件與對策**：用外部 `--script` 執行 SceneTree 測試、在入口解析階段碰到專案類別／autoload 依賴時，先完成 Import，再將工作 `call_deferred()` 到初始化後，由 `root.get_node()` 取得單例、在執行期 `load()` 需要的腳本。只延後函式呼叫不會延後頂層 preload 或型別解析。
 
-**驗收與邊界**：確認真正主場景完成 ready、子測試完成且無解析錯誤；不要為測試入口改寫遊戲的正常 autoload 設計，也不要假設 deferred 已隔離首次 ready 的檔案副作用。成功方式見 [framework_smoke.gd](../../../tests/framework_smoke.gd) `_initialize()`／`_run()`；證據基準為 2026-10-19、Godot 4.6／`4dac5abe`，適用此測試入口，非所有 Godot 腳本的普遍限制。
+**驗收與邊界**：確認真正主場景完成 ready、子測試完成且無解析錯誤；不要為測試入口改寫遊戲的正常 autoload 設計，也不要假設 deferred 已隔離首次 ready 的檔案副作用。成功方式見 [framework_smoke.gd](../../../tests/framework_smoke.gd) `_initialize()`／`_run()`；證據基準為 2026-10-19、Godot 4.6／`4dac5abe`，適用此測試入口，非所有 Godot 腳本的普遍限制；同日於 4.7.2（Linux）重跑一致，見 [upstream.json](../../../tools/upstream.json) `engine_policy.migration_from_4_6`。
 
 ## PASS 只能代表斷言涵蓋範圍
 
 **條件與對策**：啟動測試同時列出診斷與已知缺陷時，逐項區分 assertions、observations 與未測項。最初 Smoke 的 Dictionary 只是診斷；本地修復後已提升為斷言。Smoke 仍不包含自訂卡牌實際出牌或完整戰鬥，須另選對應 suite。
 
-**驗收與邊界**：看 exit code、PASS 標記、SCRIPT ERROR／FAIL 與已知問題；失敗控制只證明退出碼，修 bug 要證明同一行為斷言在舊碼失敗、修後通過。證據：2026-10-19、Godot 4.6／`4dac5abe` 加本地修復，[回歸紀錄](../../../analysis/slay-the-robot/architecture/04_regression_validation.md) 保留真紅與真綠。新情境的退出資源數量變化需查明，不能沿用啟動基準一概忽略。
+**驗收與邊界**：看 exit code、PASS 標記、SCRIPT ERROR／FAIL 與已知問題；失敗控制只證明退出碼，修 bug 要證明同一行為斷言在舊碼失敗、修後通過。證據：2026-10-19、Godot 4.6／`4dac5abe` 加本地修復，[回歸紀錄](../../../analysis/slay-the-robot/architecture/04_regression_validation.md) 保留真紅與真綠；同日 4.7.2（Linux）重跑斷言數一致，見 [upstream.json](../../../tools/upstream.json) `engine_policy.migration_from_4_6`。新情境的退出資源數量變化需查明，不能沿用啟動基準一概忽略。
 
 ## 修改角色內容須分別核對新開局與舊存檔
 
@@ -44,6 +44,6 @@
 
 ## 存讀測試在 autoload 之前隔離
 
-**條件與對策**：驗 autosave、Continue 或壞檔時，用 [test-game.ps1](../../../tools/test-game.ps1) 先複製乾淨遊戲再啟動；預設 saves、profile、settings 和 user:// 都要隔離。只給 save_game 自訂路徑不能涵蓋 autosave，也不能攔 Global 首次 ready 的寫入。
+**條件與對策**：驗 autosave、Continue 或壞檔時，用 [test_game.py](../../../tools/test_game.py) 先複製乾淨遊戲再啟動；預設 saves、profile、settings 和 user:// 都要隔離。只給 save_game 自訂路徑不能涵蓋 autosave，也不能攔 Global 首次 ready 的寫入。
 
 **驗收與邊界**：寫入和讀回使用兩個程序，除了資料欄位相同，還要驗 RNG 後續輸出及載入後下一步。壞檔失敗須保留原記憶體狀態，不可只檢查檔案存在或 JSON 可解析。證據：2026-10-19 [流程驗證](../../../analysis/slay-the-robot/architecture/04_regression_validation.md)；這是本版 checkpoint 契約，非戰鬥 SceneTree 快照。

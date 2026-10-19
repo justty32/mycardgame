@@ -46,7 +46,7 @@ Continue 可不買離開；一般返回 Map，幕尾可 generate_next_act，終�
 
 ### 專項 fixture 與驗收
 
-依 verification 在 autoload ready 後 runtime load 建議的 tests/ui_shop_rest_probe.gd（未建立）。節點／素材檢查接 Smoke Root ready 後；互動另建設施情境，沿 Combat `_scenario()` 起局／固定 seed／map button 模式，配置可達 SHOP→REST_SITE→下一節點，呼叫 Shop.button_up 進商店。新 suite 由 runner owner 接 ValidateSet、分支、mapping、PASS／結果。
+依 verification 在 autoload ready 後 runtime load 建議的 tests/ui_shop_rest_probe.gd（未建立）。節點／素材檢查接 Smoke Root ready 後；互動另建設施情境，沿 Combat `_scenario()` 起局／固定 seed／map button 模式，配置可達 SHOP→REST_SITE→下一節點，呼叫 Shop.button_up 進商店。新 suite 由 runner owner 接 SUITE_CHOICES（及 ps1 ValidateSet）、分支、mapping、PASS／結果。
 
 ShopData fixture 固定商品及價格並標 shop_is_visited，避免重開隨機重生。分別用 price−1、price、足額／滿槽，記交易前後 money、永久牌組／遺物／消耗品、庫存、按鈕數；售罄、全空、外部金錢改變、重複點擊與 Continue／重開各有斷言。零價 stale action 是待修失敗案例，不作正常預期。
 

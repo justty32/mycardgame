@@ -56,7 +56,7 @@ AnimationPlayer 已有 `flash_map_location`：2 秒循環、self_modulate 白→
 
 查每個節點的 position／label／flash animation、STARTING 不顯示、container 高度與空圖出口。讀取與重建前後記 RNG／事件池，證明預覽未抽事件。查看模式與不可達點擊經真實 MapLocation.button_up，應不改 player_location_id、shop、存檔與 visited；目前 visited 問題明列預期失敗，不能默默放寬斷言。
 
-合法點擊後有界等待 action idle，驗 location_id、visited、shop 清除、訊號恰一次及 Map 關閉；連點、Back／重開與幕尾另列。測 populate 後同 frame 重建／釋放，確認舊節點 queue_free、pending callback 取消且不指向新 scene。若改 travel 時序，補 combat／dialogue／shop／rest 返回情境。新增 suite 要同步 runner 的 ValidateSet、分支、mapping、PASS marker／manifest；現有 Combat 單條路徑不是全圖驗收。
+合法點擊後有界等待 action idle，驗 location_id、visited、shop 清除、訊號恰一次及 Map 關閉；連點、Back／重開與幕尾另列。測 populate 後同 frame 重建／釋放，確認舊節點 queue_free、pending callback 取消且不指向新 scene。若改 travel 時序，補 combat／dialogue／shop／rest 返回情境。新增 suite 要同步 runner 的 SUITE_CHOICES、分支、mapping、PASS marker／manifest；現有 Combat 單條路徑不是全圖驗收。
 
 ## 交接
 

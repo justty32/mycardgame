@@ -26,7 +26,7 @@
 
 ## 逐步縮小問題
 
-使用 [test-game.ps1](../../../tools/test-game.ps1) 的相關 suite 先驗可在背景涵蓋的邊界，保持來源版本、fixture 與參數可比。一次只改一個會影響結果的條件；同一命令沒有重現時，記為該條件下未重現，不等於問題不存在。
+使用 [test_game.py](../../../tools/test_game.py)（Windows 亦可經 test-game.ps1 包裝）的相關 suite 先驗可在背景涵蓋的邊界，保持來源版本、fixture 與參數可比。一次只改一個會影響結果的條件；同一命令沒有重現時，記為該條件下未重現，不等於問題不存在。
 
 headless 可檢查載入與邏輯，但不驗證實際 GPU 驅動、視窗呈現、桌面輸入或 GUI 事件路徑。若原錯誤只發生於這些路徑，本次保留待補證據，不用無關 headless 成功代替。
 
@@ -40,10 +40,10 @@ runner 的實際診斷欄位以當前程式與輸出為準；只有改過程式�
 
 ## 現有 runner 的診斷範圍
 
-[test-game.ps1](../../../tools/test-game.ps1) 在 starting、running 與 phase finally 更新同次 `results.json`；[diagnostics helper](../../../tools/test-game-diagnostics.ps1) 以暫存檔原子替換。phase 記錄 executable、參數、工作目錄、`launched_pid`、`status`、`exit_code`／`exit_code_hex`、timeout 與 `native_crash_signatures`。`started_utc` 是被啟動程序的 StartTime；`ended_utc` 是 runner finally 的觀察時間，不是作業系統提供的精確死亡時刻。
+[test_game.py](../../../tools/test_game.py) 在 starting、running 與 phase finally 更新同次 `results.json`，以暫存檔原子替換。phase 記錄 executable、參數、工作目錄、`launched_pid`、`status`、`exit_code`／`exit_code_hex`、timeout 與 `native_crash_signatures`。`started_utc`／`ended_utc` 都是 runner 在啟動後與 finally 的觀察時間，不是作業系統提供的精確開始／死亡時刻。Linux 上程序被訊號終止時，`exit_code` 依 shell 慣例記 128+N，另存 `exit_signal`=N 與 `exit_code_raw`=-N（如 SIGSEGV 為 139／11）；Windows 的退出碼原樣保留，`exit_code_hex` 對應 0xC0000005 類狀態。
 
 `launched_pid_kind` 按 executable 名稱標示 `console_wrapper` 或 `invoked_executable`；前者的 PID／exit 屬於 console wrapper，不能冒充實際 engine 子程序。這套診斷沒有自動收集 WER、故障模組或子程序身分，仍需另以可讀的現場證據關聯。
 
 啟動前的 `log_write_preflight` 用相同權限開啟精確 log 目標，不截斷既有內容；失敗時記錄失敗且 PID 為 null，不啟動引擎。精確匹配行首 `CrashHandlerException`／`handle_crash` 的 `Program crashed with signal N` 會使該 phase 失敗，即使有 PASS 且啟動程序 exit 0；沒有匹配也不等於排除了所有原生 crash。
 
-2026-10-19 已執行 [test_runner_diagnostics.ps1](../../../tests/test_runner_diagnostics.ps1)：32 項合成檢查通過，使用隱藏的非互動 PowerShell fixture，沒有啟動 Godot。案例包括 log 無法寫入時不啟動、正常退出、crash 標記及失敗／逾時記錄；[結果](../../../analysis/slay-the-robot/evidence/2026-10-19/runner-diagnostics-results.json) 保留各 phase。這驗的是 runner 判讀與留證，不能寫成 Godot crash 修復或 GUI 穩定性驗收。
+2026-10-19 runner 改為 Python 後，[test_runner_diagnostics.py](../../../tests/test_runner_diagnostics.py) 於 Linux 執行 105 項合成檢查通過：以假引擎程序走真實判讀流程，沒有啟動 Godot。案例包括 log 無法寫入時不啟動、正常退出、crash 標記、訊號結束碼及失敗／逾時記錄；Windows 端尚未實測。舊 PowerShell 版 32 項的[歷史結果](../../../analysis/slay-the-robot/evidence/2026-10-19/runner-diagnostics-results.json)保留各 phase。這驗的是 runner 判讀與留證，不能寫成 Godot crash 修復或 GUI 穩定性驗收。

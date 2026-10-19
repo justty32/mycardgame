@@ -6,8 +6,8 @@
   "published_path"
  ],
  "redaction_rules": {
-  "PROJECT_ROOT": "original Windows or WSL project prefix",
-  "USER_PROFILE": "original Windows or WSL user home prefix"
+  "PROJECT_ROOT": "original Windows, WSL or Linux project prefix",
+  "USER_PROFILE": "original Windows, WSL or Linux user home prefix"
  },
  "columns": [
   "id",
@@ -349,6 +349,176 @@
    "raw_bytes": 11519,
    "published_bytes": 10883,
    "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-results",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/results.json",
+   "published_path": "final-all-4.7.2-linux-results.json",
+   "raw_sha256": "4256159d12b17b67a50a1cc9d014278211985ec6ae54c8083886e7aacb528212",
+   "published_sha256": "b340a7b7c08b2fe092f52a168a7254e7a6492012487e2d1541fa9076a0dff846",
+   "raw_bytes": 46135,
+   "published_bytes": 44432,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-version",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/version.log",
+   "published_path": "final-all-4.7.2-linux/version.log",
+   "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "raw_bytes": 0,
+   "published_bytes": 0,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-version-console",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/version.console.log",
+   "published_path": "final-all-4.7.2-linux/version.console.log",
+   "raw_sha256": "43f2c35e605f53de2c42953fdccdf376e6ab5632fdecc509de74424605798917",
+   "published_sha256": "43f2c35e605f53de2c42953fdccdf376e6ab5632fdecc509de74424605798917",
+   "raw_bytes": 40,
+   "published_bytes": 40,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-ResourceLifecycle-import",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/import.log",
+   "published_path": "final-all-4.7.2-linux/ResourceLifecycle/import.log",
+   "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "raw_bytes": 16955,
+   "published_bytes": 16955,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-ResourceLifecycle-resourcelifecycle",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/resourcelifecycle.log",
+   "published_path": "final-all-4.7.2-linux/ResourceLifecycle/resourcelifecycle.log",
+   "raw_sha256": "97af15bd41c086d614edda7dd0b6491bd07bcc7bfff6f06df9ed9bec6ee4a222",
+   "published_sha256": "97af15bd41c086d614edda7dd0b6491bd07bcc7bfff6f06df9ed9bec6ee4a222",
+   "raw_bytes": 12986,
+   "published_bytes": 12986,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-Dictionary-import",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/Dictionary/import.log",
+   "published_path": "final-all-4.7.2-linux/Dictionary/import.log",
+   "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "raw_bytes": 16955,
+   "published_bytes": 16955,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-Dictionary-dictionary",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/Dictionary/dictionary.log",
+   "published_path": "final-all-4.7.2-linux/Dictionary/dictionary.log",
+   "raw_sha256": "707845e31b7bd09664d21deedb1806407f3de7c63fcc3ded75c047364bf71550",
+   "published_sha256": "707845e31b7bd09664d21deedb1806407f3de7c63fcc3ded75c047364bf71550",
+   "raw_bytes": 9607,
+   "published_bytes": 9607,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-Smoke-import",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/Smoke/import.log",
+   "published_path": "final-all-4.7.2-linux/Smoke/import.log",
+   "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "raw_bytes": 16955,
+   "published_bytes": 16955,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-Smoke-smoke",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/Smoke/smoke.log",
+   "published_path": "final-all-4.7.2-linux/Smoke/smoke.log",
+   "raw_sha256": "8453db865e0e3da4a9ec3c7a19d3f720fdec726b138f332ed289b55cd6cfe63b",
+   "published_sha256": "3d48d54f0e19cd9541b6bc69da63d57a078da9e17d7dd270bb2e0d5446ab5db5",
+   "raw_bytes": 9935,
+   "published_bytes": 9887,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-CombatVictory-import",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/CombatVictory/import.log",
+   "published_path": "final-all-4.7.2-linux/CombatVictory/import.log",
+   "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "raw_bytes": 16955,
+   "published_bytes": 16955,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-CombatVictory-combatvictory",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/CombatVictory/combatvictory.log",
+   "published_path": "final-all-4.7.2-linux/CombatVictory/combatvictory.log",
+   "raw_sha256": "066ba9a64b5dfa6b9e4ceae1ade0288bd5e21164fdeb9f44f5b7886bcb8f0bcb",
+   "published_sha256": "066ba9a64b5dfa6b9e4ceae1ade0288bd5e21164fdeb9f44f5b7886bcb8f0bcb",
+   "raw_bytes": 12993,
+   "published_bytes": 12993,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-CombatDefeat-import",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/CombatDefeat/import.log",
+   "published_path": "final-all-4.7.2-linux/CombatDefeat/import.log",
+   "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "raw_bytes": 16955,
+   "published_bytes": 16955,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-CombatDefeat-combatdefeat",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/CombatDefeat/combatdefeat.log",
+   "published_path": "final-all-4.7.2-linux/CombatDefeat/combatdefeat.log",
+   "raw_sha256": "ad7c81c480b527fa8a5bed93acfc0483b366b103fb14d73a2a77a7184b630494",
+   "published_sha256": "ad7c81c480b527fa8a5bed93acfc0483b366b103fb14d73a2a77a7184b630494",
+   "raw_bytes": 10387,
+   "published_bytes": 10387,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-SaveLoad-import",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/SaveLoad/import.log",
+   "published_path": "final-all-4.7.2-linux/SaveLoad/import.log",
+   "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "raw_bytes": 16955,
+   "published_bytes": 16955,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-SaveLoad-save-write",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/SaveLoad/save-write.log",
+   "published_path": "final-all-4.7.2-linux/SaveLoad/save-write.log",
+   "raw_sha256": "fbf0741bb1d4bfe00d682edb245d2c9744fcef393af189dab3e33226864476ec",
+   "published_sha256": "49af91123371926dc56ca05d2af8f707a3a3d2503b2b2b823811bb2bbe8f341b",
+   "raw_bytes": 8656,
+   "published_bytes": 8632,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-SaveLoad-save-read",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/SaveLoad/save-read.log",
+   "published_path": "final-all-4.7.2-linux/SaveLoad/save-read.log",
+   "raw_sha256": "2697014e340168cff6e4d0a239a5ad1dc19266add1ecdea0f88c3e989f931d93",
+   "published_sha256": "8ada67002de5b9a0d2e475f9c106bf1815333b4982a12428c60ad8ba5185e057",
+   "raw_bytes": 10111,
+   "published_bytes": 10087,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-472-SaveLoad-save-rejected",
+   "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/SaveLoad/save-rejected.log",
+   "published_path": "final-all-4.7.2-linux/SaveLoad/save-rejected.log",
+   "raw_sha256": "a9183509a5a36ff15904172b0718a03b68b1b7b917bb486d2d27c696a515bca0",
+   "published_sha256": "743e6b8f8734df6584f7b7af2a1e8094287db498b21d96241d1939312e832507",
+   "raw_bytes": 18772,
+   "published_bytes": 18268,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
   }
  ]
 }

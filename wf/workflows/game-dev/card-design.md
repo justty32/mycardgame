@@ -71,7 +71,7 @@
 
 ### 將驗收接進可跑的測試
 
-2026-10-19 冷讀 [runner](../../../tools/test-game.ps1) 與 [fixture](../../../tests/combat_fixture.gd)：現有 Combat 會覆寫起始牌組，`combat_flow._play()` 的扣費斷言固定為 1；它不會因 mod 新增卡而自動測到該卡。安排專項載入／出牌／升級／取得 assertions，交 runner owner 接入隔離執行與完成標記。現在沒有 `-Suite Cards` 或任意腳本參數，不得虛構命令；已有 Smoke／Combat 成功只作基準。此結論為靜態核對，非新卡執行證據。
+2026-10-19 冷讀 [runner](../../../tools/test_game.py) 與 [fixture](../../../tests/combat_fixture.gd)：現有 Combat 會覆寫起始牌組，`combat_flow._play()` 的扣費斷言固定為 1；它不會因 mod 新增卡而自動測到該卡。安排專項載入／出牌／升級／取得 assertions，交 runner owner 接入隔離執行與完成標記。現在沒有 `--suite Cards` 或任意腳本參數，不得虛構命令；已有 Smoke／Combat 成功只作基準。此結論為靜態核對，非新卡執行證據。
 
 ## 交接
 

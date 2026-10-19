@@ -1,3 +1,4 @@
+# Legacy Windows-only entry (Run opens a GUI). Background verification uses tools/test_game.py.
 [CmdletBinding()]
 param(
     [ValidateSet('Run', 'Import', 'Smoke')]
@@ -9,7 +10,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 if (-not $GodotPath) {
-    $GodotPath = Join-Path $projectRoot '.tools/godot-4.6/Godot_v4.6-stable_win64_console.exe'
+    $GodotPath = Join-Path $projectRoot '.tools/godot-4.7/Godot_v4.7.2-stable_win64_console.exe'
 }
 $GodotPath = (Resolve-Path -LiteralPath $GodotPath).Path
 $gamePath = Join-Path $projectRoot 'game'
@@ -19,8 +20,8 @@ if (-not (Test-Path -LiteralPath (Join-Path $gamePath 'project.godot'))) {
 $logDirectory = Join-Path $projectRoot 'artifacts/startup'
 New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
 $godotVersion = & $GodotPath --version
-if ($LASTEXITCODE -ne 0 -or $godotVersion -notmatch '^4\.6\.') {
-    throw "Expected Godot 4.6; received: $godotVersion"
+if ($LASTEXITCODE -ne 0 -or $godotVersion -notmatch '^4\.7\.') {
+    throw "Expected Godot 4.7.x; received: $godotVersion"
 }
 $engineArguments = @('--path', $gamePath, '--log-file', (Join-Path $logDirectory "$($Mode.ToLowerInvariant()).log"))
 switch ($Mode) {

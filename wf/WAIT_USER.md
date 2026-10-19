@@ -10,4 +10,4 @@
 
 ## 待使用者項
 
-（目前無）
+- [testing] 回公司 Windows 機時跑 `./tools/test-game.ps1 -Suite All` 與 `python tests/test_runner_diagnostics.py`，確認 ps1 薄包裝、不開窗、taskkill 殺樹、APPDATA 隔離、.tools/godot-4.7 引擎探測（Python 3.12 以下的 junction 跳過）→ 回報結果後我修正並更新 dev-env／testing

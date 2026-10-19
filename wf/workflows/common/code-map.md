@@ -25,9 +25,9 @@
 
 序列化與擴充：[SerializableData.gd](../../../game/data/SerializableData.gd)、[擴充契約與限制](../../../analysis/slay-the-robot/architecture/02_extension_points.md)。Dictionary merge 已修，公開 API 回歸見 [dictionary_regression.gd](../../../tests/dictionary_regression.gd)；跨程序讀寫、續玩與拒絕無效輸入見 [save_load_flow.gd](../../../tests/save_load_flow.gd)。
 
-本專案工具：[game.ps1](../../../tools/game.ps1) 啟動／匯入／Smoke，[test-game.ps1](../../../tools/test-game.ps1) 隔離回歸與流程驗證，[upstream.json](../../../tools/upstream.json) 固定來源、引擎與本地修復。
+本專案工具：[test_game.py](../../../tools/test_game.py) 為跨平台隔離回歸與流程驗證 runner（Python 3.10+），[test-game.ps1](../../../tools/test-game.ps1) 是沿用舊參數的 Windows 薄包裝；[game.ps1](../../../tools/game.ps1) 為 Windows 專用的舊 Run／Import／Smoke 入口；[upstream.json](../../../tools/upstream.json) 固定來源、引擎政策（基準 4.7.x）與本地修復。
 
-程序診斷：[test-game-diagnostics.ps1](../../../tools/test-game-diagnostics.ps1) 保存退出碼、原生崩潰標記與逐階段結果；[test_runner_diagnostics.ps1](../../../tests/test_runner_diagnostics.ps1) 使用不開視窗的合成程序驗證 runner，不啟動 Godot。事故判讀見 [native-crash](../game-dev/native-crash.md)，執行前遵守 [使用者操作邊界](user.md)。
+程序診斷：[test_game.py](../../../tools/test_game.py) 本身保存退出碼、原生崩潰標記與逐階段結果；[test_runner_diagnostics.py](../../../tests/test_runner_diagnostics.py) 以不開視窗的假引擎程序驗證 runner，不啟動 Godot。事故判讀見 [native-crash](../game-dev/native-crash.md)，執行前遵守 [使用者操作邊界](user.md)。
 
 資源生命週期：[ActionInterceptorProcessor.gd](../../../game/scripts/action_interceptors/ActionInterceptorProcessor.gd)、[BaseAsyncAction.gd](../../../game/scripts/actions/BaseAsyncAction.gd)、[ActionHandler.gd](../../../game/autoload/ActionHandler.gd) 管理攔截器與等待／取消；Root／Map 離樹與選單型別也在清理範圍。專項入口為 [resource_lifecycle.gd](../../../tests/resource_lifecycle.gd)，實測與檔案責任見 [清理報告](../../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。
 

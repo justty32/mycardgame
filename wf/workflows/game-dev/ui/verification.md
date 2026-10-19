@@ -20,11 +20,11 @@
 
 ### 把新增 helper 真正接上
 
-[runner](../../../../tools/test-game.ps1) 只接受 All／Dictionary／Combat／SaveLoad／Smoke／ResourceLifecycle，沒有 UI suite。它複製 tests 頂層 `.gd`，**不會自動執行新 helper**；`-SourceGame` 只換 game 來源，tests 仍取 runner 所屬專案。候選副本方式見 [bootstrap](../content/bootstrap.md)。本篇的 helper 名稱是後續實作建議，目前不存在。
+[runner](../../../../tools/test_game.py) 只接受 All／Dictionary／Combat（含 CombatVictory／CombatDefeat）／SaveLoad／Smoke／ResourceLifecycle，沒有 UI suite。它複製 tests 頂層 `.gd`，**不會自動執行新 helper**；`--source-game` 只換 game 來源，tests 仍取 runner 所屬專案。候選副本方式見 [bootstrap](../content/bootstrap.md)。本篇的 helper 名稱是後續實作建議，目前不存在。
 
 靜態布局可建 tests/ui_layout_probe.gd（extends RefCounted），在 Smoke `_run()` 的 Root.add_child、兩次 process_frame 後、example mod probe 前，以 `load(get_script().resource_path.get_base_dir().path_join("ui_layout_probe.gd")).new()` 載入；呼叫其 `check_scene(game_root)`，把回傳的每筆 label／bool 交既有 `_check()`。若 helper 自己等待 layout，將方法設為 async 並由 caller await。需先建 helper 才插呼叫，不留無法載入的範例路徑。
 
-HUD／卡牌狀態 helper 可接在 Combat `_wait(_player_ready, ...)` 成功之後，既有 `_scenario()` 後續勝利出牌／`_defeat_flow()` 分支之前；只讀預覽或暫時選取／取消的 probe 須還原，不能改 HP／牌組破壞固定傷害斷言。獎勵 Skip 應另設情境，或在 `_claim_rewards()` 第一個 draft 開啟後驗 skip，再透過正式 reward action 提供第二次 draft 驗 claim；明列 fixture 差異，不直接 emit 勝利或竄改 HP 假造流程。需要新 suite 時連 runner 的 ValidateSet、選擇分支、script mapping、PASS marker／結果 manifest 一起接，交測試入口 owner 整合。
+HUD／卡牌狀態 helper 可接在 Combat `_wait(_player_ready, ...)` 成功之後，既有 `_scenario()` 後續勝利出牌／`_defeat_flow()` 分支之前；只讀預覽或暫時選取／取消的 probe 須還原，不能改 HP／牌組破壞固定傷害斷言。獎勵 Skip 應另設情境，或在 `_claim_rewards()` 第一個 draft 開啟後驗 skip，再透過正式 reward action 提供第二次 draft 驗 claim；明列 fixture 差異，不直接 emit 勝利或竄改 HP 假造流程。需要新 suite 時連 runner 的 SUITE_CHOICES（及 ps1 包裝的 ValidateSet）、選擇分支、script mapping、PASS marker／結果 manifest 一起接，交測試入口 owner 整合。
 
 helper 在 autoload ready 後才 runtime load，避免開頭 preload 提早解析遊戲全域 class。以既有 `_wait()` 型態等待 action idle／畫面狀態，有明確 timeout；不要固定睡一秒猜完成，也不要忽略 fail 繼續列 PASS。queue_free、Card 延後刷新與字級調整各自等待，最終移除 Root 並確認待選 action 沒有懸掛。
 
@@ -54,6 +54,6 @@ tooltip fixture 準備至少一個有效 KeywordData；呼叫 hover／timeout ha
 
 ## 命令與交接
 
-僅在當次允許背景引擎時，從專案根跑 `./tools/test-game.ps1 -Suite Smoke`（共享場景／版面）、`-Suite Combat`（戰鬥／獎勵 handler），清理變更加 `-Suite ResourceLifecycle`。讀 artifacts/verification 當次 results.json、engine／console log 與專項 assertion；通過須符合 [testing](../../testing.md)，不能只看 exit 0。本次文件補強未執行這些引擎命令。
+僅在當次允許背景引擎時，從專案根跑 `python3 tools/test_game.py --suite Smoke`（共享場景／版面）、`--suite Combat`（戰鬥／獎勵 handler），清理變更加 `--suite ResourceLifecycle`。讀 artifacts/verification 當次 results.json、engine／console log 與專項 assertion；通過須符合 [testing](../../testing.md)，不能只看 exit 0。本次文件補強未執行這些引擎命令。
 
 文件用 `bash wf/tools/wf-lint.sh --strict .`。交接列出 source／test hash、fixture、候選根、suite／helper 呼叫位置、測過的狀態與尺寸、未驗視覺／輸入，讓下一位能重現而不依對話記憶。

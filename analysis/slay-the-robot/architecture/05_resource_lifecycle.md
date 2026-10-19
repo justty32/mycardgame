@@ -2,7 +2,7 @@
 
 [分析入口](../README.md)｜[前次功能驗證](04_regression_validation.md)｜[testing](../../../wf/workflows/testing.md)
 
-2026-10-19，已修復本輪定位的資源保留與非同步取消問題；隔離 headless All 共 498 項通過，未出現退出資源保留。版本基於 Slay-The-Robot `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`、Godot 4.6 及既有 Dictionary／存讀修復。此結論限定下述測試，不涵蓋原生 GUI crash。
+2026-10-19，已修復本輪定位的資源保留與非同步取消問題；隔離 headless All 共 498 項通過，未出現退出資源保留。版本基於 Slay-The-Robot `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`、Godot 4.6 及既有 Dictionary／存讀修復。同日引擎基準升 4.7.x 後，於 Godot 4.7.2（Linux）以 Python runner 重跑 All，各 suite 斷言數一致、無退出資源保留，見 [4.7.2 manifest](../evidence/2026-10-19/final-all-4.7.2-linux-results.json) 與來源鎖 `engine_policy.migration_from_4_6`。此結論限定下述測試，不涵蓋原生 GUI crash。
 
 ## 修復前證據
 
@@ -38,7 +38,7 @@ processor 改為 RefCounted，`parent_action` 改弱回指；返回的陣列或 
 
 ## 最終整合結果
 
-由專責 runtime agent 以 `./tools/test-game.ps1 -Suite All` 執行，[最終 manifest](../evidence/2026-10-19/final-all-results.json) 對應原始 `artifacts/verification/20261019-141014-31bb0cb1/results.json`。文件與實作線另讀 manifest／原始日誌核對：completed=true、verdict=PASS，21 個程序階段全 exit 0；shutdown_resources 與 native_crash_signatures 全空，日誌沒有 ObjectDB leak。六個 suite 的 13 份產品來源 hash 與當前 game 相符，測試也保存獨立快照。
+由專責 runtime agent 以當時的 PowerShell runner（`./tools/test-game.ps1 -Suite All`，Godot 4.6）執行，[最終 manifest](../evidence/2026-10-19/final-all-results.json) 對應原始 `artifacts/verification/20261019-141014-31bb0cb1/results.json`。文件與實作線另讀 manifest／原始日誌核對：completed=true、verdict=PASS，21 個程序階段全 exit 0；shutdown_resources 與 native_crash_signatures 全空，日誌沒有 ObjectDB leak。六個 suite 的 13 份產品來源 hash 與當前 game 相符，測試也保存獨立快照。
 
 總計 498 checks／0 failures：ResourceLifecycle 127、Dictionary 47、Smoke 43、Combat 勝利 82／敗北 42、SaveLoad write 28／read 56／rejected 73。存讀三程序仍驗保存後語意還原與後續遭遇，並非戰鬥中快照；受控 fixture 的勝敗不代表全部敵人或卡牌平衡。
 

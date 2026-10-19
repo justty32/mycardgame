@@ -1,0 +1,1189 @@
+{
+  "suite": "All",
+  "run_id": "20261019-194556-becc58ea",
+  "source_game": "{PROJECT_ROOT}/game",
+  "upstream_commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+  "source_lock_sha256": "66C3B0E127D9F1C170E307F86B71087E8FA1303CE8B4015BCB1C36098C688FB7",
+  "checkout": {
+    "layout": "outer_repository_snapshot",
+    "repository_root": "{PROJECT_ROOT}",
+    "commit": "d67a0ce0ddf0ac8b4bdd41171139e3c694a2e664",
+    "changes": []
+  },
+  "historical_baseline": false,
+  "source_hashes": {
+    "ResourceLifecycle": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "8F1D57F1C5FBB7156CDCE05742453CB244B4CF6AA0C235DB5B78C80F820D6B2D"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      }
+    ],
+    "Dictionary": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "8F1D57F1C5FBB7156CDCE05742453CB244B4CF6AA0C235DB5B78C80F820D6B2D"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      }
+    ],
+    "Smoke": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "8F1D57F1C5FBB7156CDCE05742453CB244B4CF6AA0C235DB5B78C80F820D6B2D"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      }
+    ],
+    "CombatVictory": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "8F1D57F1C5FBB7156CDCE05742453CB244B4CF6AA0C235DB5B78C80F820D6B2D"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      }
+    ],
+    "CombatDefeat": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "8F1D57F1C5FBB7156CDCE05742453CB244B4CF6AA0C235DB5B78C80F820D6B2D"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      }
+    ],
+    "SaveLoad": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "8F1D57F1C5FBB7156CDCE05742453CB244B4CF6AA0C235DB5B78C80F820D6B2D"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      }
+    ]
+  },
+  "test_hashes": {
+    "ResourceLifecycle": [
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "B23A1C2941E75B95D1EA52A9810D45D6836C337F078A3A2E03AEA17DE6BB1B3E"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "66455D901AA3411689F8040A13735BC8BCE579B5AE0BAABE1CE0D078A164A517"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "2970E8762BEA304BDF774670A01F57328720C63BB32600C7334F55670A47460E"
+      }
+    ],
+    "Dictionary": [
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "B23A1C2941E75B95D1EA52A9810D45D6836C337F078A3A2E03AEA17DE6BB1B3E"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "66455D901AA3411689F8040A13735BC8BCE579B5AE0BAABE1CE0D078A164A517"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "2970E8762BEA304BDF774670A01F57328720C63BB32600C7334F55670A47460E"
+      }
+    ],
+    "Smoke": [
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "B23A1C2941E75B95D1EA52A9810D45D6836C337F078A3A2E03AEA17DE6BB1B3E"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "66455D901AA3411689F8040A13735BC8BCE579B5AE0BAABE1CE0D078A164A517"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "2970E8762BEA304BDF774670A01F57328720C63BB32600C7334F55670A47460E"
+      }
+    ],
+    "CombatVictory": [
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "B23A1C2941E75B95D1EA52A9810D45D6836C337F078A3A2E03AEA17DE6BB1B3E"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "66455D901AA3411689F8040A13735BC8BCE579B5AE0BAABE1CE0D078A164A517"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "2970E8762BEA304BDF774670A01F57328720C63BB32600C7334F55670A47460E"
+      }
+    ],
+    "CombatDefeat": [
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "B23A1C2941E75B95D1EA52A9810D45D6836C337F078A3A2E03AEA17DE6BB1B3E"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "66455D901AA3411689F8040A13735BC8BCE579B5AE0BAABE1CE0D078A164A517"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "2970E8762BEA304BDF774670A01F57328720C63BB32600C7334F55670A47460E"
+      }
+    ],
+    "SaveLoad": [
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "B23A1C2941E75B95D1EA52A9810D45D6836C337F078A3A2E03AEA17DE6BB1B3E"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "66455D901AA3411689F8040A13735BC8BCE579B5AE0BAABE1CE0D078A164A517"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "2970E8762BEA304BDF774670A01F57328720C63BB32600C7334F55670A47460E"
+      }
+    ]
+  },
+  "engine": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+  "completed": true,
+  "results": [
+    {
+      "name": "version",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 10902,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:45:56.157309Z",
+      "ended_utc": "2026-10-19T11:45:56.189362Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.03,
+      "command_arguments": [
+        "--headless",
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/version.log",
+        "--version"
+      ],
+      "engine_version": "4.7.2.stable.mono.arch_linux.ed1daf0bf",
+      "engine_version_accepted": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 10908,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:45:56.229446Z",
+      "ended_utc": "2026-10-19T11:45:58.897861Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 2.67,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "resourcelifecycle",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 10958,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:45:58.898608Z",
+      "ended_utc": "2026-10-19T11:46:00.014251Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 1.12,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/resourcelifecycle.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/tests/resource_lifecycle.gd"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Dictionary",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 10988,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:00.039609Z",
+      "ended_utc": "2026-10-19T11:46:02.457668Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 2.42,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Dictionary/import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Dictionary/game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "dictionary",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Dictionary",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11029,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:02.458582Z",
+      "ended_utc": "2026-10-19T11:46:03.124160Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.67,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Dictionary/dictionary.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Dictionary/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Dictionary/tests/dictionary_regression.gd"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11104,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:03.149309Z",
+      "ended_utc": "2026-10-19T11:46:05.567333Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 2.42,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke/import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke/game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "smoke",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11184,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:05.568440Z",
+      "ended_utc": "2026-10-19T11:46:06.283723Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.72,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke/smoke.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/Smoke/tests/framework_smoke.gd"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatVictory",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11214,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:06.308888Z",
+      "ended_utc": "2026-10-19T11:46:08.627084Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 2.32,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatVictory/import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatVictory/game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "combatvictory",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatVictory",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11254,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:08.628265Z",
+      "ended_utc": "2026-10-19T11:46:15.152428Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 6.52,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatVictory/combatvictory.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatVictory/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatVictory/tests/combat_flow.gd",
+        "--",
+        "--scenario=victory"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatDefeat",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11285,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:15.190178Z",
+      "ended_utc": "2026-10-19T11:46:17.659085Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 2.47,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatDefeat/import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatDefeat/game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "combatdefeat",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatDefeat",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11353,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:17.660393Z",
+      "ended_utc": "2026-10-19T11:46:20.931599Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 3.27,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatDefeat/combatdefeat.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatDefeat/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/CombatDefeat/tests/combat_flow.gd",
+        "--",
+        "--scenario=defeat"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11392,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:20.970076Z",
+      "ended_utc": "2026-10-19T11:46:23.438655Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 2.47,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "save-write",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11432,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:23.440220Z",
+      "ended_utc": "2026-10-19T11:46:24.255790Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.82,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/save-write.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/tests/save_load_flow.gd",
+        "--",
+        "--phase=write",
+        "--source-game-path={PROJECT_ROOT}/game"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "save-read",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11462,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:24.257280Z",
+      "ended_utc": "2026-10-19T11:46:26.124997Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 1.87,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/save-read.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/tests/save_load_flow.gd",
+        "--",
+        "--phase=read",
+        "--source-game-path={PROJECT_ROOT}/game"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "save-rejected",
+      "directory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad",
+      "executable": "/usr/lib/godot-mono/godot.linuxbsd.editor.x86_64.mono",
+      "launched_pid": 11492,
+      "launched_pid_kind": "invoked_executable",
+      "started_utc": "2026-10-19T11:46:26.127530Z",
+      "ended_utc": "2026-10-19T11:46:26.896133Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.77,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/save-rejected.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/game",
+        "--script",
+        "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/SaveLoad/tests/save_load_flow.gd",
+        "--",
+        "--phase=rejected",
+        "--source-game-path={PROJECT_ROOT}/game"
+      ],
+      "marker_found": true,
+      "save_rejection_blocks_valid": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    }
+  ],
+  "runner": {
+    "name": "test_game.py",
+    "version": "1.0.0",
+    "python": "3.14.7",
+    "platform": "Linux-6.18.49-1-MANJARO-x86_64-with-glibc2.44",
+    "os": "posix"
+  },
+  "engine_discovery": {
+    "method": "PATH",
+    "candidates_considered": [
+      "PATH:godot -> None",
+      "PATH:godot4 -> None",
+      "PATH:godot-mono -> /usr/bin/godot-mono"
+    ]
+  },
+  "engine_policy": {
+    "accepted_version_patterns": [
+      "^4\\.7\\."
+    ],
+    "source": "tools/upstream.json engine_policy",
+    "baseline": "4.7"
+  },
+  "isolation": {
+    "removed": [
+      "DISPLAY",
+      "WAYLAND_DISPLAY",
+      "XDG_RUNTIME_DIR",
+      "XAUTHORITY"
+    ],
+    "overrides": {
+      "HOME": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/home",
+      "XDG_DATA_HOME": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data",
+      "XDG_CONFIG_HOME": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/config",
+      "XDG_CACHE_HOME": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/cache",
+      "XDG_STATE_HOME": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/state",
+      "DOTNET_CLI_HOME": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/dotnet",
+      "NUGET_PACKAGES": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/nuget",
+      "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+      "DOTNET_NOLOGO": "1"
+    },
+    "user_data_root": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data",
+    "appdata_isolated": null,
+    "user_dirs": {
+      "ResourceLifecycle": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data/mycardgame-tests/20261019-194556-becc58ea/ResourceLifecycle",
+      "Dictionary": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data/mycardgame-tests/20261019-194556-becc58ea/Dictionary",
+      "Smoke": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data/mycardgame-tests/20261019-194556-becc58ea/Smoke",
+      "CombatVictory": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data/mycardgame-tests/20261019-194556-becc58ea/CombatVictory",
+      "CombatDefeat": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data/mycardgame-tests/20261019-194556-becc58ea/CombatDefeat",
+      "SaveLoad": "{PROJECT_ROOT}/artifacts/verification/20261019-194556-becc58ea/xdg/data/mycardgame-tests/20261019-194556-becc58ea/SaveLoad"
+    }
+  },
+  "timeout_seconds": 180,
+  "force_failure": false,
+  "exit_code_semantics": "posix_shell (128+N for signal N; exit_code_raw keeps Popen value)",
+  "engine_version": "4.7.2.stable.mono.arch_linux.ed1daf0bf",
+  "source_changes": [],
+  "copy_exclusions": {
+    "ResourceLifecycle": {
+      "dirs": 0,
+      "files": 0,
+      "links": 0
+    },
+    "Dictionary": {
+      "dirs": 0,
+      "files": 0,
+      "links": 0
+    },
+    "Smoke": {
+      "dirs": 0,
+      "files": 0,
+      "links": 0
+    },
+    "CombatVictory": {
+      "dirs": 0,
+      "files": 0,
+      "links": 0
+    },
+    "CombatDefeat": {
+      "dirs": 0,
+      "files": 0,
+      "links": 0
+    },
+    "SaveLoad": {
+      "dirs": 0,
+      "files": 0,
+      "links": 0
+    }
+  },
+  "known_shutdown_issues": false,
+  "verdict": "PASS"
+}

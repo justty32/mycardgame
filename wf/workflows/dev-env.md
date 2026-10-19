@@ -6,66 +6,78 @@
 
 ## 環境與來源
 
-背景測試使用 Windows PowerShell 7；Godot `4.6.stable.official.89cea1439` 可攜版放在 `.tools/godot-4.6/`，或透過 `-GodotPath` 提供其他位置。官方下載 URL、SHA-512 與本地補丁見 [upstream.json](../../tools/upstream.json)。文件 lint 可用 WSL 原生 python3 或 Git Bash 搭 Windows Python 3.13，完整 PowerShell 入口見 [文件檢查](testing.md#文件檢查修改後必跑)；commit／push 使用 WSL 的 justty32 Git 全域設定與既有 SSH 認證。
+開發跨平台：公司 Windows、家中 Manjaro Linux 原生。共同需求為 Python 3.10+（runner 只用標準函式庫）與 Godot 4.7.x（2026-10-19 起的基準；4.6 為歷史基準）。引擎政策、官方 4.7.2 四平台 SHA-512、本機已驗 build 與 4.6 遷移比對見 [upstream.json](../../tools/upstream.json) 的 `engine_policy`。文件 lint 需 bash 與 python3，見 [文件檢查](testing.md#文件檢查修改後必跑)；Git 身份見 [版本控制](version-control.md)。
 
 發布 repository 為 `justty32/mycardgame`，外層 snapshot 包含 game 普通檔案與本地修復。原開發機另外保留 game/.git 作上游固定版本 checkout；fresh clone 沒有內層 repository。因此 `git -C game rev-parse HEAD` 可能是外層專案 commit；上游基準須讀來源鎖，不能混用。runner 分開記錄上游、checkout 及實際來源檔雜湊。
 
 ## 背景驗證
 
-從專案根目錄使用 [隔離 runner](../../tools/test-game.ps1)：
+從專案根使用 [隔離 runner](../../tools/test_game.py)；Windows 也可用參數相同於舊版的 [ps1 包裝](../../tools/test-game.ps1)：
 
-```powershell
-./tools/test-game.ps1 -Suite All
-./tools/test-game.ps1 -Suite ResourceLifecycle
-# 引擎位於其他位置時
-./tools/test-game.ps1 -Suite Smoke -GodotPath 'C:/path/to/Godot_v4.6-stable_win64_console.exe'
+```bash
+python3 tools/test_game.py --suite All
+python3 tools/test_game.py --suite ResourceLifecycle
+# 指定引擎、或重放舊基準
+python3 tools/test_game.py --suite Smoke --godot-path /path/to/godot
+python3 tools/test_game.py --suite Smoke --accept-engine-version '^4\.6\.'
 ```
 
-每次在 artifacts/verification/ 建立獨立副本、快取及 user://，使用明確可寫日誌與不開視窗的程序啟動方式。`-SourceGame` 可指定候選原始碼目錄；來源鎖仍是本專案基準，實際候選版本須另核對 checkout 與 hashes。驗證規則、歷史紅測開關及套件範圍見 testing，不在正式綠測容許資源殘留。
+```powershell
+./tools/test-game.ps1 -Suite Smoke -GodotPath 'C:/path/to/Godot_v4.7.2-stable_win64_console.exe'
+```
 
-[game.ps1](../../tools/game.ps1) 另保留 Run／Import／Smoke 舊入口。Run 會開 GUI，且一般啟動會讀寫 game/external 的設定／存檔；它不適用目前的 agent 操作授權。需要 GUI 的部分記為未驗證，不能因本頁列有入口就自行執行。完整限制見 [user](common/user.md)。
+引擎探測順序：`--godot-path` → `.tools/` 下版本符合 `accepted_version_patterns` 者 → PATH 上的 godot／godot4／godot-mono／godot4-mono；版本再以 `--version` 核對，探測方式寫入 results.json。
+
+每次在 artifacts/verification/ 建立獨立副本與 user://，程序一律 headless、不開視窗。Linux 把 HOME、XDG_*、DOTNET_CLI_HOME、NUGET_PACKAGES 導到 run 目錄，並移除 DISPLAY／WAYLAND_DISPLAY；Windows 把 APPDATA、LOCALAPPDATA、TEMP 導到 run 目錄（`--no-isolate-appdata` 可關閉），以 CREATE_NO_WINDOW 啟動、逾時用 taskkill /T。Windows 端這些行為尚未實測。`--source-game` 可指定候選原始碼目錄；來源鎖仍是本專案基準，候選版本須另核對 checkout 與 hashes。驗證規則、歷史紅測開關及套件範圍見 testing，正式綠測不容許資源殘留。
+
+[game.ps1](../../tools/game.ps1) 是 Windows 專用的舊 Run／Import／Smoke 入口，預設路徑已改指 4.7 但未實測。Run 會開 GUI，且會讀寫 game/external 的設定／存檔；不適用目前的 agent 操作授權，需要 GUI 的部分記為未驗證。完整限制見 [user](common/user.md)。
 
 ## 換機與重建
 
-clone 本專案即包含已修復的 game，不要再次套用補丁。依來源鎖下載官方 Godot 4.6 Windows x64，核對 SHA-512 後解壓，或指定現有執行檔，再執行隔離 All。不需 PAS、Node/npm 或 export template 即可跑現有背景套件；本專案尚未驗證發行匯出。
+clone 本專案即包含已修復的 game，不要再次套用補丁。不需 PAS、Node/npm 或 export template 即可跑現有背景套件；本專案尚未驗證發行匯出。先唯讀核對工具與佈局，缺工具時只記錄缺項，再依當前安裝授權處理；Git 身份不是背景遊戲測試前提。
 
-先在專案根唯讀核對工具與佈局；`$PSVersionTable.PSVersion` 須為 7 以上，文件檢查依所選執行器確認 WSL 原生 python3 或 Git Bash／Windows Python 能實際執行。缺工具時只記錄缺項，再依當前安裝授權處理；Git 身份與 WSL 認證不是背景遊戲測試前提。
+Linux（2026-10-19 Manjaro 已驗）：發行版套件 godot 或 godot-mono 經 PATH 探測即可；套件 build 不是官方 archive，upstream.json 的 SHA-512 不描述它，以 runner 版本探測與隔離 All 為證據。
 
-```powershell
-$PSVersionTable.PSVersion
-Get-Command git, python, pwsh
-python --version
-Test-Path 'C:/Program Files/Git/bin/bash.exe'
-Test-Path game/project.godot
-Test-Path game/.git
+```bash
+python3 --version; command -v git godot godot-mono
+godot-mono --version
+test -f game/project.godot && echo ok
 git rev-parse --show-toplevel
-git -C game rev-parse --show-toplevel
 ```
 
-Godot 下載後先驗 ZIP，勿直接以檔名推定版本。以下假設已依來源鎖下載到 `.tools/Godot_v4.6-stable_win64.exe.zip`；尚未下載則先使用來源鎖的 engine_download，沒有下載／安裝授權時不要執行取得或解壓步驟。
+Windows：依 `engine_policy.official_downloads` 下載官方 4.7.2 win64 ZIP 到 `.tools/`，核對 SHA-512 後解壓；沒有下載／安裝授權時不要執行取得或解壓步驟。勿以檔名推定版本。
 
 ```powershell
-$sourceLock = Get-Content tools/upstream.json -Raw | ConvertFrom-Json
-$engineZip = '.tools/Godot_v4.6-stable_win64.exe.zip'
-if ((Get-FileHash $engineZip -Algorithm SHA512).Hash -ne $sourceLock.engine_sha512) {
-    throw 'Godot archive SHA-512 mismatch'
-}
+$PSVersionTable.PSVersion   # ps1 包裝要求 7 以上
+Get-Command git, python
+python --version
+$policy = (Get-Content tools/upstream.json -Raw | ConvertFrom-Json).engine_policy
+$engineZip = '.tools/Godot_v4.7.2-stable_win64.exe.zip'
+$expected = $policy.official_downloads.files.'Godot_v4.7.2-stable_win64.exe.zip'
+if ((Get-FileHash $engineZip -Algorithm SHA512).Hash -ne $expected) { throw 'Godot archive SHA-512 mismatch' }
 # 僅首次解壓；已有檔案時核對或使用 -GodotPath，不覆蓋。
-Expand-Archive -LiteralPath $engineZip -DestinationPath '.tools/godot-4.6'
-Test-Path '.tools/godot-4.6/Godot_v4.6-stable_win64_console.exe'
+Expand-Archive -LiteralPath $engineZip -DestinationPath '.tools/godot-4.7'
 ```
 
-runner 的版本探測與隔離 All 才產生本機執行證據；上述雜湊只證明 ZIP 符合來源鎖。環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
+雜湊只證明 ZIP 符合來源鎖，runner 的版本探測與隔離 All 才是本機執行證據。環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
 
-只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前先 framework-fixes.patch，再 resource-lifecycle.patch。已套用與未套用的目錄分開辨認，不能重複套用或覆寫既有修改。上游更新走 [upstream](game-dev/upstream.md)。
+只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前先 framework-fixes.patch，再 resource-lifecycle.patch。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)。
 
-`.tools/`、artifacts/、Godot cache、個人 profile／settings／saves 不屬於發布原始碼。必要的歷史驗證已另選入 analysis/slay-the-robot/evidence/；原件保留本機，發布副本記錄原件與副本 hash 及路徑遮罩，不能當成未處理的原始日誌。
+`.tools/`、artifacts/、Godot cache、個人 profile／settings／saves 不屬於發布原始碼。必要的歷史驗證已另選入 analysis/slay-the-robot/evidence/；發布副本記錄原件與副本 hash 及路徑遮罩，不能當成未處理的原始日誌。
+
+### Windows 文件檢查執行器
+
+WSL 原生 python3 為已驗入口。Git Bash 需以函式把 python3 指向 Windows Python，避免商店別名：
+
+```powershell
+& 'C:\Program Files\Git\bin\bash.exe' -c 'function python3() { python "$@"; }; export -f python3; python3 --version && bash wf/tools/wf-lint.sh --strict .'
+```
 
 ## 存檔與環境限制
 
-框架除錯模式會使用 game/external/profile.json、user_settings.json 與 saves/。舊 Smoke 只在 Global 首次 ready 後轉移其後寫入，不能用它直接測使用者存檔；流程驗證一律走隔離 runner。發布省略個人設定，由框架在新環境依預設值建立。
+框架除錯模式會使用 game/external/profile.json、user_settings.json 與 saves/。game.ps1 的舊 Smoke 只在 Global 首次 ready 後轉移其後寫入，不能用它直接測使用者存檔；流程驗證一律走隔離 runner。發布省略個人設定，由框架在新環境依預設值建立。
 
-Windows 沙箱曾阻擋 Godot 寫入 user://、編輯器設定，以及 Git Bash 建立 signal pipe（Win32 error 5）；後者可改用已驗 WSL lint 入口，其他錯誤依執行環境核准流程處理。不能由權限差異推定遊戲根因，也不能只依 exit 0 宣稱無錯。原生崩潰調查目前依使用者要求擱置。
+Windows 沙箱（2026-10-19 公司機）曾阻擋 Godot 寫入 user://、編輯器設定，以及 Git Bash 建立 signal pipe（Win32 error 5）；後者改用已驗 WSL lint 入口，其他錯誤依執行環境核准流程處理。不能由權限差異推定遊戲根因，也不能只依 exit 0 宣稱無錯。原生崩潰調查目前依使用者要求擱置。
 
 ## Done when
 

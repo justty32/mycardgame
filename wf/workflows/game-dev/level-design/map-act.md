@@ -38,7 +38,7 @@
 
 先靜態驗 ID／邊／權重／fallback／act 鏈，再在隔離 fixture 用固定 seed 生成並按真實可達邊走訪。同 seed 加相同操作才可比較；改 RNG 呼叫次數會影響後續抽樣。跨多 seed 統計節點、路線、事件分布與極端值；有限樣本不能證明所有 seed，結構不變條件應直接斷言。
 
-至少覆蓋新局起點、戰鬥勝敗、EVENT 返回、SHOP、REST、TREASURE、非終局 Boss 轉幕與最終戰結算。針對變更的分岔做保存→另一程序讀取→下一步，與不中斷路徑比較。現有 `./tools/test-game.ps1 -Suite Combat`／`-Suite SaveLoad` 只提供基準，沒有全幕 suite；新增專項與 runner 接線後才有本次命令，不把舊 suite 當整章完成。
+至少覆蓋新局起點、戰鬥勝敗、EVENT 返回、SHOP、REST、TREASURE、非終局 Boss 轉幕與最終戰結算。針對變更的分岔做保存→另一程序讀取→下一步，與不中斷路徑比較。現有 `python3 tools/test_game.py --suite Combat`／`--suite SaveLoad` 只提供基準，沒有全幕 suite；新增專項與 runner 接線後才有本次命令，不把舊 suite 當整章完成。
 
 背景測試由 runtime owner 依 [validation](../validation.md) 串行安排。地圖可讀性、點擊命中與視聽節奏在目前禁止視窗操作下保留未驗；記錄版本、seed、樣本與策略，區分可達性及平衡假說。
 

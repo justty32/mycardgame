@@ -34,7 +34,7 @@ prepare 會重設 bus、volume、pitch；播放 deferred，同 frame player 尚�
 ```powershell
 rg -n 'load_audio|MISSING_AUDIO|_cached_audio' game/autoload/FileLoader.gd
 rg -n 'generate_location_music_action|generate_sound_action|SoundManager' game/scripts game/autoload/ActionGenerator.gd
-rg -n 'ValidateSet|headless|audio-driver' tools/test-game.ps1
+rg -n 'SUITE_CHOICES|headless|audio-driver' tools/test_game.py
 python -c "import wave,pathlib; p=pathlib.Path('game/external/audio/sounds/slash.wav'); w=wave.open(str(p)); print(p, p.stat().st_size, w.getparams(), w.getnframes()/w.getframerate()); w.close()"
 ```
 
@@ -71,7 +71,7 @@ func check_loaded(file_loader: Node) -> Dictionary:
         _check(audio_results[label], label)
 ```
 
-保留原 tab 縮排及 SMOKE PASS；缺檔負例應另設受控情境，不能讓預期 error 污染正式綠測。runner 複製 tests 頂層 `.gd`，但不自動呼叫 helper；只有檔案沒有接入就零覆蓋。正式接入後命令為 `./tools/test-game.ps1 -Suite Smoke`；候選 runner／APPDATA 隔離照 bootstrap。檢查本次五個 `PASS: AUDIO:`、SMOKE PASS、results.json 完成／PASS 與禁止錯誤，不只 exit 0。不要執行不存在的 `-Suite Audio`。
+保留原 tab 縮排及 SMOKE PASS；缺檔負例應另設受控情境，不能讓預期 error 污染正式綠測。runner 複製 tests 頂層 `.gd`，但不自動呼叫 helper；只有檔案沒有接入就零覆蓋。正式接入後命令為 `python3 tools/test_game.py --suite Smoke`；候選 runner 與 user:// 隔離照 bootstrap。檢查本次五個 `PASS: AUDIO:`、SMOKE PASS、results.json 完成／PASS 與禁止錯誤，不只 exit 0。不要執行不存在的 `--suite Audio`。
 
 ### 播放、bus 與池的後續橋接
 

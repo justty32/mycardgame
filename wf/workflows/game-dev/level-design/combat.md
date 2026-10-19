@@ -38,7 +38,7 @@ Event 的 `event_weighted_enemy_object_ids` 每個字典是一個槽的候選與
 
 接線測例先檢查載入 ID／pool／fallback／Act 引用，再以固定 seed 及玩家可走的邊進入新遭遇。行為測首輪、完整循環、分支、死亡、勝敗與獎勵；有召喚時驗空槽／滿槽及只剩 minion。改難度意圖前先處理已知 override cache 未篩玩家難度的缺口。
 
-現有命令為 `./tools/test-game.ps1 -Suite Smoke` 與 `-Suite Combat`；新增遭遇測試須由 runner owner 接入 [隔離 runner](../../../../tools/test-game.ps1) 才有可執行命令，現在沒有 Encounter suite。依 [validation](../validation.md) 回報專項命令／完成標記；不得只以舊 fixture 綠燈交付。
+現有命令為 `python3 tools/test_game.py --suite Smoke` 與 `--suite Combat`；新增遭遇測試須由 runner owner 接入 [隔離 runner](../../../../tools/test_game.py) 才有可執行命令，現在沒有 Encounter suite。依 [validation](../validation.md) 回報專項命令／完成標記；不得只以舊 fixture 綠燈交付。
 
 平衡比較固定牌組／策略的改前改後，再換 seed、起手與低生命條件；記錄回合、生命損失、被迫行動、極端樣本及樣本數。沒有現成自動平衡器，一場可贏不證明平衡。
 

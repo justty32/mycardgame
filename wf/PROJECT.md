@@ -12,7 +12,7 @@
 
 ### Slay-The-Robot：已引入的遊戲框架
 
-[上游 README](https://github.com/DesirePathGames/Slay-The-Robot) 在 2026-10-19 查核時列 Godot 4.6、GDScript，提供卡牌 roguelike 框架與資料驅動擴充。[根 LICENSE](https://github.com/DesirePathGames/Slay-The-Robot/blob/main/LICENSE) 為 MIT。已 clone 至 game/ 並 detached 到 commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`；保留根授權與 addons 授權，另有 Dictionary／存讀保護的本地修復。Godot 4.6 可攜版已核對 SHA-512；版本與補丁紀錄見 [upstream.json](../tools/upstream.json)，啟動方式見 [dev-env](workflows/dev-env.md)。
+[上游 README](https://github.com/DesirePathGames/Slay-The-Robot) 在 2026-10-19 查核時列 Godot 4.6、GDScript，提供卡牌 roguelike 框架與資料驅動擴充。[根 LICENSE](https://github.com/DesirePathGames/Slay-The-Robot/blob/main/LICENSE) 為 MIT。已 clone 至 game/ 並 detached 到 commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`；保留根授權與 addons 授權，另有 Dictionary／存讀保護的本地修復。匯入時的 Godot 4.6 可攜版已核對 SHA-512，2026-10-19 起引擎基準升為 4.7.x（見 [decisions](workflows/decisions.md)）；版本與補丁紀錄見 [upstream.json](../tools/upstream.json)，啟動方式見 [dev-env](workflows/dev-env.md)。
 
 ### spire-codex：設計與資料研究參考
 

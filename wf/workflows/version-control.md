@@ -1,4 +1,4 @@
-# version-control — WSL 提交與發布
+# version-control — 提交與發布
 
 [WORKFLOWS](../WORKFLOWS.md)｜[開發環境](dev-env.md)｜[使用者授權](common/user.md)
 
@@ -8,15 +8,15 @@
 
 ## Done when
 
-提交包含本次授權的程式、測試、分析與工作流；index 檢查沒有意外 gitlink、個人資料或生成快取。驗證紀錄存在，WSL commit／push 指令回傳成功，遠端 ref 與已驗提交 SHA 一致。首次發布另有 fresh clone／提交樹讀回的檔案、補丁雜湊及文件連結檢查結果。
+提交包含本次授權的程式、測試、分析與工作流；index 檢查沒有意外 gitlink、個人資料或生成快取。驗證紀錄存在，commit／push 指令回傳成功，遠端 ref 與已驗提交 SHA 一致。首次發布另有 fresh clone／提交樹讀回的檔案、補丁雜湊及文件連結檢查結果。
 
 ## 流程
 
 ### 確認身份與範圍
 
-本專案已獲使用者正常 commit／push 授權，兩者都使用 WSL 的 Git 全域設定。2026-10-19 核實 Ubuntu 的 Git 名稱為 justty32；Linux 登入與 Git 作者身份分開辨認。執行前只讀核對 `git config --global --get user.name`、`user.email` 與 origin，不列印完整 credential 設定、不改全域身份。遠端為 `git@github.com:justty32/mycardgame.git`；目前既有 SSH 認證對應 justty32，認證失效時報具體阻礙，不開登入 UI。
+本專案已獲使用者正常 commit／push 授權，使用 Git 全域身份 justty32 與既有 SSH 認證：公司 Windows 經 WSL，家中 Manjaro 用原生 git。2026-10-19 已分別核實 WSL 與 Manjaro 的全域 user.name 為 justty32；作業系統登入帳號與 Git 作者身份分開辨認。執行前只讀核對 `git config --global --get user.name`、`user.email` 與 origin，不列印完整 credential 設定、不改全域身份。遠端為 `git@github.com:justty32/mycardgame.git`；目前既有 SSH 認證對應 justty32，認證失效時報具體阻礙，不開登入 UI。
 
-以下 Git 提交操作均在 WSL 專案根目錄執行。先看 `git status --short`、本次 diff 與遠端 refs，辨認使用者及其他 agent 的變更；不要因本機有工作就覆寫遠端。多人變更由整合 owner 確認歸屬後一起驗收，正常推送不包含強制重寫或刪除歷史。
+以下 Git 提交操作均在上述環境的專案根目錄執行。先看 `git status --short`、本次 diff 與遠端 refs，辨認使用者及其他 agent 的變更；不要因本機有工作就覆寫遠端。多人變更由整合 owner 確認歸屬後一起驗收，正常推送不包含強制重寫或刪除歷史。
 
 ### 辨認 snapshot 與內層 checkout
 
@@ -34,7 +34,7 @@
 
 ### 驗收與推送
 
-變更穩定後依 testing 跑適當背景套件與 strict lint；來源變動後不能沿用不相符的舊 pass。先檢查 staged diff、排除項與版本身份，再以 WSL commit 建立可描述的變更；以 WSL push 更新已核對的分支。遠端有新提交時先讀取並整合，不強制覆蓋。
+變更穩定後依 testing 跑適當背景套件與 strict lint；來源變動後不能沿用不相符的舊 pass。先檢查 staged diff、排除項與版本身份，再 commit 建立可描述的變更；push 更新已核對的分支。遠端有新提交時先讀取並整合，不強制覆蓋。
 
 首次發布在獨立 clone 或 archive 讀回檔案，核對 game 不是 gitlink、來源補丁與證據 hashes、來源 metadata 的 snapshot 分支，以及文件 lint。若與已驗來源完全一致，這些發布檢查不需要重跑所有遊戲場景；發現內容差異才回到對應驗證。
 

@@ -58,7 +58,7 @@ BaseCombatant 在 animation_finished 查當前狀態的 next 並播放；迴圈�
 
 先靜態驗 JSON、路徑與大小寫、圖片可解碼、尺寸／alpha、序號無缺漏。取得背景引擎執行授權後，依 bootstrap 把專屬 helper 接到既有 Smoke，驗 Global 查得到 ID、人物持有同一 SpriteFrames、各狀態的 frame 數／fps／duration／loop／next、texture 有尺寸且非 fallback。僅新增 helper 而沒有入口呼叫不算測試。
 
-時序需求另加有限 timeout 的專項：attack 回 idle、連續同名播放、中途 hit／death、致死完成 signal 一次、combat 結束與離樹後無殘留等待；加入真實攻擊的 HP／格擋斷言，證明調動畫未改規則。接線後才跑 `./tools/test-game.ps1 -Suite Smoke`；戰鬥／取消有改動再選 Combat／ResourceLifecycle，套件入口與通過標記依 [testing](../../testing.md)。現有套件未自動覆蓋這批素材。
+時序需求另加有限 timeout 的專項：attack 回 idle、連續同名播放、中途 hit／death、致死完成 signal 一次、combat 結束與離樹後無殘留等待；加入真實攻擊的 HP／格擋斷言，證明調動畫未改規則。接線後才跑 `python3 tools/test_game.py --suite Smoke`；戰鬥／取消有改動再選 Combat／ResourceLifecycle，套件入口與通過標記依 [testing](../../testing.md)。現有套件未自動覆蓋這批素材。
 
 背景不驗節奏觀感、接觸格、視覺跳動、透明邊或 viewport。當前僅文件工作不跑 Godot；視覺項保留未驗，不開編輯器或預覽視窗。
 

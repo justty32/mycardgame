@@ -23,7 +23,7 @@
 
 原始來源為 `pas/analysis/slay-the-robot/`，這是來源紀錄，不是外部路徑依賴。最初完整複製三份 Markdown 並以 SHA-256 核對一致；之後依使用者要求核實框架，已在本專案更正兩篇教學並新增架構與執行證據。PAS 原件未修改。
 
-目前核實基準為 Slay-The-Robot commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加 [來源鎖](../../tools/upstream.json) 所列本地修復、Godot 4.6。靜態核實與 runtime 已驗事項分開記錄；已驗單場戰鬥勝敗、獎勵及跨程序存讀續玩，不代表所有教學自訂玩法或完整多幕通關已測試。原版問題、Dictionary／存讀及後續資源清理結果各自保留在對應驗證報告。
+目前核實基準為 Slay-The-Robot commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加 [來源鎖](../../tools/upstream.json) 所列本地修復；引擎基準 2026-10-19 起為 Godot 4.7.x。下列報告的 runtime 證據原於 Godot 4.6 取得，同日以 4.7.2（Linux）重跑隔離 All，斷言數一致，見 [可攜證據](evidence/README.md#godot-472linux重跑) 與來源鎖 `engine_policy.migration_from_4_6`。靜態核實與 runtime 已驗事項分開記錄；已驗單場戰鬥勝敗、獎勵及跨程序存讀續玩，不代表所有教學自訂玩法或完整多幕通關已測試。原版問題、Dictionary／存讀及後續資源清理結果各自保留在對應驗證報告。
 
 ## 後續維護
 

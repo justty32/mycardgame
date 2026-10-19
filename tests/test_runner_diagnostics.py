@@ -1,0 +1,374 @@
+#!/usr/bin/env python3
+"""Synthetic diagnostics for tools/test_game.py.
+
+Does not execute Godot. A fake engine (a Python script behind a platform launcher)
+replays scripted stdout/stderr/log output and exit codes through the real
+EngineRunner.invoke() so the verdict rules, durable evidence, timeout handling and
+isolation helpers are exercised exactly as the real runner uses them.
+
+Usage: python3 tests/test_runner_diagnostics.py
+Exit 0 and prints "RUNNER DIAGNOSTICS PASS: N checks" on success; exit 1 on the
+first failed assertion. Evidence: artifacts/runner-diagnostics/<uuid>/results.json
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+import uuid
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+import test_game as runner  # noqa: E402
+
+IS_WINDOWS = os.name == "nt"
+RUN_ROOT = PROJECT_ROOT / "artifacts" / "runner-diagnostics" / uuid.uuid4().hex
+RUN_ROOT.mkdir(parents=True, exist_ok=True)
+MANIFEST: dict = {"completed": False, "results": [], "note": "Synthetic diagnostics only; no Godot executed.",
+                  "runner": {"name": runner.RUNNER_NAME, "version": runner.RUNNER_VERSION}}
+CHECKS = 0
+
+FAKE_ENGINE_SOURCE = r'''
+import json, os, subprocess, sys, time
+args = sys.argv[1:]
+log_path = None
+spec_path = None
+i = 0
+while i < len(args):
+    if args[i] == "--log-file":
+        log_path = args[i + 1]; i += 2; continue
+    if args[i] == "--spec":
+        spec_path = args[i + 1]; i += 2; continue
+    i += 1
+spec = json.load(open(spec_path, encoding="utf-8")) if spec_path else {}
+if spec.get("wait_for_running_evidence", True):
+    deadline = time.time() + 2
+    observed = False
+    while not observed and time.time() < deadline:
+        try:
+            saved = json.load(open(os.path.join(os.getcwd(), "results.json"), encoding="utf-8"))
+            last = saved["results"][-1]
+            observed = last["status"] == "running" and last["launched_pid"] in (os.getpid(), os.getppid())
+        except Exception:
+            observed = False
+        if not observed:
+            time.sleep(0.01)
+    if not observed:
+        print("FAIL: missing running evidence"); sys.exit(3)
+if spec.get("version_line", "4.7.2.synthetic"):
+    print(spec.get("version_line", "4.7.2.synthetic"))
+for line in spec.get("stdout", []):
+    print(line)
+for line in spec.get("stderr", []):
+    print(line, file=sys.stderr)
+if log_path and spec.get("log"):
+    with open(log_path, "a", encoding="utf-8") as handle:
+        handle.write("\n".join(spec["log"]) + "\n")
+sys.stdout.flush(); sys.stderr.flush()
+if spec.get("spawn_child_pid_file"):
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"])
+    with open(spec["spawn_child_pid_file"], "w") as handle:
+        handle.write(str(child.pid))
+if spec.get("sleep"):
+    time.sleep(spec["sleep"])
+sys.exit(spec.get("exit", 0))
+'''
+
+
+def assert_that(condition: bool, message: str) -> None:
+    global CHECKS
+    if not condition:
+        runner.save_manifest(MANIFEST, RUN_ROOT / "results.json")
+        print(f"ASSERT FAIL: {message}")
+        print(f"Evidence: {RUN_ROOT}")
+        sys.exit(1)
+    CHECKS += 1
+    print(f"PASS: {message}")
+
+
+def make_fake_engine() -> Path:
+    script = RUN_ROOT / "fake_engine.py"
+    script.write_text(FAKE_ENGINE_SOURCE, encoding="utf-8")
+    if IS_WINDOWS:
+        launcher = RUN_ROOT / "fake_engine.cmd"
+        launcher.write_text(f'@echo off\r\n"{sys.executable}" -I "{script}" %*\r\nexit /b %ERRORLEVEL%\r\n', encoding="utf-8")
+    else:
+        launcher = RUN_ROOT / "fake_engine.sh"
+        launcher.write_text(f'#!/bin/sh\nexec "{sys.executable}" -I "{script}" "$@"\n', encoding="utf-8")
+        launcher.chmod(0o755)
+    return launcher
+
+
+def new_runner(engine: Path, timeout: int = 10, patterns=None, historical_baseline: bool = False) -> runner.EngineRunner:
+    env, _ = runner.build_engine_environment(RUN_ROOT)
+    return runner.EngineRunner(engine=engine, run_root=RUN_ROOT, manifest=MANIFEST, env=env,
+                               timeout_seconds=timeout, accepted_patterns=list(patterns or runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS),
+                               historical_baseline=historical_baseline, echo=lambda text: None)
+
+
+def invoke_fixture(engine_runner: runner.EngineRunner, name: str, spec: dict, expected_pass: bool, *,
+                   version_probe: bool = True, marker: str | None = "SYNTHETIC PASS:", **kwargs) -> dict:
+    spec_path = RUN_ROOT / f"{name}.spec.json"
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+    caught = False
+    try:
+        engine_runner.invoke(name, RUN_ROOT, ["--spec", str(spec_path)], marker=marker, version_probe=version_probe, **kwargs)
+    except runner.RunnerError:
+        caught = True
+    row = MANIFEST["results"][-1]
+    assert_that(row["passed"] == expected_pass and caught == (not expected_pass), f"{name} verdict and exception agree")
+    assert_that(row["launched_pid"] and row["launched_pid"] > 0 and row["launched_pid_kind"] == "invoked_executable",
+                f"{name} records launched PID without claiming child engine identity")
+    assert_that(str(row["started_utc"]).endswith("Z") and str(row["ended_utc"]).endswith("Z"), f"{name} records UTC start/end")
+    durable = json.loads((RUN_ROOT / "results.json").read_text(encoding="utf-8"))
+    assert_that(durable["results"][-1]["status"] == row["status"] and not durable["completed"],
+                f"{name} result durable before whole run completion")
+    return row
+
+
+def process_alive(pid: int) -> bool:
+    if IS_WINDOWS:
+        out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True, check=False).stdout
+        return str(pid) in out
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def main() -> None:
+    # --- pure helpers -------------------------------------------------------------------------
+    assert_that(runner.get_exit_code_hex(-1073741819) == "0xC0000005", "signed access-violation status preserves all 32 bits")
+    assert_that(runner.get_exit_code_hex(0) == "0x00000000", "zero exit code formatting")
+    assert_that(runner.get_exit_code_hex(None) is None, "unobserved exit is not converted to success")
+    if IS_WINDOWS:
+        assert_that(runner.normalize_posix_return_code(7) == (7, None), "Windows return codes pass through without signal")
+    else:
+        assert_that(runner.normalize_posix_return_code(-11) == (139, 11), "POSIX signal death maps to 128+N with signal recorded")
+    assert_that(runner.get_native_crash_signatures("NOTE: CrashHandlerException is a handler; ObjectDB instances leaked") == [],
+                "generic crash mention and leak are not native crash signatures")
+    assert_that(len(runner.get_native_crash_signatures("handle_crash: Program crashed with signal 11\n")) == 1,
+                "native Unix-style handler signature recognized")
+
+    def judge(console: str, log: str = "", **overrides) -> dict:
+        params = dict(console_output=console, log_text=log, exit_code=0, timed_out=False, marker="X PASS:",
+                      version_probe=False, accepted_patterns=list(runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS),
+                      cold_import=False, save_rejections=False, known_shutdown_resources=[], historical_baseline=False)
+        params.update(overrides)
+        return runner.evaluate_phase_output(**params)
+
+    assert_that(judge("X PASS:\nERROR: 1 resources still in use at exit")["passed"] is False,
+                "resource retention fails even with exit 0 and PASS marker")
+    hist = judge("X PASS:\nERROR: 1 resources still in use at exit", known_shutdown_resources=[1])
+    assert_that(hist["passed"] and hist["shutdown_resources"] == [1] and hist["warnings"],
+                "known shutdown count is tolerated only when explicitly listed and stays recorded")
+    assert_that(judge("X PASS:\nWARNING: ObjectDB instances leaked at exit")["passed"] is False, "ObjectDB leak fails by default")
+    leak_hist = judge("X PASS:\nWARNING: ObjectDB instances leaked at exit", historical_baseline=True)
+    assert_that(leak_hist["passed"] and leak_hist["objectdb_leak"], "historical baseline tolerates leak text but records it")
+    assert_that(judge("X PASS:\nERROR: unexpected")["unexpected_error_lines"] == ["ERROR: unexpected"]
+                and judge("X PASS:\nERROR: unexpected")["passed"] is False, "any other ^ERROR line fails and is listed")
+    assert_that(judge("X PASS:\nSCRIPT ERROR: boom")["passed"] is False, "SCRIPT ERROR fails")
+    assert_that(judge("X PASS:", exit_code=1)["passed"] is False, "non-zero exit fails")
+    assert_that(judge("X PASS:", timed_out=True)["passed"] is False, "timeout fails")
+    v46 = judge("4.6.stable.official.89cea1439\nX PASS:", version_probe=True)
+    assert_that(v46["engine_version"] == "4.6.stable.official.89cea1439" and not v46["engine_version_accepted"] and not v46["passed"],
+                "4.6 is rejected under the default 4.7 policy")
+    v46ok = judge("4.6.stable.official.89cea1439\nX PASS:", version_probe=True, accepted_patterns=[r"^4\.6\.", r"^4\.7\."])
+    assert_that(v46ok["passed"], "4.6 is accepted again when the policy is widened")
+    v472 = judge("4.7.2.stable.mono.arch_linux.ed1daf0bf\nX PASS:", version_probe=True)
+    assert_that(v472["passed"] and v472["engine_version"] == "4.7.2.stable.mono.arch_linux.ed1daf0bf", "4.7.2 mono build accepted")
+    assert_that(judge("junk\nX PASS:", version_probe=True)["passed"] is False, "missing version line fails the probe")
+    cold = judge(runner.COLD_CACHE_UID_ERROR, marker=None, cold_import=True)
+    assert_that(cold["passed"] and cold["cold_cache_uid_requires_recheck"], "cold cache UID is tolerated only for the cold import and flags a recheck")
+    assert_that(judge(runner.COLD_CACHE_UID_ERROR, marker=None)["passed"] is False, "cold cache UID fails the verified re-import")
+
+    def rejection_log(cases) -> str:
+        return "".join(f"EXPECTED SAVE REJECTION BEGIN: {c}\n{runner.SAVE_REJECTED_PREFIX}{c}\nEXPECTED SAVE REJECTION END: {c}\n" for c in cases)
+
+    good_log = rejection_log(runner.SAVE_REJECTION_CASES) + "SAVELOAD PASS: phase=rejected\n"
+    rej = judge("", good_log, marker="SAVELOAD PASS:", save_rejections=True)
+    assert_that(rej["passed"] and rej["save_rejection_blocks_valid"], "ten itemised rejection blocks are accepted")
+    bad = judge("", rejection_log(runner.SAVE_REJECTION_CASES[:-1]) + "SAVELOAD PASS: phase=rejected\n", marker="SAVELOAD PASS:", save_rejections=True)
+    assert_that(not bad["passed"] and not bad["save_rejection_blocks_valid"], "nine rejection blocks fail")
+    stray = judge("", good_log + runner.SAVE_REJECTED_PREFIX + "stray\n", marker="SAVELOAD PASS:", save_rejections=True)
+    assert_that(not stray["passed"], "a rejection line outside the blocks fails")
+
+    # --- preflight -------------------------------------------------------------------------------
+    preflight = RUN_ROOT / "preflight-existing.log"
+    preflight.write_text("existing evidence", encoding="utf-8")
+    runner.confirm_log_writable(preflight)
+    assert_that(preflight.read_text(encoding="utf-8") == "existing evidence", "log preflight opens exact target without truncating evidence")
+
+    engine = make_fake_engine()
+    engine_runner = new_runner(engine)
+    (RUN_ROOT / "blocked-log.log").mkdir()
+    blocked_caught = False
+    try:
+        engine_runner.invoke("blocked-log", RUN_ROOT, ["--version"])
+    except runner.RunnerError:
+        blocked_caught = True
+    blocked = MANIFEST["results"][-1]
+    assert_that(blocked_caught and blocked["log_write_preflight"] == "failed" and blocked["launched_pid"] is None
+                and "blocked-log.log" in blocked["error"], "unwritable log target fails before any process starts with path-specific evidence")
+
+    # --- process fixtures ------------------------------------------------------------------------
+    invoke_fixture(engine_runner, "normal", {"stdout": ["SYNTHETIC PASS:"]}, True)
+    row = invoke_fixture(engine_runner, "native-text", {"stdout": ["SYNTHETIC PASS:", "CrashHandlerException: Program crashed with signal 11"]}, False)
+    assert_that(row["exit_code_hex"] == "0x00000000" and len(row["native_crash_signatures"]) == 1, "native marker overrides successful exit and PASS text")
+    row = invoke_fixture(engine_runner, "nonzero", {"stdout": ["SYNTHETIC PASS:"], "exit": 7}, False)
+    assert_that(row["exit_code_hex"] == "0x00000007" and row["exit_code"] == 7, "ordinary failure exit retains hexadecimal evidence")
+    invoke_fixture(engine_runner, "missing-marker", {}, False)
+    invoke_fixture(engine_runner, "resource-leak", {"stdout": ["SYNTHETIC PASS:", "ERROR: 1 resources still in use at exit"]}, False)
+    invoke_fixture(engine_runner, "object-leak", {"stdout": ["SYNTHETIC PASS:", "WARNING: ObjectDB instances leaked at exit"]}, False)
+    invoke_fixture(engine_runner, "stderr-error", {"stderr": ["ERROR: something from stderr"], "stdout": ["SYNTHETIC PASS:"]}, False)
+    row = invoke_fixture(engine_runner, "version-46", {"version_line": "4.6.stable.official.89cea1439", "stdout": ["SYNTHETIC PASS:"]}, False)
+    assert_that(row["engine_version"] == "4.6.stable.official.89cea1439" and row["engine_version_accepted"] is False,
+                "process-level version probe rejects 4.6 under default policy and records the version")
+    # Non-probe path: the runner prepends --log-file; the fake engine writes the engine log.
+    row = invoke_fixture(engine_runner, "cold-import", {"version_line": "", "log": [runner.COLD_CACHE_UID_ERROR]}, True,
+                         version_probe=False, marker=None, cold_import=True)
+    assert_that(row["cold_cache_uid_requires_recheck"] and (RUN_ROOT / "cold-import.log").exists(),
+                "cold import through the real --log-file path flags the recheck")
+    row = invoke_fixture(engine_runner, "save-rejected", {"version_line": "", "log": good_log.splitlines()}, True,
+                         version_probe=False, marker="SAVELOAD PASS:", save_rejections=True)
+    assert_that(row["save_rejection_blocks_valid"] and row["unexpected_error_lines"] == [], "rejection blocks read from the engine log, not console")
+    hist_runner = new_runner(engine, historical_baseline=True)
+    row = invoke_fixture(hist_runner, "historical", {"stdout": ["SYNTHETIC PASS:", "ERROR: 1 resources still in use at exit"]}, True,
+                         known_shutdown_resources=[1])
+    assert_that(row["shutdown_resources"] == [1], "historical baseline records the tolerated shutdown count")
+
+    child_pid_file = RUN_ROOT / "timeout-child.pid"
+    short_runner = new_runner(engine, timeout=10)
+    short_runner.timeout_seconds = 1
+    row = invoke_fixture(short_runner, "timeout", {"stdout": ["SYNTHETIC PASS:"], "sleep": 30, "spawn_child_pid_file": str(child_pid_file)}, False)
+    assert_that(row["timed_out"] and row["status"] == "failed", "timeout remains failure even with prior PASS text")
+    child_pid = int(child_pid_file.read_text().strip()) if child_pid_file.exists() else None
+    time.sleep(0.5)
+    assert_that(child_pid is not None and not process_alive(child_pid), "timeout termination stops the whole process tree the runner created")
+    if not IS_WINDOWS:
+        assert_that(row["exit_signal"] in (9, 15) and row["exit_code"] == 128 + row["exit_signal"] and row["exit_code_raw"] < 0,
+                    "POSIX signal exit keeps raw Popen value and shell-style code")
+
+    missing_runner = new_runner(RUN_ROOT / ("missing-engine.exe" if IS_WINDOWS else "missing-engine"))
+    try:
+        missing_runner.invoke("start-failure", RUN_ROOT, ["--version"], version_probe=True)
+    except runner.RunnerError:
+        pass
+    last = MANIFEST["results"][-1]
+    assert_that(last["status"] == "failed" and last["launched_pid"] is None and last["exit_code_hex"] is None,
+                "start failure is durable with no invented PID or exit")
+
+    source_text = (PROJECT_ROOT / "tools" / "test_game.py").read_text(encoding="utf-8")
+    assert_that(runner.WINDOWS_CREATION_FLAGS & 0x08000000 == 0x08000000 and "STARTF_USESHOWWINDOW" in source_text,
+                "Windows launches use CREATE_NO_WINDOW and a hidden startup window")
+    assert_that('"--headless"' in source_text and source_text.count('"--headless"') >= 3, "every real engine invocation is headless")
+
+    # --- environment isolation -------------------------------------------------------------------
+    os.environ["DISPLAY"] = os.environ.get("DISPLAY", ":99")
+    env, description = runner.build_engine_environment(RUN_ROOT)
+    assert_that("DISPLAY" not in env and "WAYLAND_DISPLAY" not in env, "child environment carries no display variables")
+    if IS_WINDOWS:
+        assert_that(env["APPDATA"].startswith(str(RUN_ROOT)) and env["LOCALAPPDATA"].startswith(str(RUN_ROOT)),
+                    "Windows APPDATA/LOCALAPPDATA redirected into the run directory")
+        env2, _ = runner.build_engine_environment(RUN_ROOT, isolate_appdata=False)
+        assert_that(env2.get("APPDATA") == os.environ.get("APPDATA"), "--no-isolate-appdata keeps the real APPDATA")
+    else:
+        assert_that(all(env[k].startswith(str(RUN_ROOT)) for k in ("HOME", "XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME")),
+                    "HOME and XDG data/config/cache redirected into the run directory")
+    assert_that(description["user_data_root"].startswith(str(RUN_ROOT)), "user:// root lives under the run directory")
+
+    # --- isolated copy ---------------------------------------------------------------------------
+    fake_source = RUN_ROOT / "fake-source"
+    for relative in ("scripts/a.gd", ".git/HEAD", ".godot/cache.bin", "external/saves/save.json", "external/profile.json",
+                     "external/user_settings.json", "external/mod_list.json", "sub/.godot/x", "sub/profile.json"):
+        target = fake_source / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("x", encoding="utf-8")
+    (fake_source / "project.godot").write_text(
+        "config_version=5\n\n[application]\n\nconfig/name=\"Fake\"\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name=\"old\"\n", encoding="utf-8")
+    link_created = False
+    try:
+        os.symlink(str(fake_source / "scripts"), str(fake_source / "linked"), target_is_directory=True)
+        link_created = True
+    except (OSError, NotImplementedError):
+        pass
+    copy_root = RUN_ROOT / "copy" / "game"
+    info = runner.copy_isolated_game(fake_source, copy_root, RUN_ROOT / "userdata", "mycardgame-tests/synthetic/Fake")
+    assert_that((copy_root / "scripts" / "a.gd").exists() and (copy_root / "external" / "mod_list.json").exists(), "ordinary game files are copied")
+    assert_that(not (copy_root / ".git").exists() and not (copy_root / ".godot").exists() and not (copy_root / "sub" / ".godot").exists(),
+                "Git and cache directories are excluded at any depth")
+    assert_that(not (copy_root / "external" / "saves").exists() and not (copy_root / "external" / "profile.json").exists()
+                and not (copy_root / "external" / "user_settings.json").exists() and not (copy_root / "sub" / "profile.json").exists(),
+                "saves, profile and settings never reach the isolated copy")
+    if link_created:
+        assert_that(not (copy_root / "linked").exists() and info["skipped"]["links"], "symlinks are skipped, not followed")
+    project_text = (copy_root / "project.godot").read_text(encoding="utf-8")
+    assert_that(project_text.count("config/use_custom_user_dir=") == 1 and 'config/custom_user_dir_name="mycardgame-tests/synthetic/Fake"' in project_text
+                and '"old"' not in project_text, "project.godot gets exactly one isolated custom user dir")
+    assert_that((Path(info["user_dir"]) / "write-preflight.txt").exists() and info["user_dir"].startswith(str(RUN_ROOT / "userdata")),
+                "isolated user:// directory is created and write-checked")
+    assert_that((fake_source / "project.godot").read_text(encoding="utf-8").count('"old"') == 1, "source project.godot is untouched")
+
+    # --- checkout identity -----------------------------------------------------------------------
+    state = {"repo": str(PROJECT_ROOT / "game")}
+
+    def fake_git(args):
+        if "--show-toplevel" in args:
+            return 0, state["repo"] + "\n"
+        if "--verify" in args:
+            return 0, "test-checkout-commit\n"
+        if "diff" in args:
+            return 0, "test-modified-path\n"
+        raise AssertionError("Unexpected synthetic Git command")
+
+    checkout = runner.get_game_checkout_metadata(PROJECT_ROOT / "game", PROJECT_ROOT, run_git=fake_git)
+    assert_that(checkout["layout"] == "independent_game_checkout" and checkout["commit"] == "test-checkout-commit"
+                and checkout["changes"] == ["test-modified-path"], "independent game Git layout records a separate checkout identity")
+    state["repo"] = str(PROJECT_ROOT)
+    checkout = runner.get_game_checkout_metadata(PROJECT_ROOT / "game", PROJECT_ROOT, run_git=fake_git)
+    assert_that(checkout["layout"] == "outer_repository_snapshot" and checkout["commit"] == "test-checkout-commit",
+                "outer snapshot layout labels its commit as outer checkout metadata")
+    checkout = runner.get_game_checkout_metadata(RUN_ROOT / "game", PROJECT_ROOT, run_git=fake_git)
+    assert_that(checkout["layout"] == "isolated_source_snapshot" and checkout["commit"] is None,
+                "artifacts copy does not inherit outer checkout commit identity")
+    manifest = runner.build_manifest(suite="Smoke", run_id="synthetic", source_game=PROJECT_ROOT / "game",
+                                     source_lock={"commit": "lock-commit", "engine_policy": {"baseline": "4.7"}},
+                                     source_lock_sha256="X", checkout=checkout, historical_baseline=False, engine=engine,
+                                     engine_discovery={}, accepted_patterns=[r"^4\.7\."], policy_source="test", isolation={},
+                                     timeout_seconds=10, force_failure=False)
+    assert_that(manifest["upstream_commit"] == "lock-commit" and manifest["engine_policy"]["baseline"] == "4.7",
+                "upstream identity is always read from the source lock")
+
+    # --- policy and CLI --------------------------------------------------------------------------
+    lock = runner.load_source_lock(PROJECT_ROOT)
+    patterns, source = runner.accepted_engine_patterns(lock, None)
+    assert_that(any(re.search(p, "4.7.2.stable") for p in patterns) and not any(re.search(p, "4.6.stable") for p in patterns)
+                and source.startswith("tools/upstream.json"), "source lock policy accepts 4.7.x and not 4.6 by default")
+    patterns, source = runner.accepted_engine_patterns(lock, [r"^4\.6\."])
+    assert_that(patterns == [r"^4\.6\."] and source == "cli", "--accept-engine-version replaces the policy")
+    for bad_args in (["--force-failure", "--suite", "All"], ["--timeout-seconds", "5"], ["--suite", "Nope"]):
+        try:
+            runner.parse_args(bad_args)
+            rejected = False
+        except SystemExit:
+            rejected = True
+        assert_that(rejected, f"argument validation rejects {' '.join(bad_args)}")
+    parsed = runner.parse_args(["--suite", "saveload"])
+    assert_that(parsed.suite == "SaveLoad" and runner.expand_suites("Combat") == ["CombatVictory", "CombatDefeat"]
+                and runner.expand_suites("All") == list(runner.ALL_SUITES), "suite names are case-insensitive and expand like the PowerShell runner")
+
+    MANIFEST["completed"] = True
+    MANIFEST["checks"] = CHECKS
+    runner.save_manifest(MANIFEST, RUN_ROOT / "results.json")
+    print(f"RUNNER DIAGNOSTICS PASS: {CHECKS} checks; evidence {RUN_ROOT}")
+
+
+if __name__ == "__main__":
+    main()

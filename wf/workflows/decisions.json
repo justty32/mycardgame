@@ -1,0 +1,49 @@
+{
+ "contract": "wf-table/1",
+ "source": "decisions.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "date",
+  "decision",
+  "rejected_and_why",
+  "premise"
+ ],
+ "rows": [
+  {
+   "date": "2026-10-19",
+   "decision": "本階段使用平台原生 sub-agent",
+   "rejected_and_why": "不裝 multi-agent 信箱包：目前無跨資料夾投遞需求",
+   "premise": "若需要持續跨 session 協作再評估"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "kernel + dev，非侵入式放 wf/",
+   "rejected_and_why": "不攤在根目錄：使用者指定非侵入式",
+   "premise": "工作流仍由本專案維護"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "Dictionary merge 缺陷先重現留證",
+   "rejected_and_why": "不順手改框架：本輪建立原版基準",
+   "premise": "自訂內容需要合併時先修正"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "game/ 保留獨立 checkout，固定 4dac5abe",
+   "rejected_and_why": "不混入工作流：便於比較上游差異",
+   "premise": "外層尚未選定 Git 管理策略"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "以本地補丁修 Dictionary 與無效存檔拒絕，隔離驗勝敗／存讀",
+   "rejected_and_why": "不重置上游或沿用使用者存檔：保留差異與現有進度",
+   "premise": "使用者已要求修復與完整流程驗證"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "引擎基準升 Godot 4.7.x；runner 改單一 Python 實作（tools/test_game.py），ps1 只做 Windows 薄包裝",
+   "rejected_and_why": "不續守 4.6：上游 4dac5abe 久未更新，4.7.2 重跑斷言數一致；不維持雙 runner：公司 Windows／家中 Manjaro 跨平台開發，判定規則只留一份",
+   "premise": "上游若恢復更新並指定其他引擎版本、或 Windows 實測發現包裝／隔離問題時重看"
+  }
+ ]
+}
