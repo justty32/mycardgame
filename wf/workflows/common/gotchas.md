@@ -47,3 +47,7 @@
 **條件與對策**：驗 autosave、Continue 或壞檔時，用 [test_game.py](../../../tools/test_game.py) 先複製乾淨遊戲再啟動；預設 saves、profile、settings 和 user:// 都要隔離。只給 save_game 自訂路徑不能涵蓋 autosave，也不能攔 Global 首次 ready 的寫入。
 
 **驗收與邊界**：寫入和讀回使用兩個程序，除了資料欄位相同，還要驗 RNG 後續輸出及載入後下一步。壞檔失敗須保留原記憶體狀態，不可只檢查檔案存在或 JSON 可解析。證據：2026-10-19 [流程驗證](../../../analysis/slay-the-robot/architecture/04_regression_validation.md)；這是本版 checkpoint 契約，非戰鬥 SceneTree 快照。
+
+## Linux 直接開遊戲與新副本
+
+**條件與對策**：Wayland 視窗收不到點擊要加 `--display-driver x11`；新 worktree 首次開啟前要先 `--editor --import` 建 class cache，否則大量 "Could not find type"。細節與證據見 [dev-env](../dev-env.md)。

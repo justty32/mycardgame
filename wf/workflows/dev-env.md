@@ -38,6 +38,8 @@ clone 本專案即包含已修復的 game，不要再次套用補丁。不需 PA
 
 Linux（2026-10-19 Manjaro 已驗）：發行版套件 godot 或 godot-mono 經 PATH 探測即可；套件 build 不是官方 archive，upstream.json 的 SHA-512 不描述它，以 runner 版本探測與隔離 All 為證據。
 
+直接開遊戲（非 headless）的已驗事實（2026-10-19 Manjaro KDE Wayland、Godot 4.7.2 godot-mono 套件版）：Wayland 下視窗收不到滑鼠點擊，所有按鈕無反應；加 `--display-driver x11`（走 XWayland）即正常，headless runner 不受影響。新建的 worktree 或乾淨副本第一次開前，先 `godot-mono --headless --path <dir>/game --editor --import` 建 class cache，否則大量 "Could not find type" parse error。
+
 換到新平台時，先用 headless 加導向 HOME／XDG_*（Windows 為 APPDATA 等）的最小探針確認引擎可跑，再改 runner；探針不得寫入使用者的 ~/.config/godot（2026-10-19 Manjaro 實證）。
 
 ```bash
