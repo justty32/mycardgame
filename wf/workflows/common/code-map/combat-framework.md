@@ -6,7 +6,7 @@
 
 ## 時間軸與單位
 
-[UnitRegistry.gd](../../../../game/scripts/combat/UnitRegistry.gd)（autoload）管 unit_uid、陣營、主角與 unit_spawned／unit_removed。[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)（`Global.get_combat_director()`）跑 CTB 行動迴圈，Phase 2 起也負責開戰建棋盤、生成第 0 波、移動點與付費移動、敵人意圖移動。排序在 [CombatTimeline.gd](../../../../game/scripts/combat/CombatTimeline.gd)，`controllers/` 分玩家與敵人。[CombatEndAction.gd](../../../../game/scripts/ui/CombatEndAction.gd) 等出牌佇列清空後結束行動，[TimelineBar.gd](../../../../game/scripts/ui/TimelineBar.gd) 顯示行動順序。
+[UnitRegistry.gd](../../../../game/scripts/combat/UnitRegistry.gd)（autoload）管 unit_uid、陣營、主角與 unit_spawned／unit_removed。[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)（`Global.get_combat_director()`）跑 CTB 行動迴圈與開戰／停止；每場建立的元件分擔其餘職責：[BoardController.gd](../../../../game/scripts/combat/BoardController.gd) 建棋盤、部署主角、放置單位與點格移動，[UnitSpawner.gd](../../../../game/scripts/combat/UnitSpawner.gd) 生成波次單位與棋盤召喚，[CombatActionPhases.gd](../../../../game/scripts/combat/CombatActionPhases.gd) 是一次行動固定的開始／結束階段，[CombatStartActions.gd](../../../../game/scripts/combat/CombatStartActions.gd) 是開戰前的初始動作；敵人意圖（含意圖移動）在 EnemyIntentController。排序在 [CombatTimeline.gd](../../../../game/scripts/combat/CombatTimeline.gd)，`controllers/` 分玩家與敵人。[CombatEndAction.gd](../../../../game/scripts/ui/CombatEndAction.gd) 等出牌佇列清空後結束行動，[TimelineBar.gd](../../../../game/scripts/ui/TimelineBar.gd) 顯示行動順序。
 
 [BaseCombatant.gd](../../../../game/scripts/combatants/BaseCombatant.gd) 帶單位身分與每次行動的移動計數。[CombatRulesData.gd](../../../../game/data/readonly/CombatRulesData.gd)（`Global.get_combat_rules()`）定節奏與移動規則。
 

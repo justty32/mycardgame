@@ -1,10 +1,11 @@
 ## Runs one combat as an action timeline (CTB): pops the unit with the smallest next_action_tick,
 ## performs its action (player input or enemy intent) and re-queues it after a delay scaled by its
 ## speed (CombatRulesData). Replaces the AnimationPlayer-driven turn alternation of Combat.gd;
-## Combat.gd keeps the HUD and ends combat from the death animation. Phase 2: the Director builds the
-## board (BoardData) from the event's EncounterData (or one synthesized for legacy events), spawns
-## wave 0 through the EnemyContainer unit layer, places units, runs movement (move points, paid
-## movement, enemy intent movement) and keeps the ThreatPreview fresh.
+## Combat.gd keeps the HUD. Components (one per combat): BoardController builds the board from the
+## event's EncounterData (or one synthesized for legacy events) and runs movement; UnitSpawner
+## spawns wave units / summons through the EnemyContainer unit layer; CombatActionPhases holds the
+## fixed begin / end phases of an action and CombatStartActions the combat-start actions; enemy
+## intents (with intent movement) run in EnemyIntentController. The Director keeps the ThreatPreview fresh.
 ## Child of RunScreen/Combat. Signals: player_turn_* = the hero's action (pre-draw / post-discard),
 ## enemy_turn_* = one enemy's action, unit_action_started/ended for every unit, combat_tick_advanced,
 ## timeline_changed. With equal speeds and the default rules the order equals the old turn flow.
@@ -24,9 +25,16 @@ var rules: CombatRulesData = null
 var acting_unit: BaseCombatant = null
 var current_tick: int = 0
 var is_running: bool = false
+## Components of the current combat (null outside combat): board / movement and unit spawning.
+var board_controller: BoardController = null
+var unit_spawner: UnitSpawner = null
 ## Board of the current combat (null outside combat) and the encounter it was built from.
-var board: BoardData = null
-var encounter: EncounterData = null
+var board: BoardData:
+	get:
+		return board_controller.board if board_controller != null else null
+var encounter: EncounterData:
+	get:
+		return board_controller.encounter if board_controller != null else null
 var threat_preview: ThreatPreview = null
 
 var _generation: int = 0	# invalidates suspended loops when combat/run ends
@@ -86,25 +94,29 @@ func begin_combat(event_data: EventData = null) -> void:
 	_waiting_for_player = false
 	_player_finish_pending = false
 	_cards_played_this_action.clear()
-	_reset_end_action()
+	reset_end_action()
 	if event_data == null:
 		event_data = Global.get_player_event_data()
-	_setup_board(event_data)
+	board_controller = BoardController.new(rules)
+	unit_spawner = UnitSpawner.new(self)
+	var encounter_data: EncounterData = Global.get_event_encounter_data(event_data)
+	board_controller.setup(encounter_data)
+	unit_spawner.spawn_first_wave(event_data, encounter_data)
 	for unit: BaseCombatant in UnitRegistry.get_all_units():
 		if not unit.is_alive():
 			continue
 		unit.reset_unit_combat_state()
-		unit.next_action_tick = _spawn_delays.get(unit.unit_uid, 0)
+		unit.next_action_tick = unit_spawner.first_action_tick(unit)
 		_assign_controller(unit)
 		timeline.push(unit)
-	_spawn_delays.clear()
+	unit_spawner.clear()
 	# enemies decide their first intent while waiting for their first action
 	for enemy: Enemy in Global.get_alive_enemies():
 		enemy.decide_next_intent()
 	is_running = true
 	refresh_threats()
 	Signals.timeline_changed.emit()
-	await _perform_initial_combat_actions(generation)
+	await CombatStartActions.perform(self, generation)
 	if generation != _generation:
 		return
 	await _run_loop(generation)
@@ -115,10 +127,12 @@ func _stop() -> void:
 	_generation += 1
 	is_running = false
 	acting_unit = null
-	board = null
-	encounter = null
+	if board_controller != null:
+		board_controller.clear()
+	board_controller = null
+	unit_spawner = null
 	threat_preview = null
-	_reset_end_action()
+	reset_end_action()
 	_cards_played_this_action.clear()
 	if timeline != null:
 		timeline.clear()
@@ -159,7 +173,7 @@ func _admit_spawned_unit(unit: BaseCombatant, generation: int) -> void:
 	if not unit.is_alive():
 		return
 	if board != null and not board.has_unit(unit):
-		place_unit_nearest(unit, _default_spawn_origin())
+		board_controller.place_unit_nearest(unit, board_controller.default_spawn_origin())
 	unit.reset_unit_combat_state()
 	_assign_controller(unit)
 	unit.last_action_tick = current_tick
@@ -234,7 +248,18 @@ func _run_loop(generation: int) -> void:
 	if generation == _generation:
 		acting_unit = null
 
-## True when the loop must return without touching state (combat/run ended or hero died).
+## Generation of the running combat; components pass it back to is_aborted / wait_actions.
+func get_generation() -> int:
+	return _generation
+
+## True when a suspended step must return without touching state (combat/run ended or hero died).
+func is_aborted(generation: int) -> bool:
+	return _aborted(generation)
+
+## Awaits the ActionHandler queue (no-op when idle).
+func wait_actions(generation: int) -> void:
+	await _wait_actions(generation)
+
 func _aborted(generation: int) -> bool:
 	if generation != _generation:
 		return true
@@ -259,15 +284,15 @@ func _wait_actions(_generation: int) -> void:
 
 func _begin_action(unit: BaseCombatant, generation: int) -> void:
 	if unit.faction == BaseCombatant.FACTIONS.PARTY:
-		await _begin_party_action(unit, generation)
+		await CombatActionPhases.begin_party_action(self, unit, generation)
 	else:
-		await _begin_enemy_action(unit, generation)
+		await CombatActionPhases.begin_enemy_action(self, unit, generation)
 
 func _end_action(unit: BaseCombatant, generation: int) -> void:
 	if unit.faction == BaseCombatant.FACTIONS.PARTY:
-		await _end_party_action(unit, generation)
+		await CombatActionPhases.end_party_action(self, unit, generation)
 	else:
-		await _end_enemy_action(unit, generation)
+		await CombatActionPhases.end_enemy_action(self, unit, generation)
 
 ## Delay of the action just performed: the largest card_action_delay played (party) or the
 ## intent's enemy_intent_action_delay; rules.default_action_delay when unspecified.
@@ -298,39 +323,6 @@ func _on_card_played(card_play_request: CardPlayRequest) -> void:
 #endregion
 
 #region Party (hero) action
-func _begin_party_action(unit: BaseCombatant, generation: int) -> void:
-	HandManager.set_disable_hand(true)
-	unit.reset_action_movement(rules.free_move_per_action)
-	if unit.is_hero():
-		StatsHandler.begin_hero_action()	# turn count = hero actions; before the overlay reads it
-	await _play_combat_animation(ANIMATION_ACTION_START)
-	if _aborted(generation):
-		return
-	# hero's action has started: legacy signal (StatsHandler turn count, artifacts, intent cycle listeners)
-	Signals.player_turn_started.emit()
-	ActionGenerator.generate_start_of_turn_energy_actions()
-	if unit is Player:
-		(unit as Player).update_incoming_damage_amount(true)
-	if rules.reset_block_on_action_start:
-		unit.generate_reset_block_action()
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DRAW_PLAYER_START_TURN)
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	ActionGenerator.generate_start_of_turn_draw_actions()
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DRAW_PLAYER_START_TURN)
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	Signals.unit_action_started.emit(unit)
-	HandManager.set_disable_hand(false)
-	if HandManager.hand != null:
-		HandManager.hand.update_hand_card_display()
-
 ## Awaited by PlayerInputController until CombatEndAction finishes the action.
 func wait_for_player_action() -> void:
 	if _player_finish_pending:
@@ -364,276 +356,47 @@ func finish_player_action(end_action: CombatEndAction = null) -> void:
 	else:
 		_player_finish_pending = true
 
-func _reset_end_action() -> void:
+## Cancels a waiting end-action request (action ended or combat stopped).
+func reset_end_action() -> void:
 	if _end_action_request != null:
 		_end_action_request.disable()
 		_end_action_request = null
 
-func _end_party_action(unit: BaseCombatant, generation: int) -> void:
-	HandManager.set_disable_hand(true)
-	_reset_end_action()
-	await _play_combat_animation(ANIMATION_ACTION_END)
-	if _aborted(generation):
-		return
-	Signals.player_turn_ended.emit()
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_DISCARD_PLAYER_END_TURN)
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	if rules.discard_hand_on_action_end:
-		await HandManager.perform_end_of_action_hand_actions()
-		await _wait_actions(generation)
-		if _aborted(generation):
-			return
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_DISCARD_PLAYER_END_TURN)
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	Signals.unit_action_ended.emit(unit)
-
-## Plays an animation on Combat's AnimationPlayer (TurnOverlay) and waits for it. No-op headless-safe.
-func _play_combat_animation(animation_name: String) -> void:
-	var combat: Node = get_parent()
-	if combat == null or not combat.has_node("CombatAnimation"):
-		return
-	var animation_player: AnimationPlayer = combat.get_node("CombatAnimation") as AnimationPlayer
-	if animation_player == null or not animation_player.has_animation(animation_name):
-		return
-	animation_player.play(animation_name)
-	await animation_player.animation_finished
 #endregion
 
 #region Enemy action
-func _begin_enemy_action(unit: BaseCombatant, generation: int) -> void:
-	unit.reset_action_movement(0)
-	Signals.enemy_turn_started.emit()	# legacy signal: one enemy's action begins
-	# both legacy pairs fire for this enemy's own action (old data stays valid)
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_INTENT)
-	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_START)
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	Signals.unit_action_started.emit(unit)
-
-## Performs the enemy's current intent (EnemyIntentController): moves by the intent's move mode
-## (IntentResolver), then performs the intent against what it hits from there. An attack that
-## cannot reach its target is skipped and the intent is kept for the enemy's next action.
+## Performs the enemy's current intent with intent movement (EnemyIntentController.perform_intent).
 func perform_enemy_intent(enemy: Enemy) -> void:
-	var generation: int = _generation
-	if enemy == null or not enemy.is_alive():
-		return
-	var enemy_intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
-	var target: BaseCombatant = IntentResolver.choose_target(board, enemy, enemy_intent)
-	var plan: Dictionary = IntentResolver.resolve(board, enemy, enemy_intent, target)
-	var path: Array = plan.get("path", [])
-	if board != null and not path.is_empty() and plan["move_cell"] != enemy.board_anchor:
-		var move_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, [enemy], [{
-			Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": plan["move_cell"], "distance": len(path), "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
-		}], null)
-		ActionHandler.add_actions(move_actions)
-		await _wait_actions(generation)
-		if _aborted(generation) or not enemy.is_alive():
-			return
-	var hit: Dictionary = IntentResolver.hits_from(board, enemy, enemy.board_anchor, enemy_intent, target)
-	var can_hit: bool = hit["can_hit"]
-	if enemy_intent != null and enemy_intent.enemy_intent_number_of_attacks > 0 and not can_hit:
-		enemy.keep_intent_next_action = true
-	var enemy_actions_data: Array[Dictionary] = enemy.build_intent_actions_data(enemy_intent, rules.reset_block_on_action_start, can_hit)
-	# play intent sound if one exists and no attacks
-	if enemy_intent != null and enemy_intent.enemy_intent_audio_path != "" and enemy_intent.enemy_intent_number_of_attacks == 0:
-		ActionGenerator.generate_sound_action(enemy_intent.enemy_intent_audio_path, false)
-	var targets: Array[BaseCombatant] = []
-	if can_hit:
-		targets.assign(hit["targets"])
-	elif target != null:
-		targets.append(target)
-	var enemy_actions: Array[BaseAction] = ActionGenerator.create_actions(enemy, null, targets, enemy_actions_data, null)
-	ActionHandler.add_actions(enemy_actions)
-	await _wait_actions(generation)
-
-func _end_enemy_action(unit: BaseCombatant, generation: int) -> void:
-	if unit.is_alive():
-		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_INTENT)
-		await _wait_actions(generation)
-		if _aborted(generation):
-			return
-		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.POST_ENEMY_TURN)
-		unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.UNIT_ACTION_END)
-		await _wait_actions(generation)
-		if _aborted(generation):
-			return
-	Signals.unit_action_ended.emit(unit)
-	Signals.enemy_turn_ended.emit()
+	await EnemyIntentController.perform_intent(self, enemy)
 #endregion
 
-#region First-action setup (moved from Combat.gd's first player turn)
-func _perform_initial_combat_actions(generation: int) -> void:
-	var hero: BaseCombatant = UnitRegistry.get_hero()
-	var location_data: LocationData = Global.get_player_location_data()
-	if location_data != null:
-		var card_play_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
-		card_play_request.card_data = null
-		card_play_request.selected_target = null
-		# location initial actions
-		var location_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], location_data.location_initial_combat_actions, null)
-		ActionHandler.add_actions(location_initial_combat_actions)
-		await _wait_actions(generation)
-		if _aborted(generation):
-			return
-		# event initial actions
-		var event_data: EventData = Global.get_player_event_data()
-		if event_data != null:
-			var event_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], event_data.event_initial_combat_actions, null)
-			ActionHandler.add_actions(event_initial_combat_actions)
-			await _wait_actions(generation)
-			if _aborted(generation):
-				return
-	# combat start consumable actions
-	for consumable_slot_index: int in Global.player_data.player_consumable_slot_count:
-		var consumable_data: ConsumableData = Global.get_player_consumable_in_slot_index(consumable_slot_index)
-		if consumable_data != null and len(consumable_data.consumable_initial_combat_actions) > 0:
-			var consumable_request: CardPlayRequest = HandManager.create_card_play_request(null, null, false, true)
-			var consumable_actions: Array[BaseAction] = ActionGenerator.create_actions(null, consumable_request, [], consumable_data.consumable_initial_combat_actions, null)
-			ActionHandler.add_actions(consumable_actions)
-	await _wait_actions(generation)
-	if _aborted(generation):
-		return
-	# combat start card actions
-	for card_data: CardData in HandManager.player_draw:
-		var card_request: CardPlayRequest = HandManager.create_card_play_request(card_data, null, true, true)
-		var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_request, [], card_data.card_initial_combat_actions, null)
-		ActionHandler.add_actions(card_play_actions)
-	await _wait_actions(generation)
-#endregion
-
-#region Board (combat framework Phase 2)
-var _spawn_delays: Dictionary[String, int] = {}	# unit_uid -> first next_action_tick (wave spawn delays)
-
-func _get_unit_layer() -> Node:
-	var combat: Node = get_parent()
-	if combat == null or not combat.has_node("EnemyContainer"):
-		return null
-	return combat.get_node("EnemyContainer")
-
-## Builds the board from the event's encounter, places the hero on the first deploy cell and
-## spawns wave 0 (weighted picks in order with rng_enemy_spawning, like the legacy spawner).
-func _setup_board(event_data: EventData) -> void:
-	encounter = Global.get_event_encounter_data(event_data)
-	board = BoardData.new(encounter.get_board_size(rules), rules)
-	var deploy_cells: Array[Vector2i] = EncounterData.cells_from_json(encounter.encounter_deploy_cells)
-	if deploy_cells.is_empty():
-		deploy_cells = _default_deploy_cells()
-	for cell: Vector2i in deploy_cells:
-		if board.is_in_bounds(cell):
-			board.get_cell(cell).is_deploy_zone = true
-	var spawn_cells: Array[Vector2i] = EncounterData.cells_from_json(encounter.encounter_spawn_zone_cells)
-	if spawn_cells.is_empty():
-		for y: int in min(2, board.size.y):
-			for x: int in board.size.x:
-				spawn_cells.append(Vector2i(x, y))
-	for cell: Vector2i in spawn_cells:
-		if board.is_in_bounds(cell):
-			board.get_cell(cell).is_spawn_zone = true
-	for cell: Vector2i in EncounterData.cells_from_json(encounter.encounter_blocked_cells):
-		board.set_blocked(cell, true)
-	# party: the hero takes the first deploy cell
-	var hero: BaseCombatant = UnitRegistry.get_hero()
-	if hero != null:
-		place_unit_nearest(hero, deploy_cells[0] if not deploy_cells.is_empty() else Vector2i(int(board.size.x / 2), board.size.y - 1))
-	_spawn_delays.clear()
-	var unit_layer: Node = _get_unit_layer()
-	if unit_layer == null or encounter.encounter_waves.is_empty():
-		return
-	unit_layer.clear_enemies()
-	var wave: EncounterWaveData = encounter.encounter_waves[0]
-	var index: int = 0
-	for unit_entry: Dictionary in wave.wave_units:
-		var weights: Dictionary[Variant, int] = {}
-		weights.assign(unit_entry.get("weights", {}))
-		if weights.is_empty():
-			index += 1
-			continue
-		var rng_enemy_spawning: RandomNumberGenerator = Global.player_data.get_player_rng("rng_enemy_spawning")
-		var enemy_object_id: String = Random.get_weighted_selection(rng_enemy_spawning, weights)
-		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
-		if enemy == null:
-			break	# positional events stop when their slots run out (legacy)
-		var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
-		if not board.is_in_bounds(cell):
-			cell = _default_spawn_origin()
-		place_unit_nearest(enemy, cell)
-		var spawn_delay: int = int(unit_entry.get("spawn_delay_ticks", 0))
-		if spawn_delay > 0:
-			_spawn_delays[enemy.unit_uid] = spawn_delay
-		index += 1
-
-## Default deploy zone: the two south rows, the hero's cell (bottom row center) first.
-func _default_deploy_cells() -> Array[Vector2i]:
-	var cells: Array[Vector2i] = [Vector2i(int(board.size.x / 2), board.size.y - 1)]
-	for y: int in range(board.size.y - 1, max(-1, board.size.y - 3), -1):
-		for x: int in board.size.x:
-			if not cells.has(Vector2i(x, y)):
-				cells.append(Vector2i(x, y))
-	return cells
-
-func _default_spawn_origin() -> Vector2i:
-	return Vector2i(int(board.size.x / 2), 0)
-
+#region Board and spawning (delegated to BoardController / UnitSpawner)
 ## Places a unit at cell, or the nearest empty anchor (NEAREST_EMPTY). false = the board is full.
 func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
-	if board == null or unit == null:
-		return false
-	if board.place(unit, cell):
-		return true
-	var anchor: Vector2i = board.nearest_empty_anchor(unit, cell)
-	if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
-		DebugLogger.log_error("CombatDirector: no free cell for unit {0}".format([unit.get_unit_display_name()]))
-		return false
-	return board.place(unit, anchor)
+	return board_controller != null and board_controller.place_unit_nearest(unit, cell)
 
 ## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
 ## the nearest empty cell; it enters the timeline as if it had just acted.
 func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i) -> Enemy:
-	var unit_layer: Node = _get_unit_layer()
-	if unit_layer == null or board == null:
+	if unit_spawner == null:
 		return null
-	var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id)
-	if enemy != null and not place_unit_nearest(enemy, cell):
-		enemy.queue_free()
-		return null
-	return enemy
+	return unit_spawner.spawn_enemy_at_cell(enemy_object_id, cell)
 
 ## Cells the acting party unit can still move this action: free move points plus paid cells.
 func get_move_budget(unit: BaseCombatant) -> int:
-	if unit == null or rules == null:
+	if board_controller == null:
 		return 0
-	return unit.move_points + max(0, rules.paid_move_max_cells - unit.paid_cells_this_action)
+	return board_controller.get_move_budget(unit)
 
 ## Player movement input (BoardView click on an empty cell): moves the acting party unit along the
 ## shortest path, spending free move points first, then paid cells (+extra_move_delay_per_cell each).
 ## false = not the player's action, busy, or the cell is not reachable within the budget.
 func request_player_move(cell: Vector2i) -> bool:
-	if not is_running or board == null or acting_unit == null or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
+	if not is_running or board_controller == null or acting_unit == null or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
 		return false
 	if not _waiting_for_player or _end_action_request != null:
 		return false
 	if ActionHandler.actions_being_performed or HandManager.cards_being_played or not HandManager.card_play_queue.is_empty():
 		return false
-	var unit: BaseCombatant = acting_unit
-	var budget: int = get_move_budget(unit)
-	if budget <= 0:
-		return false
-	var path: Array[Vector2i] = board.find_path(unit, cell, budget)
-	if path.is_empty():
-		return false
-	var move_actions: Array[BaseAction] = ActionGenerator.create_actions(unit, null, [unit], [{
-		Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": cell, "distance": len(path), "consumes_move_points": true, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
-	}], null)
-	ActionHandler.add_actions(move_actions)
-	return true
+	return board_controller.move_party_unit(acting_unit, cell)
 #endregion
