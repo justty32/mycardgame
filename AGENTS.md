@@ -1,10 +1,11 @@
 # mycardgame — AI agent 專案備忘
 
-mycardgame = **以 Slay-The-Robot 為框架、以 spire-codex 為參考的個人卡牌遊戲專案**。遊戲原始碼在 [game/project.godot](game/project.godot)，工作流在 wf/，核實分析在 [analysis](analysis/slay-the-robot/README.md)，遊戲設計（玩法決定與任務 spec／plan）在 [games](games/README.md)（各題材的 design 與內容包）。背景與來源見 [PROJECT.md](wf/PROJECT.md)；分層原則見 [STRUCTURE.md](wf/STRUCTURE.md)。
+mycardgame = **以 Slay-The-Robot 為框架的個人卡牌遊戲開發基地**：根目錄是題材中立的框架——遊戲原始碼在 [game/project.godot](game/project.godot)，工作流在 wf/，核實分析在 [analysis](analysis/slay-the-robot/README.md)；各款遊戲在 [games](games/README.md)（每款一棵題材樹：AGENTS 入口、design、wf overlay、內容包）。背景與來源見 [PROJECT.md](wf/PROJECT.md)；分層原則見 [STRUCTURE.md](wf/STRUCTURE.md)。
 
 ## 開場與入口
 
 - 每個 session 先跑 `rg -c '^- \[' wf/SESSION-LOG.md wf/WAIT_USER.md`：有條目才開 [SESSION-LOG.md](wf/SESSION-LOG.md)（進度）/ [WAIT_USER.md](wf/WAIT_USER.md)（等使用者）；無匹配的 exit 1 表示沒有 open 項目。
+- 做某款遊戲的題材工作（玩法設計、內容包、題材 probe）→ 再讀該遊戲的 `games/<game>/AGENTS.md`；題材名詞與參考來源只寫在該題材樹。
 - 新 agent 接手或多人協作 → [agent-session](wf/workflows/agent-session.md)；遊戲修改 → [game-dev](wf/workflows/game-dev/README.md)。
 - **碰原始碼前**：慣例與 code map → [workflows/common/conventions.md](wf/workflows/common/conventions.md)、[workflows/common/code-map.md](wf/workflows/common/code-map.md)；環境與指令 → [workflows/dev-env.md](wf/workflows/dev-env.md)。
 <!-- wf-insert:AGENTS -->

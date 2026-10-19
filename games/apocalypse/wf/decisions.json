@@ -1,0 +1,25 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "date",
+  "decision",
+  "rejected_and_why",
+  "premise"
+ ],
+ "rows": [
+  {
+   "date": "2026-10-19",
+   "decision": "發行目標＝免費公開同人（天启预报，不商業）",
+   "rejected_and_why": "不走商業或原創化發行：使用者指定免費同人；因此沿用原作概念名詞、不收原文段落，spire-codex 的非商業授權條件亦不構成阻礙（採用前仍逐項核對）",
+   "premise": "若改商業發行，名詞需原創化並重審 spire-codex 內容採用"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "戰鬥需求：多角色輪流出牌＋多組敵人（主角由玩家操作，隊員由 AI 控制）",
+   "rejected_and_why": "不採單一主角對單一敵人的標準爬塔模型：要承載多名角色與敵方多組的概念；機制本身由框架以通用能力實作（見框架 decisions），本列只記本遊戲的需求，細節待 spec",
+   "premise": "概念原型驗證後若過於複雜，退回單角色再評估"
+  }
+ ]
+}

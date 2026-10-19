@@ -2,7 +2,7 @@
 
 [common/README](README.md)｜[INDEX](../../INDEX.md)｜[code-map](code-map.md)
 
-目前以 game/ 的固定上游版本為基準，分析依實際原始碼與測試結果維護。
+目前以 game/ 的固定上游版本為基準，分析依實際原始碼與測試結果維護。下列 game/、wf/、analysis/、tools/、tests/ 是題材中立的框架目錄；各款遊戲的 design、wf overlay、內容包與 probe 放 `games/<game>/`，框架目錄不引用它，也不寫題材名詞。
 
 - 工作流放 wf/，遊戲放 game/，分析放 analysis/，本專案工具與測試放 tools/、tests/；不把 Godot 內容攤入工作流目錄。
 - 文件用繁中、UTF-8；識別字沿用上游命名。

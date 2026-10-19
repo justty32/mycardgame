@@ -15,7 +15,7 @@
 | 呈現／美術風格 | 待定 | — |
 | 發行目標（個人／免費公開／商業） | 免費公開同人，不商業 | 使用者 2026-10-19 |
 
-發行目標決定 spire-codex 參考內容能否採用：其授權在 [PROJECT](../../../wf/PROJECT.md) 記為 PolyForm Noncommercial 1.0.0（遊戲資料與 hosted API 另有條件），有商業意圖時不直接採用其內容，採用前逐項核對來源與條件。
+發行目標決定 spire-codex 參考內容能否採用：其授權在題材 [PROJECT](../wf/PROJECT.md) 記為 PolyForm Noncommercial 1.0.0（遊戲資料與 hosted API 另有條件），有商業意圖時不直接採用其內容，採用前逐項核對來源與條件。
 
 ## 當前方向：概念原型
 

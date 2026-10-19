@@ -1,6 +1,6 @@
 # mycardgame
 
-以 [Slay-The-Robot](https://github.com/DesirePathGames/Slay-The-Robot) 為框架的個人卡牌遊戲專案，採 Godot 4.6。此版本建立可持續開發的程式基準、回歸測試與 agent 工作流；遊戲題材與原創內容仍待設計。
+以 [Slay-The-Robot](https://github.com/DesirePathGames/Slay-The-Robot) 為框架的個人卡牌遊戲專案，採 Godot 4.6。此版本建立可持續開發的程式基準、回歸測試與 agent 工作流。根目錄是題材中立的框架；各款遊戲的設計、決策與內容包在 [games/](games/README.md)，每款一棵題材樹。
 
 ## 開始開發
 
@@ -20,4 +20,4 @@ Agent 先讀 [AGENTS.md](AGENTS.md)，再依 [工作流入口](wf/workflows/game
 
 `wf/` 是結構化記憶與可執行的任務流程：程式變動後同步分析、驗證及操作指引。資料驅動擴充優先使用獨立 mod；修框架時保留回歸證據與補丁。多人分工與目前操作授權見 [agent-session](wf/workflows/agent-session.md) 及 [使用者邊界](wf/workflows/common/user.md)。
 
-Slay-The-Robot 的 [MIT 授權](game/LICENSE) 與 addons 原授權保留；工作流來源授權見 [LICENSE.workflows](wf/LICENSE.workflows)。[spire-codex](https://github.com/ptrlrd/spire-codex) 作為研究參考，沒有匯入其程式碼、遊戲資料或素材；詳細來源與使用邊界見 [PROJECT](wf/PROJECT.md)。
+Slay-The-Robot 的 [MIT 授權](game/LICENSE) 與 addons 原授權保留；工作流來源授權見 [LICENSE.workflows](wf/LICENSE.workflows)。框架來源見 [PROJECT](wf/PROJECT.md)；各款遊戲的外部參考與授權邊界記在該題材樹的 NOTICE 與 wf/PROJECT。

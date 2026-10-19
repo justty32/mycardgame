@@ -2,23 +2,19 @@
 
 [INDEX](INDEX.md)｜[環境](workflows/dev-env.md)｜[後續規劃](workflows/planning.md)
 
-使用者於 2026-10-19 指定：製作自己的卡牌遊戲，以 Slay-The-Robot 為框架、spire-codex 做參考；第一步以非侵入式方式引入本機 workflows。遊戲題材、原創機制與發行目標尚未定義。
+使用者於 2026-10-19 指定：製作自己的卡牌遊戲，以 Slay-The-Robot 為框架；第一步以非侵入式方式引入本機 workflows。本 repo 根目錄是題材中立的框架，可同時承載多款遊戲；各款的題材、原創機制、發行目標與外部參考來源記在各自的題材樹（由根 AGENTS.md 路由），不寫進本檔。
 
 ## 目前範圍
 
 已導入 kernel + dev，工作流與背景收在 wf/，框架分析與教學收在 analysis/slay-the-robot/。遊戲原始碼位於 game/，本專案工具與測試在 tools/、tests/。使用者指定以 `justty32/mycardgame` 外層 snapshot 發布完整程式與本地修復；原本固定 HEAD 的獨立 game checkout 保留於開發機，公開 checkout 的 game/ 為一般追蹤檔案，詳細佈局見 dev-env。現階段用平台原生 sub-agent 協作。
 
-## 框架與參考
+## 框架
 
 ### Slay-The-Robot：已引入的遊戲框架
 
 [上游 README](https://github.com/DesirePathGames/Slay-The-Robot) 在 2026-10-19 查核時列 Godot 4.6、GDScript，提供卡牌 roguelike 框架與資料驅動擴充。[根 LICENSE](https://github.com/DesirePathGames/Slay-The-Robot/blob/main/LICENSE) 為 MIT。已 clone 至 game/ 並 detached 到 commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`；保留根授權與 addons 授權，另有 Dictionary／存讀保護的本地修復。匯入時的 Godot 4.6 可攜版已核對 SHA-512，2026-10-19 起引擎基準升為 4.7.x（見 [decisions](workflows/decisions.md)）；版本與補丁紀錄見 [upstream.json](../tools/upstream.json)，啟動方式見 [dev-env](workflows/dev-env.md)。
 
-### spire-codex：設計與資料研究參考
-
-[上游](https://github.com/ptrlrd/spire-codex/tree/main) 是 Slay the Spire 2 資料庫與 API，使用 Python/FastAPI 與 Next.js/TypeScript。角色是研究參考；目前沒有匯入程式碼、資料或素材，也沒有接入 hosted API。[LICENSE.md](https://github.com/ptrlrd/spire-codex/blob/main/LICENSE.md) 在 2026-10-19 查核時為 PolyForm Noncommercial 1.0.0；README 另區分遊戲資料與 hosted API 條件。實際採用任何內容時記錄來源與適用條件。
-
-Slay-The-Robot 已固定版本；spire-codex 仍是未匯入的研究參考。
+Slay-The-Robot 已固定版本。
 
 ## 專案內建分析與教學
 

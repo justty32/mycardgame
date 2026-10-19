@@ -1,4 +1,4 @@
-# design — mycardgame 遊戲設計
+# design — apocalypse 遊戲設計
 
 [專案地圖](../../../wf/INDEX.md)｜[規劃流程](../../../wf/workflows/planning.md#遊戲規劃)｜[開發順序](../../../wf/workflows/game-dev/game-flow/vertical-slice.md)
 
@@ -20,5 +20,5 @@
 ## 填寫規則
 
 - 每個決定註明來源：「使用者 YYYY-MM-DD」或「預設（agent 提議，可改）」；尚未決定寫「待定」。
-- 「為什麼選 A 不選 B」記到 [decisions](../../../wf/workflows/decisions.md)，本資料夾只留結論。
+- 「為什麼選 A 不選 B」記到本題材的 [decisions](../wf/decisions.json)（欄位見框架 [decisions](../../../wf/workflows/decisions.md)），本資料夾只留結論。
 - 核心設計改變時，同步檢查 `specs/`、`plans/` 中仍在進行的任務。

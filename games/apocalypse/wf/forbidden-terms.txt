@@ -1,0 +1,18 @@
+# 只准出現在 games/apocalypse/ 的詞（一行一詞，# 開頭為註解，ASCII 不分大小寫，子字串比對）。
+# boundary lint 會在框架目錄、根路由檔與其他題材樹掃這些詞。
+天启预报
+天启
+天啟
+天啓
+apocalypse
+apo_
+源質
+源质
+聖痕
+圣痕
+凝固者
+昇華
+# 非商業授權參考（PolyForm Noncommercial）只限本題材樹
+spire-codex
+ptrlrd
+PolyForm

@@ -1,6 +1,6 @@
 # game-dev — AI agent 遊戲開發入口
 
-[WORKFLOWS](../../WORKFLOWS.md)｜[專案地圖](../../INDEX.md)｜[agent 接手與協作](../agent-session.md)｜[遊戲設計（題材樹）](../../../games/README.md)
+[WORKFLOWS](../../WORKFLOWS.md)｜[專案地圖](../../INDEX.md)｜[agent 接手與協作](../agent-session.md)
 
 將使用者需求轉成可驗證的遊戲變更。遊戲工作的共同執行迴圈已寫在下方「流程」節（不再回 feature-dev；feature-dev 只用於 tools／wf 類非遊戲工作），此處依遊戲領域補齊必要的原始碼與驗收。
 

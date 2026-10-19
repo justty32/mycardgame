@@ -6,7 +6,7 @@
 
 ## 專案方向
 
-文件與回覆使用繁體中文；時區 Asia/Taipei。Slay-The-Robot 作為框架，spire-codex 作為參考；workflows 維持 wf/ 非侵入式佈局。相關分析已納入本專案，之後不依賴 PAS。
+文件與回覆使用繁體中文；時區 Asia/Taipei。Slay-The-Robot 作為框架；各款遊戲的參考來源與發行條件記在該遊戲的題材樹，框架文件保持題材中立；workflows 維持 wf/ 非侵入式佈局。相關分析已納入本專案，之後不依賴 PAS。
 
 ## agent 的持續責任
 

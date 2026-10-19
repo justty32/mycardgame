@@ -11,6 +11,7 @@
 | 工作流 | 根 `AGENTS.md`、`wf/workflows/` | 派發、偏好與開發流程 | `wf/tools/wf-lint.sh --strict .` |
 | 工作流工具 | `wf/tools/` | 上游 kernel 的文件檢查與資料工具 | 同上；目前未修改工具實作 |
 | 專案來源 | [PROJECT](../../PROJECT.md) | 上游框架、參考專案與內建教學入口 | strict lint 驗本機連結；來源內容需另核對 |
+| 題材樹 | `games/<game>/`（AGENTS、design、wf、pack、tests） | 各款遊戲的設計、決策與內容包；框架不引用 | 內容包模式 Smoke（見 testing） |
 | 框架知識 | [analysis/slay-the-robot](../../../analysis/slay-the-robot/README.md) | 本專案維護的教學、分析與日誌 | strict lint 驗本機連結；執行範圍見啟動驗證紀錄 |
 
 ## 遊戲領域導航
