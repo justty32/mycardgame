@@ -60,6 +60,7 @@ func _run() -> void:
 	_check(_check_array_patch() == true, "array patch probe completed")
 	_check(_check_dictionary_patch() == true, "dictionary patch assertions completed")
 	_check(_check_example_mod(character) == true, "example_mod probe completed")
+	_run_pack_probes()
 	if OS.get_cmdline_user_args().has("--capture"):
 		_check(await _capture_menu() == true, "main menu screenshot saved")
 	if OS.get_cmdline_user_args().has("--force-failure"):
@@ -126,6 +127,29 @@ func _check_example_mod(character: Resource) -> bool:
 	loader.free()
 	print("SMOKE: example_mod enabled only in this process; no run started, save-game or mod-list file written by this probe.")
 	return true
+
+
+## Content-pack probes passed by the runner as --pack-probe=<path>. Each probe script
+## defines check_loaded(global_data) -> {label: bool}; labels are printed as PASS/FAIL lines.
+func _run_pack_probes() -> void:
+	for argument: String in OS.get_cmdline_user_args():
+		if not argument.begins_with("--pack-probe="):
+			continue
+		var probe_path: String = argument.trim_prefix("--pack-probe=")
+		var probe_name: String = probe_path.get_file()
+		var probe_script: GDScript = load(probe_path) as GDScript
+		_check(probe_script != null, "pack probe loads: " + probe_name)
+		if probe_script == null:
+			continue
+		var probe: Object = probe_script.new()
+		_check(probe.has_method("check_loaded"), "pack probe defines check_loaded(): " + probe_name)
+		if not probe.has_method("check_loaded"):
+			continue
+		var results: Dictionary = probe.check_loaded(global_data)
+		_check(not results.is_empty(), "pack probe returns assertions: " + probe_name)
+		for label: Variant in results.keys():
+			_check(results[label] == true, str(label))
+		print("PACK PROBE DONE: %s (%d assertions)" % [probe_name, results.size()])
 
 
 func _capture_menu() -> bool:

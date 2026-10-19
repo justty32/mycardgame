@@ -37,13 +37,13 @@ exit 0 為通過、1 為驗證失敗（含強制失敗）、2 為找不到引擎
 
 runner 為每個程序設外層期限（預設 180 秒，`--timeout-seconds` 可調），只停止本次程序樹；檢查 exit、完成標記、SCRIPT ERROR／FAIL 與引擎錯誤。預設不放行退出 resource 或 ObjectDB leak。冷匯入若遇指定 SoundManager UID，建立快取後必須再次匯入通過（4.6 每次冷匯入都出現，2026-10-19 Linux 4.7.2 未出現，規則仍保留）；rejected 分支只放行十個逐項核對的預期拒絕訊息。日誌、命令及 results.json 留於唯一輸出目錄，不覆蓋舊證據。歷史重現開關不作修復後通過標準。
 
-runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash 標記，啟動前確認 log 可寫；欄位與 wrapper PID 限制見 [native-crash](game-dev/native-crash.md)。[合成測試](../../tests/test_runner_diagnostics.py)（`python3 tests/test_runner_diagnostics.py`，105 項）以假引擎程序驗 runner，包含資源訊息即使 exit 0 也須失敗；不啟動 Godot，也不證明使用者 crash 已重現／修復。
+runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash 標記，啟動前確認 log 可寫；欄位與 wrapper PID 限制見 [native-crash](game-dev/native-crash.md)。[合成測試](../../tests/test_runner_diagnostics.py)（`python3 tests/test_runner_diagnostics.py`，124 項）以假引擎程序驗 runner，包含資源訊息即使 exit 0 也須失敗；不啟動 Godot，也不證明使用者 crash 已重現／修復。
 
 [Dictionary](../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[SaveLoad](../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；測試設定不代表所有卡牌／遭遇或自訂內容已驗證。
 
 ## 新內容如何接到 runner
 
-目前 suite 是上面列出的固定集合，沒有 Custom、Mod 或任意 script 參數。runner 複製其專案 `tests/` 頂層所有 `.gd` 到每個隔離 suite 的 tests 目錄，再執行固定入口；新增 helper 只會被複製，必須由既有入口明確呼叫才有驗證。
+目前 suite 是上面列出的固定集合，沒有 Custom 或任意 script 參數；題材內容包用 `--pack`／`--pack-tests` 裝入隔離副本並由 Smoke 呼叫其 probe，見 [題材內容包](game-dev/content/pack.md)。runner 複製其專案 `tests/` 頂層所有 `.gd` 到每個隔離 suite 的 tests 目錄，再執行固定入口；新增 helper 只會被複製，必須由既有入口明確呼叫才有驗證。
 
 新 mod 的可操作範例見 [第一個 mod](game-dev/content/bootstrap.md)：將專屬 helper 放 tests，以執行中腳本的相鄰路徑載入，於 Smoke 的 autoload ready 後、example_mod probe 前呼叫，交由既有 `_check()` 累計及退出。保留失敗傳遞、timeout、資源清理與完成標記。新 suite 需另改 runner 的選單、入口、標記與隔離契約，不可僅在文件寫出新命令。
 

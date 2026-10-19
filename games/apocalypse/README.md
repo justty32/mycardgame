@@ -11,4 +11,4 @@
 | [wf/](wf/README.md) | 題材 overlay：背景與參考來源、決策、roadmap、邊界詞表 |
 | [design/](design/README.md) | 玩法決定、內容範圍、任務 spec／plan |
 | [pack/](pack/mod_info.json) | 內容包（Slay-The-Robot mod） |
-| `tests/` | 題材 probe（`apocalypse_probe.gd`，待 runner `--pack` 支援後接入） |
+| `tests/` | 題材 probe（`apocalypse_probe.gd`，由 runner `--pack-tests` 接入 Smoke，命令見 [AGENTS](AGENTS.md#驗證)） |

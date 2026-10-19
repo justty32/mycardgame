@@ -1,5 +1,5 @@
 extends RefCounted
-# 題材 probe：驗 apocalypse 內容包已載入。需 runner 的 --pack 支援（Phase 1.5）才會被呼叫。
+# 題材 probe：驗 apocalypse 內容包已載入。由 Smoke 經 runner 的 --pack/--pack-tests 呼叫。
 
 func check_loaded(global_data: Node) -> Dictionary:
 	var result: Dictionary = {}

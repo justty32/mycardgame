@@ -14,6 +14,12 @@ Usage (from the project root):
     python3 tools/test_game.py --suite All
     python3 tools/test_game.py --suite Smoke --godot-path /usr/bin/godot-mono
     python3 tools/test_game.py --suite Smoke --force-failure        # must exit 1
+    python3 tools/test_game.py --suite Smoke --pack games/<game>/pack --pack-tests games/<game>/tests
+
+--pack installs a content pack (a Slay-The-Robot mod directory) into each isolated
+game copy under external/mods/<name>/ and enables it in that copy's mod_list.json;
+the source game is never modified. --pack-tests copies a directory of pack probes
+(*_probe.gd with check_loaded(global_data) -> {label: bool}) that Smoke calls.
 
 Exit status: 0 = verification passed, 1 = verification failed (including a
 forced failure), 2 = usage / environment error before any engine run.
@@ -97,6 +103,11 @@ SAVE_REJECTED_LINE_RE = re.compile(r"^ERROR: FileLoader\.load_game\(\): Save rej
 VERSION_LINE_RE = re.compile(r"^(\d+\.\d+(?:\.\d+)?\.[^\r\n]+|\d+\.\d+(?:\.\d+)?)\r?$", re.M)
 SCRIPT_ERROR_OR_FAIL_RE = re.compile(r"SCRIPT ERROR:|FAIL:")
 OBJECTDB_LEAK_TEXT = "ObjectDB instances leaked at exit"
+PACK_MODS_PREFIX = "external/mods/"
+PACK_LOAD_PRIORITY_BASE = 10
+PACK_PROBE_GLOB = "*_probe.gd"
+PACK_PROBE_DONE_MARKER = "PACK PROBE DONE: "
+PACK_NAME_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]*$")
 
 
 class RunnerError(Exception):
@@ -422,13 +433,128 @@ def copy_isolated_game(source_game: Path, destination: Path, user_data_root: Pat
     return {"user_dir": str(user_dir), "skipped": skipped}
 
 
+# --------------------------------------------------------------------------- content packs
+
+def _load_lenient_json(path: Path) -> Any:
+    """Godot's JSON reader accepts trailing commas (the shipped mod_list.json has one)."""
+    text = path.read_text(encoding="utf-8")
+    return json.loads(re.sub(r",(\s*[}\]])", r"\1", text))
+
+
+def resolve_pack_name(pack_dir: Path) -> str:
+    """Install name of a pack = the external/mods/<name>/ prefix its mod_info.json declares.
+
+    The folder keys are relative to the game root, so the pack only loads when it is
+    installed under exactly that name; the source folder name (often just "pack") is irrelevant.
+    """
+    info_path = pack_dir / "mod_info.json"
+    if not info_path.is_file():
+        raise RunnerError(f"--pack has no mod_info.json: {pack_dir}")
+    try:
+        properties = (_load_lenient_json(info_path).get("properties") or {})
+    except (ValueError, AttributeError) as error:
+        raise RunnerError(f"--pack mod_info.json is not a JSON object with properties: {info_path}") from error
+    keys = list((properties.get("mod_folder_to_load_data") or {}).keys())
+    keys += list((properties.get("mod_script_file_paths") or {}).keys())
+    names = set()
+    for key in keys:
+        if not key.startswith(PACK_MODS_PREFIX):
+            raise RunnerError(f"--pack path '{key}' in {info_path} is not under {PACK_MODS_PREFIX}<name>/")
+        names.add(key[len(PACK_MODS_PREFIX):].split("/", 1)[0])
+    if not names and properties.get("mod_name"):
+        names.add(str(properties["mod_name"]))
+    if len(names) != 1:
+        raise RunnerError(f"--pack {info_path} must declare exactly one {PACK_MODS_PREFIX}<name>/ prefix, found {sorted(names)}")
+    name = names.pop()
+    if not PACK_NAME_RE.match(name):
+        raise RunnerError(f"--pack name '{name}' from {info_path} is not a plain folder name")
+    return name
+
+
+def install_packs(pack_dirs: list[Path], isolated_game: Path) -> list[dict]:
+    """Copy packs into the isolated copy's external/mods/ and enable them in its mod_list.json only."""
+    installed: list[dict] = []
+    if not pack_dirs:
+        return installed
+    mod_list_path = isolated_game / "external" / "mod_list.json"
+    try:
+        mod_list = _load_lenient_json(mod_list_path)
+        load_data = mod_list["properties"]["mod_load_data"]
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise RunnerError(f"Isolated mod_list.json cannot take packs: {mod_list_path}: {error}") from error
+    for index, pack_dir in enumerate(pack_dirs):
+        name = resolve_pack_name(pack_dir)
+        destination = isolated_game / "external" / "mods" / name
+        if destination.exists():
+            raise RunnerError(f"--pack '{name}' collides with an existing mod folder in the game copy: {destination}")
+        skipped: list[str] = []
+
+        def ignore(directory: str, names: list[str]) -> set[str]:
+            out = set()
+            for entry in names:
+                full = os.path.join(directory, entry)
+                if _is_link_or_junction(full) or (entry in EXCLUDED_DIR_NAMES and os.path.isdir(full)):
+                    out.add(entry)
+                    skipped.append(full)
+            return out
+
+        shutil.copytree(str(pack_dir), str(destination), symlinks=False, ignore=ignore)
+        key = f"{PACK_MODS_PREFIX}{name}/"
+        load_data[key] = {"enabled": True, "load_priority": PACK_LOAD_PRIORITY_BASE + index}
+        files = []
+        for path in sorted(p for p in destination.rglob("*") if p.is_file()):
+            files.append({"path": path.relative_to(destination).as_posix(), "sha256": sha256_file(path)})
+        installed.append({"source": str(pack_dir), "name": name, "mod_list_key": key,
+                          "load_priority": PACK_LOAD_PRIORITY_BASE + index, "files": files, "skipped": skipped})
+    with open(mod_list_path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(mod_list, handle, indent="\t")
+    return installed
+
+
+def copy_pack_tests(test_dirs: list[Path], destination_root: Path) -> tuple[list[Path], list[dict]]:
+    """Copy each pack-tests directory (top-level .gd files) and return the probe entry points."""
+    probes: list[Path] = []
+    hashes: list[dict] = []
+    for index, test_dir in enumerate(test_dirs):
+        if not test_dir.is_dir():
+            raise RunnerError(f"--pack-tests is not a directory: {test_dir}")
+        target = destination_root / f"{index}-{test_dir.parent.name}-{test_dir.name}"
+        target.mkdir(parents=True, exist_ok=True)
+        for test_file in sorted(test_dir.glob("*.gd")):
+            if test_file.is_symlink():
+                continue
+            shutil.copy2(test_file, target / test_file.name)
+            hashes.append({"path": f"{target.name}/{test_file.name}", "source": str(test_file),
+                           "sha256": sha256_file(target / test_file.name)})
+        found = sorted(target.glob(PACK_PROBE_GLOB))
+        if not found:
+            raise RunnerError(f"--pack-tests has no {PACK_PROBE_GLOB} entry point: {test_dir}")
+        probes.extend(found)
+    return probes, hashes
+
+
+def build_user_args(selected: str, *, force_failure: bool = False, probes: Optional[list[Path]] = None) -> list[str]:
+    """Arguments after '--' for a suite script (one separator, as Godot expects)."""
+    user: list[str] = []
+    if selected == "CombatVictory":
+        user.append("--scenario=victory")
+    elif selected == "CombatDefeat":
+        user.append("--scenario=defeat")
+    if selected == "Smoke":
+        user += [f"--pack-probe={probe}" for probe in (probes or [])]
+        if force_failure:
+            user.append("--force-failure")
+    return user
+
+
 # --------------------------------------------------------------------------- verdict rules
 
 def evaluate_phase_output(*, console_output: str, log_text: str, exit_code: Optional[int],
                           timed_out: bool, marker: Optional[str], version_probe: bool,
                           accepted_patterns: list[str], cold_import: bool,
                           save_rejections: bool, known_shutdown_resources: list[int],
-                          historical_baseline: bool, output_streams_open: bool = False) -> dict:
+                          historical_baseline: bool, output_streams_open: bool = False,
+                          required_markers: Optional[list[str]] = None) -> dict:
     """Pure judgment over a finished phase. Shared by the real runner and the synthetic tests."""
     combined = console_output + "\n" + log_text
     verdict: dict[str, Any] = {}
@@ -440,6 +566,10 @@ def evaluate_phase_output(*, console_output: str, log_text: str, exit_code: Opti
         found = marker in combined
         verdict["marker_found"] = found
         passed = passed and found
+    if required_markers:
+        missing = [m for m in required_markers if m not in combined]
+        verdict["required_markers_missing"] = missing
+        passed = passed and not missing
     if version_probe:
         version_match = VERSION_LINE_RE.search(combined)
         version = version_match.group(1) if version_match else ""
@@ -559,7 +689,8 @@ class EngineRunner:
 
     def invoke(self, name: str, directory: Path, engine_args: list[str], *, marker: Optional[str] = None,
                cold_import: bool = False, known_shutdown_resources: Optional[list[int]] = None,
-               save_rejections: bool = False, version_probe: bool = False) -> dict:
+               save_rejections: bool = False, version_probe: bool = False,
+               required_markers: Optional[list[str]] = None) -> dict:
         known_shutdown_resources = list(known_shutdown_resources or [])
         engine_log = directory / f"{name}.log"
         if version_probe:
@@ -634,7 +765,8 @@ class EngineRunner:
                 marker=marker, version_probe=version_probe, accepted_patterns=self.accepted_patterns,
                 cold_import=cold_import, save_rejections=save_rejections,
                 known_shutdown_resources=known_shutdown_resources,
-                historical_baseline=self.historical_baseline, output_streams_open=streams_open)
+                historical_baseline=self.historical_baseline, output_streams_open=streams_open,
+                required_markers=required_markers)
             for warning in verdict.pop("warnings"):
                 self.echo(f"WARNING: {name} {warning}")
             record.update(verdict)
@@ -736,7 +868,15 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
                         help="Windows only: keep the real APPDATA/LOCALAPPDATA instead of redirecting them into the run directory.")
     parser.add_argument("--artifacts-root", help="Where run directories go (default: <project>/artifacts/verification).")
     parser.add_argument("--project-root", help="Override project root (default: parent of tools/).")
+    parser.add_argument("--pack", action="append", metavar="DIR", default=[],
+                        help="Content pack directory with mod_info.json (repeatable). Installed only into the isolated copies under external/mods/<name>/ and enabled there.")
+    parser.add_argument("--pack-tests", action="append", metavar="DIR", default=[],
+                        help="Directory of pack probes (*_probe.gd, repeatable); Smoke calls check_loaded(global_data). Requires --pack.")
     args = parser.parse_args(argv)
+    if args.pack_tests and not args.pack:
+        parser.error("--pack-tests requires --pack")
+    if args.pack_tests and "Smoke" not in expand_suites(args.suite):
+        parser.error("--pack-tests runs inside Smoke; use --suite Smoke or All")
     if not 10 <= args.timeout_seconds <= 900:
         parser.error("--timeout-seconds must be between 10 and 900")
     if args.force_failure and args.suite != "Smoke":
@@ -753,6 +893,10 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
     source_lock = load_source_lock(project_root)
     patterns, policy_source = accepted_engine_patterns(source_lock, args.accept_engine_version)
     engine, discovery = discover_engine(project_root, args.godot_path, patterns)
+    pack_dirs = [Path(p).resolve() for p in args.pack]
+    pack_test_dirs = [Path(p).resolve() for p in args.pack_tests]
+    for pack_dir in pack_dirs:
+        resolve_pack_name(pack_dir)  # fail with exit 2 before any engine run
 
     run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:8]
     artifacts_root = Path(args.artifacts_root).resolve() if args.artifacts_root else project_root / "artifacts" / "verification"
@@ -767,6 +911,8 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
         historical_baseline=args.historical_baseline, engine=engine, engine_discovery=discovery,
         accepted_patterns=patterns, policy_source=policy_source, isolation=isolation,
         timeout_seconds=args.timeout_seconds, force_failure=args.force_failure)
+    manifest["packs"] = {}
+    manifest["pack_test_hashes"] = {}
     runner = EngineRunner(engine=engine, run_root=run_root, manifest=manifest, env=env,
                           timeout_seconds=args.timeout_seconds, accepted_patterns=patterns,
                           historical_baseline=args.historical_baseline,
@@ -805,6 +951,11 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
                 shutil.copy2(test_file, isolated_tests / test_file.name)
                 test_hashes.append({"path": test_file.name, "sha256": sha256_file(isolated_tests / test_file.name)})
             manifest["test_hashes"][selected] = test_hashes
+            manifest["packs"][selected] = install_packs(pack_dirs, isolated_game)
+            probes: list[Path] = []
+            if selected == "Smoke" and pack_test_dirs:
+                probes, pack_hashes = copy_pack_tests(pack_test_dirs, directory / "pack_tests")
+                manifest["pack_test_hashes"][selected] = pack_hashes
             runner.save()
             import_args = ["--headless", "--path", str(isolated_game), "--editor", "--import"]
             import_record = runner.invoke("import", directory, import_args, cold_import=True,
@@ -813,19 +964,16 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
                 runner.invoke("import-verified", directory, import_args, known_shutdown_resources=known_counts)
             script_path = isolated_tests / SUITE_SCRIPTS[selected]
             test_args = ["--headless", "--path", str(isolated_game), "--script", str(script_path)]
-            if selected == "CombatVictory":
-                test_args += ["--", "--scenario=victory"]
-            elif selected == "CombatDefeat":
-                test_args += ["--", "--scenario=defeat"]
+            user_args = build_user_args(selected, force_failure=args.force_failure, probes=probes)
             if selected == "SaveLoad":
                 for phase in ("write", "read", "rejected"):
                     runner.invoke(f"save-{phase}", directory,
-                                  test_args + ["--", f"--phase={phase}", f"--source-game-path={source_game}"],
+                                  test_args + ["--", *user_args, f"--phase={phase}", f"--source-game-path={source_game}"],
                                   marker=SUITE_MARKERS[selected], save_rejections=(phase == "rejected"))
             else:
-                if selected == "Smoke" and args.force_failure:
-                    test_args += ["--", "--force-failure"]
-                runner.invoke(selected.lower(), directory, test_args, marker=SUITE_MARKERS[selected])
+                required = [f"{PACK_PROBE_DONE_MARKER}{probe.name}" for probe in probes]
+                runner.invoke(selected.lower(), directory, test_args + (["--", *user_args] if user_args else []),
+                              marker=SUITE_MARKERS[selected], required_markers=required)
         manifest["completed"] = True
         manifest["known_shutdown_issues"] = any(r.get("shutdown_resources") for r in manifest["results"])
         manifest["verdict"] = "PASS_WITH_KNOWN_SHUTDOWN_ISSUES" if manifest["known_shutdown_issues"] else "PASS"

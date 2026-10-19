@@ -316,6 +316,110 @@ def main() -> None:
                 "isolated user:// directory is created and write-checked")
     assert_that((fake_source / "project.godot").read_text(encoding="utf-8").count('"old"') == 1, "source project.godot is untouched")
 
+    # --- content packs ---------------------------------------------------------------------------
+    def write_json(path: Path, data) -> Path:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data), encoding="utf-8")
+        return path
+
+    def pack_info(keys, scripts=None, name="sample_pack") -> dict:
+        return {"patch_data": {}, "properties": {"object_id": "mod_data_sample", "mod_name": name,
+                "mod_folder_to_load_data": {k: {"class_name": "CardData", "table_name": "_id_to_card_data"} for k in keys},
+                "mod_script_file_paths": scripts or {}}}
+
+    packs_root = RUN_ROOT / "packs"
+    good_pack = packs_root / "good" / "pack"
+    write_json(good_pack / "mod_info.json", pack_info(["external/mods/sample_pack/cards/"]))
+    write_json(good_pack / "cards" / "smp_card.json", {"properties": {"object_id": "smp_card"}})
+    assert_that(runner.resolve_pack_name(good_pack) == "sample_pack",
+                "pack install name comes from the external/mods/<name>/ prefix in mod_info.json, not the folder name")
+    named_only = packs_root / "named"
+    write_json(named_only / "mod_info.json", pack_info([], name="only_named"))
+    assert_that(runner.resolve_pack_name(named_only) == "only_named", "a pack without folder keys falls back to mod_name")
+    bad_infos = {
+        "missing": None,
+        "mixed": pack_info(["external/mods/a/cards/", "external/mods/b/cards/"]),
+        "outside": pack_info(["external/data/cards/"]),
+        "script_mismatch": pack_info(["external/mods/a/cards/"], scripts={"external/mods/b/x.gd": ""}),
+        "traversal": pack_info(["external/mods/../cards/"]),
+    }
+    for label, info in bad_infos.items():
+        bad_dir = packs_root / f"bad-{label}"
+        bad_dir.mkdir(parents=True, exist_ok=True)
+        if info is not None:
+            write_json(bad_dir / "mod_info.json", info)
+        try:
+            runner.resolve_pack_name(bad_dir)
+            rejected = False
+        except runner.RunnerError:
+            rejected = True
+        assert_that(rejected, f"pack name resolution rejects {label} mod_info.json")
+
+    pack_game = RUN_ROOT / "pack_game"
+    (pack_game / "external" / "mods" / "example_mod").mkdir(parents=True, exist_ok=True)
+    original_list = '{"patch_data": {}, "properties": {"mod_load_data": {"external/": {"enabled": true, "load_priority": 0},\n' \
+                    '"external/mods/example_mod/": {"enabled": false, "load_priority": 1},\n}, "object_id": "mod_list"}}'
+    (pack_game / "external" / "mod_list.json").write_text(original_list, encoding="utf-8")
+    pack_link_created = False
+    try:
+        os.symlink(str(RUN_ROOT), str(good_pack / "linked"), target_is_directory=True)
+        pack_link_created = True
+    except (OSError, NotImplementedError):
+        pass
+    installed = runner.install_packs([good_pack], pack_game)
+    mod_list = json.loads((pack_game / "external" / "mod_list.json").read_text(encoding="utf-8"))
+    load_data = mod_list["properties"]["mod_load_data"]
+    assert_that((pack_game / "external" / "mods" / "sample_pack" / "cards" / "smp_card.json").is_file()
+                and installed[0]["name"] == "sample_pack" and any(f["path"] == "cards/smp_card.json" and f["sha256"] for f in installed[0]["files"]),
+                "pack is copied under external/mods/<name>/ and its file hashes are recorded")
+    assert_that(load_data["external/mods/sample_pack/"] == {"enabled": True, "load_priority": runner.PACK_LOAD_PRIORITY_BASE}
+                and load_data["external/"]["enabled"] is True and load_data["external/mods/example_mod/"]["enabled"] is False,
+                "copied mod_list.json (trailing comma tolerated) enables the pack after base data and keeps other entries")
+    if pack_link_created:
+        assert_that(not (pack_game / "external" / "mods" / "sample_pack" / "linked").exists() and installed[0]["skipped"],
+                    "symlinks inside a pack are skipped, not followed")
+    try:
+        runner.install_packs([good_pack], pack_game)
+        collided = False
+    except runner.RunnerError:
+        collided = True
+    assert_that(collided, "installing a pack over an existing mod folder is rejected")
+
+    tests_dir = packs_root / "good" / "tests"
+    tests_dir.mkdir(parents=True, exist_ok=True)
+    (tests_dir / "sample_probe.gd").write_text("extends RefCounted\n", encoding="utf-8")
+    (tests_dir / "helper.gd").write_text("extends RefCounted\n", encoding="utf-8")
+    probes, probe_hashes = runner.copy_pack_tests([tests_dir], RUN_ROOT / "pack_tests_copy")
+    assert_that([p.name for p in probes] == ["sample_probe.gd"] and len(probe_hashes) == 2 and all(h["sha256"] for h in probe_hashes),
+                "pack tests are copied with hashes and only *_probe.gd become entry points")
+    no_probe = packs_root / "noprobe"
+    no_probe.mkdir(parents=True, exist_ok=True)
+    (no_probe / "helper.gd").write_text("extends RefCounted\n", encoding="utf-8")
+    try:
+        runner.copy_pack_tests([no_probe], RUN_ROOT / "pack_tests_none")
+        no_entry = False
+    except runner.RunnerError:
+        no_entry = True
+    assert_that(no_entry, "a pack-tests directory without a probe entry point is rejected")
+    smoke_args = runner.build_user_args("Smoke", force_failure=True, probes=probes)
+    assert_that(smoke_args == [f"--pack-probe={probes[0]}", "--force-failure"]
+                and runner.build_user_args("CombatDefeat", probes=probes) == ["--scenario=defeat"],
+                "pack probes reach Smoke only, after one '--' separator together with other user args")
+    missing_done = judge("X PASS:", required_markers=["PACK PROBE DONE: sample_probe.gd"])
+    assert_that(not missing_done["passed"] and missing_done["required_markers_missing"] == ["PACK PROBE DONE: sample_probe.gd"],
+                "a requested pack probe that never reports completion fails the phase")
+    assert_that(judge("X PASS:\nPACK PROBE DONE: sample_probe.gd (1 assertions)", required_markers=["PACK PROBE DONE: sample_probe.gd"])["passed"],
+                "a completed pack probe satisfies its required marker")
+    for bad_args in (["--suite", "Smoke", "--pack-tests", "x"], ["--suite", "Dictionary", "--pack", "p", "--pack-tests", "x"]):
+        try:
+            runner.parse_args(bad_args)
+            rejected = False
+        except SystemExit:
+            rejected = True
+        assert_that(rejected, f"pack argument validation rejects {' '.join(bad_args)}")
+    parsed = runner.parse_args(["--suite", "All", "--pack", "a", "--pack", "b", "--pack-tests", "t"])
+    assert_that(parsed.pack == ["a", "b"] and parsed.pack_tests == ["t"], "--pack and --pack-tests are repeatable and accepted with All")
+
     # --- checkout identity -----------------------------------------------------------------------
     state = {"repo": str(PROJECT_ROOT / "game")}
 
