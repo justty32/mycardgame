@@ -525,6 +525,14 @@ def main() -> None:
     assert_that(judge("CTB PASS: 10 checks, 0 failures", marker="CTB PASS:")["passed"]
                 and not judge("CTB FAIL: 10 checks, 1 failures\nFAIL: order", marker="CTB PASS:")["passed"],
                 "Ctb verdict needs the CTB PASS marker and no FAIL lines")
+    assert_that(runner.parse_args(["--suite", "board"]).suite == "Board" and "Board" in runner.ALL_SUITES
+                and runner.ALL_SUITES.index("Board") == runner.ALL_SUITES.index("Ctb") + 1
+                and runner.SUITE_SCRIPTS["Board"] == "board_flow.gd" and runner.SUITE_MARKERS["Board"] == "BOARD PASS:"
+                and runner.build_user_args("Board") == [] and runner.expand_suites("Board") == ["Board"],
+                "Board suite (combat framework board / movement) is part of All after Ctb with its own script and marker")
+    assert_that(judge("BOARD PASS: 10 checks, 0 failures", marker="BOARD PASS:")["passed"]
+                and not judge("BOARD FAIL: 10 checks, 1 failures\nFAIL: move", marker="BOARD PASS:")["passed"],
+                "Board verdict needs the BOARD PASS marker and no FAIL lines")
 
     MANIFEST["completed"] = True
     MANIFEST["checks"] = CHECKS

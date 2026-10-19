@@ -30,9 +30,26 @@ var enemy_slot: int = 0 # the spawn slot the enemy is in
 var enemy_intent_attack_damage: int = 0
 var enemy_intent_number_of_attacks: int = 0
 
+#region Board intent plan (combat framework Phase 2; set by ThreatPreview, see IntentResolver)
+## Unit the current intent targets (null = the hero, legacy).
+var intended_target: BaseCombatant = null
+## Anchor the enemy plans to act from and the path to it ([] = stays).
+var planned_move_cell: Vector2i = BOARD_ANCHOR_NONE
+var planned_path: Array[Vector2i] = []
+## false = the target is out of the intent's range / shape (intent shown dimmed).
+var intent_can_hit: bool = true
+## true = keep the current intent for the next action (its attack could not hit this action).
+var keep_intent_next_action: bool = false
+const INTENT_UNREACHABLE_ALPHA: float = 0.4
+#endregion
+
 func init(_enemy_data: EnemyData):
 	enemy_data = _enemy_data
 	base_speed = enemy_data.enemy_speed
+	move_range = enemy_data.enemy_move_range
+	footprint = Vector2i(max(1, enemy_data.enemy_footprint.x), max(1, enemy_data.enemy_footprint.y))
+	ignores_occupancy = enemy_data.enemy_ignores_occupancy
+	is_immovable = enemy_data.enemy_is_immovable
 
 	selection_button.mouse_entered.connect(_on_mouse_entered)
 	selection_button.mouse_exited.connect(_on_mouse_exited)
@@ -170,11 +187,23 @@ func cycle_enemy_intent():
 ## Decides and displays the intent for the enemy's next action. Called by CombatDirector when the
 ## enemy enters the timeline (combat start / spawn) and after each of its actions.
 func decide_next_intent() -> void:
+	if keep_intent_next_action:
+		keep_intent_next_action = false
+		update_enemy_intent()
+		Signals.enemy_intent_changed.emit()
+		return
 	cycle_enemy_intent()
+
+## Stores the board plan of the current intent (ThreatPreview.refresh()).
+func apply_intent_plan(plan: Dictionary) -> void:
+	intended_target = plan.get("target", null)
+	planned_move_cell = plan.get("move_cell", board_anchor)
+	planned_path.assign(plan.get("path", []))
+	intent_can_hit = bool(plan.get("can_hit", true))
 
 ## Action payload performing the given intent: reset block (optional), block, attacks and the
 ## intent's custom actions. NOTE: ActionHandler pops these in reverse order, so reset block runs first.
-func build_intent_actions_data(enemy_intent: EnemyIntentData, include_reset_block: bool = true) -> Array[Dictionary]:
+func build_intent_actions_data(enemy_intent: EnemyIntentData, include_reset_block: bool = true, include_attacks: bool = true) -> Array[Dictionary]:
 	var enemy_actions_data: Array[Dictionary] = []
 	var intent_attack_damage: int = 0
 	var intent_number_of_attacks: int = 0
@@ -192,7 +221,7 @@ func build_intent_actions_data(enemy_intent: EnemyIntentData, include_reset_bloc
 		intent_attack_impact_animation_id = enemy_intent.enemy_intent_attack_impact_animation_id
 
 	# add attacks
-	if intent_number_of_attacks > 0:
+	if intent_number_of_attacks > 0 and include_attacks:
 		enemy_actions_data.append(
 		{
 		Scripts.ACTION_ATTACK_GENERATOR:
@@ -255,7 +284,9 @@ func update_enemy_intent():
 		else:
 			intent_icon.show()
 	
-	var player: Player = Global.get_player()
+	# previews are computed against the intended target (the hero for legacy intents)
+	var player: BaseCombatant = intended_target if (intended_target != null and is_instance_valid(intended_target)) else Global.get_player()
+	enemy_intent.modulate.a = 1.0 if intent_can_hit else INTENT_UNREACHABLE_ALPHA
 	
 	### damage
 	# intercept an attack action in preview mode
@@ -300,7 +331,8 @@ func update_enemy_intent():
 			enemy_intent_amount_label.text += " x " + str(enemy_intent_number_of_attacks)
 
 func is_alive() -> bool:
-	return enemy_data.enemy_health > 0
+	# enemy_data is null between add_child (unit registration) and init()
+	return enemy_data != null and enemy_data.enemy_health > 0
 
 func is_attacking() -> bool:
 	return enemy_intent_number_of_attacks > 0

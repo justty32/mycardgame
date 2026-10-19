@@ -77,6 +77,12 @@ const ACTION_END_TURN: String = "res://scripts/actions/combatant_actions/player_
 const ACTION_CYCLE_ENEMY_INTENT: String = "res://scripts/actions/combatant_actions/enemy_actions/ActionCycleEnemyIntent.gd"
 const ACTION_SUMMON_ENEMIES: String = "res://scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd"
 
+# board actions (combat framework Phase 2)
+const ACTION_MOVE_UNIT: String = "res://scripts/actions/board_actions/ActionMoveUnit.gd"
+const ACTION_DISPLACE_UNIT: String = "res://scripts/actions/board_actions/ActionDisplaceUnit.gd"
+const ACTION_GRANT_MOVE_POINTS: String = "res://scripts/actions/board_actions/ActionGrantMovePoints.gd"
+const ACTION_COMPUTE_BOARD_VALUE: String = "res://scripts/actions/board_actions/ActionComputeBoardValue.gd"
+
 # reward actions
 const ACTION_GRANT_REWARDS = "res://scripts/actions/rewards/ActionGrantRewards.gd"
 const ACTION_CLEAR_REWARDS = "res://scripts/actions/rewards/ActionClearRewards.gd"
@@ -180,6 +186,13 @@ const VALIDATOR_PLAYER_HEALTH: String = "res://scripts/validators/ValidatorPlaye
 const VALIDATOR_PLAYER_CHARACTER: String = "res://scripts/validators/ValidatorPlayerCharacter.gd"
 const VALIDATOR_RNG: String = "res://scripts/validators/ValidatorRNG.gd"
 
+# board validators (combat framework Phase 2)
+const VALIDATOR_DISTANCE: String = "res://scripts/validators/board/ValidatorDistance.gd"
+const VALIDATOR_CELLS_MOVED: String = "res://scripts/validators/board/ValidatorCellsMoved.gd"
+const VALIDATOR_IN_LINE: String = "res://scripts/validators/board/ValidatorInLine.gd"
+const VALIDATOR_PATH_EXISTS: String = "res://scripts/validators/board/ValidatorPathExists.gd"
+const VALIDATOR_CELL_FREE: String = "res://scripts/validators/board/ValidatorCellFree.gd"
+
 #endregion
 
 #region Card Decorators
@@ -195,6 +208,7 @@ const INTERCEPTOR_OVERSHIELD: String = "res://scripts/action_interceptors/Interc
 const INTERCEPTOR_INCREASE_TURN_DRAW: String = "res://scripts/action_interceptors/InterceptorIncreaseTurnDraw.gd"
 const INTERCEPTOR_POINTY: String = "res://scripts/action_interceptors/InterceptorPointy.gd"
 const INTERCEPTOR_NEGATE_DAMAGE: String = "res://scripts/action_interceptors/InterceptorNegateDamage.gd"
+const INTERCEPTOR_ROOTED: String = "res://scripts/action_interceptors/InterceptorRooted.gd"
 const INTERCEPTOR_CAP_DAMAGE: String = "res://scripts/action_interceptors/InterceptorCapDamage.gd"
 const INTERCEPTOR_NEGATE_DEBUFF: String = "res://scripts/action_interceptors/InterceptorNegateDebuff.gd"
 const INTERCEPTOR_NEGATE_ADD_MONEY: String = "res://scripts/action_interceptors/InterceptorNegateAddMoney.gd"

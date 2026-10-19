@@ -53,6 +53,23 @@ var action_count: int = 0
 ## Decides the unit's actions on the combat timeline; CombatDirector assigns a default
 ## (PlayerInputController for PARTY, EnemyIntentController otherwise) when null at combat start.
 var controller: BaseUnitController = null
+
+#region Board movement (combat framework Phase 2; combat only, not saved)
+## Free move points left in the current action (reset to rules.free_move_per_action for party units).
+var move_points: int = 0
+## Paid cells used this action (each adds rules.extra_move_delay_per_cell to action_extra_delay).
+var paid_cells_this_action: int = 0
+## Cells moved this action by own movement and card movement (not forced displacement).
+var cells_moved_this_action: int = 0
+## Cells moved this action by forced displacement.
+var cells_displaced_this_action: int = 0
+## Delay added to this action's delay (paid movement); folded in and cleared by CombatDirector.
+var action_extra_delay: int = 0
+## Flying: passes over units and blocked cells, never stops on them.
+var ignores_occupancy: bool = false
+## Cannot be displaced (ActionDisplaceUnit).
+var is_immovable: bool = false
+#endregion
 #endregion
 
 func _ready():
@@ -482,6 +499,15 @@ func reset_unit_combat_state() -> void:
 	next_action_tick = 0
 	last_action_tick = 0
 	action_count = 0
+	reset_action_movement(0)
+
+## Clears per-action movement counters and sets the free move points (start of each action).
+func reset_action_movement(free_move_points: int) -> void:
+	move_points = max(0, free_move_points)
+	paid_cells_this_action = 0
+	cells_moved_this_action = 0
+	cells_displaced_this_action = 0
+	action_extra_delay = 0
 
 func _on_player_turn_started():
 	pass

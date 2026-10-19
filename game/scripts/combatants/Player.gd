@@ -26,6 +26,8 @@ func reset_player() -> void:
 	animated_sprite_2d.play(AnimationData.ANIMATION_IDLE)
 	if character_data != null:
 		base_speed = character_data.character_speed
+		ignores_occupancy = character_data.character_ignores_occupancy
+		is_immovable = character_data.character_is_immovable
 
 	reset_block()
 	clear_all_status_effects()
@@ -162,6 +164,15 @@ func update_incoming_damage_amount(recalculate_enemy_intent: bool = true) -> voi
 		_intent_is_updating = false
 	
 	var incoming_damage_amount = 0 # totaled value
+	# in combat the board-aware ThreatPreview resolves targets, ranges and timing
+	var director: CombatDirector = Global.get_combat_director()
+	if director != null and director.is_running and director.threat_preview != null:
+		if recalculate_enemy_intent:
+			director.threat_preview.refresh()
+		incoming_damage_amount = director.threat_preview.incoming_damage_for(self)
+		incoming_damage_amount_text.text = str(incoming_damage_amount)
+		incoming_damage.visible = incoming_damage_amount > 0
+		return
 	for en in get_tree().get_nodes_in_group("enemies"):
 		var enemy: Enemy = en # typecast
 		

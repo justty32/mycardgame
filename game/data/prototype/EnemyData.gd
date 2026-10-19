@@ -38,6 +38,13 @@ enum ENEMY_TYPES {STANDARD, MINIBOSS, BOSS}
 ## 10 for every unit reproduces the original fixed alternation.
 @export var enemy_speed: int = BaseCombatant.DEFAULT_SPEED
 
+## Board (combat framework Phase 2): cells moved per intent action, cells covered, flying
+## (passes over units and blocked cells, cannot stop on them), immune to forced displacement.
+@export var enemy_move_range: int = 1
+@export var enemy_footprint: Vector2i = Vector2i(1, 1)
+@export var enemy_ignores_occupancy: bool = false
+@export var enemy_is_immovable: bool = false
+
 ## Time in seconds between each enemy attack.
 const ENEMY_ATTACK_DELAY: float = 0.5
 
@@ -212,3 +219,8 @@ func add_standard_animations(idle_animation_frames: Array[String], attack_animat
 	return animation
 
 #endregion
+
+func _get_native_properties() -> Dictionary:
+	return {
+		"enemy_footprint": Vector2i(),
+	}

@@ -102,6 +102,20 @@ const STANDARD_CARD_RARITIES: Array[int] = [CARD_RARITIES.COMMON, CARD_RARITIES.
 ## The action's delay is the largest value among the cards played during it.
 @export var card_action_delay: int = -1
 
+#region Board targeting (combat framework Phase 2; defaults keep legacy cards unchanged)
+## Max board distance from the acting unit to the selected cell. -1 = not checked (legacy).
+@export var card_range: int = -1
+## BoardTargeting.TARGET_SHAPES: cells resolved around the selected cell.
+@export var card_shape: int = 0	# BoardTargeting.TARGET_SHAPES.SINGLE
+## BoardTargeting.TARGET_FACTIONS: what the selected cell must hold (relative to the acting unit).
+@export var card_target_faction: int = 0	# BoardTargeting.TARGET_FACTIONS.OPPONENT
+## > 0: the card moves the acting unit up to this many cells before its play actions
+## (to the selected cell for EMPTY_CELL cards, else toward the selected target). Uses no move points.
+@export var card_move_distance: int = 0
+## Hints for later AI controllers: {"role": "damage|block|heal|buff|debuff|move|displace|utility", "value_key": "damage", "danger": 0}.
+@export var card_ai_hints: Dictionary = {}
+#endregion
+
 ### Card Actions
 @export var card_play_actions: Array[Dictionary] = [
 	#{

@@ -42,7 +42,15 @@ enum TARGET_OVERRIDES {
 	ALL_ENEMIES,
 	LEFTMOST_ENEMY,	# the target fallback will be leftmost if possible
 	ENEMY_ID,	# the targets will be enemies with given object ids
-	RANDOM_ENEMY	# a random existing enemy is chosen
+	RANDOM_ENEMY,	# a random existing enemy is chosen
+	# combat framework (Phase 2; appended, existing values unchanged)
+	ACTING_UNIT,	# the unit whose timeline action is in progress
+	ALL_ALLIES,	# living units of the parent's faction (parent included)
+	ALL_OPPONENTS,	# living units of other non-neutral factions than the parent's
+	RANDOM_OPPONENT,	# one random opponent of the parent (rng_name, default rng_targeting)
+	RESOLVED_SHAPE,	# the card play's shape-resolved targets (CardPlayRequest.resolved_targets)
+	UNITS_IN_RANGE,	# living units within values.range board cells of the parent (parent excluded)
+	MEMBER_UID,	# the unit with values.member_uid (UnitRegistry)
 	}
 
 func init(_parent_combatant: BaseCombatant = null, _card_play_request: CardPlayRequest = null, _targets: Array[BaseCombatant] = [], _values: Dictionary[String, Variant] = {}, _parent_action: BaseAction = null):
@@ -161,6 +169,46 @@ func get_adjusted_action_targets() -> Array[BaseCombatant]:
 			enemies = Random.shuffle_array(rng_targeting, enemies)
 			if len(enemies) > 0:
 				returned_targets.append(enemies[0])
+		TARGET_OVERRIDES.ACTING_UNIT:
+			var director: CombatDirector = Global.get_combat_director()
+			if director != null and director.acting_unit != null and is_instance_valid(director.acting_unit):
+				if director.acting_unit.is_alive() or force_dead_targets:
+					returned_targets.append(director.acting_unit)
+		TARGET_OVERRIDES.ALL_ALLIES, TARGET_OVERRIDES.ALL_OPPONENTS:
+			var own_faction: int = parent_combatant.faction if parent_combatant != null else BaseCombatant.FACTIONS.PARTY
+			for unit: BaseCombatant in UnitRegistry.get_all_units():
+				if not (unit.is_alive() or force_dead_targets):
+					continue
+				var is_ally: bool = unit.faction == own_faction
+				var is_opponent: bool = unit.faction != own_faction and unit.faction != BaseCombatant.FACTIONS.NEUTRAL
+				if (target_override == TARGET_OVERRIDES.ALL_ALLIES and is_ally) or (target_override == TARGET_OVERRIDES.ALL_OPPONENTS and is_opponent):
+					returned_targets.append(unit)
+		TARGET_OVERRIDES.RANDOM_OPPONENT:
+			var own_faction: int = parent_combatant.faction if parent_combatant != null else BaseCombatant.FACTIONS.PARTY
+			var opponents: Array = []
+			for unit: BaseCombatant in UnitRegistry.get_all_units():
+				if unit.is_alive() and unit.faction != own_faction and unit.faction != BaseCombatant.FACTIONS.NEUTRAL:
+					opponents.append(unit)
+			var rng_name: String = get_action_value("rng_name", "rng_targeting")
+			opponents = Random.shuffle_array(Global.player_data.get_player_rng(rng_name), opponents)
+			if len(opponents) > 0:
+				returned_targets.append(opponents[0])
+		TARGET_OVERRIDES.RESOLVED_SHAPE:
+			if card_play_request != null:
+				for unit: BaseCombatant in card_play_request.resolved_targets:
+					if is_instance_valid(unit) and (unit.is_alive() or force_dead_targets):
+						returned_targets.append(unit)
+		TARGET_OVERRIDES.UNITS_IN_RANGE:
+			var board: BoardData = BoardData.get_active()
+			var unit_range: int = int(get_action_value("range", 1))
+			if board != null and parent_combatant != null and board.has_unit(parent_combatant):
+				for unit: BaseCombatant in board.get_units():
+					if unit != parent_combatant and unit.is_alive() and board.unit_distance(parent_combatant, unit) <= unit_range:
+						returned_targets.append(unit)
+		TARGET_OVERRIDES.MEMBER_UID:
+			var member: BaseCombatant = UnitRegistry.get_unit(str(get_action_value("member_uid", "")))
+			if member != null and (member.is_alive() or force_dead_targets):
+				returned_targets.append(member)
 			
 	return returned_targets
 

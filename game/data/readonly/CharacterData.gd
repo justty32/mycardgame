@@ -44,4 +44,7 @@ class_name CharacterData
 @export var character_starting_health: int = 50
 ## Combat timeline speed of the character's unit (see CombatRulesData; 10 = original alternation).
 @export var character_speed: int = BaseCombatant.DEFAULT_SPEED
+## Board (combat framework Phase 2): flying (passes over units / blocked cells), immune to displacement.
+@export var character_ignores_occupancy: bool = false
+@export var character_is_immovable: bool = false
 #endregion

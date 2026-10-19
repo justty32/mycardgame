@@ -87,6 +87,23 @@ enum INTENT_DISPLAY_TYPES {
 ## Combat timeline delay of the action performing this intent: -1 = CombatRulesData.default_action_delay.
 @export var enemy_intent_action_delay: int = -1
 
+#region Board (combat framework Phase 2; defaults = original behavior: hits the hero from anywhere)
+enum TARGET_RULES {NEAREST, FARTHEST, LOWEST_HP, HIGHEST_HP, HERO, RANDOM, MARKED, SELF}
+## Movement before the intent's actions. FLANK and TELEPORT are Phase 2b (fall back to APPROACH / HOLD).
+enum MOVE_MODES {HOLD, APPROACH, RETREAT, KEEP_RANGE, FLANK, CHARGE, TELEPORT}
+## Max board distance to the intended target; -1 = not checked.
+@export var enemy_intent_range: int = -1
+## BoardTargeting.TARGET_SHAPES around the target (SINGLE = the target only).
+@export var enemy_intent_shape: int = 0
+## How the intended target is chosen among the enemy's opponents (RANDOM / MARKED fall back to HERO).
+@export var enemy_intent_target_rule: int = TARGET_RULES.HERO
+@export var enemy_intent_move: int = MOVE_MODES.HOLD
+## Cells moved this action; -1 = the unit's move_range.
+@export var enemy_intent_move_distance: int = -1
+## KEEP_RANGE distance; -1 = enemy_intent_range.
+@export var enemy_intent_preferred_range: int = -1
+#endregion
+
 ## Figures out the display types (overhead symbols) based on intent's parameters and custom actions.
 func infer_intent_display_types() -> void:
 	# infer blocking display type

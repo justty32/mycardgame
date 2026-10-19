@@ -315,7 +315,7 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 		return
 	
 	# get intercepted card play results to determine energy costs
-	var card_play_intercepted_action_results: Dictionary[String, Variant] = card_data.get_card_play_intercepted_action_results(card_play_request.selected_target)
+	var card_play_intercepted_action_results: Dictionary[String, Variant] = card_data.get_card_play_intercepted_action_results(card_play_request.selected_target as Enemy)
 	var card_energy_cost: int = card_play_intercepted_action_results.get("card_energy_cost", card_data.get_card_energy_cost(true, true)) # variable cost is zero cost
 	var card_energy_cost_variable_upper_bound: int = card_play_intercepted_action_results.get("card_energy_cost_variable_upper_bound", card_data.card_energy_cost_variable_upper_bound)
 	
@@ -433,12 +433,21 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 	if ActionHandler.actions_being_performed:
 		await ActionHandler.actions_ended
 	
-	# get targets
+	# get targets: board shape targets when resolved (combat framework Phase 2), else the selected target
 	var targets: Array[BaseCombatant] = [card_play_request.selected_target]
+	if not card_play_request.resolved_targets.is_empty():
+		targets.assign(card_play_request.resolved_targets)
+	var acting_unit: BaseCombatant = hand.player
+	if card_play_request.acting_unit != null and is_instance_valid(card_play_request.acting_unit):
+		acting_unit = card_play_request.acting_unit
 	
 	### generate and perform play card actions
-	# generate the card actions
-	var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(hand.player, card_play_request, targets, card_play_request.card_data.card_play_actions, null)
+	# generate the card actions (card_move_distance adds a move that runs before them)
+	var card_actions_data: Array[Dictionary] = card_play_request.card_data.card_play_actions.duplicate()
+	var card_move_action_data: Dictionary = _get_card_move_action_data(card_play_request)
+	if not card_move_action_data.is_empty():
+		card_actions_data.append(card_move_action_data)
+	var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(acting_unit, card_play_request, targets, card_actions_data, null)
 	# generate a special action which signifies the end of the card play, to be done after all the other card actions
 	var card_played_finished_action: Array[BaseAction] = [ActionGenerator.generate_card_play_finished(card_play_request)]
 	
@@ -460,6 +469,20 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 	HandManager.move_card_to_pile(card_play_request.card_data, card_origin_pile, card_destination_pile, card_destination_strategy, get_hand_limit(), true, send_signal)
 
 	hand.combat.update_combat_display()
+
+## ActionMoveUnit payload of a card's card_move_distance (empty when 0): to the selected cell for
+## EMPTY_CELL cards, else toward the selected target. Card movement uses no move points.
+func _get_card_move_action_data(card_play_request: CardPlayRequest) -> Dictionary:
+	var card_data: CardData = card_play_request.card_data
+	if card_data.card_move_distance <= 0 or BoardData.get_active() == null:
+		return {}
+	var values: Dictionary = {"distance": card_data.card_move_distance, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
+	if card_data.card_target_faction == BoardTargeting.TARGET_FACTIONS.EMPTY_CELL:
+		values["mode"] = ActionMoveUnit.MODE_TO_CELL
+	else:
+		values["mode"] = ActionMoveUnit.MODE_TOWARD
+		values["reference"] = ActionMoveUnit.REFERENCE_SELECTED_TARGET
+	return {Scripts.ACTION_MOVE_UNIT: values}
 
 ## Legacy name of perform_end_of_action_hand_actions().
 func perform_end_of_turn_hand_actions() -> void:

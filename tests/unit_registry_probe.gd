@@ -1,7 +1,8 @@
 extends RefCounted
 ## Combat framework Phase 0 probe, called from framework_smoke.gd after the main scene is ready.
 ## Checks UnitRegistry hero registration, CombatRulesData defaults (= original behavior),
-## schema registration and the declared unit/timeline signals. No run is started; the
+## schema registration and the declared unit/timeline signals; Phase 2 adds the legacy encounter
+## synthesis and pure board queries. No run is started; the
 ## "unit_action_started once per hero turn" contract is asserted by combat_flow.gd.
 
 ## Returns {label: bool}. tree_root is SceneTree.root; game_root is the instantiated main scene.
@@ -55,6 +56,25 @@ func check(tree_root: Window, game_root: Node) -> Dictionary:
 	results["CombatRulesData JSON patch sets int and Vector2i fields"] = patched.draw_per_action == 3 and patched.default_board_size == Vector2i(7, 6)
 	var exported: Dictionary = patched.get_serializable_properties(true)
 	results["CombatRulesData exports Vector2i as a JSON array"] = exported.get("default_board_size") == [7, 6]
+
+	# board (Phase 2): legacy events synthesize a default encounter; pure board queries
+	results["EncounterData is in Global.CLASS_NAME_TO_CLASS"] = global_data.CLASS_NAME_TO_CLASS.get("EncounterData") == EncounterData
+	if rules != null:
+		results["default rules keep movement off: no free / paid moves, split allowed, single-cell displacement"] = rules.free_move_per_action == 0 and rules.paid_move_max_cells == 0 and rules.extra_move_delay_per_cell == 0 and rules.move_split_allowed and rules.displace_max_footprint_area == 1
+		var legacy_event := EventData.new("probe_legacy_event")
+		legacy_event.event_weighted_enemy_object_ids.assign([{"probe_enemy_a": 1}, {"probe_enemy_b": 1}, {"probe_enemy_c": 1}])
+		var synthesized: EncounterData = global_data.get_event_encounter_data(legacy_event)
+		var wave_cells: Array = []
+		if synthesized != null and synthesized.encounter_waves.size() == 1:
+			for unit_entry: Dictionary in synthesized.encounter_waves[0].wave_units:
+				wave_cells.append(unit_entry.get("cell", []))
+		results["legacy event (no encounter id) synthesizes one wave on the north row, centered"] = synthesized != null and synthesized.get_board_size(rules) == rules.default_board_size and wave_cells == [[1, 0], [2, 0], [3, 0]]
+		var board := BoardData.new(Vector2i(5, 5), rules)
+		results["board shapes: CROSS 5 cells, ROW 5 cells, LINE to the edge 4 cells"] = BoardTargeting.cells_in_shape(board, Vector2i(2, 4), Vector2i(2, 2), BoardTargeting.TARGET_SHAPES.CROSS).size() == 5 and BoardTargeting.cells_in_shape(board, Vector2i(2, 4), Vector2i(0, 1), BoardTargeting.TARGET_SHAPES.ROW).size() == 5 and BoardTargeting.cells_in_shape(board, Vector2i(2, 4), Vector2i(2, 0), BoardTargeting.TARGET_SHAPES.LINE).size() == 4
+		results["board distance is Manhattan by default"] = board.distance(Vector2i(0, 0), Vector2i(2, 3)) == 5
+	var encounter_patch := EncounterData.new("probe_encounter")
+	encounter_patch.set_serializable_properties_from_json_patch({"properties": {"encounter_board_size": [7, 5], "encounter_blocked_cells": [[3, 2]]}, "patch_data": {}})
+	results["EncounterData JSON patch sets the board size (Vector2i) and cell lists"] = encounter_patch.encounter_board_size == Vector2i(7, 5) and EncounterData.cells_from_json(encounter_patch.encounter_blocked_cells).size() == 1 and EncounterData.cells_from_json(encounter_patch.encounter_blocked_cells)[0] == Vector2i(3, 2)
 
 	# declared signals
 	for signal_name: String in ["unit_action_started", "unit_action_ended", "combat_tick_advanced", "timeline_changed", "unit_moved", "unit_spawned", "unit_downed", "unit_removed", "wave_started", "wave_cleared", "end_action_requested", "cell_clicked", "cell_hovered", "party_member_recruited", "party_member_left", "party_member_advanced", "ai_plan_decided"]:

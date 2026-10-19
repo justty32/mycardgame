@@ -21,6 +21,7 @@ extends Control
 @onready var enemy_container = $EnemyContainer
 @onready var combat_director: CombatDirector = $CombatDirector
 @onready var timeline_bar: Control = $TimelineBar
+var board_view: BoardView = null
 
 @onready var player = $Player
 @onready var hand = $Hand
@@ -52,6 +53,11 @@ func _ready():
 
 	update_combat_display()
 	player.update_player_display(Global.player_data)
+
+	# combat framework Phase 2: self-drawn board panel (cell input, movement and intent preview)
+	board_view = BoardView.new()
+	board_view.name = "BoardView"
+	add_child(board_view)
 
 	# pile buttons
 	deck_button.button_up.connect(_on_deck_button_up)
@@ -215,14 +221,13 @@ func _on_combat_started(event_id: String):
 
 	_combat_ending = false
 	end_turn_button.disabled = true
-	enemy_container.populate_enemies_from_event(current_event)
 
 	Global.player_data.player_energy = Global.player_data.player_energy_max
 	set_combat_display_visibility(true)
 	update_combat_display()
 
-	# hand the spawned units to the action timeline
-	combat_director.begin_combat()
+	# the director builds the board, spawns the encounter's units and runs the action timeline
+	combat_director.begin_combat(current_event)
 	timeline_bar.visible = true
 
 func _on_combat_ended():

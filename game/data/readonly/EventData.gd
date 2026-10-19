@@ -51,6 +51,10 @@ enum FailedEventPoolStrategies {
 ## enemies via ActionSummonEnemies.
 @export var event_enemy_placement_positions: Array[Array] = [[0,-40], [0,40]]
 
+## Board encounter (EncounterData object id) of this combat. Empty = synthesized from
+## event_weighted_enemy_object_ids: one wave on the north row of a default-size board.
+@export var event_encounter_object_id: String = ""
+
 #endregion
 
 #region Event Combat

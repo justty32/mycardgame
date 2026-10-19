@@ -1,6 +1,8 @@
-## Handles containing enemies and spawning them
+## Handles containing enemies and spawning them (the combat's unit layer).
 ## Can handle both automatic placement and slot based placement for
 ## enemies based on EventData.event_enemy_placement_is_automatic positioning type.
+## Combat framework Phase 2: CombatDirector drives combat-start spawning (spawn_event_enemy) and
+## board summons (spawn_board_enemy); board cells are separate from these screen positions.
 extends Control
 
 @onready var automatic_enemy_container: HBoxContainer = $AutomaticEnemyContainer
@@ -50,6 +52,25 @@ func populate_enemies_from_event(event_data: EventData = Global.get_player_event
 			var _enemy: Enemy = spawn_enemy_at_slot(enemy_object_id, enemy_counter)
 		
 		enemy_counter += 1
+
+## Spawns the index-th enemy of an event's combat in the event's placement mode (automatic container
+## or positional slot). null = a positional event ran out of slots (legacy spawning stops there).
+func spawn_event_enemy(event_data: EventData, enemy_object_id: String, index: int) -> Enemy:
+	if event_data == null or event_data.event_enemy_placement_is_automatic:
+		return _spawn_enemy(enemy_object_id, automatic_enemy_container)
+	if index == 0 and len(event_data.event_enemy_placement_positions) < len(event_data.event_weighted_enemy_object_ids):
+		DebugLogger.log_error("EnemyContainer: Enemy spawns \"{0}\" exceed number of positions \"{1}\" in event \"{2}\"".format([
+			len(event_data.event_weighted_enemy_object_ids),
+			len(event_data.event_enemy_placement_positions),
+			event_data.object_id,
+		]))
+	if len(event_data.event_enemy_placement_positions) <= index:
+		return null
+	return spawn_enemy_at_slot(enemy_object_id, index)
+
+## Spawns an enemy for a board summon (screen layout: the automatic container).
+func spawn_board_enemy(enemy_object_id: String) -> Enemy:
+	return _spawn_enemy(enemy_object_id, automatic_enemy_container)
 
 ## Helper function for spawning enemies. Supplied a container for either automatic placement or
 ## positional placement depending on the event.

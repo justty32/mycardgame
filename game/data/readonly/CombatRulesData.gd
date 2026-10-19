@@ -14,6 +14,8 @@ const ENERGY_REFILL: int = -1
 enum DISTANCE_METRICS {MANHATTAN, CHEBYSHEV}
 enum DOWNED_MEMBER_POLICIES {REVIVE_AFTER_COMBAT_1HP, LEAVE_PARTY, PERMADEATH}
 enum TIE_BREAKS {HIGHER_SPEED_FIRST, PARTY_FIRST, SPAWN_ORDER}
+enum MOVE_ADJACENCY {FOUR, EIGHT}
+enum DISPLACE_TIE_AXES {VERTICAL, HORIZONTAL}
 
 #region Timeline
 ## wait = action_delay * timeline_delay_scale / speed
@@ -50,6 +52,23 @@ enum TIE_BREAKS {HIGHER_SPEED_FIRST, PARTY_FIRST, SPAWN_ORDER}
 @export var deploy_size_max: int = 1
 @export var downed_member_policy: int = DOWNED_MEMBER_POLICIES.REVIVE_AFTER_COMBAT_1HP
 @export var hero_down_ends_run: bool = true
+#endregion
+
+#region Movement (combat framework Phase 2; defaults = no movement, no change to old behavior)
+## Neighbour rule of path finding. Phase 2 implements FOUR only (EIGHT falls back to FOUR).
+@export var move_adjacency: int = MOVE_ADJACENCY.FOUR
+## true = a unit may move before and after playing cards; false = the first card play ends movement.
+@export var move_split_allowed: bool = true
+## Cells a party unit may move per action after its free move points, each adding
+## extra_move_delay_per_cell to the action delay. 0 = no paid movement.
+@export var paid_move_max_cells: int = 0
+## Reserved (Phase 2 implements "cannot pass through" only; ignores_occupancy units fly over).
+@export var move_pass_through_allies: bool = false
+@export var move_pass_through_enemies: bool = false
+## Axis used by forced displacement when |dx| == |dy|.
+@export var displace_tie_axis: int = DISPLACE_TIE_AXES.VERTICAL
+## Units whose footprint area exceeds this cannot be displaced.
+@export var displace_max_footprint_area: int = 1
 #endregion
 
 func _get_native_properties() -> Dictionary:

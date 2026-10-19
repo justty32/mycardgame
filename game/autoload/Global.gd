@@ -39,6 +39,7 @@ extends Node
 	["CustomUIData", CustomUIData, "_id_to_custom_ui_data", ["custom_ui/"]],
 	["CustomSignalData", CustomSignalData, "_id_to_custom_signal_data", ["custom_signals/"]],
 	["CombatRulesData", CombatRulesData, "_id_to_combat_rules_data", ["combat_rules/"]],
+	["EncounterData", EncounterData, "_id_to_encounter_data", ["encounters/"]],
 	# prototype data
 	["EnemyData", EnemyData,"_id_to_enemy_data", ["enemies/"]],
 	["CardData", CardData, "_id_to_card_data", ["cards/"]],
@@ -81,6 +82,7 @@ var _id_to_consumable_pack_data: Dictionary[String, ConsumablePackData] = {}
 var _id_to_custom_ui_data: Dictionary[String, CustomUIData] = {}
 var _id_to_custom_signal_data: Dictionary[String, CustomSignalData] = {}
 var _id_to_combat_rules_data: Dictionary[String, CombatRulesData] = {}
+var _id_to_encounter_data: Dictionary[String, EncounterData] = {}
 
 # prototyped data; Read only data that are duplicated into mutable data instances
 var _id_to_enemy_data: Dictionary[String, EnemyData] = {}
@@ -552,6 +554,19 @@ func get_combat_rules() -> CombatRulesData:
 	if _fallback_combat_rules_data == null:
 		_fallback_combat_rules_data = CombatRulesData.new(CombatRulesData.DEFAULT_OBJECT_ID)
 	return _fallback_combat_rules_data
+
+func get_encounter_data(encounter_object_id: String) -> EncounterData:
+	return _id_to_encounter_data.get(encounter_object_id, null)
+
+## The board encounter of an event: its event_encounter_object_id, or one synthesized from the
+## event's enemy list (legacy events).
+func get_event_encounter_data(event_data: EventData) -> EncounterData:
+	if event_data != null and event_data.event_encounter_object_id != "":
+		var encounter_data: EncounterData = get_encounter_data(event_data.event_encounter_object_id)
+		if encounter_data != null:
+			return encounter_data
+		DebugLogger.log_error("Global: EncounterData \"{0}\" of event \"{1}\" not found; synthesizing".format([event_data.event_encounter_object_id, event_data.object_id]))
+	return EncounterData.synthesize_from_event(event_data, get_combat_rules())
 #endregion
 
 #region Locations

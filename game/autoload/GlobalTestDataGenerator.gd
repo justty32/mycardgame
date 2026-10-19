@@ -34,6 +34,7 @@ func generate_test_data() -> void:
 	add_test_artifacts()
 	add_test_card_decorators()
 	add_test_cards()
+	add_test_board_content()
 	
 	add_test_card_packs()
 	add_test_artifact_packs()
@@ -4645,6 +4646,122 @@ func add_test_cards() -> void:
 	}]
 	
 	Global.register_rod(card_debug_log)
+
+#region Board (combat framework Phase 2)
+## Framework examples of the board keywords (move / dash / push / blink), the rooted status and
+## two moving enemies. Not in card packs or events: tests and content packs reference them by id.
+func add_test_board_content() -> void:
+	# rooted: ActionMoveUnit / ActionDisplaceUnit on the unit get distance 0
+	var interceptor_rooted: ActionInterceptorData = ActionInterceptorData.new("interceptor_rooted")
+	interceptor_rooted.action_interceptor_priority = -9000
+	interceptor_rooted.action_interceptor_modifies_parent = false
+	interceptor_rooted.action_interceptor_script_path = Scripts.INTERCEPTOR_ROOTED
+	interceptor_rooted.action_intercepted_action_paths = [Scripts.ACTION_MOVE_UNIT, Scripts.ACTION_DISPLACE_UNIT]
+	Global.register_rod(interceptor_rooted)
+	
+	var status_rooted: StatusEffectData = StatusEffectData.new("status_rooted")
+	status_rooted.status_effect_name = "Rooted"
+	status_rooted.status_effect_texture_path = "external/sprites/status_effects/status_effect_purple.png"
+	status_rooted.status_effect_decay_rate = 0
+	status_rooted.status_effect_type = StatusEffectData.STATUS_EFFECT_TYPES.DEBUFF
+	status_rooted.status_effect_interceptor_ids = ["interceptor_rooted"]
+	Global.register_rod(status_rooted)
+	
+	# dash: move toward a target in line, then attack if adjacent
+	# NOTE: card_play_actions run last-first (ActionHandler stack): the move runs before the attack
+	var card_test_dash_strike: CardData = CardData.new("card_test_dash_strike")
+	card_test_dash_strike.card_name = "Dash Strike"
+	card_test_dash_strike.card_color_id = "color_white"
+	card_test_dash_strike.card_texture_path = "external/sprites/cards/white/card_white.png"
+	card_test_dash_strike.card_description = "Dash up to [distance] toward a target in line, then deal [damage] if adjacent"
+	card_test_dash_strike.card_type = CardData.CARD_TYPES.ATTACK
+	card_test_dash_strike.card_rarity = CardData.CARD_RARITIES.GENERATED
+	card_test_dash_strike.card_appears_in_card_packs = false
+	card_test_dash_strike.card_energy_cost = 1
+	card_test_dash_strike.card_action_delay = 100
+	card_test_dash_strike.card_range = 3
+	card_test_dash_strike.card_shape = BoardTargeting.TARGET_SHAPES.LINE
+	card_test_dash_strike.card_target_faction = BoardTargeting.TARGET_FACTIONS.OPPONENT
+	card_test_dash_strike.card_values = {"damage": 6, "distance": 2, "stop_at_distance": 1}
+	card_test_dash_strike.card_play_validators = [{Scripts.VALIDATOR_IN_LINE: {}}]
+	card_test_dash_strike.card_play_actions = [
+		{Scripts.ACTION_VALIDATOR: {
+			"validator_data": [{Scripts.VALIDATOR_DISTANCE: {"operator": "<=", "comparison_value": 1}}],
+			"passed_action_data": [{Scripts.ACTION_ATTACK_GENERATOR: {"time_delay": 0.0, "actions_on_lethal": []}}],
+		}},
+		{Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TOWARD, "reference": ActionMoveUnit.REFERENCE_SELECTED_TARGET}},
+	]
+	card_test_dash_strike.card_ai_hints = {"role": "damage", "value_key": "damage", "danger": 0}
+	Global.register_rod(card_test_dash_strike)
+	
+	# shove: attack, then push the target (collision damage per remaining cell)
+	var card_test_shove: CardData = CardData.new("card_test_shove")
+	card_test_shove.card_name = "Shove"
+	card_test_shove.card_color_id = "color_white"
+	card_test_shove.card_texture_path = "external/sprites/cards/white/card_white.png"
+	card_test_shove.card_description = "Deal [damage] and push [distance]; [collision_damage_per_cell] per blocked cell"
+	card_test_shove.card_type = CardData.CARD_TYPES.ATTACK
+	card_test_shove.card_rarity = CardData.CARD_RARITIES.GENERATED
+	card_test_shove.card_appears_in_card_packs = false
+	card_test_shove.card_energy_cost = 1
+	card_test_shove.card_range = 1
+	card_test_shove.card_shape = BoardTargeting.TARGET_SHAPES.SINGLE
+	card_test_shove.card_target_faction = BoardTargeting.TARGET_FACTIONS.OPPONENT
+	card_test_shove.card_values = {"damage": 4, "distance": 2, "collision_damage_per_cell": 3}
+	card_test_shove.card_play_actions = [
+		{Scripts.ACTION_DISPLACE_UNIT: {"mode": ActionDisplaceUnit.MODE_PUSH}},
+		{Scripts.ACTION_ATTACK_GENERATOR: {"time_delay": 0.0, "actions_on_lethal": []}},
+	]
+	card_test_shove.card_ai_hints = {"role": "displace", "value_key": "damage"}
+	Global.register_rod(card_test_shove)
+	
+	# blink: teleport to a free cell in range
+	var card_test_blink: CardData = CardData.new("card_test_blink")
+	card_test_blink.card_name = "Blink"
+	card_test_blink.card_color_id = "color_white"
+	card_test_blink.card_texture_path = "external/sprites/cards/white/card_white.png"
+	card_test_blink.card_description = "Teleport to an empty cell"
+	card_test_blink.card_type = CardData.CARD_TYPES.SKILL
+	card_test_blink.card_rarity = CardData.CARD_RARITIES.GENERATED
+	card_test_blink.card_appears_in_card_packs = false
+	card_test_blink.card_energy_cost = 0
+	card_test_blink.card_action_delay = 50
+	card_test_blink.card_requires_target = false
+	card_test_blink.card_range = 3
+	card_test_blink.card_shape = BoardTargeting.TARGET_SHAPES.SINGLE
+	card_test_blink.card_target_faction = BoardTargeting.TARGET_FACTIONS.EMPTY_CELL
+	card_test_blink.card_play_validators = [{Scripts.VALIDATOR_CELL_FREE: {}}, {Scripts.VALIDATOR_PATH_EXISTS: {"teleport": true}}]
+	card_test_blink.card_play_actions = [{Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TELEPORT}}]
+	card_test_blink.card_ai_hints = {"role": "move", "value": 2}
+	Global.register_rod(card_test_blink)
+	
+	# charger: charges along its row / column (approaches otherwise) and hits adjacent
+	var enemy_test_charger: EnemyData = EnemyData.new("enemy_test_charger")
+	enemy_test_charger.enemy_name = "Test Charger"
+	enemy_test_charger.enemy_move_range = 3
+	enemy_test_charger.add_health_bounds(40, 40)
+	var charge: EnemyIntentData = EnemyIntentData.new("intent_charge", 0, 4, 1, "", 0, "", {"intent_charge": 1})
+	charge.enemy_intent_range = 1
+	charge.enemy_intent_move = EnemyIntentData.MOVE_MODES.CHARGE
+	enemy_test_charger.add_intent_state([EnemyIntentData.new(EnemyIntentData.INTENT_INITIAL, 0, 0, 0, "", 0, "", {"intent_charge": 1})])
+	enemy_test_charger.add_intent_state([charge])
+	var _charger_anim: AnimationData = enemy_test_charger.add_standard_animations(["external/sprites/enemies/enemy_red_small.png"])
+	Global.register_rod(enemy_test_charger)
+	
+	# archer: keeps distance 3 from its target and shoots at range 3
+	var enemy_test_archer: EnemyData = EnemyData.new("enemy_test_archer")
+	enemy_test_archer.enemy_name = "Test Archer"
+	enemy_test_archer.enemy_move_range = 2
+	enemy_test_archer.add_health_bounds(30, 30)
+	var shoot: EnemyIntentData = EnemyIntentData.new("intent_shoot", 0, 3, 1, "", 0, "", {"intent_shoot": 1})
+	shoot.enemy_intent_range = 3
+	shoot.enemy_intent_preferred_range = 3
+	shoot.enemy_intent_move = EnemyIntentData.MOVE_MODES.KEEP_RANGE
+	enemy_test_archer.add_intent_state([EnemyIntentData.new(EnemyIntentData.INTENT_INITIAL, 0, 0, 0, "", 0, "", {"intent_shoot": 1})])
+	enemy_test_archer.add_intent_state([shoot])
+	var _archer_anim: AnimationData = enemy_test_archer.add_standard_animations(["external/sprites/enemies/enemy_blue_small.png"])
+	Global.register_rod(enemy_test_archer)
+#endregion
 
 #region Card Packs
 

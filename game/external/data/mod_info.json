@@ -67,6 +67,10 @@
 				"class_name": "DialogueData",
 				"table_name": "_id_to_dialogue_data"
 			},
+			"external/data/encounters/": {
+				"class_name": "EncounterData",
+				"table_name": "_id_to_encounter_data"
+			},
 			"external/data/enemies/": {
 				"class_name": "EnemyData",
 				"table_name": "_id_to_enemy_data"

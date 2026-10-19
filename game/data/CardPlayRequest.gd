@@ -12,6 +12,16 @@ var refundable_energy: int = 0	# how much energy the card play can refund if int
 var input_energy: int = 0	# how much energy is input into the card play. Can be positive even if refundable_energy is 0. Useful for X cost cards and card play duplications
 var is_duplicate_play: bool = false	# duplcate plays should not be further duplicated
 
+#region Board (combat framework Phase 2)
+## The unit playing the card (the acting unit); null = the hero (legacy requests).
+var acting_unit: BaseCombatant = null
+## Board cell the player selected; BaseCombatant.BOARD_ANCHOR_NONE when no cell was selected.
+var selected_cell: Vector2i = Vector2i(-1, -1)
+## Units resolved from card_shape around selected_cell (HandManager uses them as the action targets
+## when not empty; empty = legacy [selected_target]).
+var resolved_targets: Array[BaseCombatant] = []
+#endregion
+
 ## Where the card being played came from. This will almost always be HandManager.HAND_PILE, but can be
 ## from other piles if played indirectly.
 ## Empty if the card somehow did not come from anywhere (banished)
