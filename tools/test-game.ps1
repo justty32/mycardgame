@@ -13,6 +13,7 @@ Requires Python 3.10+ on PATH (python, py -3 or python3). Never opens a window.
 ./tools/test-game.ps1 -Suite All
 ./tools/test-game.ps1 -Suite Smoke -GodotPath 'C:/path/to/Godot_v4.7.2-stable_win64_console.exe'
 ./tools/test-game.ps1 -Suite Smoke -ForceFailure   # must exit 1
+./tools/test-game.ps1 -Suite Smoke -ContentProfile pack -Pack games/<game>/pack -PackTests games/<game>/tests   # untested on Windows
 #>
 [CmdletBinding()]
 param(
@@ -25,6 +26,10 @@ param(
     [switch]$ForceFailure,
     [switch]$NoIsolateAppData,
     [string[]]$AcceptEngineVersion,
+    [string[]]$Pack,
+    [string[]]$PackTests,
+    [ValidateSet('test', 'pack')]
+    [string]$ContentProfile,
     [string]$ArtifactsRoot,
     [ValidateRange(10, 900)]
     [int]$TimeoutSeconds = 180
@@ -54,6 +59,10 @@ if ($DiagnosticVerbose) { $arguments += '--diagnostic-verbose' }
 if ($ForceFailure) { $arguments += '--force-failure' }
 if ($NoIsolateAppData) { $arguments += '--no-isolate-appdata' }
 if ($ArtifactsRoot) { $arguments += @('--artifacts-root', $ArtifactsRoot) }
+# -Pack/-PackTests/-ContentProfile map to --pack/--pack-tests/--content-profile (not yet run on Windows).
+foreach ($dir in @($Pack)) { if ($dir) { $arguments += @('--pack', $dir) } }
+foreach ($dir in @($PackTests)) { if ($dir) { $arguments += @('--pack-tests', $dir) } }
+if ($ContentProfile) { $arguments += @('--content-profile', $ContentProfile) }
 foreach ($pattern in @($AcceptEngineVersion)) { if ($pattern) { $arguments += @('--accept-engine-version', $pattern) } }
 
 & $pythonExe @pythonArgs @arguments
