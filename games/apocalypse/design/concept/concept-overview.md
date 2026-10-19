@@ -17,7 +17,7 @@
 
 從 (a) 保留下來的：獨立牌組／手牌／源質、全隊共用遺物金錢地圖；被 CTB 取代的：「回合」結構（本檔一律改成「行動」與「刻」）。
 
-**資料來源**：`/home/lorkhan/repo/narratives/apocalypse/analysis/`。出處記法：`[powers Pxx]`＝powers.md／evidence/powers.json；`[lineages lixxx]`＝powers-catalog.md／evidence/lineages.json；`[item pixxx]`＝evidence/power-items.json；`[adv adxxx]`＝stage5/powers-catalog.md／evidence/advancement.json；`[creature crxxx]`＝bestiary.md／evidence/creature-catalog.json；`[bestiary Bxxx]`、`[factions Fxx]`、`[world Wxx]`＝各 md 證據編號。標「同人新增」者為原作沒有的規則或名稱。依 design/core-loop.md，本檔不收原文段落，只做規則轉譯。
+**資料來源**：小說分析 repo（narratives/apocalypse 的 analysis/）。出處記法：`[powers Pxx]`＝powers.md／evidence/powers.json；`[lineages lixxx]`＝powers-catalog.md／evidence/lineages.json；`[item pixxx]`＝evidence/power-items.json；`[adv adxxx]`＝stage5/powers-catalog.md／evidence/advancement.json；`[creature crxxx]`＝bestiary.md／evidence/creature-catalog.json；`[bestiary Bxxx]`、`[factions Fxx]`、`[world Wxx]`＝各 md 證據編號。標「同人新增」者為原作沒有的規則或名稱。依 design/core-loop.md，本檔不收原文段落，只做規則轉譯。
 
 **框架假設（基線）**：Slay-The-Robot 有 HP／格擋／能量／抽棄牌／狀態／敵人意圖權重圖（`enemy_intents`、`intent_initial`）／遺物／藥物／單一玩家實體／回合制。本檔的 CTB、棋盤、多單位、AI 隊員皆為新增層。
 
