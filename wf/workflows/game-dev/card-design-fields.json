@@ -1,0 +1,67 @@
+{
+ "contract": "wf-table/1",
+ "source": "card-design.md",
+ "extracted": "2026-10-19",
+ "columns": [
+  "id",
+  "record",
+  "check",
+  "basis"
+ ],
+ "rows": [
+  {
+   "id": "intent",
+   "record": "玩家要做的選擇、卡牌角色、適用階段、題材限制與非目標。",
+   "check": "有一句可驗證的用途；未知核心需求標待定，不冒充使用者決定。",
+   "basis": "建議設計契約；角色標籤不是 card_type。"
+  },
+  {
+   "id": "identity",
+   "record": "穩定 card ID、原創/引用來源、mod ID與優先順序、color/type/rarity、基礎與升級名字。",
+   "check": "ID無意外碰撞；每個enum值回查當前CardData；來源條件已記錄。",
+   "basis": "已核實 schema 與載入入口；命名規格由任務決定。"
+  },
+  {
+   "id": "effect",
+   "record": "觸發時機、來源/目標、自然語言順序、action路徑、參數/值映射、validator與可觀察結果。",
+   "check": "每個效果能指到現有原語或明列待新增原語；描述占位符與實際讀值一致。",
+   "basis": "已核實 ActionGenerator/BaseAction/HandManager 契約。"
+  },
+  {
+   "id": "economy",
+   "record": "能量費、X費上限、手牌槽位、抽牌與生成/回收、出牌後和回合後去向、啟動時間。",
+   "check": "有成本和限制；0費/退款/自動出牌的預期已列；循環候選有終止測試。",
+   "basis": "欄位已核實；價值與循環風險屬待驗設計判斷。"
+  },
+  {
+   "id": "upgrade",
+   "record": "基礎/首升/後續升級的有效值、property改變、上限、永久與戰鬥範圍。",
+   "check": "首升覆寫再加改善的結果已算出；action值未意外遮住card_values；需多次升級者有專項測試。",
+   "basis": "CardData順序已核實；UpgradeCards副本/parent參數差異須注意。"
+  },
+  {
+   "id": "acquisition",
+   "record": "起手角色、pack ID、色/類型/稀有篩選、明列ID、玩家黑白名單、獎勵/商店/事件入口。",
+   "check": "註冊、池包含、實際取得三者分開驗；新增run/舊save各自結果已列。",
+   "basis": "已核實卡包與角色接線；各入口的可到達性需本次實跑。"
+  },
+  {
+   "id": "synergy",
+   "record": "搭配卡/遺物/狀態ID，無搭配時用途，成形回報，反制與最強循環假說。",
+   "check": "有同階替代或跳過的對照，有無協同/預期協同/極端協同情境。",
+   "basis": "建議設計與評量契約，不代表已驗平衡。"
+  },
+  {
+   "id": "presentation",
+   "record": "卡面圖/音效需求、文案、關鍵詞、目標提示、資訊優先序及資產來源。",
+   "check": "顯示與規則用同一組語意；佔位素材/人工審查未完成項明列。",
+   "basis": "卡牌欄位已核實；美術、音訊與UI品質需相應工作流驗收。"
+  },
+  {
+   "id": "evidence",
+   "record": "版本/內容hash、驗證情境、期望與實際值、測試命令/輸出、未驗事項與下一步。",
+   "check": "功能/評量/人工體驗各自標明；沒有把headless測試寫成GUI或樂趣證據。",
+   "basis": "本專案交付契約；執行須遵守當前無桌面/視窗邊界。"
+  }
+ ]
+}

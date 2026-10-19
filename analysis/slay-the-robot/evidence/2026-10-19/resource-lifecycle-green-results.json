@@ -1,0 +1,217 @@
+{
+  "suite": "ResourceLifecycle",
+  "run_id": "20261019-135858-7a3738c4",
+  "source_game": "{PROJECT_ROOT}\\game",
+  "upstream_commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+  "historical_baseline": false,
+  "source_hashes": {
+    "ResourceLifecycle": [
+      {
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E",
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd"
+      },
+      {
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C",
+        "path": "scripts/actions/BaseAsyncAction.gd"
+      },
+      {
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16",
+        "path": "autoload/ActionHandler.gd"
+      },
+      {
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F",
+        "path": "scripts/Root.gd"
+      },
+      {
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D",
+        "path": "scripts/ui/menus/BaseMenu.gd"
+      },
+      {
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167",
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd"
+      },
+      {
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598",
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd"
+      },
+      {
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE",
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd"
+      },
+      {
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D",
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd"
+      }
+    ]
+  },
+  "test_hashes": {
+    "ResourceLifecycle": [
+      {
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B",
+        "path": "combat_fixture.gd"
+      },
+      {
+        "sha256": "B23A1C2941E75B95D1EA52A9810D45D6836C337F078A3A2E03AEA17DE6BB1B3E",
+        "path": "combat_flow.gd"
+      },
+      {
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E",
+        "path": "dictionary_regression.gd"
+      },
+      {
+        "sha256": "66455D901AA3411689F8040A13735BC8BCE579B5AE0BAABE1CE0D078A164A517",
+        "path": "framework_smoke.gd"
+      },
+      {
+        "sha256": "6D40A289FC58E002A706EB36B408081F8445C709DFBE5DE88DD8323A37B772EA",
+        "path": "resource_lifecycle_cases.gd"
+      },
+      {
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8",
+        "path": "resource_lifecycle_child.gd"
+      },
+      {
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064",
+        "path": "resource_lifecycle_interceptor.gd"
+      },
+      {
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7",
+        "path": "resource_lifecycle.gd"
+      },
+      {
+        "sha256": "BBA1E61FEFD9D5D3A56901F7967346865D7D19A842F3C251164DD0C9C070A578",
+        "path": "save_load_flow.gd"
+      }
+    ]
+  },
+  "engine": "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe",
+  "completed": true,
+  "results": [
+    {
+      "name": "version",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe",
+      "launched_pid": 33776,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-19T05:58:58.4580810Z",
+      "ended_utc": "2026-10-19T05:58:58.5621526Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.11,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\version.log",
+        "--headless",
+        "--version"
+      ],
+      "engine_version": "4.6.stable.official.89cea1439"
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe",
+      "launched_pid": 9604,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-19T05:58:59.5865831Z",
+      "ended_utc": "2026-10-19T05:59:07.1561924Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": true,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 7.57,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle\\import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle\\game",
+        "--editor",
+        "--import"
+      ]
+    },
+    {
+      "name": "import-verified",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe",
+      "launched_pid": 35516,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-19T05:59:07.1617280Z",
+      "ended_utc": "2026-10-19T05:59:11.8562238Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 4.7,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle\\import-verified.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle\\game",
+        "--editor",
+        "--import"
+      ]
+    },
+    {
+      "name": "resourcelifecycle",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe",
+      "launched_pid": 32860,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-19T05:59:11.8625734Z",
+      "ended_utc": "2026-10-19T05:59:13.9439138Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 2.08,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle\\resourcelifecycle.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle\\game",
+        "--script",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261019-135858-7a3738c4\\ResourceLifecycle\\tests\\resource_lifecycle.gd"
+      ]
+    }
+  ],
+  "engine_version": "4.6.stable.official.89cea1439",
+  "source_changes": [
+    "autoload/ActionHandler.gd",
+    "autoload/FileLoader.gd",
+    "data/SerializableData.gd",
+    "scripts/Root.gd",
+    "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+    "scripts/actions/BaseAsyncAction.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+    "scripts/ui/menus/BaseMenu.gd"
+  ],
+  "known_shutdown_issues": false,
+  "verdict": "PASS"
+}

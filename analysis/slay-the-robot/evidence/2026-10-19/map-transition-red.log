@@ -1,0 +1,411 @@
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Unrecognized output string "misc2" in mapping:
+030000000d0f00000202000000000000,Horipad O Nintendo Switch 2 Controller,a:b1,b:b0,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,misc1:b13,misc2:b14,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b3,y:b2,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000000d0f00009601000000000000,Horipad Steam,a:b0,b:b1,back:b10,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b6,leftstick:b13,lefttrigger:b8,leftx:a0,lefty:a1,misc2:b2,paddle1:b5,paddle2:b15,paddle3:b18,paddle4:b19,rightshoulder:b7,rightstick:b14,righttrigger:b9,rightx:a3,righty:a4,start:b11,x:b3,y:b4,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000007e0500006920000000000000,Nintendo Switch 2 Pro Controller,a:b0,b:b1,back:b14,dpdown:b8,dpleft:b10,dpright:b9,dpup:b11,guide:b16,leftshoulder:b12,leftstick:b15,lefttrigger:b13,leftx:a0,lefty:a1~,misc1:b17,misc2:b20,paddle1:b18,paddle2:b19,rightshoulder:b4,rightstick:b7,righttrigger:b5,rightx:a2,righty:a3~,start:b6,x:b2,y:b3,platform:Windows,
+Using "default" pen tablet driver...
+
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+Loading resource: res://sounds/default_bus_layout.tres
+CORE API HASH: 3663110324
+EDITOR API HASH: 835956462
+Loading resource: {PROJECT_ROOT}/artifacts/verification/20261019-140422-8f6eb038/ResourceLifecycle/tests/resource_lifecycle.gd
+SceneTreeFTI: traversal method DEFAULT
+Loading resource: res://autoload/Signals.gd
+Loading resource: res://icon.svg
+Loading resource: res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex
+Loading resource: res://misc/curves/hand_rotation_curve.tres
+Loading resource: res://misc/curves/hand_y_curve.tres
+Loading resource: res://scenes/ui/card/Card.tscn
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+Loading resource: res://scenes/ui/card/CardTrail.tscn
+Loading resource: res://misc/curves/card_trail_curve.tres
+Loading resource: res://scenes/ui/card/CardDecorator.tscn
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+Loading resource: res://scenes/ui/Artifact.tscn
+Loading resource: res://scripts/ui/Artifact.gd
+Loading resource: res://scenes/ui/MapLocation.tscn
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+Loading resource: res://scripts/ui/MapLocation.gd
+Loading resource: res://scenes/combatants/Enemy.tscn
+Loading resource: res://animations/Combatant.res
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+Loading resource: res://scenes/combatants/LayeredHealthBar.tscn
+Loading resource: res://sprites/health_bar_frame.PNG
+Loading resource: res://.godot/imported/health_bar_frame.PNG-60874fdaa2c079ed8d0a1a6e60b8b4a5.ctex
+Loading resource: res://animations/Enemy.res
+Loading resource: res://sprites/missing_texture.png
+Loading resource: res://.godot/imported/missing_texture.png-41299733942aab8ee8b8e1bee88556cc.ctex
+Loading resource: res://sprites/intents/enemy_intent_attacking.png
+Loading resource: res://.godot/imported/enemy_intent_attacking.png-ecce28104bb7b3478bce3df3fb1b5f22.ctex
+Loading resource: res://scenes/combatants/SpeechBubble.tscn
+Loading resource: res://sprites/intents/enemy_intent_blocking.png
+Loading resource: res://.godot/imported/enemy_intent_blocking.png-f04d0274ec00422fb3eed70b1184a1a4.ctex
+Loading resource: res://sprites/intents/enemy_intent_debuffing.png
+Loading resource: res://.godot/imported/enemy_intent_debuffing.png-f510b1482ad1458633c2a164a27fb2b4.ctex
+Loading resource: res://sprites/intents/enemy_intent_buffing.png
+Loading resource: res://.godot/imported/enemy_intent_buffing.png-88eccf1cb5c2d9ff2748a9c416b04057.ctex
+Loading resource: res://sprites/intents/enemy_intent_summoning.png
+Loading resource: res://.godot/imported/enemy_intent_summoning.png-b7aa3fe4cc940bcf7a1f52bd0d544882.ctex
+Loading resource: res://scenes/combatants/Player.tscn
+Loading resource: res://animations/Player.res
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+Loading resource: res://scenes/combatants/StatusEffect.tscn
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+Loading resource: res://scenes/combatants/HealthLayer.tscn
+Loading resource: res://scripts/combatants/HealthLayer.gd
+Loading resource: res://scenes/ui/rewards/BaseRewardButton.tscn
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+Loading resource: res://scripts/ui/rewards/BaseRewardButton.gd
+Loading resource: res://scenes/ui/rewards/MoneyRewardButton.tscn
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+Loading resource: res://scripts/ui/rewards/MoneyRewardButton.gd
+Loading resource: res://scenes/ui/rewards/CardRewardButton.tscn
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+Loading resource: res://scripts/ui/rewards/CardRewardButton.gd
+Loading resource: res://scenes/ui/rewards/ArtifactRewardButton.tscn
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+Loading resource: res://scripts/ui/rewards/ArtifactRewardButton.gd
+Loading resource: res://scenes/ui/RestActionButton.tscn
+Loading resource: res://scripts/ui/RestActionButton.gd
+Loading resource: res://scenes/ui/ConsumableButton.tscn
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+Loading resource: res://scripts/ui/ConsumableButton.gd
+Loading resource: res://scenes/ui/CharacterSelectionButton.tscn
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+Loading resource: res://scripts/ui/CharacterSelectionButton.gd
+Loading resource: res://scenes/ui/CustomRunModifierCheckbox.tscn
+Loading resource: res://scripts/ui/CustomRunModifierCheckbox.gd
+Loading resource: res://scenes/ui/shop/BaseShopButton.tscn
+Loading resource: res://scripts/ui/shop/BaseShopButton.gd
+Loading resource: res://scenes/ui/shop/CardShopButton.tscn
+Loading resource: res://scripts/ui/shop/CardShopButton.gd
+Loading resource: res://scenes/ui/shop/ArtifactShopButton.tscn
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+Loading resource: res://scripts/ui/shop/ArtifactShopButton.gd
+Loading resource: res://scenes/ui/shop/ConsumableShopButton.tscn
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+Loading resource: res://scripts/ui/shop/ConsumableShopButton.gd
+Loading resource: res://scenes/combatants/fades/TextFade.tscn
+Loading resource: res://scenes/combatants/fades/ArtifactFade.tscn
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+Loading resource: res://scenes/combatants/fades/ImageFade.tscn
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+Loading resource: res://scenes/combatants/AnimatedCombatEffect.tscn
+Loading resource: res://scenes/ui/general/KeywordTooltip.tscn
+Loading resource: res://themes/keyword_tooltip_theme.tres
+Loading resource: res://scripts/ui/general/KeywordTooltip.gd
+Loading resource: res://ui/components/tooltip/Tooltip.tscn
+Loading resource: res://ui/components/tooltip/Tooltip.gd
+Loading resource: res://scenes/ui/general/DialogueOption.tscn
+Loading resource: res://scripts/ui/general/DialogueOption.gd
+Loading resource: res://scenes/ui/codex/CodexCardPackButton.tscn
+Loading resource: res://scripts/ui/codex/CodexCardPackButton.gd
+Loading resource: res://scenes/ui/codex/CodexArtifact.tscn
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+Loading resource: res://scripts/ui/codex/CodexArtifact.gd
+Loading resource: res://scenes/ui/codex/CodexConsumable.tscn
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+Loading resource: res://scripts/ui/codex/CodexConsumable.gd
+Loading resource: res://scenes/ui/codex/CodexActNameLabel.tscn
+Loading resource: res://scripts/ui/codex/CodexActNameLabel.gd
+Loading resource: res://scenes/ui/codex/CodexEnemyButton.tscn
+Loading resource: res://scripts/ui/codex/CodexEnemyButton.gd
+Loading resource: res://scenes/ui/codex/CodexEnemyIntent.tscn
+Loading resource: res://scripts/ui/codex/CodexEnemyIntent.gd
+Loading resource: res://themes/panel_theme.tres
+Loading resource: res://scenes/ui/profile/CharacterStat.tscn
+Loading resource: res://scripts/ui/profile/CharacterStat.gd
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+Loading resource: res://scenes/ui/run_summary/RunHistoryCard.tscn
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+Loading resource: res://scripts/ui/run_summary/RunHistoryCard.gd
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2766)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+Loading resource: res://autoload/GlobalProdDataGenerator.gd
+Loading resource: res://addons/sound_manager/sound_manager.gd
+Loaded system CA certificates
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+Loading resource: {PROJECT_ROOT}/artifacts/verification/20261019-140422-8f6eb038/ResourceLifecycle/tests/resource_lifecycle_cases.gd
+Loading resource: res://scenes/Root.tscn
+Loading resource: res://scripts/Root.gd
+Loading resource: res://themes/title_screen_theme.tres
+Loading resource: res://scripts/ui/menus/TitleScreen.gd
+Loading resource: res://scripts/ui/Combat.gd
+Loading resource: res://scripts/ui/menus/MainMenu.gd
+Loading resource: res://scripts/ui/EnemyContainer.gd
+Loading resource: res://scripts/ui/menus/NewRunMenu.gd
+Loading resource: res://scripts/ui/ArtifactContainer.gd
+Loading resource: res://shortcuts/esc_shortcut.tres
+Loading resource: res://scripts/ui/TurnOverlay.gd
+Loading resource: res://scripts/ui/menus/CodexMenu.gd
+Loading resource: res://scripts/ui/CardSelectionOverlay.gd
+Loading resource: res://ui/components/resizing_grid_scroll_container/ResizingGridScrollContainer.gd
+Loading resource: res://scripts/ui/RewardOverlay.gd
+Loading resource: res://scripts/ui/Chest.gd
+Loading resource: res://scripts/ui/Consumables.gd
+Loading resource: res://scripts/ui/codex/CodexCardsMenu.gd
+Loading resource: res://scripts/ui/CardDraftSelectionOverlay.gd
+Loading resource: res://scripts/ui/menus/RunScreen.gd
+Loading resource: res://scripts/ui/PauseButton.gd
+Loading resource: res://scripts/ui/Shop.gd
+Loading resource: res://scripts/ui/Map.gd
+Loading resource: res://scripts/ui/RestOverlay.gd
+Loading resource: res://scripts/ui/codex/CodexArtifactMenu.gd
+Loading resource: res://scripts/ui/menus/SettingsMenu.gd
+Loading resource: res://scripts/ui/ShopOverlay.gd
+Loading resource: res://scripts/ui/codex/CodexConsumablesMenu.gd
+Loading resource: res://ui/components/volume_slider/VolumeSlider.tscn
+Loading resource: res://ui/components/volume_slider/VolumeSlider.gd
+Loading resource: res://scripts/ui/codex/CodexEnemiesMenu.gd
+Loading resource: res://scripts/ui/RunSummaryOverlay.gd
+Loading resource: res://scripts/ui/menus/RunHistoryMenu.gd
+Loading resource: res://scripts/ui/RunStartOptions.gd
+Loading resource: res://scripts/ui/DialogueOverlay.gd
+Loading resource: res://scripts/ui/menus/ProfileStatsMenu.gd
+Loading resource: res://scripts/ui/PauseOverlay.gd
+Loading resource: res://scripts/ui/RunTimer.gd
+Loading resource: {PROJECT_ROOT}/artifacts/verification/20261019-140422-8f6eb038/ResourceLifecycle/tests/resource_lifecycle_interceptor.gd
+PASS: normal iteration 0 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 1 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 2 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 3 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 4 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 5 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 6 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 7 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal leaves source values unchanged
+PASS: normal side effect count
+PASS: normal releases every processor after returned owner drops
+PASS: normal does not accumulate detached Nodes
+PASS: normal releases parent action
+PASS: rejected iteration 0 acceptance
+PASS: rejected iteration 1 acceptance
+PASS: rejected iteration 2 acceptance
+PASS: rejected iteration 3 acceptance
+PASS: rejected iteration 4 acceptance
+PASS: rejected iteration 5 acceptance
+PASS: rejected iteration 6 acceptance
+PASS: rejected iteration 7 acceptance
+PASS: rejected leaves source values unchanged
+PASS: rejected side effect count
+PASS: rejected releases every processor after returned owner drops
+PASS: rejected does not accumulate detached Nodes
+PASS: rejected releases parent action
+PASS: preview iteration 0 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 1 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 2 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 3 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 4 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 5 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 6 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 7 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview leaves source values unchanged
+PASS: preview side effect count
+PASS: preview releases every processor after returned owner drops
+PASS: preview does not accumulate detached Nodes
+PASS: preview releases parent action
+PASS: async active and handler waiting
+PASS: async preview accepted
+PASS: preview does not execute interceptor side effects
+PASS: async execution reuses interception without duplicate effects
+PASS: async completes and handler ends once per reuse
+PASS: async handler is idle after completion
+PASS: async completion releases all cached and preview processors
+PASS: async active and handler waiting
+PASS: async preview accepted
+PASS: preview does not execute interceptor side effects
+PASS: async execution reuses interception without duplicate effects
+PASS: async completes and handler ends once per reuse
+PASS: async handler is idle after completion
+PASS: async completion releases all cached and preview processors
+PASS: same async action executes twice with independent previews
+PASS: completed async action is not retained by cache cycle
+PASS: picker force cancel reaches real selection wait
+PASS: picker force cancel request/finish/handler end exactly once
+PASS: picker force cancel leaves handler idle
+PASS: picker force cancel releases selection continuation
+PASS: picker force cancel produces no child effect
+PASS: picker force cancel releases cancelled action
+PASS: picker force cancel permits next action exactly once
+PASS: picker synchronous cancel request/finish/handler end exactly once
+PASS: picker synchronous cancel leaves handler idle
+PASS: picker synchronous cancel releases selection continuation
+PASS: picker synchronous cancel produces no child effect
+PASS: picker synchronous cancel releases cancelled action
+PASS: picker synchronous cancel permits next action exactly once
+PASS: picker run leave reaches real selection wait
+PASS: picker run leave request/finish/handler end exactly once
+PASS: picker run leave leaves handler idle
+PASS: picker run leave releases selection continuation
+PASS: picker run leave produces no child effect
+PASS: picker run leave releases cancelled action
+PASS: picker run leave permits next action exactly once
+PASS: delayed action starts real handler timer
+PASS: clear cancels timer continuation
+PASS: timer cancellation releases active action
+PASS: pending async owns active execution cache
+PASS: cancel releases execution cache while caller still owns action
+PASS: async cancel completes once without effect
+PASS: cancelled async action has no cache cycle
+PASS: automatic picker chooses real card before frame wait
+Loading resource: {PROJECT_ROOT}/artifacts/verification/20261019-140422-8f6eb038/ResourceLifecycle/tests/resource_lifecycle_child.gd
+PASS: automatic pick effect contract cancelled=false
+PASS: automatic pick finishes exactly once cancelled=false
+PASS: automatic pick releases action cancelled=false
+PASS: automatic picker chooses real card before frame wait
+PASS: automatic pick effect contract cancelled=true
+PASS: automatic pick finishes exactly once cancelled=true
+PASS: cancel removes automatic pending selection
+PASS: automatic pick releases action cancelled=true
+PASS: reentrant cancellation completes once
+PASS: cancel callback cannot resurrect cleared run actions
+PASS: immediate async emits completion once
+PASS: immediate async completion does not leave handler waiting for a past signal
+PASS: immediately completed async releases action
+PASS: Root exit fixture has pending selection
+PASS: map layout creates both private fixture locations before frame wait
+PASS: Root teardown cancels selection exactly once
+PASS: Root teardown releases pending picker
+FAIL: same-frame Root teardown releases every pending map layout LocationData
+RESOURCE FAIL: 117 checks, 1 failures
+XR: Clearing primary interface
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+Leaked instance: GDScriptNativeClass:9223372044807176641 - Reference count: 2
+Leaked instance: GDScript:9223372067355755985 - Reference count: 2
+Leaked instance: GDScript:9223372085592589878 - Reference count: 4
+Leaked instance: Resource:9223372349749857756 - Reference count: 2
+Leaked instance: Resource:9223372349733080542 - Reference count: 1
+Hint: Leaked instances typically happen when nodes are removed from the scene tree (with `remove_child()`) but not freed (with `free()` or `queue_free()`).
+ERROR: 2 resources still in use at exit.
+   at: clear (core/io/resource.cpp:805)
+Resource still in use: res://data/SerializableData.gd (GDScript)
+Resource still in use: res://data/mutable/LocationData.gd (GDScript)
+Orphan StringName: location_type (static: 0, total: 6)
+Orphan StringName: json_friendly_to_native_object (static: 0, total: 1)
+Orphan StringName: _get_recursive_properties (static: 0, total: 1)
+Orphan StringName: _get_native_properties (static: 0, total: 2)
+Orphan StringName: location_obfuscated (static: 0, total: 6)
+Orphan StringName: patch_array (static: 0, total: 1)
+Orphan StringName: location_position (static: 0, total: 6)
+Orphan StringName: get_object_id_from_json_patch (static: 0, total: 1)
+Orphan StringName: build_recursive_property_script_cache (static: 0, total: 1)
+Orphan StringName: location_next_location_ids (static: 0, total: 5)
+Orphan StringName: location_id (static: 0, total: 6)
+Orphan StringName: process_frame (static: 1, total: 2)
+Orphan StringName: location_visited (static: 0, total: 6)
+Orphan StringName: get_serializable_properties_to_json_patch (static: 0, total: 1)
+Orphan StringName: get_serializable_property_names (static: 0, total: 1)
+Orphan StringName: native_array_to_json_friendly (static: 0, total: 1)
+Orphan StringName: Resource (static: 2, total: 5)
+Orphan StringName: location_background_texture_path (static: 0, total: 6)
+Orphan StringName: LocationData (static: 0, total: 3)
+Orphan StringName: location_event_object_id (static: 0, total: 6)
+Orphan StringName: SerializableData (static: 0, total: 3)
+Orphan StringName: _init (static: 0, total: 1)
+Orphan StringName: location_initial_combat_actions (static: 0, total: 5)
+Orphan StringName: location_event_pool_object_id (static: 0, total: 6)
+Orphan StringName: native_object_to_json_friendly (static: 0, total: 1)
+Orphan StringName: json_friendly_to_native_dict (static: 0, total: 1)
+Orphan StringName: build_serializable_script_cache (static: 0, total: 1)
+Orphan StringName: set_serializable_properties_from_json_patch (static: 0, total: 1)
+Orphan StringName: location_floor (static: 0, total: 6)
+Orphan StringName: _serializable_data_script_cache (static: 0, total: 1)
+Orphan StringName: _recursive_property_script_cache (static: 0, total: 1)
+Orphan StringName: get_serializable_properties (static: 0, total: 1)
+Orphan StringName: json_friendly_to_native_array (static: 0, total: 1)
+Orphan StringName: LOCATION_TYPES (static: 0, total: 1)
+Orphan StringName: patch_dictionary (static: 0, total: 1)
+Orphan StringName: set_serializable_properties (static: 0, total: 1)
+Orphan StringName: location_index (static: 0, total: 6)
+Orphan StringName: get_location_event_object_id (static: 0, total: 1)
+Orphan StringName: object_id (static: 0, total: 6)
+Orphan StringName: native_dict_to_json_friendly (static: 0, total: 1)
+Orphan StringName: location_act (static: 0, total: 6)
+StringName: 41 unclaimed string names at exit.

@@ -1,0 +1,2 @@
+# Shell entry points must run in both Git Bash and WSL after a fresh clone.
+*.sh text eol=lf

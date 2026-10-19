@@ -1,0 +1,214 @@
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2766)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: normal iteration 0 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 1 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 2 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 3 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 4 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 5 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 6 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal iteration 7 acceptance
+PASS: normal shadow modifier preserved
+PASS: normal leaves source values unchanged
+PASS: normal side effect count
+FAIL: normal releases every processor after returned owner drops
+FAIL: normal does not accumulate detached Nodes
+FAIL: normal releases parent action
+PASS: rejected iteration 0 acceptance
+PASS: rejected iteration 1 acceptance
+PASS: rejected iteration 2 acceptance
+PASS: rejected iteration 3 acceptance
+PASS: rejected iteration 4 acceptance
+PASS: rejected iteration 5 acceptance
+PASS: rejected iteration 6 acceptance
+PASS: rejected iteration 7 acceptance
+PASS: rejected leaves source values unchanged
+PASS: rejected side effect count
+FAIL: rejected releases every processor after returned owner drops
+FAIL: rejected does not accumulate detached Nodes
+FAIL: rejected releases parent action
+PASS: preview iteration 0 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 1 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 2 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 3 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 4 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 5 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 6 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview iteration 7 acceptance
+PASS: preview shadow modifier preserved
+PASS: preview leaves source values unchanged
+PASS: preview side effect count
+FAIL: preview releases every processor after returned owner drops
+FAIL: preview does not accumulate detached Nodes
+FAIL: preview releases parent action
+PASS: async active and handler waiting
+PASS: async preview accepted
+PASS: preview does not execute interceptor side effects
+FAIL: async execution reuses interception without duplicate effects
+PASS: async completes and handler ends once per reuse
+PASS: async handler is idle after completion
+FAIL: async completion releases all cached and preview processors
+PASS: async active and handler waiting
+PASS: async preview accepted
+FAIL: preview does not execute interceptor side effects
+FAIL: async execution reuses interception without duplicate effects
+PASS: async completes and handler ends once per reuse
+PASS: async handler is idle after completion
+FAIL: async completion releases all cached and preview processors
+PASS: same async action executes twice with independent previews
+FAIL: completed async action is not retained by cache cycle
+PASS: picker force cancel reaches real selection wait
+FAIL: picker force cancel request/finish/handler end exactly once
+PASS: picker force cancel leaves handler idle
+PASS: picker force cancel releases selection continuation
+PASS: picker force cancel produces no child effect
+PASS: picker force cancel releases cancelled action
+PASS: picker force cancel permits next action exactly once
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_async_action' in base 'Nil'.
+   at: _perform_actions (res://autoload/ActionHandler.gd:89)
+   GDScript backtrace (most recent call first):
+       [0] _perform_actions (res://autoload/ActionHandler.gd:89)
+       [1] add_actions (res://autoload/ActionHandler.gd:66)
+       [2] add_action (res://autoload/ActionHandler.gd:33)
+       [3] _test_picker_cancel ({PROJECT_ROOT}/tests/resource_lifecycle_cases.gd:125)
+       [4] run ({PROJECT_ROOT}/tests/resource_lifecycle_cases.gd:39)
+       [5] _test_picker_cancel ({PROJECT_ROOT}/tests/resource_lifecycle_cases.gd:147)
+PASS: picker synchronous cancel request/finish/handler end exactly once
+PASS: picker synchronous cancel leaves handler idle
+FAIL: picker synchronous cancel releases selection continuation
+PASS: picker synchronous cancel produces no child effect
+PASS: picker synchronous cancel releases cancelled action
+PASS: picker synchronous cancel permits next action exactly once
+PASS: picker run leave reaches real selection wait
+FAIL: picker run leave request/finish/handler end exactly once
+PASS: picker run leave leaves handler idle
+PASS: picker run leave releases selection continuation
+PASS: picker run leave produces no child effect
+PASS: picker run leave releases cancelled action
+PASS: picker run leave permits next action exactly once
+PASS: delayed action starts real handler timer
+FAIL: clear cancels timer continuation
+FAIL: timer cancellation releases active action
+PASS: pending async owns active execution cache
+FAIL: cancel releases execution cache while caller still owns action
+FAIL: async cancel completes once without effect
+FAIL: cancelled async action has no cache cycle
+PASS: automatic picker chooses real card before frame wait
+PASS: automatic pick effect contract cancelled=false
+PASS: automatic pick finishes exactly once cancelled=false
+PASS: automatic pick releases action cancelled=false
+PASS: automatic picker chooses real card before frame wait
+FAIL: automatic pick effect contract cancelled=true
+PASS: automatic pick finishes exactly once cancelled=true
+FAIL: cancel removes automatic pending selection
+PASS: automatic pick releases action cancelled=true
+FAIL: reentrant cancellation completes once
+FAIL: cancel callback cannot resurrect cleared run actions
+PASS: Root exit fixture has pending selection
+FAIL: Root teardown cancels selection exactly once
+FAIL: Root teardown releases pending picker
+RESOURCE FAIL: 112 checks, 29 failures
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

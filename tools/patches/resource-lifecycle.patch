@@ -1,0 +1,442 @@
+diff --git a/autoload/ActionHandler.gd b/autoload/ActionHandler.gd
+index 0857784..54a2168 100644
+--- a/autoload/ActionHandler.gd
++++ b/autoload/ActionHandler.gd
+@@ -9,6 +9,8 @@ var action_stack: Array[Array] = []	# stack of queues of BaseActions
+ var current_action_queue: Array[BaseAction] = []
+ var current_action: BaseAction = null # the current action being invoked
+ var actions_being_performed: bool = false	# flag to prevent multiple actions being performed simultaneously and check for blocking
++var _action_generation: int = 0 # invalidates a suspended loop when a run is cleared
++var _clearing_actions: bool = false
+ 
+ # action interceptors
+ var _registered_action_interceptor_object_ids: Dictionary	= {}	# maps an object to a sorted list of registered action interceptor ids used when the object is involved in an action
+@@ -36,6 +38,9 @@ func add_action(action: BaseAction, enqueue: bool = false, front_of_queue: bool
+ ## if front_of_queue = true it will place the actions in front of the current queue, effectively always making them
+ ## the next action to take place.
+ func add_actions(actions: Array[BaseAction], enqueue: bool = false, front_of_queue: bool = false):
++	# Cancellation callbacks cannot resurrect work from the run being cleared.
++	if _clearing_actions:
++		return
+ 	if enqueue:
+ 		# adding to queue
+ 		if len(action_stack) == 0:
+@@ -67,6 +72,7 @@ func add_actions(actions: Array[BaseAction], enqueue: bool = false, front_of_que
+ 
+ func _perform_actions() -> void:	
+ 	# performs all actions on the action stack
++	var generation: int = _action_generation
+ 	actions_being_performed = true
+ 	while len(action_stack) > 0:
+ 		# pop the next queue from the stack
+@@ -79,22 +85,36 @@ func _perform_actions() -> void:
+ 		# perform all actions in the queue until empty
+ 		while len(current_action_queue) > 0:
+ 			current_action = current_action_queue.pop_front()
++			# A signal emitted by the action can synchronously clear the handler.
++			# Keep the active action alive locally, never dereference mutable state
++			# after resuming an await belonging to an earlier run.
++			var action: BaseAction = current_action
+ 			# skip short circuited actions
+-			if current_action.is_action_short_circuited():
++			if action.is_action_short_circuited():
+ 				if not Global.are_remaining_enemies():
++					current_action = null
+ 					continue
+ 			# perform action
+-			current_action.perform_action()
++			if action is BaseAsyncAction:
++				action.begin_async_action()
++			action.perform_action()
++			if generation != _action_generation:
++				return
+ 			# wait for async actions to finish
+-			if current_action.is_async_action():
+-				await current_action.action_async_finished
++			if action.is_async_action():
++				if not (action is BaseAsyncAction and action.async_finished):
++					await action.action_async_finished
++			if generation != _action_generation:
++				return
+ 			# wait for action delay if one exists
+-			if current_action.time_delay > 0.0 and !current_action.is_instant_action():
+-				action_timer.start(current_action.time_delay)
++			if action.time_delay > 0.0 and !action.is_instant_action():
++				action_timer.start(action.time_delay)
+ 				await action_timer.timeout
+ 				# await get_tree().create_timer(current_action.time_delay).timeout
+ 			else:
+ 				await get_tree().process_frame
++			if generation != _action_generation:
++				return
+ 			
+ 			current_action = null
+ 	
+@@ -103,24 +123,35 @@ func _perform_actions() -> void:
+ 
+ ## Removes the current async action. Will only remove short circuited actions unless force_end = true.
+ func _clear_current_async_action(force_end: bool = false) -> void:
+-	if current_action != null:
+-		if current_action is BaseAsyncAction:
+-			if current_action.async_awaiting:
+-				if current_action.is_action_short_circuited() or force_end:
+-					current_action.force_action_end() # force the action to stop awaiting something
+-					current_action.action_async_finished.emit() # force the action to emit a finished signal just in case
+-					current_action = null
++	var action: BaseAsyncAction = current_action as BaseAsyncAction
++	if action != null and not action.async_finished:
++		if action.is_action_short_circuited() or force_end:
++			action.force_action_end()
++			action.finish_async_action() # idempotent fallback for custom cancellation
+ 
+ func clear_all_actions() -> void:
+-	_clear_current_async_action(true)
+-	
++	if _clearing_actions:
++		return
++	_clearing_actions = true
++	_action_generation += 1
++	var was_performing: bool = actions_being_performed
+ 	action_stack.clear()
+ 	current_action_queue.clear()
+-	
+-	if actions_being_performed:
+-		actions_being_performed = false
++	# Invalidate and clear queues before resuming a cancelled async continuation.
++	_clear_current_async_action(true)
++	current_action = null
++	if not action_timer.is_stopped():
++		action_timer.stop()
++		action_timer.timeout.emit()
++	actions_being_performed = false
++	_clearing_actions = false
++	if was_performing:
+ 		actions_ended.emit()
+ 
++func _exit_tree() -> void:
++	clear_all_actions()
++	clear_all_action_interceptors()
++
+ ### Action Interception
+ 
+ func register_action_interceptor(base_combatant: BaseCombatant, action_interceptor_object_id: String) -> void:
+diff --git a/scripts/Root.gd b/scripts/Root.gd
+index e07a0bf..0146b18 100644
+--- a/scripts/Root.gd
++++ b/scripts/Root.gd
+@@ -1 +1,6 @@
+ extends Control
++
++func _exit_tree() -> void:
++	# Release pending selections/continuations while autoloads are still alive.
++	ActionHandler.clear_all_actions()
++	ActionHandler.clear_all_action_interceptors()
+diff --git a/scripts/action_interceptors/ActionInterceptorProcessor.gd b/scripts/action_interceptors/ActionInterceptorProcessor.gd
+index d6fdf74..4707ac9 100644
+--- a/scripts/action_interceptors/ActionInterceptorProcessor.gd
++++ b/scripts/action_interceptors/ActionInterceptorProcessor.gd
+@@ -4,10 +4,17 @@
+ ## After the chain is finished, shadowed_action_values will be populated with modified values
+ ## and the processor ultimately accepted/rejected.
+ ## A rejected processsor will be discarded in the final returned result.
+-extends Node
++extends RefCounted
+ class_name ActionInterceptorProcessor
+ 
+-var parent_action: BaseAction = null	# the action tied to this processor
++# The caller owns the action; async actions may own cached processors. A weak
++# back-reference keeps that cache from forming a reference-counted cycle.
++var _parent_action_ref: WeakRef
++var parent_action: BaseAction:
++	get:
++		return _parent_action_ref.get_ref() if _parent_action_ref != null else null
++	set(value):
++		_parent_action_ref = weakref(value) if value != null else null
+ var target: BaseCombatant = null	# the sub target to use for interception processing. Can be null
+ 
+ ## This will contain any modified values for the parent action after processing has taken place.
+diff --git a/scripts/actions/BaseAsyncAction.gd b/scripts/actions/BaseAsyncAction.gd
+index 9078cf9..139e747 100644
+--- a/scripts/actions/BaseAsyncAction.gd
++++ b/scripts/actions/BaseAsyncAction.gd
+@@ -9,12 +9,36 @@ class_name BaseAsyncAction
+ 
+ ## Flag used to check if the action is currently await'ing a signal
+ var async_awaiting: bool = false
++var async_finished: bool = false
++var async_cancelled: bool = false
+ 
+ # Caching this allows you to use the same interceptors between perform_action() and perform_async_action()
+ # without producing side effects multiple times.
+ var _interceptor_processors_cached: bool = false
+ var _cached_interceptor_processors: Array[ActionInterceptorProcessor] = []
+ 
++func _init() -> void:
++	action_async_finished.connect(_on_async_finished)
++
++func begin_async_action() -> void:
++	async_finished = false
++	async_cancelled = false
++	async_awaiting = false
++	_clear_interceptor_cache()
++
++func finish_async_action() -> void:
++	if not async_finished:
++		action_async_finished.emit()
++
++func _on_async_finished() -> void:
++	async_finished = true
++	async_awaiting = false
++	_clear_interceptor_cache()
++
++func _clear_interceptor_cache() -> void:
++	_cached_interceptor_processors.clear()
++	_interceptor_processors_cached = false
++
+ ### Override
+ 
+ ## Async actions should use perform_action() to define an await callback, and
+@@ -30,13 +54,12 @@ func perform_action() -> void:
+ 
+ ## Override this to fill with interceptable action logic, then emit action_async_finished
+ func perform_async_action() -> void:
+-	action_async_finished.emit()
++	finish_async_action()
+ 
+ ## Override this. This method prevents possibility of infinite hanging asyncs.
+ func force_action_end() -> void:
+-	if async_awaiting:
+-		# emit the signal that this action is awaiting
+-		pass
++	async_cancelled = true
++	finish_async_action()
+ 
+ ### Keep
+ 
+@@ -45,6 +68,10 @@ func is_async_action() -> bool:
+ 
+ # Overridden to allow caching of results
+ func _intercept_action(targets: Array[BaseCombatant] = get_adjusted_action_targets(), preview_mode: bool = false) -> Array[ActionInterceptorProcessor]:
++	# Previews must neither consume the execution cache nor suppress real effects.
++	if preview_mode:
++		return super(targets, true)
+ 	if not _interceptor_processors_cached:
+ 		_cached_interceptor_processors = super(targets, preview_mode)
++		_interceptor_processors_cached = true
+ 	return _cached_interceptor_processors
+diff --git a/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd b/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd
+index d7543cb..22d0471 100644
+--- a/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd
++++ b/scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd
+@@ -33,7 +33,7 @@ const PICK_ADJACENT_CARDS: String = "PICK_ADJACENT_CARDS"
+ func perform_async_action() -> void:
+ 	# override this to provide functionality after the player or game has picked the cards
+ 	# picked_cards will be populated at this point and you can manipulate them
+-	action_async_finished.emit()
++	finish_async_action()
+ 
+ ## Gets the display message for the user when picking cards.
+ ## Uses card_pick_text from card's values.
+@@ -91,6 +91,7 @@ func get_input_cardset() -> Array[CardData]:
+ 	return HandManager.get_pile(card_pick_type)
+ 
+ func perform_action():
++	begin_async_action()
+ 	# determine if its possible to select the cards from the input card set
+ 	# the number of min cards and min requirement determine if the action is performable
+ 	# and if its automatically performed
+@@ -113,19 +114,21 @@ func perform_action():
+ 		if min_cards_are_required:
+ 			# not enough cards to perform the card action, do nothing
+ 			await Global.get_tree().process_frame # add a delay to allow ActionHandler to catch up with async to avoid infinite hang
+-			action_async_finished.emit()
++			finish_async_action()
+ 			return
+ 		else:
+ 			# automatically select the cards
+ 			picked_cards = pickable_cards
+ 			await Global.get_tree().process_frame # add a delay to allow ActionHandler to catch up with async to avoid infinite hang
+-			perform_async_action()
++			if not async_cancelled:
++				perform_async_action()
+ 			return
+ 	elif len(pickable_cards) == min_card_amount:
+ 		# exactly enough cards; automatically select them
+ 		picked_cards = pickable_cards
+ 		await Global.get_tree().process_frame # add a delay to allow ActionHandler to catch up with async to avoid infinite hang
+-		perform_async_action()
++		if not async_cancelled:
++			perform_async_action()
+ 		return
+ 	else:
+ 		# more than min cards
+@@ -139,15 +142,21 @@ func perform_action():
+ 			picked_cards = pickable_cards.slice(0, min_card_amount)
+ 
+ 			await Global.get_tree().process_frame # add a delay to allow ActionHandler to catch up with async to avoid infinite hang
+-			perform_async_action()
++			if not async_cancelled:
++				perform_async_action()
+ 			return
+ 		else:
+ 			# prompt the user for card input
+ 			async_awaiting = true 
+ 			Signals.card_pick_requested.emit(self)
++			# A request listener may synchronously leave the run and cancel us
++			# before the confirmation await has even been installed.
++			if async_cancelled or async_finished:
++				return
+ 			await Signals.card_pick_confirmed
+ 			async_awaiting = false
+-			perform_async_action()
++			if not async_cancelled:
++				perform_async_action()
+ 			return
+ 
+ func is_instant_action() -> bool:
+@@ -304,10 +313,11 @@ func is_card_pickable(card_data: CardData, check_max_pick_size: bool = true) ->
+ 
+ ## Forces the card pick to end
+ func force_action_end() -> void:
++	async_cancelled = true
++	picked_cards = []
+ 	if async_awaiting:
+-		picked_cards = []
+ 		Signals.card_pick_confirmed.emit()
+-		async_awaiting = false
++	finish_async_action()
+ 
+ ## Used for PICK_ADJACENT_CARDS card pick type. Only works for cards in hand.
+ func _get_action_adjacent_cards() -> Array[CardData]:
+diff --git a/scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd b/scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd
+index 690d3ee..037e526 100644
+--- a/scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd
++++ b/scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd
+@@ -4,6 +4,7 @@
+ extends ActionPickCards
+ 
+ func perform_action():
++	begin_async_action()
+ 	# overrides user card selection with generated cards
+ 	var action_interceptor_processors: Array[ActionInterceptorProcessor] = _intercept_action([])
+ 	for action_interceptor_processor in action_interceptor_processors:
+@@ -22,6 +23,8 @@ func perform_action():
+ 		card_play_request.card_values["generated_cards"] = picked_cards
+ 	
+ 	await Global.get_tree().process_frame # add a delay to allow ActionHandler to catch up with async to avoid infinite hang
++	if async_cancelled:
++		return
+ 	perform_async_action()
+ 	
+ 	# emit signals for each created card
+diff --git a/scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd b/scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd
+index fff6e1c..7ba47ba 100644
+--- a/scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd
++++ b/scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd
+@@ -5,7 +5,7 @@ class_name ActionPickCards
+ 
+ func perform_async_action() -> void:
+ 	_generate_child_actions()
+-	action_async_finished.emit()
++	finish_async_action()
+ 
+ func _generate_child_actions() -> void:
+ 	# an additional check here allows for canceling card picks
+diff --git a/scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd b/scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd
+index 1903ce0..378f947 100644
+--- a/scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd
++++ b/scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd
+@@ -19,7 +19,7 @@ func perform_async_action() -> void:
+ 		card_play_request.card_values["generated_cards"] = generated_cards
+ 		_generate_child_actions()
+ 	
+-	action_async_finished.emit()
++	finish_async_action()
+ 
+ 	# emit signals for each created card
+ 	for card_data: CardData in generated_cards:
+diff --git a/scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd b/scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd
+index fa894c1..1745515 100644
+--- a/scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd
++++ b/scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd
+@@ -16,7 +16,7 @@ func perform_async_action() -> void:
+ 			if upgrade_parent_card and card.parent_card != null:
+ 				card.parent_card.upgrade_card(upgrade_count, bypass_upgrade_max)
+ 			
+-	action_async_finished.emit()
++	finish_async_action()
+ 
+ func is_card_pickable(_card: CardData, check_max_pick_size: bool = true) -> bool:
+ 	# determine if cards can qualify for user upgrade selection
+diff --git a/scripts/ui/Map.gd b/scripts/ui/Map.gd
+index 49e72fd..b56faab 100644
+--- a/scripts/ui/Map.gd
++++ b/scripts/ui/Map.gd
+@@ -7,6 +7,7 @@ extends Control
+ @onready var map_button = %MapButton
+ 
+ var can_travel: bool = false	# if clicking on a location brings you to the next location
++var _pending_scroll: Callable
+ 
+ ## Adds a margin to the bottom of the map display
+ const MAP_Y_MARGIN: float = 150
+@@ -59,10 +60,16 @@ func populate_locations(locations: Array[LocationData] = Global.get_all_act_loca
+ 	location_container.custom_minimum_size.y = max_y + MAP_Y_MARGIN
+ 	location_container.size.y = max_y + MAP_Y_MARGIN
+ 	
+-	# wait a frame to ensure container is properly resized
+-	await Global.get_tree().process_frame
+-	# set the scroll
+-	if current_map_location != null:
++	# Wait for layout without suspending this function with the whole location
++	# array on its stack. The map owns and cancels this one-shot callback.
++	var location_ref: WeakRef = weakref(current_map_location) if current_map_location != null else null
++	_pending_scroll = _restore_scroll.bind(location_ref, max_y)
++	get_tree().process_frame.connect(_pending_scroll, CONNECT_ONE_SHOT)
++
++func _restore_scroll(location_ref: WeakRef, max_y: float) -> void:
++	_pending_scroll = Callable()
++	var current_map_location: MapLocation = location_ref.get_ref() if location_ref != null else null
++	if is_instance_valid(current_map_location) and current_map_location.is_inside_tree():
+ 		current_map_location.grab_focus()
+ 	else:
+ 		# presumably the invisible starting location, set to bottom
+@@ -70,9 +77,18 @@ func populate_locations(locations: Array[LocationData] = Global.get_all_act_loca
+ 	
+ 
+ func clear_locations() -> void:
++	_cancel_pending_scroll()
+ 	for child in location_container.get_children():
+ 		child.queue_free()
+ 
++func _cancel_pending_scroll() -> void:
++	if _pending_scroll.is_valid() and get_tree().process_frame.is_connected(_pending_scroll):
++		get_tree().process_frame.disconnect(_pending_scroll)
++	_pending_scroll = Callable()
++
++func _exit_tree() -> void:
++	_cancel_pending_scroll()
++
+ func show_map():
+ 	populate_locations()
+ 	visible = true
+diff --git a/scripts/ui/menus/BaseMenu.gd b/scripts/ui/menus/BaseMenu.gd
+index c89a7dc..462f33e 100644
+--- a/scripts/ui/menus/BaseMenu.gd
++++ b/scripts/ui/menus/BaseMenu.gd
+@@ -5,11 +5,13 @@ extends Control
+ class_name BaseMenu
+ 
+ ## Maps a navigation button to the menu you wish to go to
+-@export var navigation_button_to_menu: Dictionary[Button, BaseMenu] = {}
++# Use the native base type here: a Dictionary typed with its own script retains
++# that script's default-value metadata. Navigation validates BaseMenu below.
++@export var navigation_button_to_menu: Dictionary[Button, Control] = {}
+ 
+ ## If a sub menu is displayed, clicking the navigation button will hide the current sub menu
+ ## and display the next one.
+-@export var navigation_button_to_sub_menu: Dictionary[Button, BaseMenu] = {}
++@export var navigation_button_to_sub_menu: Dictionary[Button, Control] = {}
+ 
+ ## The default sub-menu to display when populating this one. This can be null if there's no sub menus
+ @export var default_sub_menu: BaseMenu

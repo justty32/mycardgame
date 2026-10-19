@@ -1,0 +1,33 @@
+# 可攜驗證證據
+
+[分析入口](../README.md)｜[資源生命週期報告](../architecture/05_resource_lifecycle.md)
+
+本目錄只收錄供版本管理的精選文字證據，不包含遊戲副本、引擎、快取、使用者存檔或畫面。原始 artifacts 保留在本機，不因發布副本而修改。這些是對應來源版本的執行結果，不表示任意後續工作目錄都已重新驗證。
+
+## 2026-10-19
+
+[轉換清單與雜湊](2026-10-19/manifest.json) 記錄各原件的專案相對位置、原件與發布副本 SHA-256、大小及轉換方式。檔案解碼為 UTF-8、統一 LF；JSON 重新排版，字串內的原專案絕對位置替換為 `{PROJECT_ROOT}`，個人家目錄替換為 `{USER_PROFILE}`。這些代號是證據遮罩，不是可直接執行的命令或新的實測位置。
+
+原日誌的斷言、退出碼、錯誤與警告保留。歷史工具轉錄的兩個 Markdown 連結另按發布位置重算；所有轉換均列在清單，副本雜湊不應與原件相同。
+
+## 事故與診斷
+
+[歷史工具輸出轉錄](2026-10-19/crash-prior-tool-evidence.md) 保留先前 signal 11 與後續編譯錯誤的證據邊界；其引用的 [早期 editor import 日誌](2026-10-19/startup-import.log) 是另一事件，不是 crash 的前文。[runner 32 項合成檢查](2026-10-19/runner-diagnostics-results.json) 驗證背景程序診斷，沒有啟動 Godot；不能當成原生崩潰已修復。
+
+## 112 項資源生命週期回歸
+
+[紅測試日誌](2026-10-19/resource-lifecycle-red.log)、[綠測試日誌](2026-10-19/resource-lifecycle-green.log) 與 [綠測試 manifest](2026-10-19/resource-lifecycle-green-results.json) 保留當時的修前／修後結果與來源 hashes。它們屬獨立 ResourceLifecycle suite；不取代本輪稍後完成的全套流程驗證，也不主張所有執行情境均無資源殘留。
+
+## 最終 498 項整合驗證
+
+[最終 All manifest](2026-10-19/final-all-results.json) 對應原始 run `20261019-141014-31bb0cb1`，21 個程序階段均 exit 0，整體 verdict 為 PASS。其每個階段的實際 engine log 保存於 `2026-10-19/final-all/`，包含初次／再次 import 的完整訊息；檔案對照與原件雜湊可查轉換清單。
+
+[ResourceLifecycle](2026-10-19/final-all/ResourceLifecycle/resourcelifecycle.log) 127、[Dictionary](2026-10-19/final-all/Dictionary/dictionary.log) 47、[Smoke](2026-10-19/final-all/Smoke/smoke.log) 43、[勝利](2026-10-19/final-all/CombatVictory/combatvictory.log) 82、[敗北](2026-10-19/final-all/CombatDefeat/combatdefeat.log) 42 項，全部零失敗。
+
+SaveLoad 的 [write](2026-10-19/final-all/SaveLoad/save-write.log) 28、[read](2026-10-19/final-all/SaveLoad/save-read.log) 56、[rejected](2026-10-19/final-all/SaveLoad/save-rejected.log) 73 項亦零失敗，合計 498 項。21 份日誌沒有 ObjectDB leak 或退出資源殘留訊息；rejected 的明示拒絕與冷匯入重查仍保留，不宣稱所有日誌完全沒有 ERROR。
+
+最終斷言的修前證據見 [127 項紅測試](2026-10-19/resource-lifecycle-127-red.log) 與 [其 manifest](2026-10-19/resource-lifecycle-127-red-results.json)；較早 Map 退場問題另保留 [紅日誌](2026-10-19/map-transition-red.log) 與 [manifest](2026-10-19/map-transition-red-results.json)。[runner 44 項合成檢查](2026-10-19/runner-diagnostics-44-results.json) 是後續診斷覆蓋，舊 32 項結果仍保留為歷史證據。
+
+## 發布前的來源鎖說明
+
+最終 All 後只更新 `tools/upstream.json` 的 layout 描述，以區分發布 snapshot 與本機可能保留的獨立 upstream checkout。因此目前來源鎖檔案 SHA-256 與該次 manifest 的 `source_lock_sha256` 不同；原始與可攜 manifest 均保留當時的值。遊戲及測試內容雜湊不變，資源生命週期補丁 SHA-256 仍為 `ed27f763e8492d193c03324954d1533c2e9f03aa33a2a7bc115f6a7189610c8c`。這是發布描述更新，不補寫成另一次 runtime 驗證。

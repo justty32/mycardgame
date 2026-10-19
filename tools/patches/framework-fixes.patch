@@ -1,0 +1,58 @@
+diff --git a/autoload/FileLoader.gd b/autoload/FileLoader.gd
+index 4b602a5..8997f51 100644
+--- a/autoload/FileLoader.gd
++++ b/autoload/FileLoader.gd
+@@ -413,12 +413,37 @@ func save_game(file_dir: String = SAVE_DIR_PATH, file_name: String = SAVE_FILE_N
+ ## start_game automatically continues the run rather than simply load into memory. false used to load
+ ## the game and forfeit it.
+ func load_game(start_game: bool = true, file_dir: String = SAVE_DIR_PATH, file_name: String = SAVE_FILE_NAME) -> void:
+-	if not has_save_file():
+-		DebugLogger.log_error("No save file found")
++	# Validate the requested file before replacing live run state. load_json() returns
++	# an empty Dictionary on failure, which is not a valid saved PlayerData.
++	var full_path: String = _get_modified_filepath(file_dir + file_name)
++	if not FileAccess.file_exists(full_path):
++		DebugLogger.log_error("FileLoader.load_game(): Save rejected (missing file): \"{0}\"".format([full_path]))
++		return
++	var file: FileAccess = FileAccess.open(full_path, FileAccess.READ)
++	if file == null:
++		DebugLogger.log_error("FileLoader.load_game(): Save rejected (unreadable file): \"{0}\"".format([full_path]))
++		return
++	var parser: JSON = JSON.new()
++	var parse_error: Error = parser.parse(file.get_as_text())
++	file.close()
++	if parse_error != OK:
++		DebugLogger.log_error("FileLoader.load_game(): Save rejected (invalid JSON): \"{0}\"".format([full_path]))
++		return
++	var parsed: Variant = parser.data
++	if not parsed is Dictionary or not parsed.get("properties") is Dictionary:
++		DebugLogger.log_error("FileLoader.load_game(): Save rejected (invalid envelope): \"{0}\"".format([full_path]))
++		return
++	if parsed.has("patch_data") and not parsed["patch_data"] is Dictionary:
++		DebugLogger.log_error("FileLoader.load_game(): Save rejected (invalid patch metadata): \"{0}\"".format([full_path]))
++		return
++	var player_dict: Dictionary = parsed
++	var properties: Dictionary = player_dict["properties"]
++	if not properties.get("player_character_object_id") is String or Global.get_character_data(properties["player_character_object_id"]) == null:
++		DebugLogger.log_error("FileLoader.load_game(): Save rejected (invalid character): \"{0}\"".format([full_path]))
++		return
+ 	else:
+ 		# load from json
+ 		var player_data: PlayerData = PlayerData.new()
+-		var player_dict: Dictionary = load_json(file_dir, file_name)
+ 		player_data.set_serializable_properties_from_json_patch(player_dict)
+ 		
+ 		# hook everything back up and regenerate caches
+diff --git a/data/SerializableData.gd b/data/SerializableData.gd
+index d72a242..4e859b3 100644
+--- a/data/SerializableData.gd
++++ b/data/SerializableData.gd
+@@ -317,7 +317,7 @@ func set_serializable_properties(object_data: Dictionary, json_friendly: bool =
+ 					temp_value.clear()
+ 					temp_value.assign(new_value)
+ 					var patched_dictionary = patch_dictionary(current_value, temp_value, property_patch_strategy)
+-					set(property_name, temp_value)
++					set(property_name, patched_dictionary)
+ 				elif current_value is Array:
+ 					# assign for typed array safety
+ 					var temp_value = get(property_name).duplicate()

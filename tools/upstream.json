@@ -1,0 +1,25 @@
+{
+  "repository": "https://github.com/DesirePathGames/Slay-The-Robot.git",
+  "commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+  "imported_on": "2026-10-19",
+  "directory": "game",
+  "local_patches": [
+    {
+      "file": "tools/patches/framework-fixes.patch",
+      "sha256": "9f0d0eb3245d0d0f1731ccda016a23a55a1d2214fc8941715165aeb2e76a52cf",
+      "description": "Write merged JSON dictionaries; reject invalid saves before replacing live state and respect custom save paths.",
+      "validation": "analysis/slay-the-robot/architecture/04_regression_validation.md"
+    },
+    {
+      "file": "tools/patches/resource-lifecycle.patch",
+      "sha256": "ed27f763e8492d193c03324954d1533c2e9f03aa33a2a7bc115f6a7189610c8c",
+      "description": "Release interceptor processors without reference cycles; finish and cancel async actions safely; clear scene work, weakly defer map layout and remove self-typed menu dictionary retention.",
+      "validation": "analysis/slay-the-robot/architecture/05_resource_lifecycle.md"
+    }
+  ],
+  "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",
+  "engine_version": "4.6.stable.official.89cea1439",
+  "engine_download": "https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_win64.exe.zip",
+  "engine_sha512": "3b2f0b4b3c490cb1a78db8fd2afc924412edab996b436c08e38957388976e9dfaf203cb50a8916036bc810f68da3dd6b9f16561e6549062ef225b4a97877081b",
+  "engine_checksum_source": "https://github.com/godotengine/godot-builds/releases/download/4.6-stable/SHA512-SUMS.txt"
+}
