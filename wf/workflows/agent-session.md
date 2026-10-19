@@ -14,10 +14,10 @@
 
 從專案根檢查：
 
-```powershell
+```bash
 git -C game status --short
 git -C game rev-parse HEAD
-Get-Content tools/upstream.json
+cat tools/upstream.json
 ```
 
 依 [dev-env](dev-env.md) 辨認外層 snapshot 與本機保留的 game 上游 checkout；公開 clone 的 `git -C game rev-parse HEAD` 會是專案提交，不能當上游 SHA。上游基準以來源鎖為準。既有變更可能屬於使用者或其他 agent；先辨認歸屬，不能 reset、覆蓋或批次清掉。已有本機存檔要保留，驗證需要乾淨資料時使用獨立測試副本。
