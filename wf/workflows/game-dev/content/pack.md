@@ -28,7 +28,17 @@
 python3 tools/test_game.py --suite Smoke --content-profile pack --pack games/<game>/pack --pack-tests games/<game>/tests
 ```
 
-pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容包仍引用範例 id（例如顏色）時，開局與畫面需要該包自備資料。
+pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容包須自備其引用的基礎資料，見下節清單。
+
+## 題材包須自備的基礎資料清單
+
+題材包不依賴框架範例內容（pack 側寫下範例 id 不存在）。包內每個被引用的 id 都要自己提供，並帶題材前綴；mod_info 的 `mod_folder_to_load_data` 要登記對應資料夾與 `class_name`／`table_name`。
+
+- 顏色（`ColorData`，`colors/`，表 `_id_to_color_data`）：每張卡的 `card_color_id` 指向的顏色；最小一筆即可，`color` 為 `#rrggbbaa` 字串，圖示路徑可留空。
+- 卡牌（`CardData`，`cards/`）：不得引用框架範例的卡、關鍵字或顏色 id。
+- 角色與起始牌組（`CharacterData`，`characters/`）：要實際開局時才需要，且起始牌只列包內卡；骨架階段尚未提供。
+- 素材（sprites／audio）：路徑留空或指向包內檔案；缺圖的行為未驗。
+- 驗證：probe 逐項斷言這些 id 已註冊（比照題材 probe 的「own color registered」類斷言）。
 
 ## 編輯器載入（本機）
 

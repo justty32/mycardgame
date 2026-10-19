@@ -25,4 +25,4 @@ python3 tools/test_game.py --suite Smoke --pack games/apocalypse/pack --pack-tes
 python3 tools/test_game.py --suite Smoke --content-profile pack --pack games/apocalypse/pack --pack-tests games/apocalypse/tests
 ```
 
-示範卡 `apo_card_probe_strike` 仍引用框架範例的 `color_white`；pack 側寫下該顏色不存在，題材要自備顏色等基礎資料才能開局（待使用者決定是否允許依賴框架範例內容）。
+示範卡 `apo_card_probe_strike` 使用包內的 `apo_color_base`；題材包自備基礎資料的規則見框架 [pack](../../wf/workflows/game-dev/content/pack.md#題材包須自備的基礎資料清單)（使用者已核准：題材包不依賴框架範例內容）。

@@ -3,7 +3,7 @@
 	"properties": {
 		"card_add_to_deck_actions": [],
 		"card_appears_in_card_packs": false,
-		"card_color_id": "color_white",
+		"card_color_id": "apo_color_base",
 		"card_description": "Deal [damage] damage.",
 		"card_description_preview_overrides": [],
 		"card_discard_actions": [],

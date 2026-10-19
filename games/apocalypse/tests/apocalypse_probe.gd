@@ -8,5 +8,6 @@ func check_loaded(global_data: Node) -> Dictionary:
 	if card == null:
 		return result
 	result["APO: declared cost and damage"] = card.card_energy_cost == 1 and card.card_values.get("damage") == 6
+	result["APO: own color registered"] = global_data.get_color_data("apo_color_base") != null and card.card_color_id == "apo_color_base"
 	result["APO: attack action reference"] = card.card_play_actions.size() == 1 and card.card_play_actions[0].has("res://scripts/actions/combatant_actions/ActionAttackGenerator.gd")
 	return result

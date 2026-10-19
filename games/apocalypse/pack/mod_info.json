@@ -3,8 +3,12 @@
 	"properties": {
 		"mod_author": "justty32",
 		"mod_dependency_mod_ids": [],
-		"mod_description": "Apocalypse fan-game content pack (free, non-commercial). Skeleton: one probe card.",
+		"mod_description": "Apocalypse fan-game content pack (free, non-commercial). Skeleton: one probe card and its own base color.",
 		"mod_folder_to_load_data": {
+			"external/mods/apocalypse/colors/": {
+				"class_name": "ColorData",
+				"table_name": "_id_to_color_data"
+			},
 			"external/mods/apocalypse/cards/": {
 				"class_name": "CardData",
 				"table_name": "_id_to_card_data"
