@@ -8,7 +8,9 @@
 
 ## 冷啟動
 
-依使用者要求，每位主／子 agent 開工前先通讀核心規矩：根入口、[STRUCTURE](../STRUCTURE.md)、[派發器](../WORKFLOWS.md)、[專案地圖](../INDEX.md)、[PROJECT](../PROJECT.md)、[工作流模板](TEMPLATE.workflow.md) 及本篇。再讀 [common 入口](common/README.md)、[使用者邊界](common/user.md)、[慣例](common/conventions.md)、[code map](common/code-map.md)、[資料檔契約](common/data-files.md) 與 [經驗回寫](learning.md)。簡單雜事可只讀相關規矩；操作邊界與檔案所有權仍須傳遞。同一任務已完整讀過且未變動的內容可沿用，不必每次工具呼叫都重讀。
+使用者於 2026-10-19 同意縮減：每位主／子 agent 開工前必讀 4 項——[根入口 AGENTS.md](../../AGENTS.md)、[派發器](../WORKFLOWS.md)、[使用者邊界](common/user.md)、目標工作流入口檔（見派發器），外加下述 SESSION-LOG／WAIT_USER 檢查。操作邊界與檔案所有權仍須傳遞。同一任務已讀過且未變動的內容可沿用。
+
+其餘按情境再讀：整理工作流讀 [STRUCTURE](../STRUCTURE.md)、[專案地圖](../INDEX.md)、[PROJECT](../PROJECT.md)；新開工作流讀 [模板](TEMPLATE.workflow.md)；碰原始碼前讀 [慣例](common/conventions.md)、[code map](common/code-map.md)、[dev-env](dev-env.md)；碰資料檔讀 [資料檔契約](common/data-files.md)；收尾回寫讀 [經驗回寫](learning.md)；其餘規矩見 [common 入口](common/README.md)。
 
 接著看 SESSION-LOG／WAIT_USER 的 open 項目，再由 [game-dev](game-dev/README.md) 選領域，按需讀分析、實作與測試。來源版本以 tools/upstream.json 和實際 checkout 為準，不依前一個 agent 的記憶。`wf/` 保存可重用的操作流程與判斷邊界；分析保存核實事實及來源，任務結果提供驗證證據，變更後沿這條鏈一起更新。
 
