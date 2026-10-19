@@ -4,7 +4,7 @@
 
 改變行為的工作：加一個功能、修一個 bug，從動手到驗證交付。碰原始碼前先讀 [common/conventions](../common/conventions.md) 與 [common/code-map](../common/code-map.md)。遊戲基準與限制見 [dev-env](../dev-env.md) 與 [testing](../testing.md)。
 
-遊戲需求先從 [game-dev](../game-dev/README.md) 選內容、機制、UI 或上游流程；共用多人工作方式見 [agent-session](../agent-session.md)。
+**本流程只用於 tools／wf 類非遊戲工作**；遊戲需求（內容、機制、UI、上游）直接走 [game-dev](../game-dev/README.md)，其流程節已含同樣的四步迴圈（讀 code map → 改 → 驗 → 同步）。共用多人工作方式見 [agent-session](../agent-session.md)。
 
 **何時用**：使用者說「我想開發／修改某個功能」「這裡壞了，修一下」——**修 bug 也走這條**，產出一樣是「行為改變＋驗證綠燈」。
 **何時不用**：只是要查清楚原因、還不動碼 → [investigation](../investigation.md)；行為不變、只重排結構 → [refactor](../refactor/README.md)；還在討論要不要做、方案長怎樣 → [planning](../planning.md)。

@@ -47,19 +47,7 @@ test -f game/project.godot && echo ok
 git rev-parse --show-toplevel
 ```
 
-Windows：依 `engine_policy.official_downloads` 下載官方 4.7.2 win64 ZIP 到 `.tools/`，核對 SHA-512 後解壓；沒有下載／安裝授權時不要執行取得或解壓步驟。勿以檔名推定版本。
-
-```powershell
-$PSVersionTable.PSVersion   # ps1 包裝要求 7 以上
-Get-Command git, python
-python --version
-$policy = (Get-Content tools/upstream.json -Raw | ConvertFrom-Json).engine_policy
-$engineZip = '.tools/Godot_v4.7.2-stable_win64.exe.zip'
-$expected = $policy.official_downloads.files.'Godot_v4.7.2-stable_win64.exe.zip'
-if ((Get-FileHash $engineZip -Algorithm SHA512).Hash -ne $expected) { throw 'Godot archive SHA-512 mismatch' }
-# 僅首次解壓；已有檔案時核對或使用 -GodotPath，不覆蓋。
-Expand-Archive -LiteralPath $engineZip -DestinationPath '.tools/godot-4.7'
-```
+Windows 取得引擎、PowerShell 檢查與 Git Bash/WSL 文件檢查的步驟見 [Windows 補充](dev-env/windows.md)；Linux 主路徑以上述 `godot-mono` 為準。
 
 雜湊只證明 ZIP 符合來源鎖，runner 的版本探測與隔離 All 才是本機執行證據。環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
 
@@ -67,13 +55,7 @@ Expand-Archive -LiteralPath $engineZip -DestinationPath '.tools/godot-4.7'
 
 `.tools/`、artifacts/、Godot cache、個人 profile／settings／saves 不屬於發布原始碼。必要的歷史驗證已另選入 analysis/slay-the-robot/evidence/；發布副本記錄原件與副本 hash 及路徑遮罩，不能當成未處理的原始日誌。
 
-### Windows 文件檢查執行器
-
-WSL 原生 python3 為已驗入口。Git Bash 需以函式把 python3 指向 Windows Python，避免商店別名：
-
-```powershell
-& 'C:\Program Files\Git\bin\bash.exe' -c 'function python3() { python "$@"; }; export -f python3; python3 --version && bash wf/tools/wf-lint.sh --strict .'
-```
+Windows 的文件檢查執行器（WSL／Git Bash）見 [Windows 補充](dev-env/windows.md#windows-文件檢查執行器)。
 
 ## 存檔與環境限制
 

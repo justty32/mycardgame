@@ -18,8 +18,8 @@
 |------|-----------|------|
 | **idea** | 要不要做？ | 下方「想法」表 |
 | **roadmap** | 會做，何時？ | 下方「roadmap」表 |
-| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放 `planning/specs/`、`planning/plans/`，第一份出現時升級成資料夾型。非開發：接 plan-a-thing（knowledge 包）|
-| **執行** | — | 開發：feature-dev；非開發：plan-a-thing 的執行段 |
+| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放 `planning/specs/`、`planning/plans/`，第一份出現時升級成資料夾型。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
+| **執行** | — | 開發：feature-dev；非開發：未導入 |
 
 ## 想法（要不要做）
 

@@ -42,4 +42,4 @@ Slay-The-Robot 已固定版本；spire-codex 仍是未匯入的研究參考。
 
 來源為本機 `C:/code/mine/workflows`，讀取時 HEAD 為 `794d6d23322a93e0f65e3748375351904fa67066`，模板標記 v0.6。使用其 tools/wf-init.sh，以 `--flavor dev --non-invasive wf` 產生骨架；沒有修改來源 repo。授權副本見 [LICENSE.workflows](LICENSE.workflows)。
 
-環境、驗證、code map 與偏好已更新為目前事實；尚未建立發行版 export 驗證。後續升級依來源 IMPORT.md 的 kernel-owned / project-owned 分類處理，保留已填的專案內容。
+環境、驗證、code map 與偏好已更新為目前事實；尚未建立發行版 export 驗證。後續升級依來源 IMPORT.md 的 kernel-owned / project-owned 分類處理（來源 repo 在公司 Windows 機 C:/code/mine/workflows，Manjaro 本機無法升級 kernel），保留已填的專案內容。

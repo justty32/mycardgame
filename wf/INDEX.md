@@ -9,7 +9,7 @@ mycardgame 是以 Slay-The-Robot 為框架、spire-codex 為參考的個人卡�
 | [AGENTS.md](../AGENTS.md) | agent 入口與共通規則 |
 | [CLAUDE.md](../CLAUDE.md) | Claude 的入口轉址 |
 | [PROJECT.md](PROJECT.md) | 範圍、上游角色、內建教學與導入來源 |
-| [game/project.godot](../game/project.godot) | 遊戲入口；檔內標記 4.6，執行基準為 Godot 4.7.x |
+| [game/project.godot](../game/project.godot) | 遊戲入口；檔內標記 4.7，執行基準為 Godot 4.7.x |
 | [tools/test_game.py](../tools/test_game.py) | 跨平台隔離回歸、戰鬥勝敗與跨程序存讀（主 runner） |
 | [tools/test-game.ps1](../tools/test-game.ps1) | 上列 runner 的 Windows 薄包裝 |
 | [tools/game.ps1](../tools/game.ps1) | Windows 專用舊入口：啟動、匯入與 smoke |

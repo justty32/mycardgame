@@ -33,7 +33,6 @@
 | 「查清楚這是怎麼運作的」「這樣做可不可行」 | **investigation** | [workflows/investigation.md](workflows/investigation.md) |
 | 「做一包 patch 給別的專案 / 別的 agent 套」 | **patch** | [workflows/patch.md](workflows/patch.md) |
 | 「環境怎麼裝」「fresh clone 後要做什麼」「指令是什麼」 | **dev-env** | [workflows/dev-env.md](workflows/dev-env.md) |
-| 「討論方案」「寫動工計畫」（spec / plan）| **planning**（kernel 管線的後兩段）| [workflows/planning.md](workflows/planning.md) |
 
 **analysis** ＝初次接觸陌生專案、要建立可延續的分析產物；**investigation** ＝回答一個窄問題。**patch** ＝跨 repo、原專案無 git 或不能直接 push、要交給冷啟動 agent 套用時才用；同一個 repo 內能改能測就走 feature-dev。
 <!-- wf-insert:WORKFLOWS -->
@@ -44,7 +43,7 @@
 |--------------|--------|--------|
 | 「記 / 查踩坑」 | **gotchas** | [workflows/common/gotchas.md](workflows/common/gotchas.md) |
 | 「整理 X」「封存過時的」「檔案太多／太雜」「太大要拆」 | **tidy** | [workflows/tidy/README.md](workflows/tidy/README.md) |
-| 「記個想法」「以後要做」「排進 roadmap」「幫我規劃」「規劃遊戲／遊戲設計」 | **planning**（遊戲內容再接 game-dev） | [workflows/planning.md](workflows/planning.md)、[game-dev](workflows/game-dev/README.md) |
+| 「記個想法」「以後要做」「排進 roadmap」「幫我規劃」「討論方案」「寫動工計畫」（spec / plan）「規劃遊戲／遊戲設計」 | **planning**（kernel 管線；遊戲內容再接 game-dev） | [workflows/planning.md](workflows/planning.md)、[game-dev](workflows/game-dev/README.md) |
 | 「記個決定」「為什麼選 A 不選 B」 | **decisions** | [workflows/decisions.md](workflows/decisions.md) |
 | 「我的偏好是…」「以後直接做 / 先問」 | **user** | [workflows/common/user.md](workflows/common/user.md) |
 
@@ -56,4 +55,4 @@
 |--------|--------|
 | 等**使用者**做 / 驗證 / 決定 | [WAIT_USER.md](WAIT_USER.md) |
 | 等**同 repo 另一個 session / fork** | [SESSION-LOG.md](SESSION-LOG.md) 一行 open |
-| 等**別資料夾的 agent** | 信件軸：multi-agent 包提供（派發表有 inbox 才有）|
+| 等**別資料夾的 agent** | 信件軸（multi-agent 包，本 repo 未導入）；改用 SESSION-LOG 一行 open|

@@ -2,7 +2,7 @@
 
 [WORKFLOWS](../../WORKFLOWS.md)｜[專案地圖](../../INDEX.md)｜[agent 接手與協作](../agent-session.md)
 
-將使用者需求轉成可驗證的遊戲變更。共同執行流程用 [feature-dev](../feature-dev/README.md)，此處依遊戲領域補齊必要的原始碼與驗收。
+將使用者需求轉成可驗證的遊戲變更。遊戲工作的共同執行迴圈已寫在下方「流程」節（不再回 feature-dev；feature-dev 只用於 tools／wf 類非遊戲工作），此處依遊戲領域補齊必要的原始碼與驗收。
 
 **何時用**：設計與評量卡牌、敵人或關卡，製作圖像／聲音／UI，新增內容、修改規則／數值、修遊戲 bug 或更新框架。
 
@@ -14,7 +14,7 @@
 | 使用者需求 | 操作指引 |
 |---|---|
 | 第一個原創版本、整局狀態、跨幕、勝敗與續玩 | [整體遊戲流程](game-flow.md) |
-| 從零建立第一個 mod、登記與候選驗證 | [內容開發](content.md) |
+| 從零建立第一個 mod、登記與候選驗證；設計完成後的 schema、mod、角色、遺物與內容接線 | [內容開發](content.md) |
 | 卡牌定位、費用、效果、升級與取得入口 | [卡牌設計](card-design.md) |
 | 單卡、牌組、協同與遭遇中的強度評量 | [卡牌評量](card-evaluation.md) |
 | 敵人角色、意圖、行動節奏與反制 | [敵人設計](enemy-design.md) |
@@ -24,7 +24,6 @@
 | 共用元件／版面、戰鬥 HUD、卡牌互動、選單與文字 | [UI 與呈現](ui.md) |
 | 完整戰鬥／對話／商店等畫面的 UI、圖像、聲音與動畫組合 | [完整場景製作](scene-pack.md) |
 | 一個遊戲事件的動畫、特效、音訊與 UI 共同交付 | [跨領域演出整合](presentation-delivery.md) |
-| 設計完成後的 schema、mod、角色、遺物與內容接線 | [內容開發](content.md) |
 | Action、戰鬥、攔截、隨機、序列化與存檔 | [機制修改](mechanics.md) |
 | ownership、快取、非同步取消與退出資源保留 | [資源生命週期](resource-lifecycle.md) |
 | Slay-The-Robot 或 Godot 版本更新 | [上游升級](upstream.md) |
@@ -33,6 +32,8 @@
 先通讀 [agent-session](../agent-session.md) 指定的核心規矩，領域流程按任務取用。例如新卡先設計與評量，再由內容流程接線；需要新 Action 才加機制；需要卡圖或音效則交對應素材流程，最後由 UI／內容完成引用與驗證。
 
 ## 流程
+
+四步迴圈：① 讀 code map（[code-map](../common/code-map.md)）→ ② 改 → ③ 驗（依 validation 選檢查）→ ④ 同步（文件、分析、經驗）。以下說明各步在遊戲工作的具體做法。
 
 先依 [code-map](../common/code-map.md) 找實作，讀 [來源紀錄](../../../tools/upstream.json) 與現有測試。將需求寫成可觀察結果，例如卡牌在哪出現、付出多少能量、影響誰、在哪個時點生效；不自行填入未決定的核心玩法。
 

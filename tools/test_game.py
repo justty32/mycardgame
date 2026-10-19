@@ -78,7 +78,7 @@ SOURCE_HASH_PATHS = (
     "autoload/FileLoader.gd",
     "data/SerializableData.gd",
 )
-EXCLUDED_DIR_NAMES = frozenset({".git", ".godot", ".import", ".saves", ".screenshots"})
+EXCLUDED_DIR_NAMES = frozenset({".git", ".godot", ".import", ".saves", ".screenshots", ".mono"})
 EXCLUDED_FILE_NAMES = frozenset({"profile.json", "user_settings.json"})
 SAVE_REJECTION_CASES = ("missing", "malformed", "array", "scalar", "null", "no_properties",
                         "array_properties", "empty_properties", "array_patch_metadata",

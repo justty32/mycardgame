@@ -34,7 +34,7 @@
 
 現有命令為 `python3 tools/test_game.py --suite ResourceLifecycle`；[測試案例](../../../tests/resource_lifecycle_cases.gd) 用觀測用 interceptor／child fixture，搭配真實 processor、handler 與選牌動作。新增所有權型態須補對應路徑，不能由既有案例推定全部涵蓋。
 
-再依 [testing](../testing.md) 執行受影響 suite。診斷 verbose 中保留資源的路徑與類型；exit 0 或資源數變少不足以通過清理驗收。若局部已綠但完整戰鬥仍保留資源，記錄剩餘持有鏈，不放寬測試。2026-10-19／Godot 4.6 的實作及實測狀態統一見 05 報告；同日於 4.7.2（Linux）重跑一致，見 [upstream.json](../../../tools/upstream.json) `engine_policy.migration_from_4_6`。
+再依 [testing](../testing.md) 執行受影響 suite。診斷 verbose 中保留資源的路徑與類型；exit 0 或資源數變少不足以通過清理驗收。若局部已綠但完整戰鬥仍保留資源，記錄剩餘持有鏈，不放寬測試。2026-10-19 的實作及實測狀態統一見 05 報告（現況基準 Godot 4.7.2；初測於 4.6，4.7.2 Linux 重跑一致），見 [upstream.json](../../../tools/upstream.json) `engine_policy.migration_from_4_6`。
 
 ## 同步與適用邊界
 

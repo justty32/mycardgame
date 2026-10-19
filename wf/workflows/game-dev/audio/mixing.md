@@ -38,7 +38,7 @@ rg -n 'SUITE_CHOICES|headless|audio-driver' tools/test_game.py
 python -c "import wave,pathlib; p=pathlib.Path('game/external/audio/sounds/slash.wav'); w=wave.open(str(p)); print(p, p.stat().st_size, w.getparams(), w.getnframes()/w.getframerate()); w.close()"
 ```
 
-wave 只驗 WAV 檔頭；MP3／OGG 需另核實可用離線解析器，不能用副檔名推定編碼。hash 用 Get-FileHash，保留採用檔與修改來源的 SHA-256。
+wave 只驗 WAV 檔頭；MP3／OGG 需另核實可用離線解析器，不能用副檔名推定編碼。hash 以 `sha256sum` 為主（Windows 用 `Get-FileHash -Algorithm SHA256`），保留採用檔與修改來源的 SHA-256。
 
 ### 可接入的最小 loader probe（尚未執行範本）
 

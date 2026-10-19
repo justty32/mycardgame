@@ -91,4 +91,4 @@ runner 的 source_hashes 只涵蓋 13 個框架檔；另記 mod 三檔、mod_lis
 
 圖像／UI／音訊 fixture 另依領域流程。headless 不證明畫面正確或音訊無實體輸出；播放測試先隔離音訊裝置。教學手動驗收僅在有效 GUI 授權下執行。
 
-2026-10-19 依上游 4dac5abe 加本地修復核對；後續候選 Smoke 為 52／0，八項新斷言均執行（當時為 Godot 4.6 與 PowerShell 候選流程）。首次失敗、重試證據與未驗範圍見 [實跑分析](../../../../analysis/slay-the-robot/design/mod-bootstrap.md)，不代表正式遊戲已加入此 mod。
+2026-10-19 依上游 4dac5abe 加本地修復核對；後續候選 Smoke 為 52／0，八項新斷言均執行（當時為 Godot 4.6 與 PowerShell 候選流程；4.7 尚未重跑）。首次失敗、重試證據與未驗範圍見 [實跑分析](../../../../analysis/slay-the-robot/design/mod-bootstrap.md)，不代表正式遊戲已加入此 mod。

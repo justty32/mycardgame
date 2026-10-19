@@ -57,11 +57,7 @@ runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash �
 python3 --version && bash wf/tools/wf-lint.sh --strict .
 ```
 
-Linux／macOS 直接用原生 bash；Windows 經 WSL 或 Git Bash（商店別名與 Win32 error 5 的處理見 [dev-env](dev-env.md#windows-文件檢查執行器)）。2026-10-19 Manjaro 原生與 Windows WSL 皆回傳全部零項。WSL 範例的 `--cd` 依實際 checkout 調整：
-
-```powershell
-wsl.exe --cd /mnt/c/code/mine/mycardgame bash -lc 'python3 --version && bash wf/tools/wf-lint.sh --strict .'
-```
+Linux／macOS 直接用原生 bash；Windows 經 WSL 或 Git Bash，步驟與商店別名／Win32 error 5 處理見 [dev-env/windows](dev-env/windows.md)。2026-10-19 Manjaro 原生與 Windows WSL 皆回傳全部零項。
 
 WSL 的 CRLF 錯誤依 [版本控制](version-control.md) 查 shell 換行。
 

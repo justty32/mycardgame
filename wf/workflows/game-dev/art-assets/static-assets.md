@@ -34,7 +34,7 @@ FileLoader 依完整路徑快取，不以既有程序熱換檔後的畫面作證
 
 ### 驗收層次與失敗定位
 
-先用現有可用的無視窗圖像解碼工具完整讀取每張檔案，核對格式、實際長寬、alpha 像素範圍及是否全透明；僅讀 IHDR 要註明是標頭檢查。工具缺失時明列未解碼，不為此自行安裝 GUI。以 `Get-FileHash -Algorithm SHA256` 留輸出身分，再查引用路徑大小寫、內容 ID 與缺檔。不得把 alpha 通道存在當作透明邊緣正確。
+先用現有可用的無視窗圖像解碼工具完整讀取每張檔案，核對格式、實際長寬、alpha 像素範圍及是否全透明；僅讀 IHDR 要註明是標頭檢查。工具缺失時明列未解碼，不為此自行安裝 GUI。以 `sha256sum` 留輸出身分（Windows 用 `Get-FileHash -Algorithm SHA256`），再查引用路徑大小寫、內容 ID 與缺檔。不得把 alpha 通道存在當作透明邊緣正確。
 
 接入任務需在 [bootstrap](../content/bootstrap.md) 的 helper 接線方式加入目標斷言，依 [validation](../validation.md) 跑已授權套件；沒有現成「素材 suite」。目標 loader 結果不能是 MISSING_TEXTURE，且尺寸非零並符合輸出；Card 要等待 display 的 process_frame 後核對實際 texture。背景驗 Act／Location／Event 各自及空白切換；共用圖示驗各使用端，角色頭像驗對應按鈕。既有 Smoke 只表示其既定斷言通過，新增 helper 必須真的被呼叫。
 

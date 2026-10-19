@@ -27,7 +27,7 @@
 
 新增控制器應保存自己的 Tween／timer／連線與本次 generation。重播先取消同屬性舊演出，再從可觀察的當前值或指定起點開始；完成回呼必須檢查 generation、資料身分與節點存活。關閉／切場／死亡時失效舊回呼、釋放自己建立的節點，明確回復 modulate、position、scale、rotation、z_index、visible 與輸入狀態。不要依賴動畫結束才解除輸入鎖。
 
-採用 [Godot 4.6 Tween](https://docs.godotengine.org/en/4.6/classes/class_tween.html) 時，同一屬性只給一個 Tween owner；保存引用以 kill 中斷，每次重播建立新 Tween。Container 負責的布局位置不與補間搶寫：新增動畫包裹節點，由 UI owner 定布局根，動畫 owner 只動內層視覺。alpha=0 不等於禁止點擊，需明定 disabled／mouse_filter 與鍵盤確認政策。
+採用 [Godot Tween（stable）](https://docs.godotengine.org/en/stable/classes/class_tween.html) 時，同一屬性只給一個 Tween owner；保存引用以 kill 中斷，每次重播建立新 Tween。Container 負責的布局位置不與補間搶寫：新增動畫包裹節點，由 UI owner 定布局根，動畫 owner 只動內層視覺。alpha=0 不等於禁止點擊，需明定 disabled／mouse_filter 與鍵盤確認政策。
 
 
 ### 資料狀態與演出階段
