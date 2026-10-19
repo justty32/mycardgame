@@ -10,7 +10,7 @@ var scenario: String = "victory"
 var results: Array[Dictionary] = []
 var snapshots: Array[Dictionary] = []
 var player_damage_records: Array[Dictionary] = []
-var counts: Dictionary = {"drawn": 0, "played": 0, "combat_started": 0, "combat_ended": 0, "enemy_turn": 0, "enemy_dead": 0, "player_dead": 0, "player_death_animation": 0}
+var counts: Dictionary = {"drawn": 0, "played": 0, "combat_started": 0, "combat_ended": 0, "enemy_turn": 0, "enemy_dead": 0, "player_dead": 0, "player_death_animation": 0, "hero_action_started": 0, "hero_action_ended": 0}
 var global_data: Node
 var hand_manager: Node
 var action_handler: Node
@@ -126,6 +126,8 @@ func _scenario() -> bool:
 	_check(enemy.enemy_data.get_current_intent().enemy_intent_attack_damage == 14, "enemy intent is a real 14-damage attack")
 	_check(hand_manager.player_hand.size() == 5 and counts.drawn == 5, "turn one draws all five fixture cards through the draw pipeline")
 	_check(global_data.player_data.player_energy == 3, "turn one begins with three energy")
+	_check(counts.hero_action_started == 1 and counts.hero_action_ended == 0 and player.action_count == 1, "turn one emits unit_action_started(hero) once and no unit_action_ended")
+	_check(enemy.faction == 1 and enemy.unit_uid != "" and root.get_node("UnitRegistry").get_unit(enemy.unit_uid) == enemy, "fixture enemy registers as an ENEMY-faction unit")
 	_snapshot("turn_one_ready")
 	if scenario == "defeat":
 		return await _defeat_flow()
@@ -150,6 +152,7 @@ func _scenario() -> bool:
 	_check(player.get_combatant_health() == health_before - 4, "enemy's fourteen damage consumes ten block and four HP")
 	_check(player.get_block() == 0, "spent block does not remain on turn two")
 	_check(global_data.player_data.player_energy == 3, "turn two replenishes energy")
+	_check(counts.hero_action_started == 2 and counts.hero_action_ended == 1 and player.action_count == 2, "hero unit action signals track the legacy player turns")
 	_check(hand_manager.player_hand.size() == 5 and counts.drawn == 10, "discarded/played cards reshuffle and draw again on turn two")
 	_check(counts.player_dead == 0 and counts.combat_ended == 0, "first enemy turn neither kills player nor ends combat")
 	_snapshot("turn_two_ready")
@@ -189,6 +192,7 @@ func _defeat_flow() -> bool:
 	_check(player.get_combatant_health() == 0 and not player.is_alive(), "fourteen-damage enemy attack kills the ten-HP player")
 	_check(player_damage_records.size() == 1 and player_damage_records[0] == {"unblocked": 14, "capped": 10, "overkill": 4}, "real damage signal records fourteen damage, ten lost HP and four overkill")
 	_check(counts.enemy_turn == 1 and counts.player_dead == 1 and counts.player_death_animation == 1, "one enemy turn emits one player death and one completed death animation")
+	_check(counts.hero_action_started == 1 and counts.hero_action_ended == 1, "defeat: one hero action started and ended before the lethal enemy turn")
 	_check(enemy.is_alive() and enemy.get_combatant_health() == 65 and counts.enemy_dead == 0, "defeat leaves the attacking enemy alive and untouched")
 	_check(summary.defeat_label.visible and not summary.victory_label.visible and summary.player_run_end_state == 1, "summary presents defeat with the native LOSS end state")
 	_check(summary.stats_summary_autosize_label.get_parsed_text().contains("Damage Taken"), "defeat summary contains generated run statistics")
@@ -308,6 +312,14 @@ func _connect_observers() -> void:
 	signals.combat_started.connect(func(_event): counts.combat_started += 1)
 	signals.combat_ended.connect(func(): counts.combat_ended += 1)
 	signals.enemy_turn_started.connect(func(): counts.enemy_turn += 1)
+	signals.unit_action_started.connect(func(unit):
+		if unit == global_data.get_player():
+			counts.hero_action_started += 1
+	)
+	signals.unit_action_ended.connect(func(unit):
+		if unit == global_data.get_player():
+			counts.hero_action_ended += 1
+	)
 	signals.enemy_killed.connect(func(_enemy): counts.enemy_dead += 1)
 	signals.player_killed.connect(func(_player): counts.player_dead += 1)
 	signals.player_death_animation_finished.connect(func(_player): counts.player_death_animation += 1)

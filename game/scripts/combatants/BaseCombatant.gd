@@ -25,11 +25,46 @@ var custom_ui_object_id_to_custom_ui: Dictionary = {} # maps a custom ui id to t
 
 const BLOCK_TEXTURE: Texture = preload("res://icon.svg")
 
+#region Unit identity (combat framework)
+## Side a unit fights for. PARTY = the player's side, ENEMY = opponents, NEUTRAL = neither.
+enum FACTIONS {PARTY, ENEMY, NEUTRAL}
+## Speed every unit has unless data or interceptors change it (equal speeds = original turn order).
+const DEFAULT_SPEED: int = 10
+const BOARD_ANCHOR_NONE: Vector2i = Vector2i(-1, -1)
+
+## Unique id within the process, assigned by UnitRegistry on _ready. Not saved.
+var unit_uid: String = ""
+var faction: int = FACTIONS.NEUTRAL
+## Top-left board cell of the unit; BOARD_ANCHOR_NONE while not placed on a board.
+var board_anchor: Vector2i = BOARD_ANCHOR_NONE
+## Board cells covered by the unit.
+var footprint: Vector2i = Vector2i(1, 1)
+## Unmodified speed (from data); read the effective value through speed / get_speed().
+var base_speed: int = DEFAULT_SPEED
+## Effective speed. Read-only; subclasses override get_speed() to apply modifiers.
+var speed: int:
+	get:
+		return get_speed()
+var move_range: int = 1
+var next_action_tick: int = 0
+var last_action_tick: int = 0
+## Number of own actions started this combat (unit_action_started with unit == self).
+var action_count: int = 0
+## Decides the unit's actions. Typed as RefCounted until BaseUnitController exists; null = legacy flow.
+var controller: RefCounted = null
+#endregion
+
 func _ready():
+	faction = _get_default_faction()
+	UnitRegistry.register_unit(self)
+	tree_exiting.connect(_on_unit_tree_exiting)
+	
 	Signals.combat_started.connect(_on_combat_started)
 	Signals.combat_ended.connect(_on_combat_ended)
 	Signals.player_turn_started.connect(_on_player_turn_started)
 	Signals.player_turn_ended.connect(_on_player_turn_ended)
+	Signals.unit_action_started.connect(_on_unit_action_started)
+	Signals.unit_action_ended.connect(_on_unit_action_ended)
 	
 	animated_sprite_2d.animation_finished.connect(_on_animation_finished)
 	
@@ -37,6 +72,40 @@ func _ready():
 
 func _on_selection_button_up():
 	breakpoint
+
+#region Unit identity (combat framework)
+## Override. Faction assigned on _ready.
+func _get_default_faction() -> int:
+	return FACTIONS.NEUTRAL
+
+## Override. Whether this unit represents the run's main character (see UnitRegistry.get_hero()).
+func is_hero() -> bool:
+	return false
+
+## Override to apply speed modifiers (e.g. status effects in later phases).
+func get_speed() -> int:
+	return base_speed
+
+func _on_unit_tree_exiting() -> void:
+	UnitRegistry.unregister_unit(self)
+
+func _on_unit_action_started(unit: BaseCombatant) -> void:
+	if unit == self:
+		action_count += 1
+		_on_own_action_started()
+
+func _on_unit_action_ended(unit: BaseCombatant) -> void:
+	if unit == self:
+		_on_own_action_ended()
+
+## Override. Called when this unit's own action starts (after draw, before input).
+func _on_own_action_started() -> void:
+	pass
+
+## Override. Called when this unit's own action ends (after discard).
+func _on_own_action_ended() -> void:
+	pass
+#endregion
 
 #region Animations
 
@@ -402,6 +471,12 @@ func _on_combat_started(_event_id: String):
 
 func _on_combat_ended():
 	pass
+
+## Resets per-combat timeline counters. Called by subclasses' combat start handling.
+func reset_unit_combat_state() -> void:
+	next_action_tick = 0
+	last_action_tick = 0
+	action_count = 0
 
 func _on_player_turn_started():
 	pass

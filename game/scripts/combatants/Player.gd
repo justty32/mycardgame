@@ -45,6 +45,12 @@ func reset_player() -> void:
 	if location_data.location_type == LocationData.LOCATION_TYPES.STARTING:
 		animation_player.play("Player/run_start")
 
+func _get_default_faction() -> int:
+	return FACTIONS.PARTY
+
+func is_hero() -> bool:
+	return true
+
 func get_animation_data() -> AnimationData:
 	var character_data: CharacterData = Global.get_player_character_data()
 	var animation_data: AnimationData = Global.get_animation_data(character_data.character_animation_id)
@@ -208,6 +214,7 @@ func _on_run_ended():
 
 func _on_combat_started(_event_id: String):
 	clear_all_status_effects()
+	reset_unit_combat_state()
 	
 func _on_combat_ended():
 	clear_all_status_effects()

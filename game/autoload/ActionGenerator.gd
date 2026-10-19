@@ -42,7 +42,10 @@ func generate_card_play_finished(card_play_request: CardPlayRequest) -> BaseActi
 	return generated_action
 
 ## Used in Hand to draw cards at the start of a turn.
-func generate_start_of_turn_draw_actions(number_of_cards: int = HandManager.PLAYER_CARD_DRAW_PER_TURN) -> void:
+## number_of_cards < 0 reads CombatRulesData.draw_per_action (default 5 = HandManager.PLAYER_CARD_DRAW_PER_TURN).
+func generate_start_of_turn_draw_actions(number_of_cards: int = -1) -> void:
+	if number_of_cards < 0:
+		number_of_cards = Global.get_combat_rules().draw_per_action
 	var action_data: Array[Dictionary] = [{
 		Scripts.ACTION_DRAW_GENERATOR: {
 			"draw_count": number_of_cards,
@@ -54,10 +57,15 @@ func generate_start_of_turn_draw_actions(number_of_cards: int = HandManager.PLAY
 	# immediately process this action without ActionHandler
 	generated_action.perform_action()
 
-## Used in Combat to reset the player's energy and add energy
+## Used in Combat to reset the player's energy and add energy.
+## Follows CombatRulesData.energy_per_action: ENERGY_REFILL (default) resets to 0 and adds max energy;
+## >= 0 keeps current energy and adds that amount, capped by energy_cap.
 func generate_start_of_turn_energy_actions() -> void:
+	var combat_rules_data: CombatRulesData = Global.get_combat_rules()
+	var is_refill: bool = combat_rules_data.energy_per_action == CombatRulesData.ENERGY_REFILL
+	var energy_gain: int = combat_rules_data.get_start_of_action_energy_gain(Global.player_data.player_energy, Global.player_data.player_energy_max)
 	var action_data: Array[Dictionary] = [
-		{Scripts.ACTION_ADD_ENERGY: {"energy_amount": Global.player_data.player_energy_max, "time_delay": 0}},
+		{Scripts.ACTION_ADD_ENERGY: {"energy_amount": energy_gain, "time_delay": 0}},
 		{Scripts.ACTION_RESET_ENERGY: {}}
 		]
 	var generated_actions: Array[BaseAction] = ActionGenerator.create_actions(Global.get_player(), null, [], action_data, null)
@@ -66,7 +74,8 @@ func generate_start_of_turn_energy_actions() -> void:
 	var reset_energy_action: BaseAction = generated_actions[1]
 	
 	# immediately process this action without ActionHandler
-	reset_energy_action.perform_action()
+	if is_refill:
+		reset_energy_action.perform_action()
 	add_energy_action.perform_action()
 
 

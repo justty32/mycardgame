@@ -70,6 +70,7 @@ func _run() -> void:
 		_check(_check_array_patch() == true, "array patch probe completed")
 		_check(_check_dictionary_patch() == true, "dictionary patch assertions completed")
 		_check(_check_example_mod(character) == true, "example_mod probe completed")
+	_run_unit_registry_probe(game_root)
 	_run_pack_probes()
 	if OS.get_cmdline_user_args().has("--capture"):
 		_check(await _capture_menu() == true, "main menu screenshot saved")
@@ -137,6 +138,20 @@ func _check_example_mod(character: Resource) -> bool:
 	loader.free()
 	print("SMOKE: example_mod enabled only in this process; no run started, save-game or mod-list file written by this probe.")
 	return true
+
+
+## Combat framework Phase 0 probe (tests/unit_registry_probe.gd), run in both content profiles.
+func _run_unit_registry_probe(game_root: Node) -> void:
+	var probe_path: String = get_script().resource_path.get_base_dir().path_join("unit_registry_probe.gd")
+	var probe_script: GDScript = load(probe_path) as GDScript
+	_check(probe_script != null, "unit registry probe loads")
+	if probe_script == null:
+		return
+	var results: Dictionary = probe_script.new().check(root, game_root)
+	_check(not results.is_empty(), "unit registry probe returns assertions")
+	for label: Variant in results.keys():
+		_check(results[label] == true, str(label))
+	print("UNIT REGISTRY PROBE DONE: %d assertions" % results.size())
 
 
 ## Content-pack probes passed by the runner as --pack-probe=<path>. Each probe script

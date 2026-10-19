@@ -6,6 +6,7 @@
 extends Node
 
 ## How many cards player naturally draws at start of turn. See: ActionGenerator.generate_start_of_turn_draw_actions().
+## NOTE: Legacy default; the start-of-turn draw now reads CombatRulesData.draw_per_action (same value by default).
 const PLAYER_CARD_DRAW_PER_TURN: int = 5
 
 ## The default max number of cards available in player's hand. Exceeding this will discard the cards.

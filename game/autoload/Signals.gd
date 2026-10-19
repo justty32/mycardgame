@@ -106,6 +106,24 @@ signal enemy_turn_started
 signal enemy_turn_ended
 signal end_turn_requested(end_turn_immediacy_level: int)	# requests to end the turn. See CombatEndTurn
 
+# combat framework: unit actions, timeline and board
+# NOTE: The legacy turn flow emits unit_action_started/ended for the hero only (alongside
+# player_turn_*); the remaining signals are declared for the action-timeline combat loop and
+# are not emitted yet. player_turn_* = hero's action, enemy_turn_* = one enemy's action.
+signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: after draw, before input/decision
+signal unit_action_ended(unit: BaseCombatant)	# a unit's action ends: after discard, before delay is computed
+signal combat_tick_advanced(previous_tick: int, current_tick: int)	# the combat clock advanced
+signal timeline_changed	# any unit's next_action_tick changed (UI should re-project the timeline)
+signal unit_moved(unit: BaseCombatant, from: Vector2i, to: Vector2i)	# a unit finished moving on the board
+signal unit_spawned(unit: BaseCombatant)
+signal unit_downed(unit: BaseCombatant)
+signal unit_removed(unit: BaseCombatant)
+signal wave_started(wave_index: int)
+signal wave_cleared(wave_index: int)
+signal end_action_requested(immediacy: int)	# replaces end_turn_requested for the action timeline
+signal cell_clicked(cell: Vector2i)	# board input; enemy_clicked/hovered stay for units on clicked cells
+signal cell_hovered(cell: Vector2i)
+
 # custom ui
 signal custom_ui_requested
 
@@ -137,4 +155,13 @@ signal consumable_added(consumable_index: int, consumable_object_id: String)
 signal consumable_purchased(consumable_object_id: String)
 
 signal add_consumable_requested(consumable_object_id: String)
+#endregion
+
+#region Party (combat framework; declared, not emitted yet)
+# member is a PartyMemberData once that class exists; untyped until then.
+signal party_member_recruited(member)
+signal party_member_left(member)
+signal party_member_advanced(member)
+# plan is an AiPlan once that class exists; untyped until then. Debug/test observation.
+signal ai_plan_decided(unit: BaseCombatant, plan)
 #endregion

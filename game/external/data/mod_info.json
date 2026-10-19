@@ -43,6 +43,10 @@
 				"class_name": "ColorData",
 				"table_name": "_id_to_color_data"
 			},
+			"external/data/combat_rules/": {
+				"class_name": "CombatRulesData",
+				"table_name": "_id_to_combat_rules_data"
+			},
 			"external/data/consumable_packs/": {
 				"class_name": "ConsumablePackData",
 				"table_name": "_id_to_consumable_pack_data"

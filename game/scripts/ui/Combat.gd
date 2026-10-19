@@ -450,6 +450,9 @@ func _on_player_turn_started():
 	if _end_combat_check():
 		return
 	
+	# hero's action has started (combat framework signal, emitted alongside player_turn_started)
+	Signals.unit_action_started.emit(player)
+	
 	# unlock and update hand
 	HandManager.set_disable_hand(false)
 	hand.update_hand_card_display()
@@ -478,6 +481,9 @@ func _on_player_turn_ended():
 		await ActionHandler.actions_ended
 	if _end_combat_check():
 		return
+	
+	# hero's action has ended (combat framework signal, emitted alongside player_turn_ended)
+	Signals.unit_action_ended.emit(player)
 
 func _on_player_start_turn_animation_finished():
 	# called from animation player

@@ -49,6 +49,9 @@ func init(_enemy_data: EnemyData):
 	# update_health_bar()
 	layered_health_bar.init(enemy_data.enemy_health, enemy_data.enemy_health_max)
 	
+func _get_default_faction() -> int:
+	return FACTIONS.ENEMY
+
 func get_animation_data() -> AnimationData:
 	var animation_data: AnimationData = Global.get_animation_data(enemy_data.enemy_animation_id)
 	return animation_data

@@ -38,6 +38,7 @@ extends Node
 	["ConsumablePackData", ConsumablePackData, "_id_to_consumable_pack_data", ["consumable_packs/"]],
 	["CustomUIData", CustomUIData, "_id_to_custom_ui_data", ["custom_ui/"]],
 	["CustomSignalData", CustomSignalData, "_id_to_custom_signal_data", ["custom_signals/"]],
+	["CombatRulesData", CombatRulesData, "_id_to_combat_rules_data", ["combat_rules/"]],
 	# prototype data
 	["EnemyData", EnemyData,"_id_to_enemy_data", ["enemies/"]],
 	["CardData", CardData, "_id_to_card_data", ["cards/"]],
@@ -79,6 +80,7 @@ var _id_to_artifact_pack_data: Dictionary[String, ArtifactPackData] = {}
 var _id_to_consumable_pack_data: Dictionary[String, ConsumablePackData] = {}
 var _id_to_custom_ui_data: Dictionary[String, CustomUIData] = {}
 var _id_to_custom_signal_data: Dictionary[String, CustomSignalData] = {}
+var _id_to_combat_rules_data: Dictionary[String, CombatRulesData] = {}
 
 # prototyped data; Read only data that are duplicated into mutable data instances
 var _id_to_enemy_data: Dictionary[String, EnemyData] = {}
@@ -374,14 +376,20 @@ func unpause_game() -> void:
 #endregion
 
 #region Combat and Combat Stats
-## Gets the BaseCombatant representing the player character
+## Gets the BaseCombatant representing the player character (the hero in UnitRegistry).
+## Falls back to the "players" group if no hero is registered.
 func get_player() -> Player:
+	var hero: Player = UnitRegistry.get_hero() as Player
+	if hero != null:
+		return hero
 	return Global.get_tree().get_first_node_in_group("players")
 
+## Living enemy-faction units in scene-tree order (UnitRegistry).
 func get_alive_enemies() -> Array[Enemy]:
 	var returned_enemies: Array[Enemy] = []
-	for enemy: Enemy in Global.get_tree().get_nodes_in_group("enemies_alive_or_dead"):
-		if enemy.is_alive():
+	for unit: BaseCombatant in UnitRegistry.get_units_by_faction(BaseCombatant.FACTIONS.ENEMY, true):
+		var enemy: Enemy = unit as Enemy
+		if enemy != null:
 			returned_enemies.append(enemy)
 	return returned_enemies
 
@@ -522,6 +530,24 @@ func get_custom_ui_data(custom_ui_object_id: String) -> CustomUIData:
 #region Custom Signals
 func get_custom_signal_data(custom_signal_object_id: String) -> CustomSignalData:
 	return _id_to_custom_signal_data.get(custom_signal_object_id, null)
+#endregion
+
+#region Combat Rules
+## Built-in fallback used when no CombatRulesData with DEFAULT_OBJECT_ID is registered
+## (e.g. the pack content profile without a combat_rules/ patch). Values = original behavior.
+var _fallback_combat_rules_data: CombatRulesData = null
+
+func get_combat_rules_data(combat_rules_object_id: String) -> CombatRulesData:
+	return _id_to_combat_rules_data.get(combat_rules_object_id, null)
+
+## The rules every combat reads: CombatRulesData.DEFAULT_OBJECT_ID, or the built-in default.
+func get_combat_rules() -> CombatRulesData:
+	var combat_rules_data: CombatRulesData = get_combat_rules_data(CombatRulesData.DEFAULT_OBJECT_ID)
+	if combat_rules_data != null:
+		return combat_rules_data
+	if _fallback_combat_rules_data == null:
+		_fallback_combat_rules_data = CombatRulesData.new(CombatRulesData.DEFAULT_OBJECT_ID)
+	return _fallback_combat_rules_data
 #endregion
 
 #region Locations

@@ -5,6 +5,7 @@ extends Node
 ## Wrapper method used to generate all data used in testing.
 ## After running this you can use Fileloader.export_read_only_data() to output to json files.
 func generate_test_data() -> void:
+	add_test_combat_rules()
 	add_test_rest_actions()
 	add_test_consumables()
 	
@@ -38,6 +39,13 @@ func generate_test_data() -> void:
 	add_test_artifact_packs()
 	add_test_consumable_packs()
 
+
+#region Combat Rules
+## Registers the framework default rules; every value is the class default (= original behavior).
+func add_test_combat_rules() -> void:
+	var combat_rules_default: CombatRulesData = CombatRulesData.new(CombatRulesData.DEFAULT_OBJECT_ID)
+	Global.register_rod(combat_rules_default)
+#endregion
 
 #region Artifacts
 func add_test_artifacts_to_player() -> void:
