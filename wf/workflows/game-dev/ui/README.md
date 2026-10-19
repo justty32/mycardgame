@@ -6,7 +6,7 @@
 
 ## Done when
 
-選定子流程的任務規格與驗證紀錄存在，列出來源、改動、實測結果與未驗範圍；文件 strict lint 回傳 0。
+選定子流程的任務 spec（`design/specs/`）與驗證紀錄（`design/plans/`）存在，列出來源、改動、實測結果與未驗範圍；文件 strict lint 回傳 0。
 
 ## 流程與導航
 

@@ -44,6 +44,12 @@
    "decision": "引擎基準升 Godot 4.7.x；runner 改單一 Python 實作（tools/test_game.py），ps1 只做 Windows 薄包裝",
    "rejected_and_why": "不續守 4.6：上游 4dac5abe 久未更新，4.7.2 重跑斷言數一致；不維持雙 runner：公司 Windows／家中 Manjaro 跨平台開發，判定規則只留一份",
    "premise": "上游若恢復更新並指定其他引擎版本、或 Windows 實測發現包裝／隔離問題時重看"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "遊戲設計與任務 spec／plan 統一放 repo 根 design/（specs/、plans/、archive/）",
+   "rejected_and_why": "不放 wf/workflows/planning/：wf 是操作流程、非遊戲內容；不放 analysis/：那裡只記框架已核實事實；不用 planning/specs 原寫法：相對位置不明且目錄不存在",
+   "premise": "若設計文件需對外發布或改用外部文件工具時重看"
   }
  ]
 }

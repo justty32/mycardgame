@@ -49,7 +49,7 @@ git rev-parse --show-toplevel
 
 Windows 取得引擎、PowerShell 檢查與 Git Bash/WSL 文件檢查的步驟見 [Windows 補充](dev-env/windows.md)；Linux 主路徑以上述 `godot-mono` 為準。
 
-雜湊只證明 ZIP 符合來源鎖，runner 的版本探測與隔離 All 才是本機執行證據。環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
+環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
 
 只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前先 framework-fixes.patch，再 resource-lifecycle.patch。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)。
 

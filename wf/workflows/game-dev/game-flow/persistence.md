@@ -6,7 +6,7 @@
 
 ## Done when
 
-任務規格存在 run／profile／settings 的資料責任、保存時機、中斷恢復結果、結算後檔案狀態及舊檔政策。實作任務有隔離跨程序的語意與續玩斷言，拒絕載入時原 run 不變；未驗 GUI／匯出明列，文件 strict lint 回傳 0。
+任務 spec（`design/specs/`）寫明 run／profile／settings 的資料責任、保存時機、中斷恢復結果、結算後檔案狀態及舊檔政策。實作任務有隔離跨程序的語意與續玩斷言，拒絕載入時原 run 不變；未驗 GUI／匯出明列，文件 strict lint 回傳 0。
 
 ## 流程
 

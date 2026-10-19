@@ -1,12 +1,12 @@
 # game-dev — AI agent 遊戲開發入口
 
-[WORKFLOWS](../../WORKFLOWS.md)｜[專案地圖](../../INDEX.md)｜[agent 接手與協作](../agent-session.md)
+[WORKFLOWS](../../WORKFLOWS.md)｜[專案地圖](../../INDEX.md)｜[agent 接手與協作](../agent-session.md)｜[遊戲設計](../../../design/README.md)
 
 將使用者需求轉成可驗證的遊戲變更。遊戲工作的共同執行迴圈已寫在下方「流程」節（不再回 feature-dev；feature-dev 只用於 tools／wf 類非遊戲工作），此處依遊戲領域補齊必要的原始碼與驗收。
 
 **何時用**：設計與評量卡牌、敵人或關卡，製作圖像／聲音／UI，新增內容、修改規則／數值、修遊戲 bug 或更新框架。
 
-**何時不用**：只查一個問題 → [investigation](../investigation.md)；單純改文件 → 修改後跑文件 lint；沒有需求的玩法構想 → [planning](../planning.md)。
+**何時不用**：只查一個問題 → [investigation](../investigation.md)；單純改文件 → 修改後跑文件 lint；沒有需求的玩法構想或核心玩法未定 → [planning 遊戲規劃](../planning.md#遊戲規劃)，答案記在 [design/](../../../design/README.md)。
 
 ## 先選修改類型
 
@@ -29,7 +29,7 @@
 | Slay-The-Robot 或 Godot 版本更新 | [上游升級](upstream.md) |
 | 改動應驗到哪、既有測試涵蓋什麼 | [驗證選擇](validation.md) |
 
-先通讀 [agent-session](../agent-session.md) 指定的核心規矩，領域流程按任務取用。例如新卡先設計與評量，再由內容流程接線；需要新 Action 才加機制；需要卡圖或音效則交對應素材流程，最後由 UI／內容完成引用與驗證。
+讀 [agent-session 冷啟動](../agent-session.md#冷啟動)的必讀項，領域流程按任務取用。例如新卡先設計與評量，再由內容流程接線；需要新 Action 才加機制；需要卡圖或音效則交對應素材流程，最後由 UI／內容完成引用與驗證。
 
 ## 流程
 
@@ -49,7 +49,7 @@
 
 ## Done when
 
-- 任務記錄列出需求對應的改動檔與實際驗收結果。
+- 任務記錄列出需求對應的改動檔與實際驗收結果：有 plan 時寫在 `design/plans/` 該檔的驗證段，小改寫在 commit 訊息與交付回報（落點見 [planning](../planning.md#任務規格與-plan-落點)）。
 - validation 選出的命令回傳符合預期，新增行為有針對性證據；未驗部分明列。
 - 受影響的 code-map／教學／工作流已同步，strict lint 回傳 0。
 - 已完成的 SESSION-LOG 條目移除；真正待使用者操作者才留 WAIT_USER。

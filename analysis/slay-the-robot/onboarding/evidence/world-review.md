@@ -14,7 +14,7 @@ WORKFLOWS → agent-session → game-dev 分流至 level-design 的 combat／non
 
 路由是 game-dev → game-flow → vertical-slice／persistence → design/game-flow，另沿 content／bootstrap 建內容、level-design 接節點、testing 接驗證。C 本身可以提出可執行計畫；產品玩法尚未定義是明示未決條件，不是導航缺口。
 
-第一個應寫的是任務規格與計畫（planning/specs、planning/plans 的首份落點由 planning 指引），明定角色、核心決策、局長、兩幕以上、節點、最終 Boss 是否直接結算、checkpoint 及局外保留。第一批遊戲檔是 `game/external/mods/mycardgame/mod_info.json`、角色／玩家 JSON 與 mod_list 登記。候選識別字可為 `character_original`、`player_original`，只是工程佔位，不表示題材已決。CharacterData.character_player_id 對 PlayerData prototype，PlayerData.player_character_object_id 回指角色；新起手卡與獎勵卡包分開接。
+第一個應寫的是任務規格與計畫（落點 design/specs、design/plans，由 planning 指引），明定角色、核心決策、局長、兩幕以上、節點、最終 Boss 是否直接結算、checkpoint 及局外保留。第一批遊戲檔是 `game/external/mods/mycardgame/mod_info.json`、角色／玩家 JSON 與 mod_list 登記。候選識別字可為 `character_original`、`player_original`，只是工程佔位，不表示題材已決。CharacterData.character_player_id 對 PlayerData prototype，PlayerData.player_character_object_id 回指角色；新起手卡與獎勵卡包分開接。
 
 Global.gd:208 的 start_run 會重建玩家、牌組／遺物／卡包／HP／金錢、seed 與 stats；:244 固定 location_0，:279 固定 generate_act("act_1", true)。因此現有內容方案可明確 patch act_1 與它的 next IDs；若要求角色自選起始幕，第一個框架改點是 Global.start_run 並增設明確資料契約，不能把未知欄位塞進角色 JSON。兩幕例需同時設定 PlayerData.player_act_max=2 及 act_1 → 新第二幕；不是只讓最後 act_next_act_ids 為空。
 

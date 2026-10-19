@@ -13,7 +13,7 @@
 
 ## 記錄
 
-已抽到 [decisions.json](decisions.json)（6 列，依時間追加，新的在最後）。
+已抽到 [decisions.json](decisions.json)（7 列，依時間追加，新的在最後）。
 
 欄位：
 - `date`：決定日期（YYYY-MM-DD）。
@@ -21,5 +21,5 @@
 - `rejected_and_why`：未選方案與原因。
 - `premise`：前提，變了就重看。
 
-統計：6 筆，全部為 2026-10-19。
+統計：7 筆，全部為 2026-10-19。
 

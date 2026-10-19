@@ -6,7 +6,7 @@
 
 **何時用**：在公司 Windows 機取得引擎、跑 ps1 包裝或用 WSL／Git Bash 跑文件 lint。
 
-Windows：依 `engine_policy.official_downloads` 下載官方 4.7.2 win64 ZIP 到 `.tools/`，核對 SHA-512 後解壓；沒有下載／安裝授權時不要執行取得或解壓步驟。勿以檔名推定版本。
+Windows：依 `engine_policy.official_downloads` 下載官方 4.7.2 win64 ZIP 到 `.tools/`，核對 SHA-512 後解壓；沒有下載／安裝授權時不要執行取得或解壓步驟。勿以檔名推定版本。雜湊只證明 ZIP 符合來源鎖，runner 的版本探測與隔離 All 才是本機執行證據。
 
 ```powershell
 $PSVersionTable.PSVersion   # ps1 包裝要求 7 以上
