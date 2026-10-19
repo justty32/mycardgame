@@ -50,6 +50,18 @@
    "decision": "遊戲設計與任務 spec／plan 統一放 repo 根 design/（specs/、plans/、archive/）",
    "rejected_and_why": "不放 wf/workflows/planning/：wf 是操作流程、非遊戲內容；不放 analysis/：那裡只記框架已核實事實；不用 planning/specs 原寫法：相對位置不明且目錄不存在",
    "premise": "若設計文件需對外發布或改用外部文件工具時重看"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "發行目標＝免費公開同人（天启预报，不商業）",
+   "rejected_and_why": "不走商業或原創化發行：使用者指定免費同人；因此沿用原作概念名詞、不收原文段落，spire-codex 的非商業授權條件亦不構成阻礙（採用前仍逐項核對）",
+   "premise": "若改商業發行，名詞需原創化並重審 spire-codex 內容採用"
+  },
+  {
+   "date": "2026-10-19",
+   "decision": "戰鬥採多角色輪流出牌＋多組敵人",
+   "rejected_and_why": "不採單一主角對單一敵人的標準爬塔模型：要承載多名角色與敵方多組的概念；代價是需改框架的單一玩家／敵人假設，細節待 spec",
+   "premise": "概念原型驗證後若過於複雜，退回單角色再評估"
   }
  ]
 }
