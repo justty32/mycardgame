@@ -10,6 +10,7 @@ const PROJECTION_COUNT: int = 8
 @onready var tick_label: Label = $TickLabel
 @onready var entry_container: HBoxContainer = $Entries
 var wave_label: Label = null
+var _hovered_uid: String = ""
 
 func _ready() -> void:
 	Signals.combat_started.connect(_on_combat_started)
@@ -28,6 +29,7 @@ func _ready() -> void:
 	visible = false
 
 func refresh() -> void:
+	_on_entry_exited()
 	for child: Node in entry_container.get_children():
 		child.queue_free()
 	var director: CombatDirector = Global.get_combat_director()
@@ -46,6 +48,10 @@ func refresh() -> void:
 		label.text = "%s@%d" % [unit.get_unit_display_name(), entry["tick"]]
 		if unit == director.acting_unit:
 			label.text = "[%s]" % label.text
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
+		label.set_meta("unit_uid", unit.unit_uid)
+		label.mouse_entered.connect(_on_entry_hovered.bind(unit.unit_uid))
+		label.mouse_exited.connect(_on_entry_exited)
 		entry_container.add_child(label)
 
 func _on_combat_started(_event_id: String) -> void:
@@ -65,3 +71,15 @@ func _on_unit_action_started(_unit: BaseCombatant) -> void:
 
 func _on_wave_changed(_wave_index: int) -> void:
 	refresh()
+
+func _on_entry_hovered(uid: String) -> void:
+	_hovered_uid = uid
+	Signals.enemy_hovered.emit(UnitRegistry.get_unit(uid) as Enemy)
+
+func _on_entry_exited() -> void:
+	if _hovered_uid != "":
+		_hovered_uid = ""
+		Signals.enemy_hovered.emit(null)
+
+func _exit_tree() -> void:
+	_on_entry_exited()

@@ -17,6 +17,8 @@ var is_duplicate_play: bool = false	# duplcate plays should not be further dupli
 var acting_unit: BaseCombatant = null
 ## Board cell the player selected; BaseCombatant.BOARD_ANCHOR_NONE when no cell was selected.
 var selected_cell: Vector2i = Vector2i(-1, -1)
+## Explicit selected board; empty means infer from a selected unit or acting unit, never faction.
+var selected_board_id: String = ""
 ## Units resolved from card_shape around selected_cell (HandManager uses them as the action targets
 ## when not empty; empty = legacy [selected_target]).
 var resolved_targets: Array[BaseCombatant] = []

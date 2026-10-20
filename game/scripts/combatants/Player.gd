@@ -28,6 +28,9 @@ func reset_player() -> void:
 		base_speed = character_data.character_speed
 		ignores_occupancy = character_data.character_ignores_occupancy
 		is_immovable = character_data.character_is_immovable
+		ignores_zoc = ignores_occupancy if character_data.character_ignores_zoc < 0 else bool(character_data.character_ignores_zoc)
+		opportunity_actions = character_data.character_opportunity_actions
+		displace_resistance = max(0, character_data.character_displace_resistance)
 
 	reset_block()
 	clear_all_status_effects()

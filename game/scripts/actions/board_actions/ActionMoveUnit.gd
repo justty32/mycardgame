@@ -21,74 +21,75 @@ const REFERENCE_NEAREST_OPPONENT: String = "NEAREST_OPPONENT"
 const REFERENCE_HERO: String = "HERO"
 
 func perform_action() -> void:
-	var board: BoardData = BoardData.get_active()
-	if board == null:
-		return
 	var movers: Array[BaseCombatant] = []
 	if values.has("target_override"):
 		movers = get_adjusted_action_targets()
-	elif parent_combatant != null and is_instance_valid(parent_combatant):
+	elif is_instance_valid(parent_combatant):
 		movers = [parent_combatant]
-	if movers.is_empty():
-		return
-	for action_interceptor_processor: ActionInterceptorProcessor in _intercept_action(movers):
-		var unit: BaseCombatant = action_interceptor_processor.target
-		if unit == null or not is_instance_valid(unit) or not unit.is_alive() or not board.has_unit(unit):
-			continue
-		_move_unit(board, unit, action_interceptor_processor)
+	var actions: Array[BaseAction] = []
+	if card_play_request != null:
+		card_play_request.card_values["moved_cells"] = 0
+	for unit: BaseCombatant in movers:
+		actions.append(BoardMovementDispatch.new(self, unit, &"_move_unit"))
+	ActionHandler.add_ordered_actions(actions)
 
 func _move_unit(board: BoardData, unit: BaseCombatant, processor: ActionInterceptorProcessor) -> void:
 	var mode: String = str(processor.get_shadowed_action_values("mode", MODE_TO_CELL))
 	var distance: int = int(processor.get_shadowed_action_values("distance", -1))
 	if distance == 0:
 		return
-	var consumes_move_points: bool = bool(processor.get_shadowed_action_values("consumes_move_points", false))
-	var budget: int = distance
-	if consumes_move_points:
-		var available: int = unit.move_points + max(0, board.rules.paid_move_max_cells - unit.paid_cells_this_action)
-		budget = available if budget < 0 else min(budget, available)
-		if budget <= 0:
-			return
+	var teleport: bool = mode == MODE_TELEPORT or not bool(processor.get_shadowed_action_values("use_path", true))
+	if teleport and bool(processor.get_shadowed_action_values("teleport_blocked", false)):
+		return
+	var target_board_id: String = str(processor.get_shadowed_action_values("target_board_id", ""))
+	if target_board_id == "" and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and card_play_request.selected_board_id != "" and card_play_request.selected_board_id != board.board_id and (teleport or mode == MODE_TO_CELL):
+		return
+	if target_board_id == "SELECTED" and card_play_request != null:
+		target_board_id = card_play_request.selected_board_id
+	if target_board_id != "" and target_board_id != board.board_id:
+		# An explicit teleport/direct placement authorizes crossing. Ordinary paths never do.
+		if teleport:
+			BoardTransferAction.move_unit(self, unit, target_board_id, _get_target_cell(processor), false, bool(processor.get_shadowed_action_values("ignore_zoc", false)))
+		return
+	var consumes: bool = bool(processor.get_shadowed_action_values("consumes_move_points", false)) and not teleport
+	var ignore_zoc: bool = bool(processor.get_shadowed_action_values("ignore_zoc", false))
 	var from: Vector2i = unit.board_anchor
 	var destination: Vector2i = from
 	var path: Array[Vector2i] = []
-	match mode:
-		MODE_TELEPORT:
-			destination = _get_target_cell(processor)
-			if destination == from or not board.can_stand(unit, destination):
+	var reachable: Dictionary = board.reachable_active(unit, ignore_zoc, distance) if consumes else board.reachable_steps(unit, distance, ignore_zoc)
+	if teleport:
+		destination = _get_target_cell(processor)
+		if destination == from or not board.can_teleport(unit, destination):
+			return
+		if distance >= 0 and board.distance(from, destination) > distance:
+			return
+		path = [destination]
+	elif processor.get_shadowed_action_values("planned_path", null) != null:
+		for value: Variant in processor.get_shadowed_action_values("planned_path", []):
+			path.append(EncounterData.cell_from_json(value))
+		var previous: Vector2i = from
+		for cell: Vector2i in path:
+			if not BoardPathfinding.neighbours(board).has(cell - previous):
 				return
-			if budget >= 0 and board.distance(from, destination) > budget:
-				return
-		MODE_TOWARD, MODE_AWAY:
-			var reference: BaseCombatant = _get_reference_unit(board, unit, processor)
-			if reference == null or not board.has_unit(reference):
-				return
-			var stop_at_distance: int = int(processor.get_shadowed_action_values("stop_at_distance", 1))
-			var choice: Array = _choose_relative(board, unit, reference, budget, mode == MODE_TOWARD, stop_at_distance)
-			destination = choice[0]
-			path.assign(choice[1])
-		_:
-			destination = _get_target_cell(processor)
-			if destination == from:
-				return
-			path = board.find_path(unit, destination, budget)
-			if path.is_empty():
-				return
-	if destination == from or not board.move(unit, destination):
+			previous = cell
+		if path.is_empty() or (distance >= 0 and path.size() > distance):
+			return
+	elif mode == MODE_TOWARD or mode == MODE_AWAY:
+		var reference: BaseCombatant = _get_reference_unit(board, unit, processor)
+		if reference == null or not board.has_unit(reference):
+			return
+		var stop: int = int(processor.get_shadowed_action_values("stop_at_distance", 1))
+		var choice: Array = _choose_relative(board, unit, reference, distance, mode == MODE_TOWARD, stop, reachable, ignore_zoc)
+		path.assign(choice[1])
+	else:
+		destination = _get_target_cell(processor)
+		path.assign(reachable.get(destination, []))
+	if path.is_empty():
 		return
-	var cells_moved: int = len(path) if mode != MODE_TELEPORT else board.distance(from, destination)
-	unit.cells_moved_this_action += cells_moved
-	if consumes_move_points:
-		var free_cells: int = min(cells_moved, unit.move_points)
-		var paid_cells: int = cells_moved - free_cells
-		unit.move_points -= free_cells
-		unit.paid_cells_this_action += paid_cells
-		unit.action_extra_delay += paid_cells * board.rules.extra_move_delay_per_cell
-		if paid_cells > 0:
-			Signals.timeline_changed.emit()
+	board.capture_move_start(unit)
 	if card_play_request != null:
-		card_play_request.card_values["moved_cells"] = cells_moved
-	Signals.unit_moved.emit(unit, from, destination)
+		board.invalidate_undo(unit)
+	BoardMoveSequence.start(board, unit, path, self, {"teleport": teleport, "consumes": consumes, "ignore_zoc": ignore_zoc, "path_actions": processor.get_shadowed_action_values("path_actions", []), "distance": distance, "charge": bool(processor.get_shadowed_action_values("charge", false))})
 
 func _get_target_cell(processor: ActionInterceptorProcessor) -> Vector2i:
 	var cell: Vector2i = EncounterData.cell_from_json(processor.get_shadowed_action_values("target_cell", null))
@@ -118,8 +119,8 @@ func _get_reference_unit(board: BoardData, unit: BaseCombatant, processor: Actio
 
 ## [anchor, path]: TOWARD = shortest path to within stop_at_distance, else closest;
 ## AWAY = farthest from the reference. Ties: shorter path, then smaller y, then smaller x.
-func _choose_relative(board: BoardData, unit: BaseCombatant, reference: BaseCombatant, budget: int, toward: bool, stop_at_distance: int) -> Array:
-	var reachable: Dictionary = board.reachable_cells(unit, budget)
+func _choose_relative(board: BoardData, unit: BaseCombatant, reference: BaseCombatant, budget: int, toward: bool, stop_at_distance: int, supplied_reachable: Dictionary = {}, ignore_zoc: bool = false) -> Array:
+	var reachable: Dictionary = supplied_reachable if not supplied_reachable.is_empty() else board.reachable_cells(unit, budget, null, ignore_zoc)
 	var best_anchor: Vector2i = unit.board_anchor
 	var best_key: int = -1
 	for anchor: Vector2i in reachable:
@@ -129,7 +130,7 @@ func _choose_relative(board: BoardData, unit: BaseCombatant, reference: BaseComb
 			primary = 0 if distance <= stop_at_distance else 1 + distance
 		else:
 			primary = 999 - min(998, distance)
-		var key: int = BoardData.sort_key([primary, len(reachable[anchor]), anchor.y, anchor.x])
+		var key: int = BoardData.sort_key([primary, board.path_cost(unit, reachable[anchor], ignore_zoc), anchor.y, anchor.x])
 		if best_key < 0 or key < best_key:
 			best_key = key
 			best_anchor = anchor

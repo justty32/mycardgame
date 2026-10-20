@@ -48,9 +48,7 @@ tooltip fixture 準備至少一個有效 KeywordData；呼叫 hover／timeout ha
 
 ### C：版面、字型與證據層級
 
-固定 fixture 文案（長名、繁中標點、空值、多段數字、BBCode icon），在每個提案 viewport 等 layout／字級穩定後，斷言必要 rect 位於可用區、間距、minimum size、可見性、實際取到的 theme font 與最低字級。tooltip 的 window size 來源可能與背景 viewport 不同，需先改成可驗證的幾何輸入或明列無法驗的座標差，不能用 headless 預設視窗值冒充目標 viewport。
-
-背景字型 cmap 只能驗字元存在；scene／rect 只驗幾何。字形／換行可讀、遮擋、alpha／對比、DPI、真實命中與手把操作需要另一層實證，當前不執行。沒有自動視覺比對工具，不建立虛假的 screenshot PASS。
+版面 fixture、虛擬 viewport、動畫基準與證據分層見 [headless 幾何驗證](headless-geometry.md)。保留可用區、裁切、落腳與重開 run 斷言；不能用 headless 預設視窗值冒充目標尺寸。
 
 ## 命令與交接
 

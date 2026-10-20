@@ -3,11 +3,12 @@
 extends BaseValidator
 
 func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[String, Variant]) -> bool:
-	var board: BoardData = BoardData.get_active()
 	var parent: BaseCombatant = BoardTargeting.context_parent(action)
+	var board: BoardData = BoardTargeting.context_board(action, parent)
 	if board == null or parent == null:
 		return true
 	var cell: Vector2i = BoardTargeting.context_cell(action, _get_validator_value("cell", values, action, "SELECTED_CELL"))
 	if cell == BaseCombatant.BOARD_ANCHOR_NONE:
 		return true
-	return board.can_stand(parent, cell)
+	var query: Dictionary = BoardTargeting.geometry(board, parent, cell, BoardTargeting.TARGET_SHAPES.SINGLE)
+	return query.valid and board.can_stand(parent, cell)

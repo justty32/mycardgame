@@ -1,7 +1,7 @@
 ## Fixed phases of one unit action on the combat timeline (status-effect hooks, legacy turn
 ## signals, draw / discard, overlay animations), called by CombatDirector around the controller's
 ## decide(). Party units: begin = animation, player_turn_started, energy, block reset, PRE_DRAW,
-## draw, POST_DRAW + UNIT_ACTION_START, unit_action_started; end = animation, player_turn_ended,
+## unit_action_started + field stay, draw, POST_DRAW + UNIT_ACTION_START; end = animation, player_turn_ended,
 ## PRE_DISCARD, discard, POST_DISCARD + UNIT_ACTION_END, unit_action_ended. Enemies: PRE_ENEMY_TURN,
 ## PRE_ENEMY_INTENT + UNIT_ACTION_START, unit_action_started / POST_ENEMY_INTENT, POST_ENEMY_TURN +
 ## UNIT_ACTION_END, unit_action_ended, enemy_turn_ended.
@@ -11,6 +11,8 @@ class_name CombatActionPhases
 static func begin_party_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
 	HandManager.set_disable_hand(true)
 	unit.reset_action_movement(director.rules.free_move_per_action)
+	if director.board_controller != null:
+		director.board_controller.reset_action_state(unit)
 	if unit.is_hero():
 		StatsHandler.begin_hero_action()	# turn count = hero actions; before the overlay reads it
 	await play_combat_animation(director, CombatDirector.ANIMATION_ACTION_START)
@@ -27,6 +29,13 @@ static func begin_party_action(director: CombatDirector, unit: BaseCombatant, ge
 	await director.wait_actions(generation)
 	if director.is_aborted(generation):
 		return
+	Signals.unit_action_started.emit(unit)
+	var fields: FieldController = FieldController.get_for_unit(unit)
+	if fields != null:
+		fields.on_unit_action_started(unit)
+	await director.wait_actions(generation)
+	if director.is_aborted(generation) or not unit.is_alive():
+		return
 	ActionGenerator.generate_start_of_turn_draw_actions()
 	await director.wait_actions(generation)
 	if director.is_aborted(generation):
@@ -36,7 +45,6 @@ static func begin_party_action(director: CombatDirector, unit: BaseCombatant, ge
 	await director.wait_actions(generation)
 	if director.is_aborted(generation):
 		return
-	Signals.unit_action_started.emit(unit)
 	HandManager.set_disable_hand(false)
 	if HandManager.hand != null:
 		HandManager.hand.update_hand_card_display()
@@ -77,6 +85,8 @@ static func play_combat_animation(director: CombatDirector, animation_name: Stri
 
 static func begin_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
 	unit.reset_action_movement(0)
+	if director.board_controller != null:
+		director.board_controller.reset_action_state(unit)
 	Signals.enemy_turn_started.emit()	# legacy signal: one enemy's action begins
 	# both legacy pairs fire for this enemy's own action (old data stays valid)
 	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
@@ -89,6 +99,10 @@ static func begin_enemy_action(director: CombatDirector, unit: BaseCombatant, ge
 	if director.is_aborted(generation):
 		return
 	Signals.unit_action_started.emit(unit)
+	var fields: FieldController = FieldController.get_for_unit(unit)
+	if fields != null:
+		fields.on_unit_action_started(unit)
+	await director.wait_actions(generation)
 
 static func end_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
 	if unit.is_alive():

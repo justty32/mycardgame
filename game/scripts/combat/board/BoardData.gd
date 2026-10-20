@@ -9,12 +9,72 @@ class_name BoardData
 const NEIGHBOURS_FOUR: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
 const UNLIMITED: int = -1
 
+var board_id: String = "shared"
 var size: Vector2i = Vector2i(5, 5)
 var rules: CombatRulesData = null
 var cells: Dictionary[Vector2i, BoardCellData] = {}
 ## unit_uid -> covered cells (anchor first).
 var unit_cells: Dictionary[String, Array] = {}
 var _uid_to_unit: Dictionary[String, Variant] = {}
+var fields: Dictionary = {}
+var field_controller: WeakRef = null
+var movement_state: BoardMovementState = BoardMovementState.new()
+
+func get_fields(cell: Vector2i, tag: String = "") -> Array[FieldInstance]:
+	var found: Array[FieldInstance] = []
+	for instance: FieldInstance in fields.get(cell, []):
+		if tag == "" or instance.field_data.field_tags.has(tag):
+			found.append(instance)
+	return found
+
+func is_cell_enterable(cell: Vector2i, _unit: BaseCombatant = null) -> bool:
+	if is_blocked(cell):
+		return false
+	for instance: FieldInstance in get_fields(cell):
+		if instance.field_data.field_blocks_movement:
+			return false
+	return true
+
+func can_teleport(unit: BaseCombatant, anchor: Vector2i, ignored_units: Array = []) -> bool:
+	if not can_stand(unit, anchor, ignored_units):
+		return false
+	for cell: Vector2i in footprint_cells(anchor, unit.footprint):
+		for instance: FieldInstance in get_fields(cell):
+			if instance.field_data.field_blocks_teleport_into:
+				return false
+	return true
+
+func step_cost(unit: BaseCombatant, from: Vector2i, to: Vector2i, ignore_zoc: bool = false) -> int:
+	return BoardPathfinding.step_cost(self, unit, from, to, ignore_zoc)
+
+func path_cost(unit: BaseCombatant, path: Array, ignore_zoc: bool = false) -> int:
+	var cost: int = 0
+	var previous: Vector2i = unit.board_anchor
+	for cell: Vector2i in path:
+		cost += step_cost(unit, previous, cell, ignore_zoc)
+		previous = cell
+	return cost
+
+func zoc_controllers(unit: BaseCombatant, from: Vector2i, ignore_zoc: bool = false, forced: bool = false) -> Array[BaseCombatant]:
+	return movement_state.zoc_controllers(self, unit, from, ignore_zoc, forced)
+
+func preview_opportunity_damage(unit: BaseCombatant, from: Vector2i, ignore_zoc: bool = false, forced: bool = false) -> int:
+	return movement_state.preview_damage(self, unit, from, ignore_zoc, forced)
+
+func reset_action_state(_unit: BaseCombatant) -> void:
+	movement_state.reset()
+
+func invalidate_undo(unit: BaseCombatant) -> void:
+	movement_state.invalidate(unit)
+
+func capture_move_start(unit: BaseCombatant) -> void:
+	movement_state.capture(unit)
+
+func can_undo_move(unit: BaseCombatant) -> bool:
+	return movement_state.can_undo(self, unit)
+
+func undo_move(unit: BaseCombatant) -> bool:
+	return movement_state.undo(self, unit)
 
 func _init(board_size: Vector2i = Vector2i(5, 5), combat_rules: CombatRulesData = null) -> void:
 	size = Vector2i(max(1, board_size.x), max(1, board_size.y))
@@ -22,6 +82,15 @@ func _init(board_size: Vector2i = Vector2i(5, 5), combat_rules: CombatRulesData 
 	for y: int in size.y:
 		for x: int in size.x:
 			cells[Vector2i(x, y)] = BoardCellData.new()
+
+## Resolve the unit's actual board; faction never determines current membership.
+static func get_for_unit(unit: BaseCombatant) -> BoardData:
+	var director: CombatDirector = Global.get_combat_director()
+	if director == null or unit == null:
+		return null
+	if director.battlefield != null:
+		return director.battlefield.get_board_for_unit(unit)
+	return director.board if director.board != null and director.board.has_unit(unit) else null
 
 ## The board of the running combat, or null.
 static func get_active() -> BoardData:
@@ -67,7 +136,7 @@ static func footprint_cells(anchor: Vector2i, footprint: Vector2i) -> Array[Vect
 
 #region Units
 func has_unit(unit: BaseCombatant) -> bool:
-	return unit != null and unit_cells.has(unit.unit_uid)
+	return is_instance_valid(unit) and unit.board_id == board_id and unit_cells.has(unit.unit_uid)
 
 func get_unit_at(cell: Vector2i) -> BaseCombatant:
 	var cell_data: BoardCellData = get_cell(cell)
@@ -106,6 +175,7 @@ func place(unit: BaseCombatant, anchor: Vector2i) -> bool:
 	unit_cells[unit.unit_uid] = covered
 	_uid_to_unit[unit.unit_uid] = unit
 	unit.board_anchor = anchor
+	unit.board_id = board_id
 	return true
 
 func remove(unit: BaseCombatant) -> void:
@@ -132,6 +202,7 @@ func move(unit: BaseCombatant, anchor: Vector2i) -> bool:
 		cells[cell].occupant_uid = unit.unit_uid
 		covered.append(cell)
 	unit.board_anchor = anchor
+	unit.board_id = board_id
 	return true
 
 ## Exchanges the anchors of two placed units with equal footprints.
@@ -140,6 +211,8 @@ func swap(unit_a: BaseCombatant, unit_b: BaseCombatant) -> bool:
 		return false
 	var anchor_a: Vector2i = unit_a.board_anchor
 	var anchor_b: Vector2i = unit_b.board_anchor
+	if not can_teleport(unit_a, anchor_b, [unit_b]) or not can_teleport(unit_b, anchor_a, [unit_a]):
+		return false
 	remove(unit_a)
 	remove(unit_b)
 	place(unit_a, anchor_b)
@@ -180,7 +253,7 @@ func unit_distance_to_cell(unit: BaseCombatant, cell: Vector2i) -> int:
 
 ## Smallest distance between any cells of two units (a footprint may be hypothetical: from_anchor).
 func unit_distance(unit_a: BaseCombatant, unit_b: BaseCombatant, from_anchor: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE) -> int:
-	if unit_a == null or unit_b == null or not has_unit(unit_b):
+	if not has_unit(unit_a) or not has_unit(unit_b):
 		return 1 << 30
 	var anchor: Vector2i = from_anchor if from_anchor != BaseCombatant.BOARD_ANCHOR_NONE else unit_a.board_anchor
 	if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
@@ -212,65 +285,30 @@ func footprint_fits(footprint: Vector2i, anchor: Vector2i) -> bool:
 
 func _footprint_fits(unit: BaseCombatant, footprint: Vector2i, anchor: Vector2i, ignored_units: Array) -> bool:
 	for cell: Vector2i in footprint_cells(anchor, footprint):
-		if not is_in_bounds(cell) or is_blocked(cell):
+		if not is_cell_enterable(cell, unit):
 			return false
 		var occupant: BaseCombatant = get_unit_at(cell)
 		if occupant != null and occupant != unit and not ignored_units.has(occupant):
 			return false
 	return true
 
-func _can_pass(unit: BaseCombatant, anchor: Vector2i, ignore_occupancy: bool) -> bool:
-	if not ignore_occupancy:
-		return can_stand(unit, anchor)
-	for cell: Vector2i in footprint_cells(anchor, unit.footprint):
-		if not is_in_bounds(cell):
-			return false
-	return true
+func can_pass(unit: BaseCombatant, anchor: Vector2i, ignore_occupancy: Variant = null) -> bool:
+	return BoardPathfinding.can_pass(self, unit, anchor, ignore_occupancy)
 
-## Breadth-first search from the unit's anchor (N, E, S, W expansion; deterministic).
-## Returns reachable anchor -> path (cells after the start, destination last); the start maps to [].
-## budget UNLIMITED (-1) = no length limit. ignore_occupancy (flying) passes over units and blocked
-## cells but never stops on them. Units off the board reach nothing.
-func reachable_cells(unit: BaseCombatant, budget: int = UNLIMITED, ignore_occupancy: Variant = null) -> Dictionary:
-	var returned: Dictionary = {}
-	if unit == null or not has_unit(unit):
-		return returned
-	var flying: bool = unit.ignores_occupancy if ignore_occupancy == null else bool(ignore_occupancy)
-	var start: Vector2i = unit.board_anchor
-	var parents: Dictionary = {start: start}
-	var depth: Dictionary = {start: 0}
-	var frontier: Array[Vector2i] = [start]
-	returned[start] = [] as Array[Vector2i]
-	while not frontier.is_empty():
-		var current: Vector2i = frontier.pop_front()
-		if budget != UNLIMITED and depth[current] >= budget:
-			continue
-		for offset: Vector2i in NEIGHBOURS_FOUR:
-			var next: Vector2i = current + offset
-			if parents.has(next) or not _can_pass(unit, next, flying):
-				continue
-			parents[next] = current
-			depth[next] = depth[current] + 1
-			frontier.append(next)
-			if can_stand(unit, next):
-				returned[next] = _build_path(parents, start, next)
-	return returned
+## Deterministic weighted search shared by previews and execution.
+func reachable_cells(unit: BaseCombatant, budget: int = UNLIMITED, ignore_occupancy: Variant = null, ignore_zoc: bool = false) -> Dictionary:
+	return BoardPathfinding.reachable(self, unit, budget, ignore_occupancy, ignore_zoc)
 
-## Shortest path from the unit's anchor to an anchor ([] = unreachable or already there).
-func find_path(unit: BaseCombatant, to: Vector2i, budget: int = UNLIMITED) -> Array[Vector2i]:
+func reachable_active(unit: BaseCombatant, ignore_zoc: bool = false, max_steps: int = -1) -> Dictionary:
+	return BoardPathfinding.reachable_active(self, unit, ignore_zoc, max_steps)
+
+func reachable_steps(unit: BaseCombatant, max_steps: int, ignore_zoc: bool = false) -> Dictionary:
+	return BoardPathfinding.reachable_steps(self, unit, max_steps, ignore_zoc)
+
+func find_path(unit: BaseCombatant, to: Vector2i, budget: int = UNLIMITED, ignore_zoc: bool = false) -> Array[Vector2i]:
 	var returned: Array[Vector2i] = []
-	var reachable: Dictionary = reachable_cells(unit, budget)
-	if reachable.has(to):
-		returned.assign(reachable[to])
+	returned.assign(reachable_cells(unit, budget, null, ignore_zoc).get(to, []))
 	return returned
-
-func _build_path(parents: Dictionary, start: Vector2i, destination: Vector2i) -> Array[Vector2i]:
-	var path: Array[Vector2i] = []
-	var current: Vector2i = destination
-	while current != start:
-		path.push_front(current)
-		current = parents[current]
-	return path
 
 ## NEAREST_EMPTY spawn rule: the free anchor nearest to origin (by distance), not in the deploy zone;
 ## ties: spawn-zone cells first, then smaller y, then smaller x. Falls back to the deploy zone too.

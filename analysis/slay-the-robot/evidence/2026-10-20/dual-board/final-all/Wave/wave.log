@@ -1,0 +1,140 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: project is in an isolated artifacts copy
+BOUNDARY: one three-wave combat with declared data fixtures; UI handler/signals, not mouse coordinates; the combat ends through the real victory path and the scene is freed.
+FIXTURE: seed=20261019; red 200 HP speed 10, deck=5 native Basic Block; default 5x5 board, hero (2,4); idle grunts (5 HP) and a minion (300 HP); waves 0/1/2 add 10 money each on clear; strike card 10 damage, cost 0.
+PASS: Start Run button creates a real run
+PASS: start-option handler opens the travel map
+PASS: generated map contains an adjacent combat destination
+PASS: map button starts the wave combat and the hero's first action becomes ready
+PASS: encounter has 3 waves; wave 0 started with the combat
+PASS: wave_started(0) fired once at tick 0
+PASS: wave 0 grunt stands on (2,0) and is the only enemy
+PASS: WaveLabel shows Wave 1/3
+PASS: card added to hand: wave_card_strike
+PASS: wave_card_strike played on (2, 0)
+PASS: wave 0 grunt dies and its death animation ends
+PASS: wave_cleared(0) fired at tick 0 after the grunt died
+PASS: wave_on_cleared_actions of wave 0 added 10 money
+PASS: combat continues after wave 0 (not the last wave)
+PASS: between waves: no living enemy, but Global.are_remaining_enemies() asks the director and stays true
+PASS: wave 1 scheduled: start and minion at 0 + 300, grunt at + 100 stagger (400)
+PASS: card added to hand: card_block_basic
+PASS: card_block_basic played
+PASS: Basic Block played between waves still grants its block (0 -> 10)
+PASS: End Turn runs wave 1's entries and returns to the hero at tick 1000
+PASS: hero's second action at tick 1000
+PASS: wave_started(1) fired at tick 300 (clear tick 0 + enter delay 300)
+PASS: the wave 0 grunt died before acting; the wave 1 minion entered on (0,0) and acted first, at tick 300
+PASS: WAIT_UNTIL_FREE: the grunt for occupied (0,0) waited at 400 and 450, then entered on the nearest cell (1,0) at 500
+PASS: no wave 1 entry pending or skipped
+PASS: WaveLabel shows Wave 2/3
+PASS: card added to hand: wave_card_strike
+PASS: wave_card_strike played on (1, 0)
+PASS: wave 1 grunt dies and its death animation ends
+PASS: wave_cleared(1) fired at tick 1000 with the minion still alive
+PASS: the wave 1 minion stays alive into wave 2
+PASS: wave 1 clear added 10 more money; combat continues
+UnitSpawner: wave 2 unit wave_grunt at (0, 0) skipped at tick 1200: cell occupied (FAIL_SKIP)
+PASS: End Turn runs wave 2's entries and returns to the hero at tick 2000
+PASS: wave_started(2) fired at tick 1200 (clear tick 1000 + enter delay 200)
+PASS: FAIL_SKIP: the grunt for occupied (0,0) was skipped at tick 1200
+PASS: wave 2 grunt entered on (4,0) and acted at tick 1200
+PASS: WaveLabel shows Wave 3/3
+PASS: last wave started but not cleared yet
+PASS: card added to hand: wave_card_strike
+PASS: wave_card_strike played on (4, 0)
+PASS: last wave grunt dies and the combat ends
+PASS: wave_cleared(2) then combat_ended, only after the last wave: [["started",0,0],["cleared",0,0],["started",1,300],["cleared",1,1000],["started",2,1200],["cleared",2,2000],["ended",-1,2000]]
+PASS: money accumulated per cleared wave: +10 x 3 (100 -> 130)
+PASS: victory: hero alive, director stopped
+PASS: combat_ended fired exactly once
+PASS: complete wave scenario returned
+PASS: freed run screen leaves no combat director behind
+WAVE PASS: 48 checks, 0 failures

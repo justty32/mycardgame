@@ -14,7 +14,7 @@
 
 `game/scripts/combat/board/` 下有四支：
 
-- [BoardData.gd](../../../../game/scripts/combat/board/BoardData.gd)：格子、佔格、距離、BFS 尋路與 NEAREST_EMPTY。
+- [BoardData.gd](../../../../game/scripts/combat/board/BoardData.gd)：格子、佔格、距離、由 BoardPathfinding 提供加權 Dijkstra 尋路與 NEAREST_EMPTY。
 - [BoardTargeting.gd](../../../../game/scripts/combat/board/BoardTargeting.gd)：形狀、陣營與出牌目標檢查，另提供 Validator 的上下文。
 - [IntentResolver.gd](../../../../game/scripts/combat/board/IntentResolver.gd)：敵人意圖的目標、預計格與命中。
 - [ThreatPreview.gd](../../../../game/scripts/combat/board/ThreatPreview.gd)：預計受傷。
@@ -26,3 +26,13 @@ UI 是 [BoardView.gd](../../../../game/scripts/ui/BoardView.gd)，由 Combat 在
 ## 測試
 
 Smoke 呼叫 [unit_registry_probe.gd](../../../../tests/unit_registry_probe.gd)，驗合成遭遇與純棋盤查詢。suite Ctb 跑 [ctb_flow.gd](../../../../tests/ctb_flow.gd) 加 [ctb_fixture.gd](../../../../tests/ctb_fixture.gd)。suite Wave 跑 [wave_flow.gd](../../../../tests/wave_flow.gd)，情境在 [wave_cases.gd](../../../../tests/wave_cases.gd)，fixture 在 [wave_fixture.gd](../../../../tests/wave_fixture.gd)。suite Board 跑 [board_flow.gd](../../../../tests/board_flow.gd)，情境在 [board_cases.gd](../../../../tests/board_cases.gd)，fixture 在 [board_fixture.gd](../../../../tests/board_fixture.gd)。
+
+## 雙盤 A 與 Phase 2b
+
+位置與策略由 [BoardPosition](../../../../game/scripts/combat/board/BoardPosition.gd)、[CombatBattlefield](../../../../game/scripts/combat/board/CombatBattlefield.gd)、[CrossBoardPolicy](../../../../game/scripts/combat/board/CrossBoardPolicy.gd) 管理；[BoardActionGeometry](../../../../game/scripts/combat/board/BoardActionGeometry.gd) 集中檢查巢狀動作與費用前拒絕。正常新局預設 DUAL，舊幾何回歸顯式 SINGLE，不能用 faction 取代目前盤身分。
+
+[FieldController](../../../../game/scripts/combat/board/FieldController.gd) 每盤一個；[FieldClockAction](../../../../game/scripts/combat/board/FieldClockAction.gd) 全盤動態補刻，[FieldEventAction](../../../../game/scripts/combat/board/FieldEventAction.gd) 管進出／停留與 owner／generation，[FieldPreview](../../../../game/scripts/combat/board/FieldPreview.gd) 提供純傷害與收益估值。ActionHandler 的 ordered 子樹保留 legacy queue/stack，外部重入與真正子動作分開。
+
+[BoardPathfinding](../../../../game/scripts/combat/board/BoardPathfinding.gd) 管 Dijkstra，[BoardMovementState](../../../../game/scripts/combat/board/BoardMovementState.gd) 管 ZOC 與 undo；[BoardMoveSequence](../../../../game/scripts/actions/board_actions/BoardMoveSequence.gd) 逐格反應，[BoardTransferAction](../../../../game/scripts/actions/board_actions/BoardTransferAction.gd) 原子轉移後發事件。意圖位置接點見 [board-intents](../../../../analysis/slay-the-robot/design/board-intents.md)。
+
+[BoardActorPresentation](../../../../game/scripts/ui/BoardActorPresentation.gd) 映射實際 sprite/HUD/hitbox 到兩盤，保留父節點與 UID，動畫位置不回寫資料格。專項為 [Field](../../../../tests/field_flow.gd)、[DualBoard](../../../../tests/dual_board_flow.gd)；需求／測試／證據依 [雙盤矩陣](../../../../analysis/slay-the-robot/design/dual-board/verification.json)。開發流程見 [fields-zoc](../../game-dev/fields-zoc.md)。

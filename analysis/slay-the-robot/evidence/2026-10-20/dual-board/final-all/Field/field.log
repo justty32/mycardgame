@@ -1,0 +1,447 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: Field uses an isolated artifacts copy
+BOUNDARY: real Root run and handler actions; placement/rule changes are declared fixture setup; no screen, keyboard, mouse or GUI operations.
+FIXTURE: seed=20261019; red 200 HP speed 10, deck=5 native Basic Block; rules free move 1, paid 2 cells x 20 delay; 7x5 board, hero (3,4), idle dummies 1x1 (0,0) and 2x2 (5,0); test cards cost 0.
+FIELD FIXTURE: same 7x5 real run; hero 2000 HP, 12 free move; field definitions registered through JSON patch schema; field actions have no audio.
+PASS: BoardView exists and is hidden outside combat
+PASS: Start Run button creates a real run
+PASS: start-option handler opens the travel map
+PASS: generated map contains an adjacent combat destination
+PASS: map button starts the board combat and the hero's first action becomes ready
+PASS: director built a board for the encounter
+PASS: ordered cases start with an idle live-combat handler
+PASS: mixed ordered batches drain
+PASS: ordered mixed queue/stack/front batches preserve E,D,C,A,B before continuation: ["E", "D", "C", "A", "B", "continue"]
+PASS: nested ordered descendants drain
+PASS: grandchild finishes before its parent's sibling and movement continuation
+PASS: synchronous async child does not await an already-fired signal
+PASS: ordered synchronous async completion emits once and keeps descendants moving
+PASS: external enqueue fixture arrives during a real action delay
+PASS: external enqueue during delay drains
+PASS: independent enqueue keeps public queue semantics instead of becoming a reaction child: ["delay", "continue", "external"]
+PASS: external stack fixture arrives during a real action delay
+PASS: external stack during delay drains
+PASS: independent stack keeps public queue semantics instead of becoming a reaction child: ["delay", "continue", "external"]
+PASS: external front fixture arrives during a real action delay
+PASS: external front during delay drains
+PASS: independent front keeps public queue semantics instead of becoming a reaction child: ["delay", "external", "continue"]
+PASS: external ordered fixture arrives during a real action delay
+PASS: external ordered during delay drains
+PASS: independent ordered keeps public queue semantics instead of becoming a reaction child: ["delay", "continue", "external"]
+PASS: asynchronous child identified by ancestry drains
+PASS: genuine asynchronous descendant still finishes before the parent's continuation
+PASS: ordered parent cancellation reaches a real suspended action
+PASS: ordered parent cancellation finishes and ends exactly once
+PASS: clear callbacks cannot resurrect ordered or legacy work; all descendants cancelled
+PASS: cancelled ordered wait is released after its queue and fixture scope are cleared
+PASS: ordered child cancellation reaches a real suspended action
+PASS: ordered child cancellation finishes and ends exactly once
+PASS: clear callbacks cannot resurrect ordered or legacy work; all descendants cancelled
+PASS: cancelled ordered wait is released after its queue and fixture scope are cleared
+PASS: nested production AttackGenerator and continuation drain
+PASS: both production generated attacks change health before the following continuation
+PASS: encounter_initial_fields installs before wave without default spawn damage
+PASS: board actions complete
+PASS: FieldData JSON patch registered duration and tick interval
+PASS: FieldData public JSON serialization round-trips typed action payloads
+PASS: board actions complete
+PASS: ActionCreateField duration_override uses creation clock
+PASS: board actions complete
+PASS: REPLACE replaces same-id instance instead of doubling payload
+PASS: board actions complete
+PASS: IGNORE preserves original instance and stack count
+PASS: board actions complete
+PASS: STACK increments same-id stack count
+PASS: board actions complete
+PASS: STACK executes enter damage once per stack through real handler
+PASS: board actions complete
+PASS: ActionRemoveField tag removes matching fields across board
+PASS: board actions complete
+PASS: board actions complete
+PASS: field_id plus explicit cell removal leaves other instances
+PASS: board actions complete
+PASS: board actions complete
+PASS: ActionSetCellBlocked updates path queries
+PASS: board actions complete
+PASS: board actions complete
+PASS: field_blocks_movement excludes its cell from reachable endpoints
+PASS: board actions complete
+PASS: board actions complete
+PASS: teleport-only blocker preserves normal walkability
+PASS: board actions complete
+PASS: ActionMoveUnit TELEPORT rejects field_blocks_teleport_into
+PASS: board actions complete
+PASS: board actions complete
+PASS: field_move_cost_override is consumed by weighted reachability
+PASS: board actions complete
+PASS: card play completes: field_card_create
+PASS: real Hand request creates a field shape
+PASS: omitted cells resolves card CROSS rather than only selected cell
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: default intermediate field does not trigger enter or leave
+PASS: board actions complete
+PASS: destination enter fires once
+PASS: board actions complete
+PASS: origin leave fires once
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: pass-through opt-in executes intermediate enter exactly once
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: faction filter 1 controls real enter actions
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: faction filter 2 controls real enter actions
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: faction filter 3 controls real enter actions
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: faction filter 4 controls real enter actions
+PASS: board actions complete
+PASS: board actions complete
+PASS: spawn does not trigger enter by default
+PASS: board actions complete
+PASS: board actions complete
+PASS: spawn opt-in field actions drain
+PASS: spawn opt-in triggers exactly one enter after placement
+PASS: board actions complete
+PASS: board actions complete
+PASS: ownerless AttackGenerator hazard preview includes target Vulnerable without mutating HP
+PASS: board actions complete
+PASS: freed owner field still executes generated attacks against targets and matches preview
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: nested generated lethal field attack completes before next movement step
+PASS: lethal movement does not swallow following independent handler queue
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: field validator requires tag and id on the same instance
+PASS: field validator missing/inverted branches
+PASS: board actions complete
+PASS: UNITS_ON_FIELD resolves the real occupying unit through handler
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: UNITS_ON_FIELD deduplicates a multi-cell unit occupying two matching fields
+PASS: board actions complete
+PASS: board actions complete
+PASS: zero duration field cannot linger or trigger
+PASS: board actions complete
+PASS: unknown field id does not create an invalid instance
+PASS: board actions complete
+PASS: out-of-board field cells are rejected
+PASS: board actions complete
+PASS: board actions complete
+PASS: a field effect makes movement non-undoable
+PASS: board actions complete
+PASS: board actions complete
+PASS: block benefit preview is negative and does not grant real block
+PASS: board actions complete
+PASS: benefit enter action targets the mover
+PASS: board actions complete
+PASS: board actions complete
+PASS: FOUR cannot reach a diagonal in one point
+PASS: EIGHT changes path adjacency without changing Manhattan range
+PASS: board actions complete
+PASS: ActionMoveUnit executes the one-step diagonal path
+PASS: ally occupancy blocks the two-step path by default
+PASS: ally can be crossed but never selected as a landing cell
+PASS: board actions complete
+PASS: crossing an ally preserves its occupancy
+PASS: ally pass flag does not authorize crossing opponents
+PASS: opponent pass flag independently enables the path
+PASS: board actions complete
+PASS: paid movement consumes the actual path budget
+PASS: enabled undo succeeds before cards or field effects
+PASS: undo restores anchor, free points, paid allowance, counters and delay
+PASS: board actions complete
+PASS: disabled rule rejects undo without changing position
+PASS: card play completes: board_card_any
+PASS: real card play completes before undo rejection
+PASS: playing a card invalidates the prior movement snapshot
+PASS: board actions complete
+PASS: movement after a card cannot create a fresh undo allowance
+PASS: board actions complete
+PASS: paid movement charges one physical cell even when terrain costs four points
+PASS: board actions complete
+PASS: card distance one limits physical steps rather than terrain cost
+PASS: leaving an adjacent opponent costs base 1 plus ZOC 2
+PASS: ZOC cost shrinks the reachable set at the exact budget boundary
+PASS: unit ignores_zoc removes the weighted surcharge
+PASS: action preview ignore_zoc removes the same surcharge
+PASS: board actions complete
+PASS: real move spends ZOC-weighted points rather than path length
+PASS: opportunity preview includes block and repeated calls are pure
+PASS: board actions complete
+PASS: opportunity damage equals preview and adds no timeline delay
+PASS: board actions complete
+PASS: spent attacker/mover pair previews no second strike
+PASS: board actions complete
+PASS: same controller cannot strike the same mover twice in an action
+PASS: board actions complete
+PASS: ActionMoveUnit ignore_zoc suppresses opportunity execution
+PASS: ignored movement does not spend the opportunity pair
+PASS: board actions complete
+PASS: forced movement is immune to opportunity attacks by default
+PASS: board actions complete
+PASS: explicit forced-move ZOC opt-in executes the pending strike
+PASS: opportunity action targeting PARENT previews no damage to mover
+PASS: board actions complete
+PASS: PARENT opportunity damages its owner and never the mover
+PASS: two controllers share one preview block pool
+PASS: board actions complete
+PASS: two real opportunity reactions consume the same block pool once
+PASS: board actions complete
+PASS: resistance reduces push distance and only the displacement counter changes
+PASS: board actions complete
+PASS: resistance equal to distance produces a successful no-op
+PASS: board actions complete
+PASS: ignore_resistance restores the full displacement
+PASS: board actions complete
+PASS: edge collision applies damage per remaining cell and adds raw delay ticks once
+PASS: board actions complete
+PASS: 2x2 displacement stays disabled under the conservative default
+PASS: board actions complete
+PASS: enabled 2x2 displacement updates all occupied cells atomically
+PASS: board actions complete
+PASS: blocked trailing footprint cell stops the entire multi-cell unit
+PASS: movement restores original combat placement
+PASS: movement restores original combat placement
+PASS: movement restores original combat placement
+PASS: board actions complete
+PASS: PINCER: attacker and ally on opposite target sides
+PASS: SURROUND counts adjacent opponents once
+PASS: all seven computed board keys include flank and target opponent count
+PASS: hypothetical board values do not mutate occupancy and move the parent's adjacency contribution
+PASS: compute board value action completes
+PASS: real ComputeBoardValue action writes the pure preview result
+PASS: PINCER and SURROUND validators accept matching positions
+PASS: position validators reject threshold 3 and count target's faction correctly
+PASS: neutral unit does not provide flank or surround
+PASS: perpendicular adjacent ally is not a pincer
+PASS: TELEPORT adjacent ignores move range and has no walked path
+PASS: real teleport controller lands at preview and attacks for expected damage
+PASS: RANDOM_EMPTY repeated preview is stable without consuming RNG
+PASS: RANDOM_EMPTY repeated preview is stable without consuming RNG
+PASS: RANDOM_EMPTY repeated preview is stable without consuming RNG
+PASS: RANDOM_EMPTY repeated preview is stable without consuming RNG
+PASS: teleport previews do not move or increment action counters
+PASS: rooted teleport preview agrees with intercepted movement rejection
+PASS: FARTHEST_FROM_OPPONENTS selects a farthest legal corner
+PASS: MARKED_CELL explicit anchor
+PASS: board actions complete
+PASS: teleport-blocking field prevents marked landing
+PASS: board actions complete
+PASS: board actions complete
+PASS: MARKED_CELL selects tagged field when no explicit cell
+PASS: board actions complete
+PASS: FLANK prefers opposite side of adjacent allied enemy
+PASS: move_after preview attacks from original anchor before retreat
+PASS: move_after real attack then movement matches preview
+PASS: CHARGE makes one alignment step then follows a straight path
+PASS: CHARGE preview identifies the crossed unit once
+PASS: CHARGE payload preview reports the same path damage
+PASS: CHARGE path_actions hit each crossed unit once via real movement
+PASS: board actions complete
+PASS: movement listener example observes its owner's actual movement
+PASS: board actions complete
+PASS: movement listener ignores another unit
+PASS: board actions complete
+PASS: movement listener ignores its card outside the hand
+PASS: movement listener disconnects and releases cleanly
+PASS: intent fixtures restore original placement
+PASS: intent fixtures restore original placement
+PASS: intent fixtures restore original placement
+PASS: board actions complete
+PASS: board actions complete
+PASS: reaction fixture spawns living independent owners and movers
+PASS: board actions complete
+PASS: board actions complete
+PASS: first target completes its real movement before the second dispatch
+PASS: first mover leave field roots second mover before its interception runs
+PASS: board actions complete
+PASS: removing Root permits the previously blocked second route
+PASS: board actions complete
+PASS: board actions complete
+PASS: opportunity preview respects C's strength and PARENT target without side effects
+PASS: board actions complete
+PASS: field owned by A moves its entering target out of C's control zone
+PASS: opportunity PARENT resolves C rather than inheriting field owner A
+PASS: nested opportunity AttackGenerator uses C's +3 damage rather than A's +11
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: field teleport invalidates expected anchor so the old path cannot pull the mover back
+PASS: board actions complete
+PASS: charge fixture spawns a two-cell-wide target on the route
+PASS: board actions complete
+PASS: CHARGE crosses both cells of a 2x2 unit but executes path payload once per uid
+PASS: flying CHARGE never overwrites the crossed footprint's occupancy
+PASS: board actions complete
+PASS: CHARGE initially previews an unobstructed three-step route and adjacent hit
+PASS: board actions complete
+PASS: intermediate field inserts a living ally that ordinary pass-through rules would permit
+PASS: non-flying CHARGE revalidates the next step and stops before the new blocker without counting phantom steps
+PASS: fresh CHARGE preview agrees with the blocked position rather than claiming the stale endpoint or hit
+PASS: board actions complete
+PASS: board actions complete
+PASS: one paid physical cell admits a terrain step costing four free points
+PASS: board actions complete
+PASS: expensive terrain charges one physical paid step and one delay increment
+PASS: board actions complete
+PASS: card distance is a physical-step limit and does not spend terrain movement points
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: expanded field owner fixture spawns a real enemy
+PASS: board actions complete
+PASS: expanded field owner death and generated attack complete
+PASS: first already-expanded field child kills its creator
+PASS: following already-expanded payload resolves a dead creator to null at execution
+PASS: generated attack after creator death deals base damage without retaining creator's +11 strength
+PASS: board actions complete
+PASS: completed field subtree does not retain its dead creator
+PASS: scope cancellation fixture has a legal next movement cell
+PASS: board actions complete
+PASS: field MoveUnit expands dispatch/sequence into a real leave reaction
+PASS: leave reaction is delayed before occupancy commits
+PASS: cleared field subtree drains without movement or trailing effects
+PASS: controller clear cancels expanded movement continuation and following generated attack
+PASS: scope cancellation stops every remaining payload marker
+PASS: cleared temporary field scope releases all board field instances
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: clock field payloads complete after crossing multiple interval boundaries
+PASS: 300-tick field catches up at 100 and 200, expires before boundary 300
+PASS: clock expiry removes field once and emits field_removed
+PASS: board actions complete
+PASS: created field clock step drains
+PASS: parent expired while its created child survives
+PASS: board actions complete
+PASS: board actions complete
+PASS: created field clock step drains
+PASS: created field clock step drains
+PASS: created field clock step drains
+PASS: created field clock step drains
+PASS: parent expired while its created child survives
+PASS: board actions complete
+PASS: bulk advance equals stepwise: tick-100 child is created at 100 and runs at 200/300
+PASS: board actions complete
+PASS: catch-up refreshed field drains
+PASS: tick refresh reschedules new boundaries within the same bulk advance
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: same-tick refreshed stale boundary queue drains
+PASS: same-created-tick refresh revision suppresses old tick and expiry work
+PASS: board actions complete
+PASS: board actions complete
+PASS: real End Turn reaches hero next action with stay field
+PASS: stay occurs after unit_action_started and before first drawn card
+PASS: on_stay triggers exactly once on occupying unit own action
+PASS: board actions complete
+PASS: board actions complete
+PASS: scene exit clears all field instances even when test holds board reference
+PASS: detached field controller cannot enqueue effects after run exit
+PASS: complete Field scenario returned
+PASS: Field run exit releases the director
+FIELD PASS: 355 checks, 0 failures

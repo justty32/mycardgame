@@ -23,7 +23,7 @@ func perform_action() -> void:
 		var spawn_cells: Array[Vector2i] = EncounterData.cells_from_json(action_interceptor_processor.get_shadowed_action_values("spawn_cells", []))
 		var director: CombatDirector = Global.get_combat_director()
 		if not spawn_cells.is_empty() and director != null and director.board != null:
-			_summon_on_board(director, spawn_cells, number_of_spawns, random_enemy_object_ids)
+			_summon_on_board(director, spawn_cells, number_of_spawns, random_enemy_object_ids, str(action_interceptor_processor.get_shadowed_action_values("board_id", "")))
 			continue
 
 		# get all enemies and map them to their slot
@@ -60,12 +60,12 @@ func perform_action() -> void:
 			Signals.enemy_spawn_requested.emit(enemy_object_id, slot_id)
 			remaining_spawns -= 1
 		
-func _summon_on_board(director: CombatDirector, spawn_cells: Array[Vector2i], number_of_spawns: int, random_enemy_object_ids: Array) -> void:
+func _summon_on_board(director: CombatDirector, spawn_cells: Array[Vector2i], number_of_spawns: int, random_enemy_object_ids: Array, board_id: String = "") -> void:
 	var rng_name: String = get_action_value("rng_name", "rng_enemy_spawning")
 	var rng_enemy_spawning: RandomNumberGenerator = Global.player_data.get_player_rng(rng_name)
 	for spawn_index: int in min(number_of_spawns, len(spawn_cells)):
 		random_enemy_object_ids = Random.shuffle_array(rng_enemy_spawning, random_enemy_object_ids)
-		director.spawn_enemy_at_cell(random_enemy_object_ids[0], spawn_cells[spawn_index])
+		director.spawn_enemy_at_cell(random_enemy_object_ids[0], spawn_cells[spawn_index], board_id)
 
 func _to_string() -> String:
 	return "Summon Enemy Action"

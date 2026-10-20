@@ -1,8 +1,6 @@
 ## Read only combat rules shared by every combat (action timeline, energy, draw, board, party).
-## The framework registers one object, DEFAULT_OBJECT_ID, whose values reproduce the original
-## single-character, turn-based behavior. Content packs patch that object to change pacing.
-## NOTE: Phase 0 only consumes draw_per_action, energy_per_action and energy_cap
-## (see ActionGenerator start-of-action helpers); the remaining fields are read by later phases.
+## The framework registers one object, DEFAULT_OBJECT_ID. New combats use two independent
+## boards; SINGLE explicitly retains shared-board fixtures. Content packs patch rules to change pacing.
 extends SerializableData
 class_name CombatRulesData
 
@@ -16,6 +14,8 @@ enum DOWNED_MEMBER_POLICIES {REVIVE_AFTER_COMBAT_1HP, LEAVE_PARTY, PERMADEATH}
 enum TIE_BREAKS {HIGHER_SPEED_FIRST, PARTY_FIRST, SPAWN_ORDER}
 enum MOVE_ADJACENCY {FOUR, EIGHT}
 enum DISPLACE_TIE_AXES {VERTICAL, HORIZONTAL}
+enum ZOC_MODES {NONE, EXTRA_MOVE_COST, OPPORTUNITY_ATTACK}
+enum BOARD_MODES {SINGLE, DUAL}
 
 #region Timeline
 ## wait = action_delay * timeline_delay_scale / speed
@@ -41,6 +41,10 @@ enum DISPLACE_TIE_AXES {VERTICAL, HORIZONTAL}
 #endregion
 
 #region Board and movement
+## New combats use independent party/enemy boards. SINGLE is an explicit legacy fixture mode.
+@export var board_mode: int = BOARD_MODES.DUAL
+@export var cross_board_policy_version: int = 1
+@export var cross_board_policy: String = "SELECT_TARGET_CELL"
 @export var free_move_per_action: int = 0
 @export var distance_metric: int = DISTANCE_METRICS.MANHATTAN
 @export var board_min_size: Vector2i = Vector2i(5, 5)
@@ -55,16 +59,20 @@ enum DISPLACE_TIE_AXES {VERTICAL, HORIZONTAL}
 #endregion
 
 #region Movement (combat framework Phase 2; defaults = no movement, no change to old behavior)
-## Neighbour rule of path finding. Phase 2 implements FOUR only (EIGHT falls back to FOUR).
+## Neighbour rule of deterministic weighted path finding.
 @export var move_adjacency: int = MOVE_ADJACENCY.FOUR
 ## true = a unit may move before and after playing cards; false = the first card play ends movement.
 @export var move_split_allowed: bool = true
 ## Cells a party unit may move per action after its free move points, each adding
 ## extra_move_delay_per_cell to the action delay. 0 = no paid movement.
 @export var paid_move_max_cells: int = 0
-## Reserved (Phase 2 implements "cannot pass through" only; ignores_occupancy units fly over).
+## Passing through units never permits stopping on an occupied cell.
 @export var move_pass_through_allies: bool = false
 @export var move_pass_through_enemies: bool = false
+@export var move_undo_allowed: bool = false
+@export var zone_of_control: int = ZOC_MODES.NONE
+@export var zoc_extra_move_cost: int = 1
+@export var zoc_triggers_on_forced_move: bool = false
 ## Axis used by forced displacement when |dx| == |dy|.
 @export var displace_tie_axis: int = DISPLACE_TIE_AXES.VERTICAL
 ## Units whose footprint area exceeds this cannot be displaced.
@@ -76,6 +84,16 @@ func _get_native_properties() -> Dictionary:
 		"board_min_size": Vector2i(),
 		"default_board_size": Vector2i(),
 	}
+
+## Unknown policies are rejected, never interpreted as the currently supported policy.
+func validate_configuration() -> String:
+	if board_mode not in [BOARD_MODES.SINGLE, BOARD_MODES.DUAL]:
+		return "unknown_board_mode"
+	if cross_board_policy_version != 1:
+		return "unsupported_cross_board_policy_version"
+	if cross_board_policy != "SELECT_TARGET_CELL":
+		return "unknown_cross_board_policy"
+	return ""
 
 ## Energy to add at the start of an action, given the unit's current and max energy.
 ## With ENERGY_REFILL the caller resets energy to 0 first, so the gain is the full max.

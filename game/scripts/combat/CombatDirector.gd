@@ -30,6 +30,12 @@ var is_running: bool = false
 ## Components of the current combat (null outside combat): board / movement and unit spawning.
 var board_controller: BoardController = null
 var unit_spawner: UnitSpawner = null
+var battlefield: CombatBattlefield:
+	get:
+		return board_controller.battlefield if board_controller != null else null
+var field_controller: FieldController:
+	get:
+		return board_controller.field_controller if board_controller != null else null
 ## Wave progression of the current / last combat (kept after the combat stops for the victory check).
 var waves: WaveController = null
 ## Board of the current combat (null outside combat) and the encounter it was built from.
@@ -60,6 +66,10 @@ func _ready() -> void:
 	Signals.enemy_killed.connect(_on_enemy_killed)
 	Signals.enemy_death_animation_finished.connect(_on_enemy_death_animation_finished)
 	Signals.unit_moved.connect(_on_unit_moved)
+	Signals.field_created.connect(_on_field_changed)
+	Signals.field_removed.connect(_on_field_changed)
+	Signals.field_changed.connect(_on_field_changed)
+	Signals.board_changed.connect(_on_board_changed)
 	tree_exiting.connect(_stop)
 
 #region Public queries
@@ -114,7 +124,9 @@ func begin_combat(event_data: EventData = null) -> void:
 	board_controller = BoardController.new(rules)
 	unit_spawner = UnitSpawner.new(self)
 	var encounter_data: EncounterData = Global.get_event_encounter_data(event_data)
-	board_controller.setup(encounter_data)
+	if not board_controller.setup(encounter_data):
+		_stop()
+		return
 	waves = WaveController.new(self, encounter_data)
 	unit_spawner.spawn_first_wave(event_data, encounter_data)
 	for unit: BaseCombatant in UnitRegistry.get_all_units():
@@ -129,6 +141,8 @@ func begin_combat(event_data: EventData = null) -> void:
 	for enemy: Enemy in Global.get_alive_enemies():
 		enemy.decide_next_intent()
 	is_running = true
+	for unit: BaseCombatant in battlefield.get_units():
+		FieldController.get_for_unit(unit).on_unit_spawned(unit)
 	refresh_threats()
 	Signals.timeline_changed.emit()
 	waves.enter_wave(0)
@@ -191,8 +205,9 @@ func _admit_spawned_unit(unit: BaseCombatant, generation: int) -> void:
 		return
 	if not unit.is_alive():
 		return
-	if board != null and not board.has_unit(unit):
-		board_controller.place_unit_nearest(unit, board_controller.default_spawn_origin())
+	if battlefield != null and battlefield.get_board_for_unit(unit) == null:
+		if not board_controller.place_unit_nearest(unit, board_controller.default_spawn_origin()):
+			return
 	_admit(unit, current_tick + timeline.wait_for(rules.default_action_delay, unit.speed))
 
 ## A wave unit entering mid-combat (UnitSpawner): acts at the current tick.
@@ -207,22 +222,27 @@ func _admit(unit: BaseCombatant, next_tick: int) -> void:
 	unit.last_action_tick = current_tick
 	unit.next_action_tick = next_tick
 	timeline.push(unit)
+	var fields: FieldController = FieldController.get_for_unit(unit)
+	if fields != null:
+		fields.on_unit_spawned(unit)
 	if unit is Enemy:
 		(unit as Enemy).decide_next_intent()
 	refresh_threats()
 	Signals.timeline_changed.emit()
 
 func _on_unit_removed(unit: BaseCombatant) -> void:
-	if board != null:
-		board.remove(unit)
+	var current: BoardData = battlefield.get_board_for_unit(unit) if battlefield != null else null
+	if current != null:
+		current.remove(unit)
 	if timeline != null and timeline.has(unit):
 		timeline.remove(unit)
 		Signals.timeline_changed.emit()
 
 ## Dead enemies leave the board (their node stays until the death animation / combat end).
 func _on_enemy_killed(enemy: Enemy) -> void:
-	if board != null:
-		board.remove(enemy)
+	var current: BoardData = battlefield.get_board_for_unit(enemy) if battlefield != null else null
+	if current != null:
+		current.remove(enemy)
 		refresh_threats()
 	if is_running and waves != null:
 		waves.queue_check()
@@ -231,6 +251,12 @@ func _on_enemy_killed(enemy: Enemy) -> void:
 func _on_enemy_death_animation_finished(_enemy: Enemy) -> void:
 	if waves != null:
 		waves.on_death_animation_finished()
+
+func _on_board_changed(_board_id: StringName) -> void:
+	refresh_threats()
+
+func _on_field_changed(_instance: FieldInstance) -> void:
+	refresh_threats()
 
 func _on_unit_moved(_unit: BaseCombatant, _from: Vector2i, _to: Vector2i) -> void:
 	refresh_threats()
@@ -269,6 +295,9 @@ func _run_loop(generation: int) -> void:
 			return
 		if is_combat_over():
 			break
+		if not is_instance_valid(unit) or not unit.is_alive():
+			acting_unit = null
+			continue
 		await unit.controller.decide(self, unit)
 		if _aborted(generation):
 			return
@@ -318,6 +347,8 @@ func _advance_clock(tick: int, generation: int) -> void:
 	current_tick = tick
 	timeline.current_tick = tick
 	Signals.combat_tick_advanced.emit(previous_tick, tick)
+	if board_controller != null:
+		board_controller.advance_fields(previous_tick, tick)
 	for unit: BaseCombatant in UnitRegistry.get_all_units():
 		if unit.is_alive():
 			unit.perform_tick_status_effects(previous_tick, tick)
@@ -361,6 +392,9 @@ func _compute_action_delay(unit: BaseCombatant) -> int:
 func _on_card_played(card_play_request: CardPlayRequest) -> void:
 	if is_running and card_play_request.card_data != null:
 		_cards_played_this_action.append(card_play_request.card_data)
+		var current: BoardData = battlefield.get_board_for_unit(acting_unit) if battlefield != null else null
+		if current != null:
+			current.invalidate_undo(acting_unit)
 		# move-then-play rules: the first card play ends this action's movement
 		if not rules.move_split_allowed and acting_unit != null and acting_unit.faction == BaseCombatant.FACTIONS.PARTY:
 			acting_unit.move_points = 0
@@ -422,10 +456,10 @@ func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
 
 ## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
 ## the nearest empty cell; it enters the timeline as if it had just acted.
-func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i) -> Enemy:
+func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i, board_id: String = "") -> Enemy:
 	if unit_spawner == null:
 		return null
-	return unit_spawner.spawn_enemy_at_cell(enemy_object_id, cell)
+	return unit_spawner.spawn_enemy_at_cell(enemy_object_id, cell, board_id)
 
 ## Cells the acting party unit can still move this action: free move points plus paid cells.
 func get_move_budget(unit: BaseCombatant) -> int:
@@ -436,12 +470,29 @@ func get_move_budget(unit: BaseCombatant) -> int:
 ## Player movement input (BoardView click on an empty cell): moves the acting party unit along the
 ## shortest path, spending free move points first, then paid cells (+extra_move_delay_per_cell each).
 ## false = not the player's action, busy, or the cell is not reachable within the budget.
-func request_player_move(cell: Vector2i) -> bool:
+func request_player_move(cell: Vector2i, board_id: String = "") -> bool:
 	if not is_running or board_controller == null or acting_unit == null or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
+		return false
+	if board_id != "" and board_id != acting_unit.board_id:
 		return false
 	if not _waiting_for_player or _end_action_request != null:
 		return false
 	if ActionHandler.actions_being_performed or HandManager.cards_being_played or not HandManager.card_play_queue.is_empty():
 		return false
 	return board_controller.move_party_unit(acting_unit, cell)
+
+func can_player_undo_move() -> bool:
+	if not is_running or battlefield == null or not is_instance_valid(acting_unit):
+		return false
+	if acting_unit.faction != BaseCombatant.FACTIONS.PARTY or not _waiting_for_player or _end_action_request != null:
+		return false
+	if ActionHandler.actions_being_performed or HandManager.cards_being_played or not HandManager.card_play_queue.is_empty():
+		return false
+	var current: BoardData = battlefield.get_board_for_unit(acting_unit)
+	return current != null and current.can_undo_move(acting_unit)
+
+func request_player_undo_move() -> bool:
+	if not can_player_undo_move():
+		return false
+	return battlefield.get_board_for_unit(acting_unit).undo_move(acting_unit)
 #endregion

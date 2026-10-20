@@ -5,8 +5,8 @@
 extends BaseValidator
 
 func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[String, Variant]) -> bool:
-	var board: BoardData = BoardData.get_active()
 	var parent: BaseCombatant = BoardTargeting.context_parent(action)
+	var board: BoardData = BoardData.get_for_unit(parent)
 	if board == null or parent == null or not board.has_unit(parent):
 		return true
 	var max_length: int = int(_get_validator_value("max_length", values, action, -1))
@@ -16,8 +16,12 @@ func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[St
 	var cell: Vector2i = BoardTargeting.context_cell(action, _get_validator_value("to", values, action, "SELECTED_CELL"))
 	if cell == BaseCombatant.BOARD_ANCHOR_NONE:
 		return true
+	var target_board: BoardData = BoardTargeting.context_board(action, parent)
+	var query: Dictionary = BoardTargeting.geometry(target_board, parent, cell, BoardTargeting.TARGET_SHAPES.SINGLE)
+	if not query.valid or query.cross_board:
+		return false
 	if bool(_get_validator_value("teleport", values, action, false)):
-		return board.can_stand(parent, cell)
+		return board.can_teleport(parent, cell)
 	return not board.find_path(parent, cell, move_distance).is_empty()
 
 ## Move distance after interceptors (preview): -1 = unlimited, 0 = cannot move.

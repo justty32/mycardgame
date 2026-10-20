@@ -30,6 +30,10 @@
 
 ### 難度與遭遇接線
 
+雙盤／移動意圖另讀 [棋盤意圖核實](../../../analysis/slay-the-robot/design/board-intents.md)。先指定來源與目標的實際 `board_id`，經 BoardTargeting.geometry → CrossBoardPolicy 查詢，不用 faction 推盤，也不把跨盤 A 當零距離。方向型跨盤效果在費用前拒絕，測例須包含 SINGLE 卡內巢狀推拉、request 值覆寫、全域／隨機目標、拒絕時費用與位置不變；只有 UI 拒絕不涵蓋自動／複製出牌。
+
+移動意圖至少對照預覽與真正 controller 的落點、命中與次序，覆蓋 move_after、rooted、禁閃現格、CHARGE 穿越去重及中途死亡／退出。NEAREST／FARTHEST 只比較同盤距離，無同盤候選按 uid；跨盤 ComputeBoardValue 卡整體拒絕。新自訂 payload 的估值未被標準預覽涵蓋時，另補實作與回歸，不能用數值 0 表示已模擬。此流程來自 2026-10-20 靜態接線核對；實測結果依該輪整合報告。
+
 血量用上下界與 `add_health_bounds()`；一般屬性難度表的實際拼字為 `enemy_difficulty_to_enemy_modfiers`。`add_intent_state()` 可保存同原始 ID 的難度版本，但目前 override cache 未依玩家難度篩選，會挑最高版本。設計依賴此能力時先建立最低、門檻前、門檻及最高難度的失敗測例並接 mechanics 修正，不宣稱現成難度切換可用。
 
 依 content 註冊 mod 資料，沿 `EnemyData → EventData.event_weighted_enemy_object_ids → EventPoolData → ActData／LocationData` 接入可到達遭遇。每個敵群欄位是一個生成槽的加權候選，不是「整隊二選一」；各槽組合可能產生單體設計未遇到的連鎖壓力。指定位置需覆蓋初始與召喚槽；確認敵人種類、minion、初始狀態、動畫與死亡 action。

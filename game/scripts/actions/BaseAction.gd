@@ -28,6 +28,15 @@ var time_delay: float = 0.0
 var action_tags: Array[String] = []
 ## The action that directly generated this one. Can be null.
 var parent_action: BaseAction = null
+## Ordered reactions finish their generated children before the next movement/event step.
+var resolve_children_immediately: bool = false
+## Field payloads re-resolve their owner at execution, including generated children.
+var field_owner_bound: bool = false
+var field_owner_uid: String = ""
+var field_controller_ref: WeakRef = null
+var field_controller_generation: int = -1
+## Logical field-event time, distinct from the already committed CTB endpoint.
+var field_effective_tick: int = -1
 
 signal action_async_finished	# allows for async callbacks
 
@@ -51,6 +60,7 @@ enum TARGET_OVERRIDES {
 	RESOLVED_SHAPE,	# the card play's shape-resolved targets (CardPlayRequest.resolved_targets)
 	UNITS_IN_RANGE,	# living units within values.range board cells of the parent (parent excluded)
 	MEMBER_UID,	# the unit with values.member_uid (UnitRegistry)
+	UNITS_ON_FIELD,	# living units occupying any cell matching field_id / tag
 	}
 
 func init(_parent_combatant: BaseCombatant = null, _card_play_request: CardPlayRequest = null, _targets: Array[BaseCombatant] = [], _values: Dictionary[String, Variant] = {}, _parent_action: BaseAction = null):
@@ -62,6 +72,30 @@ func init(_parent_combatant: BaseCombatant = null, _card_play_request: CardPlayR
 	time_delay = get_action_value("time_delay", 0.0)
 	action_tags.assign(get_action_value("action_tags", []))
 	parent_action = _parent_action
+	inherit_execution_context(parent_action)
+
+## Hand-built continuation actions use the same cancellation/owner scope as generated ones.
+func inherit_execution_context(source: BaseAction) -> void:
+	if source == null:
+		return
+	field_owner_bound = source.field_owner_bound
+	field_owner_uid = source.field_owner_uid
+	field_controller_ref = source.field_controller_ref
+	field_controller_generation = source.field_controller_generation
+	field_effective_tick = source.field_effective_tick
+
+## false invalidates an already expanded field subtree after combat teardown.
+func prepare_execution() -> bool:
+	if field_controller_ref != null:
+		var controller: FieldController = field_controller_ref.get_ref()
+		if controller == null or not controller.active or controller.generation != field_controller_generation:
+			return false
+	if field_owner_bound:
+		var owner: BaseCombatant = UnitRegistry.get_unit(field_owner_uid)
+		parent_combatant = owner if is_instance_valid(owner) and owner.is_alive() else null
+	elif not is_instance_valid(parent_combatant):
+		parent_combatant = null
+	return true
 
 ### Override
 
@@ -129,7 +163,8 @@ func get_adjusted_action_targets() -> Array[BaseCombatant]:
 					if target.is_alive() or force_dead_targets:
 						returned_targets.append(target)
 		TARGET_OVERRIDES.PARENT:
-			return [parent_combatant]
+			if is_instance_valid(parent_combatant) and (parent_combatant.is_alive() or force_dead_targets):
+				return [parent_combatant]
 		TARGET_OVERRIDES.PLAYER:
 			for player in Global.get_tree().get_nodes_in_group("players"):
 				if player.is_alive() or force_dead_targets:
@@ -199,12 +234,24 @@ func get_adjusted_action_targets() -> Array[BaseCombatant]:
 					if is_instance_valid(unit) and (unit.is_alive() or force_dead_targets):
 						returned_targets.append(unit)
 		TARGET_OVERRIDES.UNITS_IN_RANGE:
-			var board: BoardData = BoardData.get_active()
+			var board: BoardData = BoardData.get_for_unit(parent_combatant)
 			var unit_range: int = int(get_action_value("range", 1))
 			if board != null and parent_combatant != null and board.has_unit(parent_combatant):
 				for unit: BaseCombatant in board.get_units():
 					if unit != parent_combatant and unit.is_alive() and board.unit_distance(parent_combatant, unit) <= unit_range:
 						returned_targets.append(unit)
+		TARGET_OVERRIDES.UNITS_ON_FIELD:
+			var board: BoardData = FieldActionCells.resolve_board(self, get_action_value("board_id", null))
+			if board != null:
+				var field_id: String = str(get_action_value("field_id", ""))
+				var tag: String = str(get_action_value("tag", ""))
+				for cell: Vector2i in board.fields:
+					for instance: FieldInstance in board.get_fields(cell, tag):
+						if field_id != "" and instance.field_data.object_id != field_id:
+							continue
+						var unit: BaseCombatant = board.get_unit_at(cell)
+						if is_instance_valid(unit) and (unit.is_alive() or force_dead_targets) and not returned_targets.has(unit):
+							returned_targets.append(unit)
 		TARGET_OVERRIDES.MEMBER_UID:
 			var member: BaseCombatant = UnitRegistry.get_unit(str(get_action_value("member_uid", "")))
 			if member != null and (member.is_alive() or force_dead_targets):

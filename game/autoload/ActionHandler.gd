@@ -11,6 +11,8 @@ var current_action: BaseAction = null # the current action being invoked
 var actions_being_performed: bool = false	# flag to prevent multiple actions being performed simultaneously and check for blocking
 var _action_generation: int = 0 # invalidates a suspended loop when a run is cleared
 var _clearing_actions: bool = false
+var _ordered_child_count: int = 0
+var _perform_call_active: bool = false
 
 # action interceptors
 var _registered_action_interceptor_object_ids: Dictionary	= {}	# maps an object to a sorted list of registered action interceptor ids used when the object is involved in an action
@@ -41,6 +43,14 @@ func add_actions(actions: Array[BaseAction], enqueue: bool = false, front_of_que
 	# Cancellation callbacks cannot resurrect work from the run being cleared.
 	if _clearing_actions:
 		return
+	if _is_ordered_child_batch(actions):
+		var immediate: Array[BaseAction] = actions.duplicate()
+		for child: BaseAction in immediate:
+			child.resolve_children_immediately = true
+		if not enqueue:
+			immediate.reverse() # preserve the existing stack order inside this reaction
+		_insert_ordered_children(immediate, not enqueue or front_of_queue)
+		return
 	if enqueue:
 		# adding to queue
 		if len(action_stack) == 0:
@@ -70,6 +80,44 @@ func add_actions(actions: Array[BaseAction], enqueue: bool = false, front_of_que
 		if not actions_being_performed:	# check to prevent multiple automatic calls of this method
 			_perform_actions()
 
+## Executes event steps in order, including nested effects before the following step.
+## Existing add_actions callers retain their queue/stack contract outside this opt-in path.
+func add_ordered_actions(actions: Array[BaseAction]) -> void:
+	if _clearing_actions or actions.is_empty():
+		return
+	for action: BaseAction in actions:
+		action.resolve_children_immediately = true
+	if actions_being_performed:
+		if _perform_call_active or _is_ordered_child_batch(actions):
+			_insert_ordered_children(actions, false)
+		else:
+			# An independent event arriving during a wait is not the active reaction's child.
+			current_action_queue.append_array(actions)
+	else:
+		action_stack.append(actions)
+		_perform_actions()
+
+func _insert_ordered_children(actions: Array[BaseAction], front: bool) -> void:
+	var offset: int = 0 if front else min(_ordered_child_count, current_action_queue.size())
+	for index: int in actions.size():
+		current_action_queue.insert(offset + index, actions[index])
+	_ordered_child_count += actions.size()
+
+func _is_ordered_child_batch(actions: Array[BaseAction]) -> bool:
+	if not actions_being_performed or current_action == null or not current_action.resolve_children_immediately:
+		return false
+	if _perform_call_active:
+		return true
+	if actions.is_empty():
+		return false
+	for action: BaseAction in actions:
+		var ancestor: BaseAction = action.parent_action
+		while ancestor != null and ancestor != current_action:
+			ancestor = ancestor.parent_action
+		if ancestor != current_action:
+			return false
+	return true
+
 func _perform_actions() -> void:	
 	# performs all actions on the action stack
 	var generation: int = _action_generation
@@ -85,10 +133,14 @@ func _perform_actions() -> void:
 		# perform all actions in the queue until empty
 		while len(current_action_queue) > 0:
 			current_action = current_action_queue.pop_front()
+			_ordered_child_count = 0
 			# A signal emitted by the action can synchronously clear the handler.
 			# Keep the active action alive locally, never dereference mutable state
 			# after resuming an await belonging to an earlier run.
 			var action: BaseAction = current_action
+			if not action.prepare_execution():
+				current_action = null
+				continue
 			# skip short circuited actions
 			if action.is_action_short_circuited():
 				if not Global.are_remaining_enemies():
@@ -97,7 +149,9 @@ func _perform_actions() -> void:
 			# perform action
 			if action is BaseAsyncAction:
 				action.begin_async_action()
+			_perform_call_active = true
 			action.perform_action()
+			_perform_call_active = false
 			if generation != _action_generation:
 				return
 			# wait for async actions to finish
@@ -137,6 +191,8 @@ func clear_all_actions() -> void:
 	var was_performing: bool = actions_being_performed
 	action_stack.clear()
 	current_action_queue.clear()
+	_ordered_child_count = 0
+	_perform_call_active = false
 	# Invalidate and clear queues before resuming a cancelled async continuation.
 	_clear_current_async_action(true)
 	current_action = null

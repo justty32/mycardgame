@@ -54,8 +54,8 @@ IS_WINDOWS = os.name == "nt"
 WINDOWS_CREATION_FLAGS = 0x08000000 | 0x00000200
 
 SUITE_CHOICES = ("All", "Dictionary", "Smoke", "Combat", "SaveLoad", "ResourceLifecycle",
-                 "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave")
-ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "SaveLoad")
+                 "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard")
+ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "SaveLoad")
 SUITE_SCRIPTS = {
     "ResourceLifecycle": "resource_lifecycle.gd",
     "Dictionary": "dictionary_regression.gd",
@@ -65,6 +65,8 @@ SUITE_SCRIPTS = {
     "Ctb": "ctb_flow.gd",
     "Board": "board_flow.gd",
     "Wave": "wave_flow.gd",
+    "Field": "field_flow.gd",
+    "DualBoard": "dual_board_flow.gd",
     "SaveLoad": "save_load_flow.gd",
 }
 SUITE_MARKERS = {
@@ -76,6 +78,8 @@ SUITE_MARKERS = {
     "Ctb": "CTB PASS:",
     "Board": "BOARD PASS:",
     "Wave": "WAVE PASS:",
+    "Field": "FIELD PASS:",
+    "DualBoard": "DUAL_BOARD PASS:",
     "SaveLoad": "SAVELOAD PASS:",
 }
 SOURCE_HASH_PATHS = (
@@ -94,6 +98,24 @@ SOURCE_HASH_PATHS = (
     "data/SerializableData.gd",
     "autoload/Global.gd",
     "scripts/ui/menus/NewRunMenu.gd",
+    "scripts/combat/CombatDirector.gd",
+    "scripts/combat/BoardController.gd",
+    "scripts/combat/UnitSpawner.gd",
+    "scripts/combat/CombatActionPhases.gd",
+    "scripts/combat/board/CombatBattlefield.gd",
+    "scripts/combat/board/BoardPosition.gd",
+    "scripts/combat/board/CrossBoardPolicy.gd",
+    "scripts/combat/board/BoardData.gd",
+    "scripts/combat/board/BoardPathfinding.gd",
+    "scripts/combat/board/BoardMovementState.gd",
+    "scripts/combat/board/FieldController.gd",
+    "scripts/combat/board/FieldEventAction.gd",
+    "scripts/combat/board/FieldPreview.gd",
+    "scripts/ui/BoardActorPresentation.gd",
+    "scripts/ui/BoardView.gd",
+    "scripts/ui/Hand.gd",
+    "autoload/HandManager.gd",
+    "scripts/actions/BaseAction.gd",
 )
 EXCLUDED_DIR_NAMES = frozenset({".git", ".godot", ".import", ".saves", ".screenshots", ".mono"})
 EXCLUDED_FILE_NAMES = frozenset({"profile.json", "user_settings.json"})

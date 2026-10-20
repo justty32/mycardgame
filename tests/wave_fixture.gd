@@ -62,6 +62,8 @@ func install() -> void:
 	wave_2.wave_on_cleared_actions.assign(reward)
 
 	var encounter := EncounterData.new("wave_flow_encounter")
+	# Historical wave spawn cells share one board; DualBoard separately verifies the default.
+	encounter.encounter_board_mode = CombatRulesData.BOARD_MODES.SINGLE
 	encounter.encounter_waves.assign([wave_0, wave_1, wave_2])
 	Global.register_rod(encounter)
 

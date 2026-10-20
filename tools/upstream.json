@@ -51,6 +51,18 @@
       "sha256": "dd61b0ebdfe5c2c9dc8f4b9bc2fb38a578346b0d50eb051eefacc4d9c40981e4",
       "description": "Load only case-insensitive .json data files from declared mod folders; ignore placeholders, notes and backups while preserving directory enumeration and JSON error behavior.",
       "validation": "analysis/slay-the-robot/architecture/06_windows_validation.md"
+    },
+    {
+      "file": "tools/patches/godot-4.7-baseline.patch",
+      "sha256": "ee9c8eac590bfa470adbcdf239d88a4069e0e8ad53c86c446d13adc8b2deba65",
+      "description": "Restore the source-rebuild provenance of the previously published Godot 4.7 baseline: project.godot config/features changed from 4.6 to 4.7 in commit 840c73f but was absent from the earlier patch chain. No new engine upgrade. Apply after json-data-files.patch and before the dual-board/fields patch.",
+      "validation": "analysis/slay-the-robot/architecture/06_windows_validation.md"
+    },
+    {
+      "file": "tools/patches/combat-framework-dual-board-fields.patch",
+      "sha256": "b1ea6fbb71cce8982cd49b5e40f43d22a26d6ca6ad3aba9e0130dab3d1c2ccb1",
+      "description": "Independent party/enemy boards with versioned SELECT_TARGET_CELL policy, atomic transfer/swap, board-local targeting/spawning and actor placement; field lifecycle, movement/ZOC and deterministic preview integration. Includes all game source additions relative to ac37a9a; applies after godot-4.7-baseline.patch.",
+      "validation": "analysis/slay-the-robot/architecture/07_fields_zoc.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

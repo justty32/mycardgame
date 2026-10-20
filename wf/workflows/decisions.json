@@ -110,6 +110,24 @@
    "decision": "框架級 spec／plan 放 wf/specs/、wf/plans/，題材級放 games/<game>/design/（使用者決定）",
    "rejected_and_why": "不放題材樹：框架能力與題材無關，會讓題材樹含框架設計；不放 wf/workflows/game-dev/：workflows 有 8 KB 單檔上限，且 spec 不是操作流程",
    "premise": "框架級 spec 數量多到需要再分類，或流程文檔與 spec 的界線改變時"
+  },
+  {
+   "date": "2026-10-20",
+   "decision": "雙棋盤先採A：跨盤直接選格、不計盤間距離，局部範圍在目標盤展開；保留C日後演進。一般各守盤，特殊卡可跨盤移動／交換，陣營不隨盤改變（使用者決定）。",
+   "rejected_and_why": "使用者選擇先A，不採本輪共同虛擬幾何B或完整多policy C；僅保留單一解析入口與版本化契約作工程提案，不預造plugin系統。",
+   "premise": "2026-10-20選A時僅規劃且Phase2b暫停；同日後續已授權雙盤A／本體站格與完整Phase2b實作。若日後需要不同跨盤射程或卡牌policy，另立增量規格並保持A相容。"
+  },
+  {
+   "date": "2026-10-20",
+   "decision": "第一版不支援方向型跨盤效果（使用者確認）：跨盤LINE/LINE_PIERCE與需從跨盤來源推導方向的推拉拒絕；同盤方向型維持，特殊跨盤transfer/swap仍保留。",
+   "rejected_and_why": "不採首版卡牌指定方向或玩家選方向；使用者明確選先不支援。CONE不是現有enum，不趁此新增。拒絕不默默降為單格，須在費用與移動前與preview一致。",
+   "premise": "同盤／跨盤依當下board_id而非faction；入侵者在對方盤可用原本同盤效果。若未來要支援跨盤方向型，需再確認方向語義並新增policy與回歸。"
+  },
+  {
+   "date": "2026-10-20",
+   "decision": "角色與敵人的實際sprite／演出主體直接站在棋盤上，依board_id＋cell／footprint定位，普通移動、特卡跨盤及交換時本體跟隨；呈現雙方對峙的日式RPG回合戰鬥感（使用者確認）。",
+   "rejected_and_why": "僅格內token加固定容器人物不符合使用者要求。沒有將JRPG推定為側面、斜視、透視或3D；這些仍未決。",
+   "premise": "2026-10-20確認呈現時僅規劃；同日使用者隨後已授權雙盤A／本體站格與完整Phase2b實作及headless。沿用現有2D sprites作功能基線，最終鏡頭、美術與人工觀感另驗。"
   }
  ]
 }

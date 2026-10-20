@@ -172,6 +172,15 @@ func _read_phase() -> void:
 	_check(not global_data.get_alive_enemies().is_empty(), "post-load combat spawns live enemies")
 	_check(not root.get_node("HandManager").player_hand.is_empty(), "post-load combat draws playable hand")
 	_check(not root.get_node("ActionHandler").actions_being_performed, "post-load action pipeline settles")
+	var loaded_director: Node = global_data.get_combat_director()
+	_check(loaded_director != null and loaded_director.battlefield != null and loaded_director.battlefield.boards.size() == 2, "post-load combat rebuilds two boards from production defaults")
+	if loaded_director != null and loaded_director.battlefield != null:
+		var loaded_hero: Node = global_data.get_player()
+		_check(loaded_hero.board_id == "party" and loaded_director.battlefield.get_board("party").get_unit_at(loaded_hero.board_anchor) == loaded_hero, "post-load hero occupies the party board")
+		var enemies_on_own_board: bool = true
+		for loaded_enemy: Node in global_data.get_alive_enemies():
+			enemies_on_own_board = enemies_on_own_board and loaded_enemy.board_id == "enemy" and loaded_director.battlefield.get_board("enemy").get_unit_at(loaded_enemy.board_anchor) == loaded_enemy
+		_check(enemies_on_own_board, "post-load enemies occupy independent enemy-board cells")
 	var saved_after: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://external/saves/save.json"))
 	_check(saved_after.properties.player_location_id == next_location.location_id, "next-location autosave writes the new checkpoint")
 

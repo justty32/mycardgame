@@ -47,6 +47,8 @@ func install() -> void:
 	far_only.card_play_validators = [{Scripts.VALIDATOR_DISTANCE: {"to": "NEAREST_OPPONENT", "operator": ">=", "comparison_value": 3}}]
 
 	var encounter := EncounterData.new("board_flow_encounter")
+	# This suite preserves historical shared-board distance/occupancy assertions.
+	encounter.encounter_board_mode = CombatRulesData.BOARD_MODES.SINGLE
 	encounter.encounter_board_size = Vector2i(7, 5)
 	encounter.encounter_deploy_cells.assign([[3, 4]])
 	var wave := EncounterWaveData.new()

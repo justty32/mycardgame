@@ -7,8 +7,14 @@ extends Control
 
 @onready var automatic_enemy_container: HBoxContainer = $AutomaticEnemyContainer
 @onready var positional_enemy_container: Control = $PositionalEnemyContainer
+## Stable free-position parent: Container layout must never overwrite board positions.
+var board_actor_container: Control = null
 
 func _ready():
+	board_actor_container = Control.new()
+	board_actor_container.name = "BoardActors"
+	board_actor_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(board_actor_container)
 	Signals.run_ended.connect(_on_run_ended)
 	Signals.enemy_spawn_requested.connect(_on_enemy_spawn_requested)
 
@@ -82,6 +88,9 @@ func _spawn_enemy(enemy_object_id: String, container: Control = automatic_enemy_
 	enemy_data.apply_enemy_difficulty_modifiers()
 	enemy_data.randomize_health(true)
 	
+	# Board actors keep this parent for their entire lifetime, including transfers.
+	if CombatBattlefield.get_active() != null:
+		container = board_actor_container
 	container.add_child(enemy)
 	enemy.init(enemy_data)
 	
@@ -103,6 +112,9 @@ func spawn_enemy_at_slot(enemy_object_id: String, slot_id: int) -> Enemy:
 	return enemy
 
 func clear_enemies():
+	if board_actor_container != null:
+		for child in board_actor_container.get_children():
+			child.queue_free()
 	for child in automatic_enemy_container.get_children():
 		child.queue_free()
 	for child in positional_enemy_container.get_children():

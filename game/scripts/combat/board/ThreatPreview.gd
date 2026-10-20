@@ -16,10 +16,10 @@ func _init(combat_director: CombatDirector = null) -> void:
 ## Re-resolves every living enemy's current intent and refreshes its intent display.
 func refresh() -> void:
 	plans.clear()
-	var board: BoardData = director.board if director != null else null
 	for enemy: Enemy in Global.get_alive_enemies():
 		if enemy.enemy_data == null:
 			continue
+		var board: BoardData = BoardData.get_for_unit(enemy)
 		var intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
 		var target: BaseCombatant = IntentResolver.choose_target(board, enemy, intent)
 		var plan: Dictionary = IntentResolver.resolve(board, enemy, intent, target)
@@ -31,6 +31,22 @@ func get_plan(enemy: BaseCombatant) -> Dictionary:
 	if enemy == null:
 		return {}
 	return plans.get(enemy.unit_uid, {})
+
+## Pure Phase 4 scoring seam. Positive hazard is damage; healing / block are negative.
+## opportunity_damage describes leaving this anchor, with the current action's ZOC dedup state.
+func position_costs(unit: BaseCombatant, anchor: Vector2i) -> Dictionary:
+	var result: Dictionary = {"hazard": 0.0, "opportunity_damage": 0}
+	if director == null or unit == null:
+		return result
+	var board: BoardData = BoardData.get_for_unit(unit)
+	if board == null:
+		return result
+	if board.field_controller != null:
+		var fields: FieldController = board.field_controller.get_ref() as FieldController
+		if fields != null:
+			result["hazard"] = fields.preview_hazard(anchor, unit)
+	result["opportunity_damage"] = board.preview_opportunity_damage(unit, anchor)
+	return result
 
 ## Whether the enemy's current intent can hit its target (true without a plan: legacy behavior).
 func can_hit(enemy: BaseCombatant) -> bool:
@@ -48,11 +64,14 @@ func incoming_damage_for(unit: BaseCombatant) -> int:
 	var total: int = 0
 	for enemy: Enemy in Global.get_alive_enemies():
 		var plan: Dictionary = get_plan(enemy)
-		if plan.is_empty() or not plan.get("can_hit", true):
-			continue
-		if not (plan.get("targets", []) as Array).has(unit):
+		if plan.is_empty() or plan.get("error", "") not in ["", "out_of_range"]:
 			continue
 		if director != null and director.is_running and enemy != director.acting_unit and enemy.next_action_tick >= unit_next:
 			continue
-		total += enemy.enemy_intent_attack_damage * enemy.enemy_intent_number_of_attacks
+		if plan.get("can_hit", false) and (plan.get("targets", []) as Array).has(unit):
+			total += enemy.enemy_intent_attack_damage * enemy.enemy_intent_number_of_attacks
+		if (plan.get("path_targets", []) as Array).has(unit):
+			var intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
+			if intent != null:
+				total += int(FieldPreview.preview_actions(intent.enemy_intent_path_actions, enemy, unit, false, false))
 	return total

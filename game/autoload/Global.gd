@@ -40,6 +40,7 @@ extends Node
 	["CustomSignalData", CustomSignalData, "_id_to_custom_signal_data", ["custom_signals/"]],
 	["CombatRulesData", CombatRulesData, "_id_to_combat_rules_data", ["combat_rules/"]],
 	["EncounterData", EncounterData, "_id_to_encounter_data", ["encounters/"]],
+	["FieldData", FieldData, "_id_to_field_data", ["fields/"]],
 	# prototype data
 	["EnemyData", EnemyData,"_id_to_enemy_data", ["enemies/"]],
 	["CardData", CardData, "_id_to_card_data", ["cards/"]],
@@ -83,6 +84,7 @@ var _id_to_custom_ui_data: Dictionary[String, CustomUIData] = {}
 var _id_to_custom_signal_data: Dictionary[String, CustomSignalData] = {}
 var _id_to_combat_rules_data: Dictionary[String, CombatRulesData] = {}
 var _id_to_encounter_data: Dictionary[String, EncounterData] = {}
+var _id_to_field_data: Dictionary[String, FieldData] = {}
 
 # prototyped data; Read only data that are duplicated into mutable data instances
 var _id_to_enemy_data: Dictionary[String, EnemyData] = {}
@@ -559,6 +561,9 @@ func get_combat_rules() -> CombatRulesData:
 	if _fallback_combat_rules_data == null:
 		_fallback_combat_rules_data = CombatRulesData.new(CombatRulesData.DEFAULT_OBJECT_ID)
 	return _fallback_combat_rules_data
+
+func get_field_data(field_id: String) -> FieldData:
+	return _id_to_field_data.get(field_id, null)
 
 func get_encounter_data(encounter_object_id: String) -> EncounterData:
 	return _id_to_encounter_data.get(encounter_object_id, null)

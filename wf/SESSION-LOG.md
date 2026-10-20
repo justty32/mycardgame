@@ -11,8 +11,7 @@
 
 ## 最新進度
 
-- [game-dev] 下次從哪接：戰鬥框架 Phase 2b（場域格與控制區，另開 FieldController，不再塞 CombatDirector），再 Phase 4（多主角＋AI 隊員）→ [phase-3 注意](plans/combat-framework/phase-3.md#phase-2b-前注意)、[16](specs/combat-framework/16-movement-phasing.md)
-- [game-dev] 中性示範包未做（開移動、移動／推拉／範圍卡、障礙格遭遇），實機玩不到 Phase 2 → 做好後配合 WAIT_USER 實機檢查
+- [game-dev] 豐富中性示範包未做（教學移動／推拉／範圍卡與障礙遭遇）；正常新局已接雙盤與本體站格，不等同示範內容齊備 → 內容另做後配合 WAIT_USER 實機檢查
 - [dev-env] scratchpad 的 `playtest` worktree（detached c662729）是暫存，勿刪；不用後 `git worktree remove` 或目錄消失後 `git worktree prune`
 
 ## 各工作流 session-log

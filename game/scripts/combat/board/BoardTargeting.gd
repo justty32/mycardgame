@@ -55,7 +55,7 @@ static func cells_in_shape(board: BoardData, origin: Vector2i, target: Vector2i,
 			if direction != Vector2i.ZERO:
 				var cell: Vector2i = origin + direction
 				var steps: int = 1
-				while board.is_in_bounds(cell) and not board.is_blocked(cell) and (max_range < 0 or steps <= max_range):
+				while board.is_in_bounds(cell) and not board.is_blocked(cell) and not board.get_cell(cell).blocks_line and (max_range < 0 or steps <= max_range):
 					returned.append(cell)
 					if shape == TARGET_SHAPES.LINE and board.get_unit_at(cell) != null:
 						break
@@ -91,40 +91,85 @@ static func faction_matches(acting_unit: BaseCombatant, unit: BaseCombatant, fac
 			return unit == acting_unit
 	return false
 
-## Living units of the shape around cell that pass the faction filter.
+## Resolve geometry once through the versioned policy, including same-board range.
+static func geometry(board: BoardData, acting_unit: BaseCombatant, cell: Vector2i, shape: int, max_range: int = -1, movement: String = "", source_anchor: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE) -> Dictionary:
+	if board == null or acting_unit == null:
+		return {"valid": false, "error": REJECT_OFF_BOARD, "cells": [], "board_id": "", "cross_board": false}
+	var battlefield: CombatBattlefield = _battlefield_for(board)
+	var source: BoardPosition = battlefield.get_position(acting_unit)
+	if source_anchor != BaseCombatant.BOARD_ANCHOR_NONE:
+		source.cell = source_anchor
+	return CrossBoardPolicy.resolve(battlefield, source, BoardPosition.new(board.board_id, cell), shape, max_range, acting_unit.footprint, movement)
+
+## Standalone BoardData fixtures keep the same policy path as a running battlefield.
+static func _battlefield_for(board: BoardData) -> CombatBattlefield:
+	var active: CombatBattlefield = CombatBattlefield.get_active()
+	if active != null and active.get_board(board.board_id) == board:
+		return active
+	var local := CombatBattlefield.new(null, board.rules)
+	local.boards.clear()
+	local.boards[board.board_id] = board
+	return local
+
+static func target_board_for_shape(board: BoardData, acting_unit: BaseCombatant, shape: int) -> BoardData:
+	if shape == TARGET_SHAPES.SELF_AREA and acting_unit != null:
+		return _battlefield_for(board).get_board_for_unit(acting_unit)
+	return board
+
+static func resolve_card_cells(board: BoardData, acting_unit: BaseCombatant, card_data: CardData, cell: Vector2i) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	if check_card_target(board, acting_unit, card_data, cell) != "":
+		return result
+	result.assign(geometry(board, acting_unit, cell, card_data.card_shape, card_data.card_range).get("cells", []))
+	return result
+
+## Living targets of a shape on the selected board. SELF_AREA remains on the caster's board.
 static func resolve_targets(board: BoardData, acting_unit: BaseCombatant, cell: Vector2i, shape: int, faction_filter: int, max_range: int = -1) -> Array[BaseCombatant]:
 	var returned: Array[BaseCombatant] = []
-	if board == null:
+	var resolved: Dictionary = geometry(board, acting_unit, cell, shape, max_range)
+	if not resolved.valid:
 		return returned
-	var origin: Vector2i = acting_unit.board_anchor if acting_unit != null else cell
-	if shape == TARGET_SHAPES.SINGLE and faction_filter == TARGET_FACTIONS.SELF and acting_unit != null:
+	if shape == TARGET_SHAPES.SINGLE and faction_filter == TARGET_FACTIONS.SELF:
 		return [acting_unit]
-	for unit: BaseCombatant in board.units_in_cells(cells_in_shape(board, origin, cell, shape, max_range)):
+	var effect_board: BoardData = _battlefield_for(board).get_board(resolved.board_id)
+	var cells: Array[Vector2i] = []
+	cells.assign(resolved.cells)
+	for unit: BaseCombatant in effect_board.units_in_cells(cells):
 		if faction_matches(acting_unit, unit, faction_filter):
 			returned.append(unit)
 	return returned
 
-## Whether a card may be played by acting_unit at cell. Returns "" or a REJECT_* reason.
-## Range: card_range >= 0 limits the distance from the unit's nearest cell to the selected cell.
-## OPPONENT / ALLY / ANY need a matching unit on the cell; EMPTY_CELL needs a cell the unit can stand on.
-static func check_card_target(board: BoardData, acting_unit: BaseCombatant, card_data: CardData, cell: Vector2i) -> String:
+## Returns a rejection before fees or movement. board identifies the selected target board.
+static func check_card_target(board: BoardData, acting_unit: BaseCombatant, card_data: CardData, cell: Vector2i, request_values: Dictionary = {}) -> String:
 	if board == null:
 		return ""
-	if not board.is_in_bounds(cell):
-		return REJECT_OFF_BOARD
-	if card_data.card_range >= 0 and acting_unit != null and board.unit_distance_to_cell(acting_unit, cell) > card_data.card_range:
-		return REJECT_OUT_OF_RANGE
+	var resolved: Dictionary = geometry(board, acting_unit, cell, card_data.card_shape, card_data.card_range)
+	if not resolved.valid:
+		return resolved.error
+	var effect_board: BoardData = _battlefield_for(board).get_board(resolved.board_id)
+	var effective_cell: Vector2i = acting_unit.board_anchor if card_data.card_shape == TARGET_SHAPES.SELF_AREA else cell
+	var context_values: Dictionary = card_data.card_values.duplicate()
+	context_values.merge(request_values, true)
+	var action_error: String = check_action_geometry(effect_board, acting_unit, effective_cell, card_data.card_play_actions, context_values)
+	if action_error != "":
+		return action_error
+	if resolved.cross_board and card_data.card_move_distance > 0:
+		return "cross_board_walk_unsupported"
 	match card_data.card_target_faction:
 		TARGET_FACTIONS.EMPTY_CELL:
-			if board.get_unit_at(cell) != null or board.is_blocked(cell) or (acting_unit != null and not board.can_stand(acting_unit, cell)):
+			if effect_board.get_unit_at(effective_cell) != null or not effect_board.can_stand(acting_unit, effective_cell):
 				return REJECT_CELL_NOT_FREE
 		TARGET_FACTIONS.SELF:
 			pass
 		_:
-			var unit: BaseCombatant = board.get_unit_at(cell)
+			var unit: BaseCombatant = effect_board.get_unit_at(effective_cell)
 			if unit == null or not unit.is_alive() or not faction_matches(acting_unit, unit, card_data.card_target_faction):
 				return REJECT_NO_TARGET
 	return ""
+
+## Recursive action checks share the geometry gate with intent and card execution.
+static func check_action_geometry(board: BoardData, parent: BaseCombatant, cell: Vector2i, data: Variant, context_values: Dictionary = {}) -> String:
+	return BoardActionGeometry.check(board, parent, cell, data, context_values)
 
 ## Whether a card needs a board cell from the player (target selection) before it is played.
 static func card_needs_cell(card_data: CardData) -> bool:
@@ -143,8 +188,10 @@ static func context_parent(action: BaseAction) -> BaseCombatant:
 ## The selected target of the action's card play (first resolved target as fallback); null = unknown
 ## (e.g. glow / playability checks before a target is chosen).
 static func context_target(action: BaseAction) -> BaseCombatant:
-	if action == null or action.card_play_request == null:
+	if action == null:
 		return null
+	if action.card_play_request == null:
+		return action.targets[0] if not action.targets.is_empty() and is_instance_valid(action.targets[0]) else null
 	var request: CardPlayRequest = action.card_play_request
 	if request.selected_target != null and is_instance_valid(request.selected_target):
 		return request.selected_target
@@ -169,6 +216,13 @@ static func context_unit(board: BoardData, action: BaseAction, parent: BaseComba
 		"PARENT":
 			return parent
 	return context_target(action)
+
+## The explicitly selected board, otherwise the parent's actual board.
+static func context_board(action: BaseAction, parent: BaseCombatant) -> BoardData:
+	var battlefield: CombatBattlefield = CombatBattlefield.get_active()
+	if action != null and action.card_play_request != null and action.card_play_request.selected_board_id != "" and battlefield != null:
+		return battlefield.get_board(action.card_play_request.selected_board_id)
+	return BoardData.get_for_unit(parent)
 
 ## A validator cell value: "SELECTED_CELL" (BOARD_ANCHOR_NONE if unknown) or [x, y].
 static func context_cell(action: BaseAction, value: Variant) -> Vector2i:

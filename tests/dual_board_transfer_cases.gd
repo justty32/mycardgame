@@ -1,0 +1,55 @@
+extends RefCounted
+## Real action transfers, rejected endpoint preflight and same-board semantics after invasion.
+
+func run(c) -> void:
+	var hero: BaseCombatant = c.player
+	var uid: String = hero.unit_uid
+	var controller: RefCounted = hero.controller
+	var tick: int = hero.next_action_tick
+	var registry_count: int = UnitRegistry.get_all_units().size()
+	var start := BoardPosition.from_unit(hero)
+	await c.run_actions(hero, [], [{Scripts.ACTION_MOVE_UNIT: {"mode": "TO_CELL", "target_board_id": "enemy", "target_cell": Vector2i(2, 4)}}])
+	c._check(BoardPosition.from_unit(hero).equals(start), "ordinary TO_CELL walking cannot enter another board")
+	c.enemy_board.set_blocked(Vector2i(2, 4), true)
+	await c.transfer(hero, "enemy", Vector2i(2, 4))
+	c._check(BoardPosition.from_unit(hero).equals(start) and c.party_board.get_unit_at(start.cell) == hero, "blocked transfer preserves source occupancy")
+	c.enemy_board.set_blocked(Vector2i(2, 4), false)
+	await c.create_field("field_probe_no_blink", [[2, 4]], hero, {"board_id": "enemy"})
+	await c.transfer(hero, "enemy", Vector2i(2, 4))
+	c._check(BoardPosition.from_unit(hero).equals(start), "destination teleport-blocking field rejects transfer")
+	await c.run_actions(hero, [], [{c.REMOVE_FIELD: {"board_id": "enemy"}}])
+	c._check(await c._play_board("dual_transfer", "enemy", Vector2i(2, 4)) == "", "explicit transfer card enters selected enemy board through Hand")
+	c._check(hero.board_id == "enemy" and hero.board_anchor == Vector2i(2, 4) and c.party_board.get_unit_at(start.cell) == null, "successful transfer commits both board occupancies")
+	c._check(hero.unit_uid == uid and hero.faction == BaseCombatant.FACTIONS.PARTY and hero.controller == controller and hero.next_action_tick == tick and UnitRegistry.get_unit(uid) == hero and UnitRegistry.get_all_units().size() == registry_count, "transfer retains UID/faction/controller/timeline and registry identity")
+	await c.snap_presentation()
+	c._check(hero.global_position.is_equal_approx(c.combat.actor_presentation.target_position_for(hero)), "actual hero sprite root follows the transferred board position")
+	var hp: int = c.enemy.get_combatant_health()
+	c._check(await c._play_board("dual_shape_0", "enemy", c.enemy.board_anchor) == BoardTargeting.REJECT_OUT_OF_RANGE and hp == c.enemy.get_combatant_health() and Global.player_data.player_energy == 50, "invader now shares board: range zero rejects adjacent target before fee")
+	var line: CardData = Global.get_card_data("dual_shape_5")
+	line.card_range = 4
+	c._check(await c._play_board("dual_shape_5", "enemy", c.enemy.board_anchor) == "" and hp - c.enemy.get_combatant_health() == 2, "invader same-board LINE keeps ordinary direction and range semantics")
+	c._check(await c._play_board("dual_push", "enemy", c.enemy.board_anchor) == "" and c.enemy.board_anchor == Vector2i(4, 4), "invader same-board PUSH is legal")
+	await c.transfer(hero, "party", Vector2i(3, 4))
+	c._check(await c._play_board("dual_swap", "enemy", c.enemy.board_anchor) == "", "explicit SWAP card exchanges units across boards")
+	c._check(hero.board_id == "enemy" and c.enemy.board_id == "party" and hero.board_anchor == Vector2i(4, 4) and c.enemy.board_anchor == Vector2i(3, 4), "cross-board swap commits both identities and endpoints")
+	await c.snap_presentation()
+	c._check(hero.global_position.is_equal_approx(c.combat.actor_presentation.target_position_for(hero)) and c.enemy.global_position.is_equal_approx(c.combat.actor_presentation.target_position_for(c.enemy)), "both actual actor roots follow a cross-board swap")
+	await c.run_actions(hero, [c.enemy], [{Scripts.ACTION_DISPLACE_UNIT: {"mode": "SWAP"}}])
+	var hero_before := BoardPosition.from_unit(hero)
+	var enemy_before := BoardPosition.from_unit(c.enemy)
+	await c.create_field("field_probe_no_blink", [hero_before.cell], hero, {"board_id": hero_before.board_id})
+	await c.run_actions(hero, [c.enemy], [{Scripts.ACTION_DISPLACE_UNIT: {"mode": "SWAP"}}])
+	c._check(BoardPosition.from_unit(hero).equals(hero_before) and BoardPosition.from_unit(c.enemy).equals(enemy_before), "swap checks reverse endpoint teleport ban and changes neither participant")
+	await c.run_actions(hero, [], [{c.REMOVE_FIELD: {"board_id": hero_before.board_id}}])
+	var big: BaseCombatant = c.enemy_board.get_unit_at(Vector2i(5, 0))
+	var big_before := BoardPosition.from_unit(big)
+	c.party_board.set_blocked(Vector2i(2, 1), true)
+	await c.transfer(big, "party", Vector2i(1, 0))
+	c._check(BoardPosition.from_unit(big).equals(big_before), "multi-cell transfer validates trailing footprint before mutation")
+	c.party_board.set_blocked(Vector2i(2, 1), false)
+	await c.transfer(big, "party", Vector2i(1, 0))
+	c._check(big.board_id == "party" and c.party_board.get_unit_at(Vector2i(2, 1)) == big and c.enemy_board.get_unit_at(Vector2i(5, 0)) == null, "2x2 transfer updates the entire footprint on both boards")
+	await c.transfer(big, "enemy", Vector2i(5, 0))
+	await c.transfer(hero, "party", Vector2i(3, 4))
+	# Setup restores the dummy's original position without firing gameplay movement events.
+	c._check(c.battlefield.transfer(c.enemy, BoardPosition.new("enemy", Vector2i(3, 4))), "restore dual dummy after transfer tests")

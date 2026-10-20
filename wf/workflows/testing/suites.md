@@ -10,7 +10,7 @@
 
 ```bash
 python3 tools/test_game.py --suite All
-# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb、Board、Wave
+# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb、Board、Wave、Field、DualBoard
 python3 tools/test_game.py --suite SaveLoad
 # Windows 包裝：./tools/test-game.ps1 -Suite SaveLoad
 ```
@@ -25,10 +25,12 @@ runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash �
 
 [Dictionary](../../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[Ctb](../../../tests/ctb_flow.gd)（fixture [ctb_fixture.gd](../../../tests/ctb_fixture.gd)，標記 `CTB PASS:`，在 All 中排在 CombatDefeat 與 SaveLoad 之間）驗 CTB 時間軸：不同速度的行動順序與刻數、`combat_tick_advanced`、EVERY_N_TICKS 狀態、行動開始清格擋、turn_count＝主角行動數、TimelineBar／TurnOverlay 文字與中途離樹後 Director 停止；[Board](../../../tests/board_flow.gd)（cases [board_cases.gd](../../../tests/board_cases.gd)、fixture [board_fixture.gd](../../../tests/board_fixture.gd)，標記 `BOARD PASS:`，在 All 中排在 Ctb 與 SaveLoad 之間）驗 7×5 棋盤：移動點與付費移動延遲、障礙與繞路、射程／CROSS／LINE_PIERCE／2×2 佔格、突進／推／拉近／交換／閃現、定身、召喚最近空格、KEEP_RANGE／CHARGE／APPROACH 移動與 ThreatPreview 等於實際受傷；[Wave](../../../tests/wave_flow.gd)（cases [wave_cases.gd](../../../tests/wave_cases.gd)、fixture [wave_fixture.gd](../../../tests/wave_fixture.gd)，標記 `WAVE PASS:`，在 All 中排在 Board 與 SaveLoad 之間）驗三波遭遇：wave_started／wave_cleared 的刻數、波間格擋牌不被短路、登場延遲與錯開、WAIT_UNTIL_FREE 重試後改最近空格、FAIL_SKIP 跳過、雜兵不擋清波、每波 wave_on_cleared_actions 加錢，以及最後一波清空才 combat_ended；[SaveLoad](../../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；不代表所有卡牌／遭遇或自訂內容已驗證。
 
+[Field](../../../tests/field_flow.gd) 與 [DualBoard](../../../tests/dual_board_flow.gd) 分別使用 `FIELD PASS:`／`DUAL_BOARD PASS:`，依序在 Wave 後、SaveLoad 前執行。前者驗場域、ZOC、位移、位置條件與 ordered lifecycle；後者從正常新局走預設雙盤、A targeting、原子 transfer/swap、兩盤場域與本體站格。各自的實際 assertions／執行結果見 [雙盤驗收表](../../../analysis/slay-the-robot/design/dual-board/verification.json)；工程仍在整合時不可引用舊 All 代替新增 suite。Board／Wave 的既有單盤案例以顯式 SINGLE 保持距離契約，DUAL 為正常新局預設。
+
 ## 新內容如何接到 runner
 
 目前 suite 是上面列出的固定集合，沒有 Custom 或任意 script 參數；題材內容包用 `--pack`／`--pack-tests` 裝入隔離副本並由 Smoke 呼叫其 probe，見 [題材內容包](../game-dev/content/pack.md)。runner 複製其專案 `tests/` 頂層所有 `.gd` 到每個隔離 suite 的 tests 目錄，再執行固定入口；新增 helper 只會被複製，必須由既有入口明確呼叫才有驗證。
 
 新 mod 的可操作範例見 [第一個 mod](../game-dev/content/bootstrap.md)：將專屬 helper 放 tests，以執行中腳本的相鄰路徑載入，於 Smoke 的 autoload ready 後、example_mod probe 前呼叫，交由既有 `_check()` 累計及退出。保留失敗傳遞、timeout、資源清理與完成標記。新 suite 需另改 runner 的選單、入口、標記與隔離契約，並同步 ps1 的 `ValidateSet` 與合成測試案例（Ctb 即照此加入），不可僅在文件寫出新命令。
 
-`--source-game`（ps1 `-SourceGame`）只換遊戲來源，不換 tests；完整候選演練須把 tools 與 tests 一併放到獨立候選根，再以 `--project-root` 指向它。source_hashes 目前是 15 個框架檔的清單，新內容另記檔案雜湊。Combat 與 Ctb 的五張原生牌 fixture 會覆寫角色起手牌（含 append）；SaveLoad 也有自己的語意情境。這些 suite 通過不等於新增卡／敵人／事件／音效已被實際執行，報告須列明新 assertion 及到達入口。
+`--source-game`（ps1 `-SourceGame`）只換遊戲來源，不換 tests；完整候選演練須把 tools 與 tests 一併放到獨立候選根，再以 `--project-root` 指向它。source_hashes 涵蓋來源修復與雙盤／場域核心檔（實際清單見 runner 的 SOURCE_HASH_PATHS），新內容另記檔案雜湊。Combat 與 Ctb 的五張原生牌 fixture 會覆寫角色起手牌（含 append）；SaveLoad 也有自己的語意情境。這些 suite 通過不等於新增卡／敵人／事件／音效已被實際執行，報告須列明新 assertion 及到達入口。

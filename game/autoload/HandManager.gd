@@ -314,6 +314,12 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 		DebugLogger.log_error("HandManager.add_card_to_play_queue: No card supplied for card play")
 		return
 	
+	# Board rejection happens before reserving energy, including automated / duplicated plays.
+	var board_rejection: String = _validate_board_request(card_play_request)
+	if board_rejection != "":
+		card_play_request.card_values["board_rejection"] = board_rejection
+		return
+
 	# get intercepted card play results to determine energy costs
 	var card_play_intercepted_action_results: Dictionary[String, Variant] = card_data.get_card_play_intercepted_action_results(card_play_request.selected_target as Enemy)
 	var card_energy_cost: int = card_play_intercepted_action_results.get("card_energy_cost", card_data.get_card_energy_cost(true, true)) # variable cost is zero cost
@@ -363,6 +369,40 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 	if (not ActionHandler.actions_being_performed) and (not cards_being_played):
 		_perform_card_plays()
 
+## Same targeting gate used by Hand, repeated here before payment and immediately before play.
+func _validate_board_request(request: CardPlayRequest) -> String:
+	var battlefield: CombatBattlefield = CombatBattlefield.get_active()
+	if battlefield == null or request == null or request.card_data == null:
+		return ""
+	var acting: BaseCombatant = request.acting_unit if is_instance_valid(request.acting_unit) else UnitRegistry.get_hero()
+	if acting == null or battlefield.get_board_for_unit(acting) == null:
+		return "off_board"
+	var cell: Vector2i = request.selected_cell
+	var board_id: String = request.selected_board_id
+	if is_instance_valid(request.selected_target):
+		# A selected unit may have moved since the request was queued. Follow its actual position.
+		var current_board: BoardData = battlefield.get_board_for_unit(request.selected_target)
+		if current_board == null:
+			return "off_board"
+		if board_id != current_board.board_id or current_board.get_unit_at(cell) != request.selected_target:
+			cell = request.selected_target.board_anchor
+		board_id = current_board.board_id
+	if cell == BaseCombatant.BOARD_ANCHOR_NONE:
+		var context_values: Dictionary = request.card_data.card_values.duplicate()
+		context_values.merge(request.card_values, true)
+		return BoardTargeting.check_action_geometry(battlefield.get_board_for_unit(acting), acting, acting.board_anchor, request.card_data.card_play_actions, context_values)
+	if board_id == "":
+		board_id = acting.board_id
+	var board: BoardData = battlefield.get_board(board_id)
+	if board == null:
+		return "off_board"
+	var reason: String = BoardTargeting.check_card_target(board, acting, request.card_data, cell, request.card_values)
+	if reason == "":
+		request.selected_board_id = board_id
+		request.selected_cell = cell
+		request.resolved_targets = BoardTargeting.resolve_targets(board, acting, cell, request.card_data.card_shape, request.card_data.card_target_faction, request.card_data.card_range)
+	return reason
+
 ## Main looping/locking method for performing all cards in the card queue.
 ## WARNING: Do not invoke this anywhere other than add_card_to_play_queue()
 func _perform_card_plays() -> void:	
@@ -380,6 +420,14 @@ func _perform_card_plays() -> void:
 		var card_target: BaseCombatant = card_play_request.selected_target
 		card_play_queue_reserved_energy_total -= max(card_energy_cost, 0)
 		
+		# Earlier queued effects may have transferred the caster/target or changed the board.
+		var board_rejection: String = _validate_board_request(card_play_request)
+		if board_rejection != "":
+			card_play_request.card_values["board_rejection"] = board_rejection
+			Global.player_data.player_energy += max(card_energy_cost, 0)
+			hand.combat.update_combat_display()
+			continue
+
 		# exit card queue if target no longer exists
 		if card_target != null and not card_target.is_alive():
 			card_play_queue.push_front(card_play_request)

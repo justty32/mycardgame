@@ -37,3 +37,7 @@
 - 戰術指令介面：第一版不做，Phase 5 之後再加。
 - 戰前部署：先用遭遇資料的預設格，不做部署 UI。
 - 落點：`wf/specs/`、`wf/plans/`。
+
+## 2026-10-20 雙盤擴充
+
+使用者後續選定的雙棋盤 A、特殊跨盤移動／交換、方向型限制及角色本體站格見 [雙盤契約](../../../analysis/slay-the-robot/design/dual-board/README.md)。本目錄保留原單盤設計脈絡；涉及位置身分、選格與跨盤事件時以新契約為準，實際接線／回歸見 [驗證矩陣](../../../analysis/slay-the-robot/design/dual-board/verification.json)，不是以 Phase 2b 八條摘要取代完整需求。

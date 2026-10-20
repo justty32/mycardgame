@@ -15,6 +15,7 @@ class_name EncounterWaveData
 enum SPAWN_POLICIES {NEAREST_EMPTY, WAIT_UNTIL_FREE, FAIL_SKIP}
 
 ## One entry per unit: {"weights": {"enemy_id": weight}, "cell": [x, y], "spawn_delay_ticks": int}.
+## Optional board_id selects a destination board; absent means enemy/shared, never overflow to another board.
 ## A missing or off-board "cell" places the unit on the nearest empty spawn-zone cell.
 @export var wave_units: Array[Dictionary] = []
 @export var wave_enter_delay_ticks: int = 0

@@ -47,4 +47,8 @@ class_name CharacterData
 ## Board (combat framework Phase 2): flying (passes over units / blocked cells), immune to displacement.
 @export var character_ignores_occupancy: bool = false
 @export var character_is_immovable: bool = false
+## -1 inherits flying; 0/1 explicitly disables/enables ZOC immunity.
+@export var character_ignores_zoc: int = -1
+@export var character_opportunity_actions: Array[Dictionary] = []
+@export var character_displace_resistance: int = 0
 #endregion

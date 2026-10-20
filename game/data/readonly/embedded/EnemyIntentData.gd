@@ -89,7 +89,7 @@ enum INTENT_DISPLAY_TYPES {
 
 #region Board (combat framework Phase 2; defaults = original behavior: hits the hero from anywhere)
 enum TARGET_RULES {NEAREST, FARTHEST, LOWEST_HP, HIGHEST_HP, HERO, RANDOM, MARKED, SELF}
-## Movement before the intent's actions. FLANK and TELEPORT are Phase 2b (fall back to APPROACH / HOLD).
+## Movement around the intent actions; append enum values to preserve existing content.
 enum MOVE_MODES {HOLD, APPROACH, RETREAT, KEEP_RANGE, FLANK, CHARGE, TELEPORT}
 ## Max board distance to the intended target; -1 = not checked.
 @export var enemy_intent_range: int = -1
@@ -102,6 +102,14 @@ enum MOVE_MODES {HOLD, APPROACH, RETREAT, KEEP_RANGE, FLANK, CHARGE, TELEPORT}
 @export var enemy_intent_move_distance: int = -1
 ## KEEP_RANGE distance; -1 = enemy_intent_range.
 @export var enemy_intent_preferred_range: int = -1
+enum TELEPORT_RULES {ADJACENT_TO_TARGET, FARTHEST_FROM_OPPONENTS, RANDOM_EMPTY, MARKED_CELL}
+@export var enemy_intent_teleport_rule: int = TELEPORT_RULES.ADJACENT_TO_TARGET
+## Explicit anchor takes priority over matching field tags. NONE selects a marked field.
+@export var enemy_intent_marked_cell: Vector2i = Vector2i(-1, -1)
+@export var enemy_intent_marked_field_tag: String = "marked"
+@export var enemy_intent_path_actions: Array[Dictionary] = []
+@export var enemy_intent_move_after: bool = false
+
 #endregion
 
 ## Figures out the display types (overhead symbols) based on intent's parameters and custom actions.

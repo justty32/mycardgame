@@ -37,6 +37,12 @@ var unit_uid: String = ""
 var faction: int = FACTIONS.NEUTRAL
 ## Top-left board cell of the unit; BOARD_ANCHOR_NONE while not placed on a board.
 var board_anchor: Vector2i = BOARD_ANCHOR_NONE
+## Physical board identity; independent of faction, including after cross-board transfers.
+var board_id: String = "shared"
+## Immutable sprite origin captured before run animations can alter the local pose.
+var presentation_sprite_origin: Vector2 = Vector2.ZERO
+var presentation_sprite_offset: Vector2 = Vector2.ZERO
+var presentation_sprite_origin_captured: bool = false
 ## Board cells covered by the unit.
 var footprint: Vector2i = Vector2i(1, 1)
 ## Unmodified speed (from data); read the effective value through speed / get_speed().
@@ -67,12 +73,18 @@ var cells_displaced_this_action: int = 0
 var action_extra_delay: int = 0
 ## Flying: passes over units and blocked cells, never stops on them.
 var ignores_occupancy: bool = false
+var ignores_zoc: bool = false
+var opportunity_actions: Array[Dictionary] = []
+var displace_resistance: int = 0
 ## Cannot be displaced (ActionDisplaceUnit).
 var is_immovable: bool = false
 #endregion
 #endregion
 
 func _ready():
+	presentation_sprite_origin = animated_sprite_2d.position
+	presentation_sprite_offset = animated_sprite_2d.offset
+	presentation_sprite_origin_captured = true
 	faction = _get_default_faction()
 	UnitRegistry.register_unit(self)
 	tree_exiting.connect(_on_unit_tree_exiting)

@@ -11,8 +11,8 @@ extends BaseAction
 func perform_action() -> void:
 	if card_play_request == null:
 		return
-	var board: BoardData = BoardData.get_active()
 	var parent: BaseCombatant = parent_combatant
+	var board: BoardData = BoardData.get_for_unit(parent)
 	if board == null or parent == null or not board.has_unit(parent):
 		return
 	var target: BaseCombatant = card_play_request.selected_target
@@ -23,25 +23,31 @@ func perform_action() -> void:
 			if candidate != null and is_instance_valid(candidate):
 				target = candidate
 				break
-	var values_out: Dictionary = card_play_request.card_values
-	if target != null and board.has_unit(target):
-		values_out["distance"] = board.unit_distance(parent, target)
-		values_out["target_adjacent_opponents"] = _count_adjacent(board, target, true)
-	values_out["adjacent_allies"] = _count_adjacent(board, parent, false)
-	values_out["adjacent_opponents"] = _count_adjacent(board, parent, true)
-	values_out["cells_moved_this_action"] = parent.cells_moved_this_action
-	values_out["cells_displaced_this_action"] = parent.cells_displaced_this_action
+	if target != null and not board.has_unit(target):
+		return # No cross-board numeric distance; card preflight rejects this action before payment.
+	card_play_request.card_values.merge(compute_values(board, parent, target), true)
 
-func _count_adjacent(board: BoardData, around: BaseCombatant, opponents: bool) -> int:
-	var count: int = 0
-	for unit: BaseCombatant in board.get_units():
-		if unit == around or not unit.is_alive() or board.unit_distance(around, unit) != 1:
-			continue
-		var is_opponent: bool = unit.faction != around.faction and unit.faction != BaseCombatant.FACTIONS.NEUTRAL
-		var is_ally: bool = unit.faction == around.faction
-		if (opponents and is_opponent) or (not opponents and is_ally):
-			count += 1
-	return count
+## Pure preview seam for a future AI context; never writes a request, unit, board or RNG.
+static func compute_values(board: BoardData, parent: BaseCombatant, target: BaseCombatant, hypothetical_anchor: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE) -> Dictionary:
+	var result: Dictionary = {"distance": 0, "adjacent_allies": 0, "adjacent_opponents": 0, "target_adjacent_opponents": 0, "cells_moved_this_action": 0, "cells_displaced_this_action": 0, "is_flanked": 0}
+	if board == null or parent == null or not board.has_unit(parent):
+		return result
+	result["adjacent_allies"] = BoardPositionQueries.count_adjacent(board, parent, "ALLY", hypothetical_anchor)
+	result["adjacent_opponents"] = BoardPositionQueries.count_adjacent(board, parent, "OPPONENT", hypothetical_anchor)
+	result["cells_moved_this_action"] = parent.cells_moved_this_action
+	result["cells_displaced_this_action"] = parent.cells_displaced_this_action
+	if target != null and not board.has_unit(target):
+		result["distance"] = -1
+		result["target_adjacent_opponents"] = BoardPositionQueries.surrounded_count(BoardData.get_for_unit(target), target)
+	if target != null and board.has_unit(target):
+		result["distance"] = board.unit_distance(parent, target, hypothetical_anchor)
+		var adjacent: int = BoardPositionQueries.surrounded_count(board, target)
+		if hypothetical_anchor != BaseCombatant.BOARD_ANCHOR_NONE and BoardPositionQueries.opponents(parent, target):
+			adjacent -= int(board.unit_distance(parent, target) == 1)
+			adjacent += int(board.unit_distance(parent, target, hypothetical_anchor) == 1)
+		result["target_adjacent_opponents"] = adjacent
+		result["is_flanked"] = int(BoardPositionQueries.is_flanked(board, parent, target, hypothetical_anchor))
+	return result
 
 func is_instant_action() -> bool:
 	return true

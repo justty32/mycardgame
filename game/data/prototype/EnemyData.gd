@@ -44,6 +44,10 @@ enum ENEMY_TYPES {STANDARD, MINIBOSS, BOSS}
 @export var enemy_footprint: Vector2i = Vector2i(1, 1)
 @export var enemy_ignores_occupancy: bool = false
 @export var enemy_is_immovable: bool = false
+## -1 inherits flying; 0/1 explicitly disables/enables ZOC immunity.
+@export var enemy_ignores_zoc: int = -1
+@export var enemy_opportunity_actions: Array[Dictionary] = []
+@export var enemy_displace_resistance: int = 0
 
 ## Time in seconds between each enemy attack.
 const ENEMY_ATTACK_DELAY: float = 0.5

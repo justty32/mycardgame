@@ -50,6 +50,9 @@ func init(_enemy_data: EnemyData):
 	footprint = Vector2i(max(1, enemy_data.enemy_footprint.x), max(1, enemy_data.enemy_footprint.y))
 	ignores_occupancy = enemy_data.enemy_ignores_occupancy
 	is_immovable = enemy_data.enemy_is_immovable
+	ignores_zoc = ignores_occupancy if enemy_data.enemy_ignores_zoc < 0 else bool(enemy_data.enemy_ignores_zoc)
+	opportunity_actions = enemy_data.enemy_opportunity_actions
+	displace_resistance = max(0, enemy_data.enemy_displace_resistance)
 
 	selection_button.mouse_entered.connect(_on_mouse_entered)
 	selection_button.mouse_exited.connect(_on_mouse_exited)

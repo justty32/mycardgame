@@ -112,7 +112,7 @@ signal end_turn_requested(end_turn_immediacy_level: int)	# legacy name of end_ac
 # Emitted by CombatDirector: unit_action_*, combat_tick_advanced, timeline_changed, end_action_requested;
 # by UnitRegistry: unit_spawned / unit_removed. wave_started / wave_cleared by the CombatDirector's
 # WaveController (Phase 3). unit_downed and the party signals are declared for later phases.
-signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: after draw, before input/decision
+signal unit_action_started(unit: BaseCombatant)	# a unit's action begins: before field stay effects and draw/decision
 signal unit_action_ended(unit: BaseCombatant)	# a unit's action ends: after discard, before delay is computed
 signal combat_tick_advanced(previous_tick: int, current_tick: int)	# the combat clock advanced
 signal timeline_changed	# any unit's next_action_tick changed (UI should re-project the timeline)
@@ -167,3 +167,15 @@ signal party_member_advanced(member)
 # plan is an AiPlan once that class exists; untyped until then. Debug/test observation.
 signal ai_plan_decided(unit: BaseCombatant, plan)
 #endregion
+
+# Phase 2b: cell transitions and field lifecycle. Unit movement still emits once per action.
+signal unit_entered_cell(unit: BaseCombatant, board_id: StringName, cell: Vector2i)
+signal unit_left_cell(unit: BaseCombatant, board_id: StringName, cell: Vector2i)
+signal unit_board_moved(unit: BaseCombatant, from_board_id: StringName, from: Vector2i, to_board_id: StringName, to: Vector2i)
+signal board_cell_clicked(board_id: StringName, cell: Vector2i)
+signal board_cell_hovered(board_id: StringName, cell: Vector2i)
+signal board_changed(board_id: StringName)
+signal field_changed(instance: FieldInstance)
+signal field_created(instance: FieldInstance)
+signal field_removed(instance: FieldInstance)
+signal unit_left_zoc(mover: BaseCombatant, controller: BaseCombatant)

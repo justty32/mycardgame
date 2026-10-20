@@ -247,3 +247,12 @@ const RUN_MODIFIER_CUSTOM_DRAFT_ALL_COLORS: String = "res://scripts/run_modifier
 const RUN_MODIFIER_CUSTOM_EASYMODE: String = "res://scripts/run_modifiers/custom/RunModifierCustomEasyMode.gd"
 const RUN_MODIFIER_CUSTOM_ENDLESS_MODE: String = "res://scripts/run_modifiers/custom/RunModifierCustomEndlessMode.gd"
 #endregion
+
+# Phase 2b field and position primitives.
+const ACTION_CREATE_FIELD: String = "res://scripts/actions/board_actions/ActionCreateField.gd"
+const ACTION_REMOVE_FIELD: String = "res://scripts/actions/board_actions/ActionRemoveField.gd"
+const ACTION_SET_CELL_BLOCKED: String = "res://scripts/actions/board_actions/ActionSetCellBlocked.gd"
+const VALIDATOR_CELL_HAS_FIELD: String = "res://scripts/validators/board/ValidatorCellHasField.gd"
+const VALIDATOR_ADJACENT_UNITS: String = "res://scripts/validators/board/ValidatorAdjacentUnits.gd"
+const VALIDATOR_FLANKED: String = "res://scripts/validators/board/ValidatorFlanked.gd"
+const VALIDATOR_ON_EDGE: String = "res://scripts/validators/board/ValidatorOnEdge.gd"

@@ -561,6 +561,16 @@ def main() -> None:
     assert_that(judge("WAVE PASS: 10 checks, 0 failures", marker="WAVE PASS:")["passed"]
                 and not judge("WAVE FAIL: 10 checks, 1 failures\nFAIL: wave", marker="WAVE PASS:")["passed"],
                 "Wave verdict needs the WAVE PASS marker and no FAIL lines")
+    assert_that(runner.parse_args(["--suite", "field"]).suite == "Field"
+                and runner.ALL_SUITES.index("Field") == runner.ALL_SUITES.index("Wave") + 1
+                and runner.SUITE_SCRIPTS["Field"] == "field_flow.gd"
+                and runner.SUITE_MARKERS["Field"] == "FIELD PASS:",
+                "Field suite is selectable and runs after Wave in All")
+    assert_that(runner.parse_args(["--suite", "dualboard"]).suite == "DualBoard"
+                and runner.ALL_SUITES.index("DualBoard") == runner.ALL_SUITES.index("Field") + 1
+                and runner.SUITE_SCRIPTS["DualBoard"] == "dual_board_flow.gd"
+                and runner.SUITE_MARKERS["DualBoard"] == "DUAL_BOARD PASS:",
+                "DualBoard has an independent marker and is included after Field in All")
 
     MANIFEST["completed"] = True
     MANIFEST["checks"] = CHECKS
