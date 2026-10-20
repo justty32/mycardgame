@@ -14,6 +14,7 @@
 - [啟動驗證](architecture/03_startup_validation.md)：Godot 實跑、畫面渲染、mod 測試與已知缺陷。
 - [回歸與流程驗證](architecture/04_regression_validation.md)：Dictionary／存讀修復、單場戰鬥勝敗、跨程序續玩與資源清理限制。
 - [資源生命週期](architecture/05_resource_lifecycle.md)：退出資源問題的後續修復與驗收狀態，和原生崩潰調查分開記錄。
+- [Windows 接手驗證](architecture/06_windows_validation.md)：4.7.2 Mono 背景驗證、Windows 工具修復與隔離證據。
 - [設計與呈現能力](design/README.md)：卡牌、敵人、關卡、圖像／UI 與音訊的實際接線及已知缺口。
 - [首次接手演練](onboarding/README.md)：不同任務從 wf 出發的缺口、補強與獨立復走證據。
 - [教學更正紀錄](tutorial/verification.md)：舊範例與目前原始碼的差異。
@@ -23,7 +24,7 @@
 
 原始來源為 `pas/analysis/slay-the-robot/`，這是來源紀錄，不是外部路徑依賴。最初完整複製三份 Markdown 並以 SHA-256 核對一致；之後依使用者要求核實框架，已在本專案更正兩篇教學並新增架構與執行證據。PAS 原件未修改。
 
-目前核實基準為 Slay-The-Robot commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加 [來源鎖](../../tools/upstream.json) 所列本地修復；引擎基準 2026-10-19 起為 Godot 4.7.x。下列報告的 runtime 證據原於 Godot 4.6 取得，同日以 4.7.2（Linux）重跑隔離 All，斷言數一致，見 [可攜證據](evidence/README.md#godot-472linux重跑) 與來源鎖 `engine_policy.migration_from_4_6`。靜態核實與 runtime 已驗事項分開記錄；已驗單場戰鬥勝敗、獎勵及跨程序存讀續玩，不代表所有教學自訂玩法或完整多幕通關已測試。原版問題、Dictionary／存讀及後續資源清理結果各自保留在對應驗證報告。
+目前核實基準為 Slay-The-Robot commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加 [來源鎖](../../tools/upstream.json) 所列本地修復；引擎基準 2026-10-19 起為 Godot 4.7.x。較早架構報告的 runtime 證據原於 Godot 4.6 取得，同日以 4.7.2（Linux）重跑隔離 All，斷言數一致，見 [可攜證據](evidence/README.md#godot-472linux重跑) 與來源鎖 `engine_policy.migration_from_4_6`。公司機 2026-10-20 的官方 4.7.2 Mono 與 Phase 3 接手結果見 [Windows 驗證](architecture/06_windows_validation.md)。靜態核實與 runtime 已驗事項分開記錄；已驗單場戰鬥勝敗、獎勵及跨程序存讀續玩，不代表所有教學自訂玩法或完整多幕通關已測試。原版問題、Dictionary／存讀及後續資源清理結果各自保留在對應驗證報告。
 
 ## 後續維護
 

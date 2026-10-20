@@ -8,7 +8,7 @@
 
 ## 冷啟動
 
-使用者於 2026-10-19 同意縮減：每位主／子 agent 開工前必讀 4 項——[根入口 AGENTS.md](../../AGENTS.md)、[派發器](../WORKFLOWS.md)、[使用者邊界](common/user.md)、目標工作流入口檔（見派發器），外加下述 SESSION-LOG／WAIT_USER 檢查。操作邊界與檔案所有權仍須傳遞。同一任務已讀過且未變動的內容可沿用。
+使用者於 2026-10-20 重申各 agent 開工前先通讀 wf 核心規矩，簡單工作與雜活可免。核心入口為 [根入口 AGENTS.md](../../AGENTS.md)、[派發器](../WORKFLOWS.md)、[使用者邊界](common/user.md)、目標工作流入口檔（見派發器），外加下述 SESSION-LOG／WAIT_USER 檢查；相關規矩依下一段補讀。操作邊界與檔案所有權仍須傳遞。同一任務已讀過且未變動的內容可沿用。
 
 其餘按情境再讀：整理工作流讀 [STRUCTURE](../STRUCTURE.md)、[專案地圖](../INDEX.md)、[PROJECT](../PROJECT.md)；新開工作流讀 [模板](TEMPLATE.workflow.md)；碰原始碼前讀 [慣例](common/conventions.md)、[code map](common/code-map.md)、[dev-env](dev-env.md)；碰資料檔讀 [資料檔契約](common/data-files.md)；收尾回寫讀 [經驗回寫](learning.md)；其餘規矩見 [common 入口](common/README.md)。
 

@@ -12,6 +12,7 @@
 
 - `games/<game>/pack/mod_info.json`：`mod_folder_to_load_data`／`mod_script_file_paths` 的 key 一律寫 `external/mods/<name>/...`（相對 game 根）。runner 由這個前綴決定安裝名，與來源資料夾名（通常就叫 `pack`）無關；前綴必須只有一個。
 - 資料 JSON 的 object_id 帶該題材前綴；刻意 patch 框架 id 時在題材樹登記例外（boundary lint 檢查）。
+- 資料夾只載直接列出的 `.json`（不分大小寫），不遞迴；佔位檔與備份略過，真正 JSON 的錯誤仍須失敗。
 - probe：`games/<game>/tests/<name>_probe.gd`，`extends RefCounted`，定義 `check_loaded(global_data: Node) -> Dictionary`，回傳 `{斷言標籤: bool}`。標籤以題材前綴開頭，Smoke 逐項印 `PASS:`／`FAIL:`，完成後印 `PACK PROBE DONE: <檔名>`。同目錄其他 `.gd` 只複製、不呼叫，probe 以自身路徑相鄰載入。
 
 ## 開新題材樹
@@ -48,7 +49,7 @@ pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容
 
 ## 編輯器載入（本機）
 
-`python3 tools/link_pack.py games/<game>/pack` 建 `game/external/mods/<name>` 相對 symlink（Windows 先試 symlink、再退 `mklink /J` junction，**Windows 路徑未實測**）；該路徑由 .gitignore 的 `/game/external/mods/*`（只放行 example_mod）蓋住，link 後 `git status` 不變。要在編輯器實際載入再加 `--enable`：在追蹤中的 `mod_list.json` 插一行，`git status` 會顯示已修改，**不得 commit**；`--unlink` 移除 link 並逐位元組還原該行。runner 複製時略過 link，並從隔離副本的 mod_list 拿掉被 link 的 mod，框架 Smoke 不受本機 `--enable` 影響；要測該包一律用 `--pack`。拒絕取代或刪除真實 mod 資料夾。
+`python3 tools/link_pack.py games/<game>/pack` 建 `game/external/mods/<name>` symlink（POSIX 為相對路徑；Windows 先試 symlink、再退 `mklink /J` junction）。2026-10-20 Windows 11／Python 3.13 已用隔離 fixture 驗真實 junction、空白路徑、unlink 保留 target 與 runner 排除；Python 3.10／3.11 的 junction 辨識以 reparse tag 退路，已在 3.13 模擬缺 API 驗證。該路徑由 .gitignore 的 `/game/external/mods/*`（只放行 example_mod）蓋住。加 `--enable` 會在追蹤中的 `mod_list.json` 插一行，**不得 commit**；`--unlink` 移除 link 並逐位元組還原該行，保留 LF／CRLF／BOM。回歸入口 `python3 tests/test_link_pack.py`。runner 複製時略過 link，並從隔離副本的 mod_list 拿掉被 link 的 mod；要測該包一律用 `--pack`。拒絕取代或刪除真實 mod 資料夾。
 
 ## 邊界檢查
 

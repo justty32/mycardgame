@@ -38,7 +38,7 @@
 
 [mod_list.json](../../../game/external/mod_list.json) 預設只啟用 `external/`，example_mod 為 false。[ModListData.gd](../../../game/data/readonly/modding/ModListData.gd) 按 `load_priority` 升序載入，高值較晚套用；未定義同優先序的內容衝突規則。每個啟用項目的 `mod_info.json` 指定資料夾、class_name、table_name 與 script overrides。新資料夾要列入此映射，不能只在磁碟建立資料夾。
 
-[FileLoader.gd](../../../game/autoload/FileLoader.gd) `load_read_only_data()` 找同 object_id 既有物件再 patch；沒找到則 new。`mod_script_file_paths` 可用 `take_over_path()` 替換腳本，屬可執行程式擴充。`validate_enabled_mod_dependencies()` 目前只是 TODO，不應宣稱已驗證 mod 相依性。
+[FileLoader.gd](../../../game/autoload/FileLoader.gd) `load_read_only_data()` 只載入映射目錄直接列出的 `.json` 資料檔（副檔名大小寫不敏感），略過佔位檔、文字與編輯器備份，不遞迴子目錄；合法 JSON 的排序與解析錯誤維持原行為，見 [Windows 修復驗證](06_windows_validation.md)。同 object_id 找既有物件再 patch；沒找到則 new。`mod_script_file_paths` 可用 `take_over_path()` 替換腳本，屬可執行程式擴充。`validate_enabled_mod_dependencies()` 目前只是 TODO，不應宣稱已驗證 mod 相依性。
 
 [SerializableData.gd](../../../game/data/SerializableData.gd) `patch_dictionary()` 支援 `merge_overwrite`、`merge_keep`、`erase`、`overwrite`；**沒有 `merge` 策略**，未知策略會走 overwrite。`patch_array()` 支援 `append`、`append_uniques`、`erase`、`overwrite`。數值沒有 add 策略；巢狀 SerializableData／原生型別的還原分支會直接重建，不代表所有欄位都支援合併。
 

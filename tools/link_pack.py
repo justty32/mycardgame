@@ -16,7 +16,7 @@ Usage (from the project root):
 modified until --unlink removes exactly that line again; never commit it.
 
 Linux/macOS: relative symlink. Windows: symlink (Developer Mode) or, failing that, a
-directory junction via `mklink /J` -- the Windows path is written but NOT yet verified.
+directory junction via `mklink /J` (covered by tests/test_link_pack.py).
 Exit 0 on success, 2 on usage or environment errors.
 """
 from __future__ import annotations
@@ -35,8 +35,8 @@ ENABLE_PRIORITY = 10
 MOD_LOAD_DATA_OPEN = '"mod_load_data": {'
 
 
-def enable_line(name: str) -> str:
-    return f'\t\t\t"external/mods/{name}/": {{"enabled": true, "load_priority": {ENABLE_PRIORITY}}},\n'
+def enable_line(name: str, newline: str = "\n") -> str:
+    return f'\t\t\t"external/mods/{name}/": {{"enabled": true, "load_priority": {ENABLE_PRIORITY}}},{newline}'
 
 
 def _same_target(link: Path, pack_dir: Path) -> bool:
@@ -62,12 +62,13 @@ def create_link(link: Path, pack_dir: Path) -> str:
         return "symlink"
     except OSError:
         pass
-    # Unverified: junctions need no Developer Mode; mklink is a cmd builtin.
+    # Junctions need no Developer Mode; mklink is a cmd builtin.
     completed = subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(pack_dir)], capture_output=True,
-                               text=True, check=False, stdin=subprocess.DEVNULL, creationflags=0x08000000)
+                               text=True, encoding="oem", errors="replace", check=False,
+                               stdin=subprocess.DEVNULL, creationflags=0x08000000)
     if completed.returncode != 0:
-        raise RunnerError(f"mklink /J failed: {completed.stdout.strip()} {completed.stderr.strip()}")
-    return "junction (unverified on Windows)"
+        raise RunnerError(f"mklink /J failed: {(completed.stdout or '').strip()} {(completed.stderr or '').strip()}")
+    return "junction"
 
 
 def remove_link(link: Path) -> bool:
@@ -84,24 +85,30 @@ def remove_link(link: Path) -> bool:
 
 def set_enabled(mod_list: Path, name: str, enabled: bool) -> bool:
     """Insert or remove exactly one line so --unlink restores the file byte-for-byte."""
-    text = mod_list.read_text(encoding="utf-8")
-    line = enable_line(name)
+    # Text-mode reads normalize CRLF even when writes use newline="". Decode
+    # bytes instead, preserving the BOM and every pre-existing line ending.
+    text = mod_list.read_bytes().decode("utf-8")
+    lines = (enable_line(name), enable_line(name, "\r\n"))
     if enabled:
-        if line in text:
+        if any(line in text for line in lines):
             return False
         if f'"external/mods/{name}/"' in text:
             raise RunnerError(f"{mod_list} already lists external/mods/{name}/ in another form; edit it by hand")
         index = text.find(MOD_LOAD_DATA_OPEN)
         if index < 0:
             raise RunnerError(f"{mod_list} has no {MOD_LOAD_DATA_OPEN} block")
-        end_of_line = text.index("\n", index) + 1
+        newline_index = text.find("\n", index)
+        if newline_index < 0:
+            raise RunnerError(f"{mod_list} has no newline after {MOD_LOAD_DATA_OPEN}")
+        end_of_line = newline_index + 1
+        line = enable_line(name, "\r\n" if text[newline_index - 1] == "\r" else "\n")
         text = text[:end_of_line] + line + text[end_of_line:]
     else:
-        if line not in text:
+        line = next((line for line in lines if line in text), None)
+        if line is None:
             return False
         text = text.replace(line, "", 1)
-    with open(mod_list, "w", encoding="utf-8", newline="") as handle:
-        handle.write(text)
+    mod_list.write_bytes(text.encode("utf-8"))
     return True
 
 

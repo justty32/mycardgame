@@ -1,0 +1,220 @@
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: --pack-tests requires --pack
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: --pack-tests runs inside Smoke; use --suite Smoke or All
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: --content-profile pack requires --suite Smoke and at least one --pack
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: --content-profile pack requires --suite Smoke and at least one --pack
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: argument --content-profile: invalid choice: 'prod' (choose from 'test', 'pack')
+PASS: signed access-violation status preserves all 32 bits
+PASS: zero exit code formatting
+PASS: unobserved exit is not converted to success
+PASS: Windows return codes pass through without signal
+PASS: generic crash mention and leak are not native crash signatures
+PASS: native Unix-style handler signature recognized
+PASS: resource retention fails even with exit 0 and PASS marker
+PASS: known shutdown count is tolerated only when explicitly listed and stays recorded
+PASS: ObjectDB leak fails by default
+PASS: historical baseline tolerates leak text but records it
+PASS: any other ^ERROR line fails and is listed
+PASS: SCRIPT ERROR fails
+PASS: non-zero exit fails
+PASS: timeout fails
+PASS: 4.6 is rejected under the default 4.7 policy
+PASS: 4.6 is accepted again when the policy is widened
+PASS: 4.7.2 mono build accepted
+PASS: missing version line fails the probe
+PASS: cold cache UID is tolerated only for the cold import and flags a recheck
+PASS: cold cache UID fails the verified re-import
+PASS: ten itemised rejection blocks are accepted
+PASS: nine rejection blocks fail
+PASS: a rejection line outside the blocks fails
+PASS: log preflight opens exact target without truncating evidence
+PASS: unwritable log target fails before any process starts with path-specific evidence
+PASS: normal verdict and exception agree
+PASS: normal records launched PID without claiming child engine identity
+PASS: normal records UTC start/end
+PASS: normal result durable before whole run completion
+PASS: native-text verdict and exception agree
+PASS: native-text records launched PID without claiming child engine identity
+PASS: native-text records UTC start/end
+PASS: native-text result durable before whole run completion
+PASS: native marker overrides successful exit and PASS text
+PASS: nonzero verdict and exception agree
+PASS: nonzero records launched PID without claiming child engine identity
+PASS: nonzero records UTC start/end
+PASS: nonzero result durable before whole run completion
+PASS: ordinary failure exit retains hexadecimal evidence
+PASS: missing-marker verdict and exception agree
+PASS: missing-marker records launched PID without claiming child engine identity
+PASS: missing-marker records UTC start/end
+PASS: missing-marker result durable before whole run completion
+PASS: resource-leak verdict and exception agree
+PASS: resource-leak records launched PID without claiming child engine identity
+PASS: resource-leak records UTC start/end
+PASS: resource-leak result durable before whole run completion
+PASS: object-leak verdict and exception agree
+PASS: object-leak records launched PID without claiming child engine identity
+PASS: object-leak records UTC start/end
+PASS: object-leak result durable before whole run completion
+PASS: stderr-error verdict and exception agree
+PASS: stderr-error records launched PID without claiming child engine identity
+PASS: stderr-error records UTC start/end
+PASS: stderr-error result durable before whole run completion
+PASS: version-46 verdict and exception agree
+PASS: version-46 records launched PID without claiming child engine identity
+PASS: version-46 records UTC start/end
+PASS: version-46 result durable before whole run completion
+PASS: process-level version probe rejects 4.6 under default policy and records the version
+PASS: cold-import verdict and exception agree
+PASS: cold-import records launched PID without claiming child engine identity
+PASS: cold-import records UTC start/end
+PASS: cold-import result durable before whole run completion
+PASS: cold import through the real --log-file path flags the recheck
+PASS: save-rejected verdict and exception agree
+PASS: save-rejected records launched PID without claiming child engine identity
+PASS: save-rejected records UTC start/end
+PASS: save-rejected result durable before whole run completion
+PASS: rejection blocks read from the engine log, not console
+PASS: historical verdict and exception agree
+PASS: historical records launched PID without claiming child engine identity
+PASS: historical records UTC start/end
+PASS: historical result durable before whole run completion
+PASS: historical baseline records the tolerated shutdown count
+PASS: timeout verdict and exception agree
+PASS: timeout records launched PID without claiming child engine identity
+PASS: timeout records UTC start/end
+PASS: timeout result durable before whole run completion
+PASS: timeout remains failure even with prior PASS text
+PASS: timeout termination stops the whole process tree the runner created
+PASS: start failure is durable with no invented PID or exit
+PASS: Windows launches use CREATE_NO_WINDOW and a hidden startup window
+PASS: every real engine invocation is headless
+PASS: child environment carries no display variables
+PASS: Windows APPDATA/LOCALAPPDATA redirected into the run directory
+PASS: --no-isolate-appdata keeps the real APPDATA
+PASS: user:// root lives under the run directory
+PASS: ordinary game files are copied
+PASS: Git and cache directories are excluded at any depth
+PASS: saves, profile and settings never reach the isolated copy
+PASS: project.godot gets exactly one isolated custom user dir
+PASS: isolated user:// directory is created and write-checked
+PASS: source project.godot is untouched
+PASS: pack install name comes from the external/mods/<name>/ prefix in mod_info.json, not the folder name
+PASS: a pack without folder keys falls back to mod_name
+PASS: pack name resolution rejects missing mod_info.json
+PASS: pack name resolution rejects mixed mod_info.json
+PASS: pack name resolution rejects outside mod_info.json
+PASS: pack name resolution rejects script_mismatch mod_info.json
+PASS: pack name resolution rejects traversal mod_info.json
+PASS: pack is copied under external/mods/<name>/ and its file hashes are recorded
+PASS: copied mod_list.json (trailing comma tolerated) enables the pack after base data and keeps other entries
+PASS: installing a pack over an existing mod folder is rejected
+PASS: pack tests are copied with hashes and only *_probe.gd become entry points
+PASS: a pack-tests directory without a probe entry point is rejected
+PASS: pack probes reach Smoke only, after one '--' separator together with other user args
+PASS: a requested pack probe that never reports completion fails the phase
+PASS: a completed pack probe satisfies its required marker
+PASS: pack argument validation rejects --suite Smoke --pack-tests x
+PASS: pack argument validation rejects --suite Dictionary --pack p --pack-tests x
+PASS: --pack and --pack-tests are repeatable and accepted with All
+PASS: pack content profile is passed to the engine as a user arg; test profile adds nothing
+PASS: content profile validation rejects --suite Smoke --content-profile pack
+PASS: content profile validation rejects --suite All --content-profile pack --pack p
+PASS: content profile validation rejects --suite Smoke --content-profile prod --pack p
+PASS: pack profile is accepted with Smoke and --pack; test is the default
+linked {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b\link_game\external\mods\sample_pack -> {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b\packs\good\pack (junction)
+mod_list.json: external/mods/sample_pack/ enabled (local change to a tracked file; run --unlink before committing)
+PASS: Windows link_pack creates its link successfully
+PASS: link_pack creates a pack-named link (relative symlink on POSIX)
+linked {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b\link_game\external\mods\sample_pack -> {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b\packs\good\pack (exists)
+PASS: link_pack --enable adds one mod_list line and re-linking the same target is idempotent
+PASS: runner drops mod_list entries only for links directly under external/mods/ and only when present
+unlinked {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b\link_game\external\mods\sample_pack: link removed, mod_list line removed
+ERROR: {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b\link_game\external\mods\sample_pack exists and is not a link; refusing to replace a real mod folder
+ERROR: {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b\link_game\external\mods\sample_pack is not a link; refusing to delete a real mod folder
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: --force-failure applies to --suite Smoke only
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: --timeout-seconds must be between 10 and 900
+usage: test_game.py [-h] [--suite SUITE] [--godot-path GODOT_PATH]
+                    [--source-game SOURCE_GAME]
+                    [--timeout-seconds TIMEOUT_SECONDS]
+                    [--historical-baseline] [--diagnostic-verbose]
+                    [--force-failure] [--accept-engine-version REGEX]
+                    [--no-isolate-appdata] [--artifacts-root ARTIFACTS_ROOT]
+                    [--project-root PROJECT_ROOT] [--pack DIR]
+                    [--pack-tests DIR] [--content-profile {test,pack}]
+test_game.py: error: argument --suite/-s: invalid suite 'Nope' (choose from All, Dictionary, Smoke, Combat, SaveLoad, ResourceLifecycle, CombatVictory, CombatDefeat, Ctb, Board, Wave)
+PASS: link_pack --unlink removes only the link and restores mod_list.json byte-for-byte
+PASS: link_pack refuses to replace or delete a real mod folder
+PASS: independent game Git layout records a separate checkout identity
+PASS: outer snapshot layout labels its commit as outer checkout metadata
+PASS: artifacts copy does not inherit outer checkout commit identity
+PASS: upstream identity is always read from the source lock
+PASS: source lock policy accepts 4.7.x and not 4.6 by default
+PASS: --accept-engine-version replaces the policy
+PASS: Windows .tools discovery selects the accepted console build over GUI and old-version names
+PASS: an explicit engine path overrides .tools preference without executing the fixture
+PASS: argument validation rejects --force-failure --suite All
+PASS: argument validation rejects --timeout-seconds 5
+PASS: argument validation rejects --suite Nope
+PASS: suite names are case-insensitive and expand like the PowerShell runner
+PASS: Ctb suite (combat framework action timeline) is part of All with its own script and marker
+PASS: Ctb verdict needs the CTB PASS marker and no FAIL lines
+PASS: Board suite (combat framework board / movement) is part of All after Ctb with its own script and marker
+PASS: Board verdict needs the BOARD PASS marker and no FAIL lines
+PASS: Wave suite (combat framework waves) is part of All after Board with its own script and marker
+PASS: Wave verdict needs the WAVE PASS marker and no FAIL lines
+RUNNER DIAGNOSTICS PASS: 141 checks; evidence {PROJECT_ROOT}\artifacts\runner-diagnostics\ea65c0e7b8d34ca6bdab15db482ba60b

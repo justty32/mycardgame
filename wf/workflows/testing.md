@@ -18,6 +18,8 @@
 
 Smoke 必須 exit 0、有 SMOKE PASS 標記、無 SCRIPT ERROR 或 FAIL。腳本有 45 秒事件迴圈 timeout；若程序同步卡死，外層需停止該測試程序。`--force-failure`（ps1 為 `-ForceFailure`）是失敗出口控制，必須 exit 1，不能列為正常驗證失敗。
 
+[file_loader_probe.gd](../../tests/file_loader_probe.gd) 在兩種 content profile 共用執行，使用隔離 fixture 走真實 mod_list／mod_info／資料載入，驗 `.json`／`.JSON`、排序 patch、非 JSON／備份排除、非遞迴與 Global 表還原。只看最後 PASS 不足：載入佔位檔的 ERROR 即使 assertions 通過，runner 仍須拒絕。
+
 Dictionary merge 已修正，Smoke 的四種策略現在是會使測試失敗的 assertions。完整 JSON patch 邊界由 [suites](testing/suites.md) 的 Dictionary 回歸涵蓋，不能只靠 Smoke 代表所有序列化契約。
 
 ## 隔離回歸 runner 與 suite

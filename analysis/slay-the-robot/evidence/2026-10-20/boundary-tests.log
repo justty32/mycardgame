@@ -1,0 +1,37 @@
+PASS: clean tree: placeholders, root routing, games index and own-tree terms pass
+BOUNDARY violations=0
+PASS: CLI exits 0 on a clean tree
+PASS: r1_concrete_path: injected violation reported as ['R1'] (got ['R1'])
+R1 wf/b.md:1: framework file names a concrete games/ path (use the games/<game>/ placeholder; routing belongs in root files)
+BOUNDARY violations=1
+PASS: r1_concrete_path: CLI exits 1
+PASS: r1_link: injected violation reported as ['R1'] (got ['R1'])
+R1 analysis/c.md:1: framework file names a concrete games/ path (use the games/<game>/ placeholder; routing belongs in root files)
+BOUNDARY violations=1
+PASS: r1_link: CLI exits 1
+PASS: r2_text: injected violation reported as ['R2'] (got ['R2'])
+R2 games/<SYNTHETIC_GAME>/notes.md:1: games/<SYNTHETIC_GAME> references games/<SYNTHETIC_GAME>
+BOUNDARY violations=1
+PASS: r2_text: CLI exits 1
+PASS: r2_link: injected violation reported as ['R2'] (got ['R2'])
+R2 games/<SYNTHETIC_GAME>/d.md:1: link into games/<SYNTHETIC_GAME>: ../alpha/README.md
+BOUNDARY violations=1
+PASS: r2_link: CLI exits 1
+PASS: r3_framework_term: injected violation reported as ['R3'] (got ['R3'])
+R3 tools/t.py:1: term 'Alpha Saga' is reserved to games/<SYNTHETIC_GAME>/
+BOUNDARY violations=1
+PASS: r3_framework_term: CLI exits 1
+PASS: r3_other_game_term: injected violation reported as ['R3'] (got ['R3'])
+R3 games/<SYNTHETIC_GAME>/e.md:1: term '秘詞' is reserved to games/<SYNTHETIC_GAME>/
+BOUNDARY violations=1
+PASS: r3_other_game_term: CLI exits 1
+PASS: r3_root_file: injected violation reported as ['R3'] (got ['R3'])
+R3 README.md:1: term 'alp_' is reserved to games/<SYNTHETIC_GAME>/
+BOUNDARY violations=1
+PASS: r3_root_file: CLI exits 1
+PASS: r4_prefix: injected violation reported as ['R4'] (got ['R4'])
+R4 games/<SYNTHETIC_GAME>/pack/enemies/x.json: object_id 'enemy_plain' lacks pack prefix 'alp_' (list deliberate framework patches in allowed_unprefixed_ids)
+BOUNDARY violations=1
+PASS: r4_prefix: CLI exits 1
+PASS: a game with pack/ but no boundary.json is reported
+BOUNDARY LINT TESTS PASS: 19 checks

@@ -70,7 +70,8 @@ if log_path and spec.get("log"):
         handle.write("\n".join(spec["log"]) + "\n")
 sys.stdout.flush(); sys.stderr.flush()
 if spec.get("spawn_child_pid_file"):
-    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"])
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"],
+                             creationflags=0x08000000 if os.name == "nt" else 0)
     with open(spec["spawn_child_pid_file"], "w") as handle:
         handle.write(str(child.pid))
 if spec.get("sleep"):
@@ -132,7 +133,9 @@ def invoke_fixture(engine_runner: runner.EngineRunner, name: str, spec: dict, ex
 
 def process_alive(pid: int) -> bool:
     if IS_WINDOWS:
-        out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True, check=False).stdout
+        out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True,
+                             text=True, encoding="oem", errors="replace", check=True,
+                             creationflags=runner.WINDOWS_CREATION_FLAGS, stdin=subprocess.DEVNULL).stdout
         return str(pid) in out
     try:
         os.kill(pid, 0)
@@ -451,10 +454,13 @@ def main() -> None:
         rc = link_pack.main([str(good_pack), "--game-dir", str(link_game), "--enable"])
     except OSError:
         link_ok = False
-    if link_ok and not IS_WINDOWS:
+    if IS_WINDOWS:
+        assert_that(link_ok and rc == 0, "Windows link_pack creates its link successfully")
+    if link_ok:
         target = link_game / "external" / "mods" / "sample_pack"
-        assert_that(rc == 0 and target.is_symlink() and (target / "cards" / "smp_card.json").is_file()
-                    and not os.path.isabs(os.readlink(target)), "link_pack creates a relative symlink named after the pack's mod_info prefix")
+        assert_that(rc == 0 and runner._is_link_or_junction(str(target)) and (target / "cards" / "smp_card.json").is_file()
+                    and (IS_WINDOWS or not os.path.isabs(os.readlink(target))),
+                    "link_pack creates a pack-named link (relative symlink on POSIX)")
         enabled_text = (link_game / "external" / "mod_list.json").read_text(encoding="utf-8")
         assert_that(link_pack.enable_line("sample_pack") in enabled_text and link_pack.main([str(good_pack), "--game-dir", str(link_game)]) == 0,
                     "link_pack --enable adds one mod_list line and re-linking the same target is idempotent")
@@ -508,6 +514,20 @@ def main() -> None:
                 and source.startswith("tools/upstream.json"), "source lock policy accepts 4.7.x and not 4.6 by default")
     patterns, source = runner.accepted_engine_patterns(lock, [r"^4\.6\."])
     assert_that(patterns == [r"^4\.6\."] and source == "cli", "--accept-engine-version replaces the policy")
+    if IS_WINDOWS:
+        discovery_root = RUN_ROOT / "engine-discovery"
+        engine_dir = discovery_root / ".tools" / "godot-4.7"
+        engine_dir.mkdir(parents=True)
+        for name in ("Godot_v4.6-stable_win64_console.exe", "Godot_v4.7.2-stable_win64.exe",
+                     "Godot_v4.7.2-stable_win64_console.exe"):
+            (engine_dir / name).write_bytes(b"synthetic discovery fixture; never executed")
+        selected, discovery = runner.discover_engine(discovery_root, None, runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS)
+        assert_that(selected.name == "Godot_v4.7.2-stable_win64_console.exe" and discovery["method"] == ".tools",
+                    "Windows .tools discovery selects the accepted console build over GUI and old-version names")
+        explicit = engine_dir / "Godot_v4.7.2-stable_win64.exe"
+        selected, discovery = runner.discover_engine(discovery_root, str(explicit), runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS)
+        assert_that(selected == explicit.resolve() and discovery["method"] == "explicit",
+                    "an explicit engine path overrides .tools preference without executing the fixture")
     for bad_args in (["--force-failure", "--suite", "All"], ["--timeout-seconds", "5"], ["--suite", "Nope"]):
         try:
             runner.parse_args(bad_args)

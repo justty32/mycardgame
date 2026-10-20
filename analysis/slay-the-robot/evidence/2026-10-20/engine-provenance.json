@@ -1,0 +1,9 @@
+{
+  "archive": "{USER_PROFILE}\\Downloads\\Godot_v4.7.2-stable_mono_win64.zip",
+  "archive_sha512": "79229fd112b0c9cbeab82363a4ef7be18ea70f1caf86bf912789335b136fbe7e01db0053a33461438c5da1c680c17bbb10040bd09bedc51221cd4423d0367757",
+  "expected_sha512": "79229fd112b0c9cbeab82363a4ef7be18ea70f1caf86bf912789335b136fbe7e01db0053a33461438c5da1c680c17bbb10040bd09bedc51221cd4423d0367757",
+  "engine": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+  "engine_sha256": "2445d009a5e0474fc7064b9767100e9d2c09521890ac5625476bfb81cf03f2d4",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "source": "user-provided archive; original preserved; separate extraction"
+}

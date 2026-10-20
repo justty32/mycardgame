@@ -1,0 +1,14 @@
+diff --git a/autoload/FileLoader.gd b/autoload/FileLoader.gd
+index 8997f51..729a459 100644
+--- a/autoload/FileLoader.gd
++++ b/autoload/FileLoader.gd
+@@ -244,6 +244,9 @@ func load_read_only_data() -> void:
+ 			# load all files from json and populate them into game's stores
+ 			var file_names: PackedStringArray = get_files_in_directory(mod_sub_directory)
+ 			for file_name: String in file_names:
++				# Data folders may also contain placeholders, notes, or editor backups.
++				if file_name.get_extension().to_lower() != "json":
++					continue
+ 				var file_data: Dictionary = load_json(mod_sub_directory, file_name) # json payload
+ 				# test the payload to see if it has an object id, in which case
+ 				# check if there's an existing object in the table to overwrite with patch

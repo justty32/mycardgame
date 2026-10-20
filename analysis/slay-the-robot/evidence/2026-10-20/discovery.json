@@ -1,0 +1,16 @@
+{
+  "selected": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+  "discovery": {
+    "method": ".tools",
+    "located": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+    "candidates_considered": [
+      "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64.exe (version in name not accepted)",
+      "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe (version in name not accepted)",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7\\Godot_v4.7.2-stable_win64_console.exe",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64.exe",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7\\Godot_v4.7.2-stable_win64.exe"
+    ]
+  },
+  "scope": "path discovery only; engine not started"
+}

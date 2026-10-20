@@ -28,7 +28,7 @@ python3 tools/test_game.py --suite Smoke --accept-engine-version '^4\.6\.'
 
 引擎探測順序：`--godot-path` → `.tools/` 下版本符合 `accepted_version_patterns` 者 → PATH 上的 godot／godot4／godot-mono／godot4-mono；版本再以 `--version` 核對，探測方式寫入 results.json。
 
-每次在 artifacts/verification/ 建立獨立副本與 user://，程序一律 headless、不開視窗。Linux 把 HOME、XDG_*、DOTNET_CLI_HOME、NUGET_PACKAGES 導到 run 目錄，並移除 DISPLAY／WAYLAND_DISPLAY；Windows 把 APPDATA、LOCALAPPDATA、TEMP 導到 run 目錄（`--no-isolate-appdata` 可關閉），以 CREATE_NO_WINDOW 啟動、逾時用 taskkill /T。Windows 端這些行為尚未實測。`--source-game` 可指定候選原始碼目錄；來源鎖仍是本專案基準，候選版本須另核對 checkout 與 hashes。驗證規則、歷史紅測開關及套件範圍見 testing，正式綠測不容許資源殘留。
+每次在 artifacts/verification/ 建立獨立副本與 user://，程序一律 headless、不開視窗。Linux 把 HOME、XDG_*、DOTNET_CLI_HOME、NUGET_PACKAGES 導到 run 目錄，並移除 DISPLAY／WAYLAND_DISPLAY；Windows 把 APPDATA、LOCALAPPDATA、TEMP／TMP 導到 run 目錄（`--no-isolate-appdata` 可關閉），以 CREATE_NO_WINDOW 啟動、逾時用 taskkill /T。2026-10-20 Windows 官方 4.7.2 Mono 修後隔離 All 通過 768 checks，程序樹逾時另以假引擎驗證，見 [Windows 報告](../../analysis/slay-the-robot/architecture/06_windows_validation.md)。`--source-game` 可指定候選原始碼目錄；來源鎖仍是本專案基準，候選版本須另核對 checkout 與 hashes。驗證規則、歷史紅測開關及套件範圍見 testing，正式綠測不容許資源殘留。
 
 [game.ps1](../../tools/game.ps1) 是 Windows 專用的舊 Run／Import／Smoke 入口，預設路徑已改指 4.7 但未實測。Run 會開 GUI，且會讀寫 game/external 的設定／存檔；不適用目前的 agent 操作授權，需要 GUI 的部分記為未驗證。完整限制見 [user](common/user.md)。
 
@@ -53,7 +53,7 @@ Windows 取得引擎、PowerShell 檢查與 Git Bash/WSL 文件檢查的步驟�
 
 環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
 
-只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前依序為 framework-fixes.patch、resource-lifecycle.patch、content-profile.patch、combat-framework-phase0.patch，combat-framework-phase1.patch、combat-framework-phase2.patch，最後 combat-framework-phase3.patch。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)。
+只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；目前依序為 framework-fixes.patch、resource-lifecycle.patch、content-profile.patch、combat-framework-phase0.patch，combat-framework-phase1.patch、combat-framework-phase2.patch，接著 combat-framework-phase3.patch，最後 json-data-files.patch。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)。
 
 `.tools/`、artifacts/、Godot cache、個人 profile／settings／saves 不屬於發布原始碼。必要的歷史驗證已另選入 analysis/slay-the-robot/evidence/；發布副本記錄原件與副本 hash 及路徑遮罩，不能當成未處理的原始日誌。
 

@@ -1,0 +1,15 @@
+PASS: template tree alone passes boundary lint
+PASS: create succeeds
+PASS: probe file renamed from token
+PASS: color file uses the prefix
+PASS: boundary.json declares smp_
+PASS: mod_info paths use the name
+PASS: no unreplaced __TOKEN__ placeholders remain
+PASS: generated tree passes boundary lint
+PASS: games index gets a row
+PASS: refuses name='sample_game' prefix='smp'
+PASS: refuses name='other' prefix='smp'
+PASS: refuses name='_template' prefix='tpl'
+PASS: refuses name='Bad Name' prefix='bad'
+PASS: refuses name='fine' prefix='x'
+NEW PACK TESTS PASS: 14 checks

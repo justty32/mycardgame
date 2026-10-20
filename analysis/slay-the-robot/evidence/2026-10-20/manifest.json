@@ -1,0 +1,254 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-20",
+ "link_columns": [
+  "published_path"
+ ],
+ "redaction_rules": {
+  "PROJECT_ROOT": "original project prefix",
+  "USER_PROFILE": "original user home prefix"
+ },
+ "columns": [
+  "id",
+  "raw_artifact",
+  "published_path",
+  "raw_sha256",
+  "published_sha256",
+  "raw_bytes",
+  "published_bytes",
+  "transformation"
+ ],
+ "rows": [
+  {
+   "id": "runner-diagnostics-results.json",
+   "raw_artifact": "artifacts/runner-diagnostics/ea65c0e7b8d34ca6bdab15db482ba60b/results.json",
+   "published_path": "runner-diagnostics-results.json",
+   "raw_sha256": "b9ea73a4b458d7d86dc7c628a396376aa0ff51f4d6da0d2efa53d14c867f3e91",
+   "published_sha256": "bbfb59d0b06cd8e12e14ae8a9cb05b0af78866d886f501ebf63ecc5b6bde02fc",
+   "raw_bytes": 18547,
+   "published_bytes": 17906,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "runner-diagnostics.log",
+   "raw_artifact": "artifacts/windows-validation/runner-diagnostics-fixed2.log",
+   "published_path": "runner-diagnostics.log",
+   "raw_sha256": "0fc276d3d9b313052ea179ed212fe3c20f4d04165a4ad3f229663015f4572b25",
+   "published_sha256": "7445ebc12372de6e3025b612ed4d54e44a11ab2ba0e8aeea5909c00ba3f26368",
+   "raw_bytes": 15083,
+   "published_bytes": 14791,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "link-pack-results.json",
+   "raw_artifact": "artifacts/link-pack/ce65a2bc1c704253aca6072c19c0eb3b/results.json",
+   "published_path": "link-pack-results.json",
+   "raw_sha256": "70da1461d2d74ae234417fe47ee4cf4d7ca0e5884cc9d868b7312deceb6f161d",
+   "published_sha256": "ba80c1364100802a822d71b4f41160b728d9cccb496cddcd4654e9050de8854a",
+   "raw_bytes": 760,
+   "published_bytes": 746,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "link-pack-test.log",
+   "raw_artifact": "artifacts/link-pack/ce65a2bc1c704253aca6072c19c0eb3b/test.log",
+   "published_path": "link-pack-test.log",
+   "raw_sha256": "391390e24c73dea6411c35d56c9cae9edbd1de342da0e1b2840ee0ec6a276c51",
+   "published_sha256": "71e49724a9a9bbcf9daa9f2626bd3fc66f49c5fd116da8c7f4da362384c1c926",
+   "raw_bytes": 1473,
+   "published_bytes": 1446,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "link-pack-baseline-regression.json",
+   "raw_artifact": "artifacts/link-pack/ce65a2bc1c704253aca6072c19c0eb3b/baseline-regression.json",
+   "published_path": "link-pack-baseline-regression.json",
+   "raw_sha256": "97aaf0f34e43056e12c9aa31d8c6a6de6b71a825d1deb984eda394bd7117ccd3",
+   "published_sha256": "43b3c06d4eebeac4c1b96820af196790fc7464f0e558b942b1e3293b3516eed8",
+   "raw_bytes": 303,
+   "published_bytes": 299,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "new-pack.log",
+   "raw_artifact": "artifacts/windows-validation/new-pack.log",
+   "published_path": "new-pack.log",
+   "raw_sha256": "b8368b6202cc5dfdd617acfa3add58351e4c29d0721938fab98b2fa55a738b72",
+   "published_sha256": "c3c90e3293cbecd7c98216a77cc1b26032777b001cbf339b4b7e7bb6c3c3ba3f",
+   "raw_bytes": 583,
+   "published_bytes": 568,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "boundary-tests.log",
+   "raw_artifact": "artifacts/windows-validation/boundary-tests.log",
+   "published_path": "boundary-tests.log",
+   "raw_sha256": "627b61516bfd05a757471a1c71e91b0efd01104ecf92f7497d641a17521a2ef7",
+   "published_sha256": "08d9130201607ee3e27636789aa8159c879c5829d3a8c20f2667c2ddddec270b",
+   "raw_bytes": 1972,
+   "published_bytes": 2049,
+   "transformation": "path-prefix-redaction; UTF-8 LF; synthetic concrete game path tokens replaced by games/<SYNTHETIC_GAME>"
+  },
+  {
+   "id": "engine-provenance.json",
+   "raw_artifact": "artifacts/windows-validation/engine-provenance.json",
+   "published_path": "engine-provenance.json",
+   "raw_sha256": "a3fcea84389c41f7da48aabe31c2f56a1543cc76a30f6c4545c172eeda01920b",
+   "published_sha256": "49a69b115109efd15c4725d77f90248892d03891a30f6c3cc553316394f0cdb9",
+   "raw_bytes": 749,
+   "published_bytes": 724,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "discovery.json",
+   "raw_artifact": "artifacts/windows-validation/discovery.json",
+   "published_path": "discovery.json",
+   "raw_sha256": "1bf98a7363687b2e554023597016b89a6397ac497a2aa3fa74fbf9486d858880",
+   "published_sha256": "7119365053f9e7fc710f8f070e356a7a5038b93a99388feaa10e5c6a040ab773",
+   "raw_bytes": 1124,
+   "published_bytes": 1014,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "final-all-results.json",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/results.json",
+   "published_path": "final-all-results.json",
+   "raw_sha256": "caaa1bf5d4ceb420deb24ec847419272f9941509594fde74cca94187ce1ebd07",
+   "published_sha256": "35783dbd608321ae90cdbb77a9597dccf16bd03d48c65afe6785b923f67b82e8",
+   "raw_bytes": 86444,
+   "published_bytes": 85077,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "final-all-ResourceLifecycle-resourcelifecycle.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/ResourceLifecycle/resourcelifecycle.log",
+   "published_path": "final-all/ResourceLifecycle/resourcelifecycle.log",
+   "raw_sha256": "1b73e1d5b51fe62407cb6844d4718d2a2f89083e2ebe15b8e2e8361246238012",
+   "published_sha256": "1b73e1d5b51fe62407cb6844d4718d2a2f89083e2ebe15b8e2e8361246238012",
+   "raw_bytes": 12958,
+   "published_bytes": 12958,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-Dictionary-dictionary.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/Dictionary/dictionary.log",
+   "published_path": "final-all/Dictionary/dictionary.log",
+   "raw_sha256": "b2f327923ba0e704e225235bd9c34ad28ba535649517c6a0675d243b89f448e3",
+   "published_sha256": "b2f327923ba0e704e225235bd9c34ad28ba535649517c6a0675d243b89f448e3",
+   "raw_bytes": 9579,
+   "published_bytes": 9579,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-Smoke-smoke.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/Smoke/smoke.log",
+   "published_path": "final-all/Smoke/smoke.log",
+   "raw_sha256": "58013a48be5fb9d6aa8c6916ead15c7c0f0863b20dcebd07be5439e5460fe0c5",
+   "published_sha256": "abb83c044edbcace54294bdcea553c06f46821418538ce0b9381e6a8562eb812",
+   "raw_bytes": 14430,
+   "published_bytes": 14385,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-CombatVictory-combatvictory.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/CombatVictory/combatvictory.log",
+   "published_path": "final-all/CombatVictory/combatvictory.log",
+   "raw_sha256": "19eb0f662578b7dec1ba89daf914766758c9e417b3789be3a187ac8590fd445a",
+   "published_sha256": "19eb0f662578b7dec1ba89daf914766758c9e417b3789be3a187ac8590fd445a",
+   "raw_bytes": 14121,
+   "published_bytes": 14121,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-CombatDefeat-combatdefeat.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/CombatDefeat/combatdefeat.log",
+   "published_path": "final-all/CombatDefeat/combatdefeat.log",
+   "raw_sha256": "6f4a31afb084089924f96ce774e794ab8b78adb83f06149f4cc0ffa9ad11507a",
+   "published_sha256": "6f4a31afb084089924f96ce774e794ab8b78adb83f06149f4cc0ffa9ad11507a",
+   "raw_bytes": 11145,
+   "published_bytes": 11145,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-Ctb-ctb.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/Ctb/ctb.log",
+   "published_path": "final-all/Ctb/ctb.log",
+   "raw_sha256": "065656ef77bf31a1dfe21862b3948556e33b7a61137e9805ba9502819ff93c53",
+   "published_sha256": "065656ef77bf31a1dfe21862b3948556e33b7a61137e9805ba9502819ff93c53",
+   "raw_bytes": 10393,
+   "published_bytes": 10393,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-Board-board.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/Board/board.log",
+   "published_path": "final-all/Board/board.log",
+   "raw_sha256": "44fb0a60e642c7dc1751d66654e7b2a7a5c5e9e6ab2164255682403122aaeb0b",
+   "published_sha256": "44fb0a60e642c7dc1751d66654e7b2a7a5c5e9e6ab2164255682403122aaeb0b",
+   "raw_bytes": 12421,
+   "published_bytes": 12421,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-Wave-wave.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/Wave/wave.log",
+   "published_path": "final-all/Wave/wave.log",
+   "raw_sha256": "e8fd30f5af55cebabc86e4f45b490bbf5cf2ca110a14d4bced59d89a8643a33d",
+   "published_sha256": "e8fd30f5af55cebabc86e4f45b490bbf5cf2ca110a14d4bced59d89a8643a33d",
+   "raw_bytes": 10123,
+   "published_bytes": 10123,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-SaveLoad-save-write.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/SaveLoad/save-write.log",
+   "published_path": "final-all/SaveLoad/save-write.log",
+   "raw_sha256": "e9c376ce63e954790fb0303cb69ad7f464330dd0268e2ace720c5174595e3965",
+   "published_sha256": "56161b255b43a27647e1426254a64932f73b5fd01780dfe3bd285efb9d653726",
+   "raw_bytes": 8629,
+   "published_bytes": 8620,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-SaveLoad-save-read.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/SaveLoad/save-read.log",
+   "published_path": "final-all/SaveLoad/save-read.log",
+   "raw_sha256": "8a75b519b9da03156a0e6adac4987ec5b0cf779fd261f853c3b036924b9a5dca",
+   "published_sha256": "2ee3b9f0b5a99923cd3f965fdb3a267b98b295be79b02bdd2ec6dc3115482591",
+   "raw_bytes": 10084,
+   "published_bytes": 10075,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "final-all-SaveLoad-save-rejected.log",
+   "raw_artifact": "artifacts/windows-validation/final-all/20261020-082010-447c566b/SaveLoad/save-rejected.log",
+   "published_path": "final-all/SaveLoad/save-rejected.log",
+   "raw_sha256": "c07dfe7542cc158ccbd22021e832ca46cfec4a0b1b1e6555bcd7cfc59310273b",
+   "published_sha256": "e0d91c2ef03829be3d63891ce85ae2e13340452193f227b72c5646beb15fb93c",
+   "raw_bytes": 18744,
+   "published_bytes": 18555,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  },
+  {
+   "id": "forced-failure-results.json",
+   "raw_artifact": "artifacts/windows-validation/forced-failure/20261020-082720-d60fec47/results.json",
+   "published_path": "forced-failure-results.json",
+   "raw_sha256": "8e2ce8fb8ce0828f2d749b3c98a8ae3234fb78ddce0f9eb6c049dccbb415bb65",
+   "published_sha256": "923dcafeb8308ae1df879103edc6ba959ee717b79cba79ceea673a08d0bad0bb",
+   "raw_bytes": 16428,
+   "published_bytes": 16153,
+   "transformation": "path-prefix-redaction; JSON pretty-print UTF-8 LF"
+  },
+  {
+   "id": "forced-failure-Smoke-smoke.log",
+   "raw_artifact": "artifacts/windows-validation/forced-failure/20261020-082720-d60fec47/Smoke/smoke.log",
+   "published_path": "forced-failure/Smoke/smoke.log",
+   "raw_sha256": "1a9de8db3a761067bd39ccb2c99edca2f3076a2f112669463488aed85e37e144",
+   "published_sha256": "82785335d44de796caaa6450cb5bb742130bb00940ef7ef602abbdb44a3a5f1a",
+   "raw_bytes": 14492,
+   "published_bytes": 14447,
+   "transformation": "path-prefix-redaction; UTF-8 LF"
+  }
+ ]
+}

@@ -195,7 +195,8 @@ def confirm_log_writable(path: Path) -> None:
 def _run_git(args: list[str]) -> tuple[int, str]:
     try:
         completed = subprocess.run(["git", *args], capture_output=True, text=True, check=False,
-                                   stdin=subprocess.DEVNULL)
+                                   stdin=subprocess.DEVNULL,
+                                   creationflags=WINDOWS_CREATION_FLAGS if IS_WINDOWS else 0)
     except OSError:
         return 127, ""
     return completed.returncode, completed.stdout
@@ -393,6 +394,13 @@ def _is_link_or_junction(path: str) -> bool:
     if is_junction is not None:
         try:
             return bool(is_junction(path))
+        except OSError:
+            return False
+    # Python 3.10/3.11 lack os.path.isjunction; lstat exposes the reparse tag
+    # without following the directory into a user's linked content.
+    if IS_WINDOWS:
+        try:
+            return getattr(os.lstat(path), "st_reparse_tag", 0) == 0xA0000003
         except OSError:
             return False
     return False

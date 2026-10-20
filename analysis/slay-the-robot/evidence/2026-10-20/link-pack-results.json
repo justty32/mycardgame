@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "skipped": [],
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.0 (tags/v3.13.0:60403a5, Oct  7 2024, 09:38:07) [MSC v.1941 64 bit (AMD64)]",
+  "hashes": {
+    "tools\\link_pack.py": "9111ffc74b9fe89aef68d6ad432ca33eb155567cf910ba853bc295c3f34f6a2f",
+    "tests\\test_link_pack.py": "90771c02fae9cb92d695cb876c8a67418a5c2e0f934625a838bd7eb19ab5c613",
+    "tools\\test_game.py": "4600826ed3aa32ea4063a13d1c020ea21d4d410aeb510f3fc77937b83fead146",
+    "artifacts\\link-pack\\ce65a2bc1c704253aca6072c19c0eb3b\\test.log": "391390e24c73dea6411c35d56c9cae9edbd1de342da0e1b2840ee0ec6a276c51"
+  },
+  "scope": "Synthetic fixtures only; no Godot or GUI; fixtures retained."
+}

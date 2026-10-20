@@ -1,0 +1,14 @@
+test_junction_command_failure_reports_environment_error (__main__.PackLinkTests.test_junction_command_failure_reports_environment_error) ... ok
+test_missing_block_or_newline_does_not_write (__main__.PackLinkTests.test_missing_block_or_newline_does_not_write) ... ok
+test_refuse_existing_alternate_entry_without_writing (__main__.PackLinkTests.test_refuse_existing_alternate_entry_without_writing) ... ok
+test_refuse_real_folder (__main__.PackLinkTests.test_refuse_real_folder) ... ok
+test_round_trip_line_endings_and_bom (__main__.PackLinkTests.test_round_trip_line_endings_and_bom) ... ok
+test_windows_junction_cli_and_isolated_copy (__main__.PackLinkTests.test_windows_junction_cli_and_isolated_copy) ... linked {PROJECT_ROOT}\artifacts\link-pack\ce65a2bc1c704253aca6072c19c0eb3b\test_windows_junction_cli_and_isolated_copy\fake game with spaces\external\mods\sample_pack -> {PROJECT_ROOT}\artifacts\link-pack\ce65a2bc1c704253aca6072c19c0eb3b\test_windows_junction_cli_and_isolated_copy\pack source with spaces (junction)
+mod_list.json: external/mods/sample_pack/ enabled (local change to a tracked file; run --unlink before committing)
+unlinked {PROJECT_ROOT}\artifacts\link-pack\ce65a2bc1c704253aca6072c19c0eb3b\test_windows_junction_cli_and_isolated_copy\fake game with spaces\external\mods\sample_pack: link removed, mod_list line removed
+ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.101s
+
+OK

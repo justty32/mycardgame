@@ -1,0 +1,144 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: project is in an isolated artifacts copy
+BOUNDARY: one combat on the action timeline with declared data fixtures; UI handler/signals, not mouse coordinates; the combat is left unfinished and the scene freed.
+FIXTURE: seed=20261019; red 80 HP speed 10, deck=5 native Basic Block; enemies fast(speed 20, block 1) and slow(speed 5, 1x1 attack); hero starts with 10 charges of a 500-tick status; default combat rules.
+PASS: default rules: delay 100, scale 100, higher speed first
+PASS: hand limit is read from the combat rules (10)
+PASS: Combat owns an idle CombatDirector before any run
+PASS: TimelineBar exists and is hidden outside combat
+PASS: fresh main menu offers New Run
+PASS: Start Run button creates a real run
+PASS: hero speed comes from character_speed
+PASS: start-option UI displays the declared no-bonus fixture
+PASS: start-option handler opens the travel map
+PASS: generated map contains an adjacent combat destination
+PASS: generated combat location has its actual map button
+PASS: map button starts combat and the hero's first action becomes ready
+PASS: combat started once and the director runs
+PASS: event spawns the two fixture enemies
+PASS: enemy speeds come from enemy_speed (20 and 5)
+PASS: enemies decided their first intent at combat start
+PASS: event initial action applied the 500-tick status with 10 charges before the first action
+PASS: fast enemy (speed 20) acts before the hero at tick 0, hero second
+PASS: fast enemy's action ended before the hero's began
+PASS: hero action one draws 5 and has 3 energy under the default rules
+PASS: turn count 1 on the hero's first action
+PASS: TimelineBar is visible in combat and lists projected actions
+PASS: TurnOverlay shows the tick and hero action number
+PASS: End Turn button is enabled during the hero's action
+PASS: timeline projection: hero (acting), slow@0, fast@500
+PASS: hand contains a playable Basic Block
+PASS: block card play completes
+PASS: native Block grants ten block during the hero's action
+PASS: End Turn request disables the button
+PASS: timeline runs slow@0, fast@500, fast@1000 and returns to the hero at tick 1000
+PASS: first six actions follow speed order and ticks: [["fast",0],["hero",0],["slow",0],["fast",500],["fast",1000],["hero",1000]]
+PASS: combat_tick_advanced reports strictly increasing ticks 0->500->1000
+PASS: director and StatsHandler agree on tick 1000
+PASS: slow enemy's 1 damage left 9 block before the hero's second action
+PASS: block is cleared at the start of each hero action (rules.reset_block_on_action_start)
+PASS: turn count equals the hero action count (2), not the enemy actions
+PASS: per-unit action counts: fast 3, slow 1
+PASS: EVERY_N_TICKS status processed twice by tick 1000 (10 -> 8 charges)
+PASS: second hero action refills energy and redraws five cards
+PASS: block absorbed the slow enemy's poke
+PASS: fast enemy's guard intent gives it block on its own action
+PASS: TurnOverlay shows tick 1000 and action 2
+PASS: timeline continues with fast@1500 and fast@2000
+PASS: first eight actions match the expected CTB order: [["fast",0],["hero",0],["slow",0],["fast",500],["fast",1000],["hero",1000],["fast",1500],["fast",2000]]
+PASS: clock advanced through 1500 and 2000
+PASS: EVERY_N_TICKS status processed four times by tick 2000 (10 -> 6 charges)
+PASS: is_player_turn is true only during hero actions
+PASS: legacy player_turn_* fired once per hero action
+PASS: legacy enemy_turn_* fire per enemy action
+PASS: combat is still running with both enemies alive
+PASS: complete ctb scenario returned
+PASS: freed run screen leaves no combat director behind
+CTB PASS: 53 checks, 0 failures

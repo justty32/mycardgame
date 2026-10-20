@@ -1,0 +1,411 @@
+{
+  "suite": "Smoke",
+  "run_id": "20261020-082720-d60fec47",
+  "source_game": "{PROJECT_ROOT}\\game",
+  "upstream_commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+  "source_lock_sha256": "116AF86DE6DDB8B071EC30DFC48F3E1B5B6EB3DBEACAC2D2A551AC4A184E8F2A",
+  "checkout": {
+    "layout": "independent_game_checkout",
+    "repository_root": "{PROJECT_ROOT}\\game",
+    "commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+    "changes": [
+      "autoload/ActionGenerator.gd",
+      "autoload/ActionHandler.gd",
+      "autoload/FileLoader.gd",
+      "autoload/Global.gd",
+      "autoload/GlobalTestDataGenerator.gd",
+      "autoload/HandManager.gd",
+      "autoload/Scripts.gd",
+      "autoload/Signals.gd",
+      "autoload/StatsHandler.gd",
+      "data/CardPlayRequest.gd",
+      "data/SerializableData.gd",
+      "data/prototype/CardData.gd",
+      "data/prototype/EnemyData.gd",
+      "data/readonly/CharacterData.gd",
+      "data/readonly/EventData.gd",
+      "data/readonly/StatusEffectData.gd",
+      "data/readonly/embedded/EnemyIntentData.gd",
+      "external/data/mod_info.json",
+      "project.godot",
+      "scenes/Root.tscn",
+      "scripts/Root.gd",
+      "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+      "scripts/actions/BaseAction.gd",
+      "scripts/actions/BaseAsyncAction.gd",
+      "scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+      "scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd",
+      "scripts/actions/combatant_actions/player_actions/ActionDraw.gd",
+      "scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd",
+      "scripts/combatants/BaseCombatant.gd",
+      "scripts/combatants/Enemy.gd",
+      "scripts/combatants/Player.gd",
+      "scripts/ui/Combat.gd",
+      "scripts/ui/CombatEndTurn.gd",
+      "scripts/ui/CombatEndTurn.gd.uid",
+      "scripts/ui/EnemyContainer.gd",
+      "scripts/ui/Hand.gd",
+      "scripts/ui/Map.gd",
+      "scripts/ui/TurnOverlay.gd",
+      "scripts/ui/menus/BaseMenu.gd",
+      "scripts/ui/menus/NewRunMenu.gd",
+      "scripts/validators/ValidatorEnemyAttacking.gd"
+    ]
+  },
+  "historical_baseline": false,
+  "source_hashes": {
+    "Smoke": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "4C8F62ABCA6A6512F1CC2345B191F2BDDF862C99FB08F7ADA82AB80B1DCD9A16"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "07B78A858EFFBBC51D7589598FF03B6CC22FB8B50B3576C663FF33E6BDE4C96A"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      },
+      {
+        "path": "autoload/Global.gd",
+        "sha256": "CB7F678C078A823589891898EFE14FDE09031D15AF719791DBA4AF3B35D75B5D"
+      },
+      {
+        "path": "scripts/ui/menus/NewRunMenu.gd",
+        "sha256": "310A69F2F18F8ADFC236DA16F3507484FAFBEE13B7800A676BDA0D0C25C6DF4A"
+      }
+    ]
+  },
+  "test_hashes": {
+    "Smoke": [
+      {
+        "path": "board_cases.gd",
+        "sha256": "6DB514CB59C29E568CACDD47B5DA539EE257673926605D426C676E24A729EED4"
+      },
+      {
+        "path": "board_fixture.gd",
+        "sha256": "87B045DAEF04CAA190F3B3FC9DD876A7190900B44E1C06D9E6A7C508127D8E3C"
+      },
+      {
+        "path": "board_flow.gd",
+        "sha256": "C5E70CE4647E39D049CF5728551158F4D90977990F35DC008455B97F5AA1BE34"
+      },
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "E2E583444FDC0B0524ED3DAC081260B885DBD7E9B646EED0B27BFD9DA95B6223"
+      },
+      {
+        "path": "ctb_fixture.gd",
+        "sha256": "60196398068C909B3D9BDA5F439AD408409A303868687ECA0124F86F0A78141B"
+      },
+      {
+        "path": "ctb_flow.gd",
+        "sha256": "3A524CD4F67CAACB7E96EE7D49096FCCE1EF76A90C230951BC1DA19DB26FE33F"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "file_loader_probe.gd",
+        "sha256": "F7050BA1C6E9ABC4F79BA2AECD1AD12D4D18C760611CE2C34A76AC185001E623"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "94FA889C0681FB6B1BDE3BEF97245A187521FB6667DD55018464F77EE23685F4"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "2970E8762BEA304BDF774670A01F57328720C63BB32600C7334F55670A47460E"
+      },
+      {
+        "path": "unit_registry_probe.gd",
+        "sha256": "66722C1C86B6C8128B355619949AF7E73150A96440BDA10234E76A54CA85B1C7"
+      },
+      {
+        "path": "wave_cases.gd",
+        "sha256": "5E752D76F88C8D19EE147A5A2681DC2946F8932A290CA007E4324D37E060E128"
+      },
+      {
+        "path": "wave_fixture.gd",
+        "sha256": "E47C892ACCC48E54EF6B39EF86EBBD35B8A73E7F13ACD33C415A5D19A51776C7"
+      },
+      {
+        "path": "wave_flow.gd",
+        "sha256": "45B3988AB183862131642F02FE927DE01E5E08E35A66F0A60992B1A28332319A"
+      }
+    ]
+  },
+  "engine": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+  "completed": false,
+  "results": [
+    {
+      "name": "version",
+      "directory": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 27100,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T00:27:20.858437Z",
+      "ended_utc": "2026-10-20T00:27:20.914849Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.07,
+      "command_arguments": [
+        "--headless",
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\version.log",
+        "--version"
+      ],
+      "engine_version": "4.7.2.stable.mono.official.ed1daf0bf",
+      "engine_version_accepted": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 12992,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T00:27:22.083245Z",
+      "ended_utc": "2026-10-20T00:27:40.484135Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 18.41,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke\\import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke\\game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "smoke",
+      "directory": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 14944,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T00:27:40.497779Z",
+      "ended_utc": "2026-10-20T00:27:46.005587Z",
+      "status": "failed",
+      "exit_code": 1,
+      "exit_code_hex": "0x00000001",
+      "exit_code_raw": 1,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": false,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 5.52,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke\\smoke.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke\\game",
+        "--script",
+        "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke\\tests\\framework_smoke.gd",
+        "--",
+        "--force-failure"
+      ],
+      "marker_found": false,
+      "objectdb_leak": false,
+      "unexpected_error_lines": [],
+      "error": "smoke failed. Inspect {PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke\\smoke.log and smoke.console.log"
+    }
+  ],
+  "runner": {
+    "name": "test_game.py",
+    "version": "1.0.0",
+    "python": "3.13.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "os": "nt"
+  },
+  "engine_discovery": {
+    "method": "explicit",
+    "located": ".tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+    "candidates_considered": []
+  },
+  "engine_policy": {
+    "accepted_version_patterns": [
+      "^4\\.7\\."
+    ],
+    "source": "tools/upstream.json engine_policy",
+    "baseline": "4.7"
+  },
+  "isolation": {
+    "removed": [],
+    "overrides": {
+      "APPDATA": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\appdata\\Roaming",
+      "LOCALAPPDATA": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\appdata\\Local",
+      "TEMP": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\appdata\\Temp",
+      "TMP": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\appdata\\Temp"
+    },
+    "user_data_root": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\appdata\\Roaming",
+    "appdata_isolated": true,
+    "user_dirs": {
+      "Smoke": "{PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\appdata\\Roaming\\mycardgame-tests\\20261020-082720-d60fec47\\Smoke"
+    }
+  },
+  "timeout_seconds": 180,
+  "force_failure": true,
+  "exit_code_semantics": "win32_status",
+  "content_profile": "test",
+  "packs": {
+    "Smoke": []
+  },
+  "pack_test_hashes": {},
+  "engine_version": "4.7.2.stable.mono.official.ed1daf0bf",
+  "source_changes": [
+    "autoload/ActionGenerator.gd",
+    "autoload/ActionHandler.gd",
+    "autoload/FileLoader.gd",
+    "autoload/Global.gd",
+    "autoload/GlobalTestDataGenerator.gd",
+    "autoload/HandManager.gd",
+    "autoload/Scripts.gd",
+    "autoload/Signals.gd",
+    "autoload/StatsHandler.gd",
+    "data/CardPlayRequest.gd",
+    "data/SerializableData.gd",
+    "data/prototype/CardData.gd",
+    "data/prototype/EnemyData.gd",
+    "data/readonly/CharacterData.gd",
+    "data/readonly/EventData.gd",
+    "data/readonly/StatusEffectData.gd",
+    "data/readonly/embedded/EnemyIntentData.gd",
+    "external/data/mod_info.json",
+    "project.godot",
+    "scenes/Root.tscn",
+    "scripts/Root.gd",
+    "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+    "scripts/actions/BaseAction.gd",
+    "scripts/actions/BaseAsyncAction.gd",
+    "scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+    "scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd",
+    "scripts/actions/combatant_actions/player_actions/ActionDraw.gd",
+    "scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd",
+    "scripts/combatants/BaseCombatant.gd",
+    "scripts/combatants/Enemy.gd",
+    "scripts/combatants/Player.gd",
+    "scripts/ui/Combat.gd",
+    "scripts/ui/CombatEndTurn.gd",
+    "scripts/ui/CombatEndTurn.gd.uid",
+    "scripts/ui/EnemyContainer.gd",
+    "scripts/ui/Hand.gd",
+    "scripts/ui/Map.gd",
+    "scripts/ui/TurnOverlay.gd",
+    "scripts/ui/menus/BaseMenu.gd",
+    "scripts/ui/menus/NewRunMenu.gd",
+    "scripts/validators/ValidatorEnemyAttacking.gd"
+  ],
+  "copy_exclusions": {
+    "Smoke": {
+      "dirs": 3,
+      "files": 2,
+      "links": 0
+    }
+  },
+  "error": "smoke failed. Inspect {PROJECT_ROOT}\\artifacts\\windows-validation\\forced-failure\\20261020-082720-d60fec47\\Smoke\\smoke.log and smoke.console.log",
+  "verdict": "FORCED_FAILURE_DETECTED"
+}
