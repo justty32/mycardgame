@@ -1,0 +1,8 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_keyword_zoc",
+    "keyword_name": "控制區",
+    "keyword_text_bb_code": "離開同盤敵人的相鄰格時，可能受到該敵人的借機攻擊。每個敵人對同一離開者，每次行動最多一次。格擋有效；強制換位與推擊預設不觸發。"
+  }
+}

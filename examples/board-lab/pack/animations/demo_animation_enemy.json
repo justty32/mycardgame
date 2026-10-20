@@ -1,0 +1,29 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_animation_enemy",
+    "_animation_data": {
+      "animation_idle": {
+        "animation_texture_file_paths": [
+          "external/sprites/enemies/enemy_yellow_small.png"
+        ],
+        "animation_next_animation_name": "animation_idle",
+        "animation_fps": 5.0
+      },
+      "animation_attack": {
+        "animation_texture_file_paths": [
+          "external/sprites/enemies/enemy_yellow_small.png"
+        ],
+        "animation_next_animation_name": "animation_idle",
+        "animation_fps": 5.0
+      },
+      "animation_death": {
+        "animation_texture_file_paths": [
+          "external/sprites/enemies/enemy_yellow_small.png"
+        ],
+        "animation_next_animation_name": "",
+        "animation_fps": 5.0
+      }
+    }
+  }
+}

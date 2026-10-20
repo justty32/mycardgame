@@ -2,11 +2,11 @@
 
 [遊戲開發入口](README.md)｜[驗收分流](validation.md)｜[資源生命週期](resource-lifecycle.md)｜[testing](../testing.md)
 
-**何時用**：新增／修正 actions、validators、interceptors、狀態、回合、RNG、序列化或載入機制。**何時不用**：現有原語能表達的內容走 [content](content.md)；只改展示或輸入接線走 [ui](ui.md)；行為不變的拆檔走 refactor。
+**何時用**：修改 actions、validators、interceptors、狀態、回合、RNG 或資料機制。內容走 [content](content.md)，展示／輸入走 [ui](ui.md)，行為不變的拆檔走 refactor。
 
 ## Done when
 
-需求有可重現輸入與可觀察結果；順序、等待／取消、預覽與受影響資料契約有證據。修 bug 的 regression 在舊行為失敗、修正後通過，並同步必要基準、文件及 code map。
+輸入可重現、結果可觀察；順序、取消、預覽與資料契約有證據。回歸在修復前失敗、修復後通過，同步文件與 code map。
 
 ## 先讀來源
 
@@ -55,3 +55,5 @@ Validator 覆寫 `_validation()`，呼叫者使用 `validate()` 以保留反轉�
 機制／資料格式／載入流程變更依 [testing](../testing.md) 跑 Smoke；資源變更加 Import。regression 保留觸發條件與失敗訊息，區分既有及新增問題；公開契約變更同步 [code-map](../common/code-map.md)、分析／教學及驗證指令，完成文件 strict lint。
 
 場域、ZOC、位移與有序反應改動先讀 [fields-zoc](fields-zoc.md)；雙盤定位與跨盤拒絕沿 [A 契約](../../../analysis/slay-the-robot/design/dual-board/README.md)。範圍含 UI/預覽、生命週期與動態時間等價，不能只驗數值 helper。
+
+棋盤掛載、普通卡解耦與未掛模組戰鬥沿 [可選棋盤模組](mechanics/board-module.md)。不要把空間規則加回 Hand／HandManager；新卡只透過效果與 `card_values.board` 表達模組選項。

@@ -1,0 +1,130 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: known isolated boardless phase
+FIXTURE: scenario=defeat; seed=20261019; red=10 HP/100 money/no artifacts; deck=3 native Basic Attack +2 native Basic Block; no-bonus start option; one 65 HP enemy with 14x1 intent; normal map/reward generation.
+BOUNDARY: explicit ordinary-card data fixtures; real menu/queue/intent/reward/save handlers; no physical UI input.
+PASS: real Start Run creates boardless campaign
+PASS: legacy start uses default Act and authored fixture deck
+PASS: normal start option exists
+PASS: normal start option opens map
+PASS: real generated map has adjacent combat for declared fixture
+PASS: map visit starts ordinary encounter and initial draw
+PASS: disabled combat has no BoardCombatModule instance
+PASS: disabled combat allocates no board controller battlefield field or preview
+PASS: disabled combat creates no board views standing actor controller or undo control
+PASS: passive card rejection adapter exists without allocating a board world
+PASS: ordinary units remain outside board occupancy
+PASS: ordinary units retain registry identities and real CTB timeline membership
+PASS: disabled scene tree contains no module or board view node
+PASS: defeat fixture starts combat at ten HP without block
+PASS: defeat scenario passes the first turn without playing cards
+PASS: enemy attack and player death animation naturally display the defeat summary
+PASS: fourteen-damage enemy attack kills the ten-HP player
+PASS: real damage signal records fourteen damage, ten lost HP and four overkill
+PASS: one enemy turn emits one player death and one completed death animation
+PASS: defeat: one hero action started and ended before the lethal enemy turn
+PASS: defeat: the lethal enemy action started, never ended, and the director stopped
+PASS: defeat leaves the attacking enemy alive and untouched
+PASS: summary presents defeat with the native LOSS end state
+PASS: defeat summary contains generated run statistics
+PASS: dead player has a disabled hand and no selectable hand cards
+PASS: no card remains queued or executes after lethal enemy damage
+PASS: defeat does not offer combat victory rewards
+PASS: defeat cannot travel on the map
+STATE: {"deck":5,"discard":5,"draw":0,"enemy_health":65,"energy":3,"hand":0,"health":0,"money":100,"signals":{"combat_ended":0,"combat_started":1,"drawn":5,"enemy_action_ended":0,"enemy_action_started":1,"enemy_dead":0,"enemy_turn":1,"hero_action_ended":1,"hero_action_started":1,"played":0,"player_dead":1,"player_death_animation":1},"stage":"defeat_summary"}
+PASS: defeat End Run button returns to the new-run menu
+PASS: normal defeat settlement removes only the isolated run save
+PASS: defeat settlement records exactly one profile loss
+PASS: defeat settlement stores a loss in run history
+PASS: defeat settlement saves the isolated profile
+PASS: settled defeat closes summary and combat UI
+STATE: {"deck":5,"discard":0,"draw":5,"enemy_health":65,"energy":3,"hand":0,"health":0,"money":100,"signals":{"combat_ended":0,"combat_started":1,"drawn":5,"enemy_action_ended":0,"enemy_action_started":1,"enemy_dead":0,"enemy_turn":1,"hero_action_ended":1,"hero_action_started":1,"played":0,"player_dead":1,"player_death_animation":1},"stage":"defeat_settled"}
+PASS: complete boardless phase defeat
+BOARDLESS CHECKS: 36, failures: 0
+BOARDLESS PASS: defeat

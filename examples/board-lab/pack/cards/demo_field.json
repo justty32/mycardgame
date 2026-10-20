@@ -1,0 +1,34 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_field",
+    "card_name": "伏能格",
+    "card_description": "選任一棋盤的空格，建立持續 300 時間刻的伏能場。敵人進入受 5 傷害，在格內開始行動受 2 傷害；格擋有效。",
+    "card_texture_path": "external/sprites/cards/white/card_white.png",
+    "card_color_id": "demo_color",
+    "card_energy_cost": 1,
+    "card_type": 1,
+    "card_rarity": 3,
+    "card_requires_target": true,
+    "card_values": {
+      "board": {
+        "range": -1,
+        "shape": 0,
+        "target_faction": 4
+      }
+    },
+    "card_play_actions": [
+      {
+        "res://scripts/actions/board_actions/ActionCreateField.gd": {
+          "field_id": "demo_hazard",
+          "cells": "SELECTED_CELL"
+        }
+      }
+    ],
+    "card_keyword_object_ids": [
+      "demo_keyword_field"
+    ],
+    "card_upgrade_amount_max": 0,
+    "card_appears_in_card_packs": true
+  }
+}

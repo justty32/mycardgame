@@ -10,7 +10,7 @@
 
 [MainMenu](../../../game/scripts/ui/menus/MainMenu.gd) 的 update_continue_button_visibility 只問 FileLoader.has_save_file：有 save 時顯示 Continue 與 Forfeit、隱藏 New Run；無 save 時相反。Continue 呼叫 autoload。檔案存在不代表內容有效；完整錯誤 UI 與壞檔恢復尚未實測。
 
-[NewRunMenu](../../../game/scripts/ui/menus/NewRunMenu.gd) 列出 Global 所有 CharacterData，自動選第一個，並收集 seed、difficulty、custom modifiers；沒有角色解鎖過濾。Start handler 交 [Global.start_run](../../../game/autoload/Global.gd)。後者從 CharacterData.character_player_id 取 PlayerData prototype，設定起始牌組／遺物／卡包、HP、金錢、難度、RNG seed 與統計引用，執行 run modifiers，再硬編碼 generate_act("act_1", true)；location 初值為 location_0。這裡 true 被用作 act_number，不能推導出角色可透過資料自行選起始幕。
+[NewRunMenu](../../../game/scripts/ui/menus/NewRunMenu.gd) 列出 Global 所有 CharacterData，自動選第一個，並收集 seed、difficulty、custom modifiers；沒有角色解鎖過濾。Start handler 交 [Global.start_run](../../../game/autoload/Global.gd)。後者從 CharacterData.character_player_id 取 PlayerData prototype，設定起始牌組／遺物／卡包、HP、金錢、難度、RNG seed 與統計引用，執行 run modifiers，再用 prototype 的 player_act_id 生成起始幕；缺欄預設 act_1，location 初值仍為 location_0。2026-10-20 接點先驗角色／player prototype／起始幕存在，空或未知 Act 在牌組、RNG、UID、run signal 與存檔變動前回 false；Continue 仍讀既有 run 的當前 Act。Smoke 已驗負例無副作用，中性包的真自訂幕流程另由 PackScenario 驗證。
 
 新局生成後 autosave，再發 run_started 及 map_location_selected。[RunStartOptions](../../../game/scripts/ui/RunStartOptions.gd) 收到 STARTING 類型時建立選項，選擇後執行 actions、等佇列完成，設定 Map.can_travel 並開地圖。起點選擇不是 start_run autosave 已完成的內容。
 

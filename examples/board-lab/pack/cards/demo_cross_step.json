@@ -1,0 +1,36 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_cross_step",
+    "card_name": "跨步",
+    "card_description": "傳送至任一棋盤的空格，不耗移動點。離開敵人相鄰格仍可能遭借機攻擊。",
+    "card_texture_path": "external/sprites/cards/white/card_white.png",
+    "card_color_id": "demo_color",
+    "card_energy_cost": 1,
+    "card_type": 1,
+    "card_rarity": 2,
+    "card_requires_target": true,
+    "card_values": {
+      "board": {
+        "range": -1,
+        "shape": 0,
+        "target_faction": 4
+      }
+    },
+    "card_play_actions": [
+      {
+        "res://scripts/actions/board_actions/ActionMoveUnit.gd": {
+          "mode": "TELEPORT",
+          "target_override": 1,
+          "target_board_id": "SELECTED",
+          "distance": -1
+        }
+      }
+    ],
+    "card_keyword_object_ids": [
+      "demo_keyword_zoc"
+    ],
+    "card_upgrade_amount_max": 0,
+    "card_appears_in_card_packs": true
+  }
+}

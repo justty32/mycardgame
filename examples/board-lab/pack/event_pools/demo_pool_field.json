@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "object_id": "demo_pool_field",
+    "event_pool_event_object_ids": [
+      "demo_event_field"
+    ],
+    "event_pool_fallback_event_object_id": "demo_event_field"
+  },
+  "patch_data": {}
+}

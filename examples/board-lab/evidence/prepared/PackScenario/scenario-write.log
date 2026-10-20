@@ -1,0 +1,184 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: known declared phase
+PASS: isolated artifact project
+PASS: standalone pack profile skips framework test content
+PASS: framework sample character is absent
+PASS: write phase begins with a fresh isolated profile
+PASS: character menu reached through normal New Run navigation
+PASS: pack character has a real selection button
+PASS: New Run starts the selected pack character
+PASS: new run selects pack player and authored starting Act
+PASS: natural character deck has the exact ten authored cards
+PASS: authored start option is available
+PASS: start option completes into adjacent-map travel
+PASS: map refuses jumping directly to the non-adjacent final battle
+PASS: authored event is a natural adjacent destination: demo_event_entry
+PASS: map offers a real travel button: demo_event_entry
+PASS: normal map visit and initial hand settle: demo_event_entry
+PASS: map handler visits the authored event without replacement: demo_event_entry
+PASS: encounter creates real dual boards and party deployment
+PASS: entry deploys the authored sentry at enemy 2,2
+PASS: entry draws original ten cards with five energy
+PASS: cross-board push is rejected before card or energy consumption
+PASS: ordinary Strike is naturally available for board-input translation
+PASS: ordinary Strike rejects empty/friendly board cell while retaining selection
+PASS: ordinary invalid board selection preserves fee piles target and queue
+PASS: ordinary Strike rejects empty/friendly board cell while retaining selection
+PASS: ordinary invalid board selection preserves fee piles target and queue
+PASS: ordinary Strike accepts enemy cell and completes
+PASS: ordinary Strike enemy-cell selection deals authored eight damage for one energy
+PASS: ordinary successful request contains no board module context
+PASS: naturally drawn card available: demo_field
+PASS: selected card awaits legal board target: demo_field
+PASS: real card action queue completes: demo_field
+PASS: card spends its authored energy: demo_field
+PASS: field card creates an actual hazard on the selected empty enemy cell
+PASS: naturally drawn card available: demo_cross_step
+PASS: selected card awaits legal board target: demo_cross_step
+PASS: real card action queue completes: demo_cross_step
+PASS: card spends its authored energy: demo_cross_step
+PASS: cross-step card transfers the real hero with stable UID
+PASS: ordinary board selection moves to (1, 3)
+PASS: leaving adjacent hostile control consumes exactly three HP through a real opportunity attack
+PASS: ordinary board selection moves to (2, 3)
+PASS: same-action return does not duplicate the sentry opportunity attack
+PASS: naturally drawn card available: demo_swap
+PASS: selected card awaits legal board target: demo_swap
+PASS: real card action queue completes: demo_swap
+PASS: card spends its authored energy: demo_swap
+PASS: swap card exchanges real occupied cells with stable enemy UID
+PASS: swapped enemy entering the authored field suffers five damage
+PASS: naturally drawn card available: demo_guard
+PASS: real card action queue completes: demo_guard
+PASS: card spends its authored energy: demo_guard
+PASS: guard card grants its actual eight block
+PASS: real End Turn resolves enemy actions and next player action
+PASS: enemy action starts with two field stay damage before its guard intent
+PASS: sentry then executes the authored guard intent
+PASS: naturally drawn card available: demo_push
+PASS: selected card awaits legal board target: demo_push
+PASS: real card action queue completes: demo_push
+PASS: card spends its authored energy: demo_push
+PASS: same-board push moves one cell then deals three collision damage at the boundary
+PASS: ordinary board selection moves to (2, 3)
+PASS: campaign fighter remains alive
+PASS: naturally drawn card available: demo_pulse
+PASS: selected card awaits legal board target: demo_pulse
+PASS: real card action queue completes: demo_pulse
+PASS: card spends its authored energy: demo_pulse
+PASS: real attack reduces enemy health or protection: demo_pulse
+PASS: naturally drawn card available: demo_strike
+PASS: selected card awaits legal board target: demo_strike
+PASS: real card action queue completes: demo_strike
+PASS: card spends its authored energy: demo_strike
+PASS: real attack reduces enemy health or protection: demo_strike
+PASS: last enemy death animation settles combat before further input
+PASS: natural entry victory clears authored fields and releases the board world
+PASS: natural victory opens rewards
+PASS: normal reward offers money and card draft
+PASS: real reward button grants displayed money
+PASS: real pack reward draft opens
+PASS: draft selection joins persistent deck
+PASS: reward card comes from authored pack and persists in deck
+PASS: reward Continue returns to next map edge
+PASS: first reward adds a real eleventh permanent card
+PASS: authored event is a natural adjacent destination: demo_event_field
+PASS: map offers a real travel button: demo_event_field
+PASS: normal map visit and initial hand settle: demo_event_field
+PASS: map handler visits the authored event without replacement: demo_event_field
+PASS: encounter creates real dual boards and party deployment
+PASS: normal visit autosave stores the second encounter checkpoint
+PASS: autosave includes the naturally acquired reward card
+PASS: observation snapshot can be written independently of game save
+PASS: normal Return to Title preserves checkpoint
+PASS: QUIT retains the real checkpoint for another process
+PASS: complete real pack write flow
+SCENARIO COUNTS: checks=94 failures=0
+PACK SCENARIO PASS: write

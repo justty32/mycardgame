@@ -234,8 +234,25 @@ func _ready():
 
 
 #region Run
+## Pure configuration preflight. Missing fields retain PlayerData's act_1 default;
+## explicit empty / unknown acts are rejected rather than leaving a partially started run.
+func get_run_start_rejection_reason(character_object_id: String) -> String:
+	var character: CharacterData = get_character_data(character_object_id)
+	if character == null:
+		return "unknown_character"
+	var prototype: PlayerData = _id_to_player_data.get(character.character_player_id)
+	if prototype == null:
+		return "unknown_player_prototype"
+	if prototype.player_act_id.is_empty() or not _id_to_act_data.has(prototype.player_act_id):
+		return "unknown_starting_act"
+	return ""
+
 ## Starts a new run under a given seed with a given character
-func start_run(character_object_id: String, run_seed: int, difficulty_level: int = 0, custom_run_modifier_object_ids: Array[String] = []) -> void:
+func start_run(character_object_id: String, run_seed: int, difficulty_level: int = 0, custom_run_modifier_object_ids: Array[String] = []) -> bool:
+	var rejection: String = get_run_start_rejection_reason(character_object_id)
+	if not rejection.is_empty():
+		push_warning("Global.start_run rejected: " + rejection)
+		return false
 	var character_data: CharacterData = get_character_data(character_object_id)
 	
 	# initialize player data from a prototype using selected character
@@ -306,13 +323,14 @@ func start_run(character_object_id: String, run_seed: int, difficulty_level: int
 	perform_start_of_run_modifiers()
 	
 	# generate world
-	ActionGenerator.generate_act("act_1", true)
+	ActionGenerator.generate_act(player_data.player_act_id, true)
 	
 	# save immediately at start of run
 	FileLoader.autosave()
 	
 	Signals.run_started.emit()
 	Signals.map_location_selected.emit(get_player_location_data())	# simulate visiting the first location
+	return true
 	
 	# simulate a win
 	#await get_tree().create_timer(5).timeout

@@ -1,0 +1,68 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-20",
+ "link_columns": [
+  "event_path",
+  "encounter_path",
+  "pool_path"
+ ],
+ "columns": [
+  "id",
+  "event_path",
+  "encounter_path",
+  "pool_path",
+  "enemy_ids",
+  "purpose",
+  "cycle",
+  "positions",
+  "counterplay",
+  "evaluation",
+  "verification",
+  "status"
+ ],
+ "rows": [
+  {
+   "id": "entry",
+   "event_path": "pack/events/demo_event_entry.json",
+   "encounter_path": "pack/encounters/demo_encounter_entry.json",
+   "pool_path": "pack/event_pools/demo_pool_entry.json",
+   "enemy_ids": "demo_enemy_sentry",
+   "purpose": "辨識兩盤與實際站格；跨盤入侵、從同盤敵人相鄰格移動、以場域及換位改變受擊位置。",
+   "cycle": "initial→guard(2盾)→attack(4傷)→guard，HOLD、同盤射程1。",
+   "positions": "party 玩家(2,4)；enemy 哨兵(2,2)。",
+   "counterplay": "guard8可吸收4傷與一次3傷借機；先鋪空格場域再跨盤落點與交換；同盤退至射程外可避短擊；跨盤攻擊不以距離閃避。 借機按離開來源相鄰格判定，不需目的地在控制區外；每個控制者對移動者每行動去重一次，強制位移依示範規則豁免。",
+   "evaluation": "固定10張起始牌、70HP、5能量、2免費移動；24HP需3張8傷strike但先做教學避免提早結束；不出牌約18次攻擊可敗北，盾回合提供回應窗口。",
+   "verification": "真實pack載入→New Run→相鄰COMBAT；核24HP、首次guard、完整guard/attack循環；跨盤/步行OA3、field5/2、換位、推擠與費用；勝利領獎後地圖保存。",
+   "status": "已落檔；待整合 owner 真實 pack headless 驗證；GUI／聽感／多策略平衡未驗。"
+  },
+  {
+   "id": "field",
+   "event_path": "pack/events/demo_event_field.json",
+   "encounter_path": "pack/encounters/demo_encounter_field.json",
+   "pool_path": "pack/event_pools/demo_pool_field.json",
+   "enemy_ids": "demo_enemy_anchor; demo_enemy_walker",
+   "purpose": "相鄰雙敵讓局部十字與單體擊殺順序有差異；實際場域由玩家卡建立，不預先注入。",
+   "cycle": "anchor initial→guard(2盾)→attack(4)→guard；walker initial→attack(4、同盤APPROACH1)→guard(2)→attack。",
+   "positions": "party 玩家(2,4)；enemy anchor(1,2)、walker(2,2)，保留(1,3)/(1,4)。",
+   "counterplay": "pulse6同時打兩個相鄰敵；field鋪(1,3)→cross_step入格→同盤swap anchor→push向下至(1,4)並碰邊；walker在玩家入侵後逼近，guard8可吸收雙4傷。",
+   "evaluation": "總28HP，雙敵錯峰使預告有辨識價值；範圍卡2費對兩目標總12傷，兩張strike2費總16但無法同時削兩敵；場域/碰撞收益依真正位置驗算。",
+   "verification": "續玩相鄰COMBAT不得覆寫敵人/位置；核兩敵14HP與各cycle；pulse局部命中、場域/推擠/剩餘格碰撞、擊殺順序與正常reward返回。",
+   "status": "已落檔；待整合 owner 真實 pack headless 驗證；GUI／聽感／多策略平衡未驗。"
+  },
+  {
+   "id": "final",
+   "event_path": "pack/events/demo_event_final.json",
+   "encounter_path": "pack/encounters/demo_encounter_final.json",
+   "pool_path": "pack/event_pools/demo_pool_final.json",
+   "enemy_ids": "demo_enemy_warden",
+   "purpose": "把格擋、位置與輸出窗口整合為短流程終局，Boss以意圖節奏區分而非只加血。",
+   "cycle": "initial→guard(4盾)→heavy(8傷、同盤APPROACH1)→quick(4傷、HOLD)→guard。",
+   "positions": "party 玩家(2,4)；enemy Boss(2,2)，其餘皆空。",
+   "counterplay": "蓄力回合可鋪場/準備換位；heavy前guard8抵擋完整預告；入侵後注意APPROACH，quick可同盤退離射程；避免把跨盤當射程免疫。",
+   "evaluation": "40HP、每3敵行動12傷且中間4盾；牌組每輪5能量可選防禦與數張8傷輸出；固定短路線保留戰間生命，平衡需多策略樣本。",
+   "verification": "真實BOSS節點核完整guard/heavy/quick cycle與預告/實傷；擊殺後正常run_victory、終局紀錄與重新開始；不使用傷害注入直接結束。",
+   "status": "已落檔；待整合 owner 真實 pack headless 驗證；GUI／聽感／多策略平衡未驗。"
+  }
+ ]
+}

@@ -1,0 +1,78 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_mod",
+    "mod_name": "Board Lab",
+    "mod_author": "mycardgame contributors",
+    "mod_description": "A neutral three-combat dual-board demonstration for an isolated pack profile.",
+    "mod_version": {
+      "major": 0,
+      "minor": 1,
+      "patch": 0
+    },
+    "mod_dependency_mod_ids": [],
+    "mod_folder_to_load_data": {
+      "external/mods/board_lab/characters/": {
+        "class_name": "CharacterData",
+        "table_name": "_id_to_character_data"
+      },
+      "external/mods/board_lab/players/": {
+        "class_name": "PlayerData",
+        "table_name": "_id_to_player_data"
+      },
+      "external/mods/board_lab/acts/": {
+        "class_name": "ActData",
+        "table_name": "_id_to_act_data"
+      },
+      "external/mods/board_lab/run_start_options/": {
+        "class_name": "RunStartOptionData",
+        "table_name": "_id_to_run_start_option_data"
+      },
+      "external/mods/board_lab/animations/": {
+        "class_name": "AnimationData",
+        "table_name": "_id_to_animation_data"
+      },
+      "external/mods/board_lab/cards/": {
+        "class_name": "CardData",
+        "table_name": "_id_to_card_data"
+      },
+      "external/mods/board_lab/fields/": {
+        "class_name": "FieldData",
+        "table_name": "_id_to_field_data"
+      },
+      "external/mods/board_lab/colors/": {
+        "class_name": "ColorData",
+        "table_name": "_id_to_color_data"
+      },
+      "external/mods/board_lab/card_packs/": {
+        "class_name": "CardPackData",
+        "table_name": "_id_to_card_pack_data"
+      },
+      "external/mods/board_lab/enemies/": {
+        "class_name": "EnemyData",
+        "table_name": "_id_to_enemy_data"
+      },
+      "external/mods/board_lab/events/": {
+        "class_name": "EventData",
+        "table_name": "_id_to_event_data"
+      },
+      "external/mods/board_lab/encounters/": {
+        "class_name": "EncounterData",
+        "table_name": "_id_to_encounter_data"
+      },
+      "external/mods/board_lab/event_pools/": {
+        "class_name": "EventPoolData",
+        "table_name": "_id_to_event_pool_data"
+      },
+      "external/mods/board_lab/combat_rules/": {
+        "class_name": "CombatRulesData",
+        "table_name": "_id_to_combat_rules_data"
+      },
+      "external/mods/board_lab/keywords/": {
+        "class_name": "KeywordData",
+        "table_name": "_id_to_keyword_data"
+      }
+    },
+    "mod_script_file_paths": {}
+  }
+}

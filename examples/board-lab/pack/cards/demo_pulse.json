@@ -1,0 +1,35 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_pulse",
+    "card_name": "十字脈衝",
+    "card_description": "選定一名敵人，對其格及上下左右相鄰格內的所有敵人造成 [damage] 傷害。可跨盤選取。",
+    "card_texture_path": "external/sprites/cards/white/card_white.png",
+    "card_color_id": "demo_color",
+    "card_energy_cost": 2,
+    "card_type": 0,
+    "card_rarity": 3,
+    "card_requires_target": true,
+    "card_values": {
+      "damage": 6,
+      "board": {
+        "range": -1,
+        "shape": 3,
+        "target_faction": 0
+      }
+    },
+    "card_play_actions": [
+      {
+        "res://scripts/actions/combatant_actions/ActionAttackGenerator.gd": {
+          "target_override": 12
+        }
+      }
+    ],
+    "card_keyword_object_ids": [
+      "demo_keyword_boards"
+    ],
+    "card_upgrade_amount_max": 0,
+    "card_appears_in_card_packs": true,
+    "card_first_shuffle_priority": 1
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_character",
+    "character_name": "Board Lab Pilot",
+    "character_description": "Three battles to learn two boards, transfers, fields, and control zones. 70 HP; 5 energy per turn.",
+    "character_color_id": "demo_color",
+    "character_icon_texture_path": "external/sprites/characters/character_red/character_red_icon.png",
+    "character_animation_id": "demo_animation_player",
+    "character_player_id": "demo_player",
+    "character_starting_health": 70,
+    "character_starting_money": 0,
+    "character_starting_artifact_ids": [],
+    "character_starting_card_draft_card_pack_ids": [
+      "demo_card_pack"
+    ],
+    "character_starting_artifact_pack_ids": [],
+    "character_starting_consumable_pack_ids": [],
+    "character_starting_card_object_ids": [
+      "demo_strike",
+      "demo_strike",
+      "demo_strike",
+      "demo_guard",
+      "demo_guard",
+      "demo_cross_step",
+      "demo_swap",
+      "demo_field",
+      "demo_push",
+      "demo_pulse"
+    ]
+  }
+}

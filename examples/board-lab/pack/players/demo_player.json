@@ -1,0 +1,17 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_player",
+    "player_character_object_id": "demo_character",
+    "player_health": 70,
+    "player_health_max": 70,
+    "player_energy_max": 5,
+    "player_act": 1,
+    "player_act_max": 1,
+    "player_act_id": "demo_act",
+    "player_location_id": "location_0",
+    "player_available_rest_action_object_ids": [],
+    "reward_cards_per_draft": 3,
+    "reward_drafts": 1
+  }
+}

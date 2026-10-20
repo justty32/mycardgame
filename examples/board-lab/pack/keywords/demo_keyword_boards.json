@@ -1,0 +1,8 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_keyword_boards",
+    "keyword_name": "雙棋盤",
+    "keyword_text_bb_code": "可跨盤的牌直接選另一盤目標，不計跨盤距離。同盤仍遵守牌面射程。推拉需要方向，只能對同盤目標使用；跨步與換位可改變所在棋盤，陣營不變。"
+  }
+}

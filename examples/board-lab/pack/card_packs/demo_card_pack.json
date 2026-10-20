@@ -1,0 +1,19 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_card_pack",
+    "card_pack_card_ids": [
+      "demo_strike",
+      "demo_guard",
+      "demo_cross_step",
+      "demo_swap",
+      "demo_field",
+      "demo_push",
+      "demo_pulse"
+    ],
+    "card_pack_color_id": "demo_color",
+    "exclude_non_standard_rarities": true,
+    "exclude_non_standard_types": true,
+    "card_pack_displays_in_codex": true
+  }
+}

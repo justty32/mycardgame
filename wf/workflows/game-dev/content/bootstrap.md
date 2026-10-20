@@ -28,13 +28,15 @@ print(cand)
 EOF
 ```
 
-以下檔案只寫到候選根。內容、fixture 與測試呼叫須在同一副本；來源鎖仍指上游。
+只寫候選根，內容、fixture 與測試須在同一副本。
 
 ## 第一批應寫檔案
 
 依新手指南的三段完整 JSON 建立候選根下 `game/external/mods/my_pack/mod_info.json`、`cards/card_heavy_strike.json`、`characters/character_red.json`，保留 `properties`／`patch_data` 包裝。卡為費用 2、15 傷害、起手追加一次、暫不進卡包；不要複製官方範例的 script takeover。
 
 `mod_folder_to_load_data` 的 key 相對於 **game 根**，不是相對 mod_info：`external/mods/my_pack/cards/` 映射 `CardData`／`_id_to_card_data`，`external/mods/my_pack/characters/` 映射 `CharacterData`／`_id_to_character_data`。檔名不取代 object_id；角色補丁須使用既有 `character_red`。
+
+資料夾 key **須以 `/` 結尾**：FileLoader.load_json 直接拼接目錄與檔名。2026-10-20 Board Lab 首次 PackScenario 因缺尾斜線載入失敗；修資料再驗，不改 FileLoader。啟動前核對「登記 key + 檔名」等於安裝路徑；JSON 可解析不代表路徑正確。
 
 修改候選 `game/external/mod_list.json`：保留 `external/` 與既有項目，在 `properties.mod_load_data` 新增 `"external/mods/my_pack/": {"enabled": true, "load_priority": 10}`。priority 升序載入，避免同 priority 的覆寫碰撞。只建資料夾、只登記 schema、或只放卡 JSON 都不足以啟用 mod。
 
@@ -73,7 +75,7 @@ func check_loaded(global_data: Node) -> Dictionary:
         _check(mod_results[label], label)
 ```
 
-runner 只接受固定 suite；沒有 `--suite Mod` 或 `Custom`。它會複製 tests 頂層全部 `.gd`，但不會自動執行新 helper；上述呼叫才建立執行鏈。不要修改 `_finish()` 的 SMOKE PASS 標記或把失敗改成單純 print。
+框架 suite 會複製 tests 頂層全部 `.gd`，但不會自動執行新 helper；上述呼叫才建立執行鏈。可重用的內容包完整流程改走 PackScenario 與 scenario manifest（見 [內容包](pack.md)），沒有任意 `Mod`／`Custom` suite。不要修改 `_finish()` 的 SMOKE PASS 標記或把失敗改成單純 print。
 
 ## 實際命令與交付範圍
 

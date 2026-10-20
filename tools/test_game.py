@@ -54,12 +54,13 @@ IS_WINDOWS = os.name == "nt"
 WINDOWS_CREATION_FLAGS = 0x08000000 | 0x00000200
 
 SUITE_CHOICES = ("All", "Dictionary", "Smoke", "Combat", "SaveLoad", "ResourceLifecycle",
-                 "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard")
-ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "SaveLoad")
+                 "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "Boardless", "PackScenario")
+ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "Boardless", "SaveLoad")
 SUITE_SCRIPTS = {
     "ResourceLifecycle": "resource_lifecycle.gd",
     "Dictionary": "dictionary_regression.gd",
     "Smoke": "framework_smoke.gd",
+    "Boardless": "boardless_flow.gd",
     "CombatVictory": "combat_flow.gd",
     "CombatDefeat": "combat_flow.gd",
     "Ctb": "ctb_flow.gd",
@@ -620,6 +621,92 @@ def build_user_args(selected: str, *, force_failure: bool = False, probes: Optio
     return user
 
 
+def load_pack_scenario(test_dir: Path) -> dict:
+    """Validate a portable scenario and its complete input tree before starting an engine."""
+    if not test_dir.is_dir() or _is_link_or_junction(str(test_dir)):
+        raise RunnerError(f"PackScenario tests must be a real directory: {test_dir}")
+    files: list[Path] = []
+    for directory, dirs, names in os.walk(test_dir):
+        for name in dirs + names:
+            path = Path(directory) / name
+            if _is_link_or_junction(str(path)):
+                raise RunnerError(f"PackScenario tests cannot contain links: {path}")
+            if path.is_file():
+                files.append(path)
+            elif not path.is_dir():
+                raise RunnerError(f"PackScenario tests contain a non-regular path: {path}")
+    path = test_dir / "scenario.json"
+    def unique_keys(pairs: list[tuple[str, Any]]) -> dict:
+        result: dict = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate key: {key}")
+            result[key] = value
+        return result
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_keys)
+    except (OSError, ValueError) as error:
+        raise RunnerError(f"Cannot read PackScenario manifest {path}: {error}") from error
+    if not isinstance(data, dict) or set(data) != {"schema", "entry", "phases"} \
+            or data["schema"] != "pack-scenario/1":
+        raise RunnerError("PackScenario requires exactly schema='pack-scenario/1', entry, phases")
+    entry = data["entry"]
+    if not isinstance(entry, str) or not re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9_./-]*\.gd", entry) \
+            or any(part in ("", ".", "..") for part in entry.split("/")):
+        raise RunnerError("PackScenario entry must be a relative POSIX .gd path without traversal")
+    entry_path = test_dir / entry
+    if not entry_path.is_file() or not entry_path.resolve().is_relative_to(test_dir.resolve()):
+        raise RunnerError(f"PackScenario entry is missing or outside tests: {entry}")
+    phases = data["phases"]
+    if not isinstance(phases, list) or not 1 <= len(phases) <= 64 \
+            or any(not isinstance(phase, str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", phase) for phase in phases) \
+            or len(set(phases)) != len(phases):
+        raise RunnerError("PackScenario phases require 1-64 unique lowercase identifiers (max 64 characters)")
+    return {**data, "source": str(path), "files": [
+        {"path": file.relative_to(test_dir).as_posix(), "sha256": sha256_file(file)}
+        for file in sorted(files)]}
+
+
+def copy_pack_scenario(test_dir: Path, isolated_game: Path, scenario: dict) -> tuple[Path, list[dict]]:
+    """Freeze all scenario inputs under res://pack_tests; reject changes since preflight."""
+    current = load_pack_scenario(test_dir)
+    if current != scenario:
+        raise RunnerError("PackScenario inputs changed after preflight; start a new verification run")
+    target = isolated_game / "pack_tests"
+    if target.exists():
+        raise RunnerError(f"PackScenario destination already exists: {target}")
+    target.mkdir()
+    hashes = []
+    for record in scenario["files"]:
+        source = test_dir / record["path"]
+        destination = target / record["path"]
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+        if sha256_file(destination) != record["sha256"]:
+            raise RunnerError(f"PackScenario input changed while copying: {source}")
+        hashes.append({**record, "source": str(source)})
+    return target / scenario["entry"], hashes
+
+
+def run_pack_scenario(runner: EngineRunner, directory: Path, isolated_game: Path,
+                      script_path: Path, scenario: dict, content_profile: str) -> None:
+    """Fresh processes share exactly one copied project and isolated child environment."""
+    run_script_phases(runner, directory,
+                      ["--headless", "--path", str(isolated_game), "--script", str(script_path)],
+                      [f"--content-profile={content_profile}"], scenario["phases"],
+                      phase_argument="scenario-phase", marker_prefix="PACK SCENARIO PASS: ", log_prefix="scenario")
+
+
+def run_script_phases(runner: EngineRunner, directory: Path, engine_args: list[str],
+                      user_args: list[str], phases: list[str] | tuple[str, ...], *,
+                      phase_argument: str, marker_prefix: str, log_prefix: str) -> None:
+    """Stop at the first failed phase; each process retains the standard strict verdict."""
+    for phase in phases:
+        runner.invoke(f"{log_prefix}-{phase}", directory,
+                      engine_args + ["--", *user_args, f"--{phase_argument}={phase}"],
+                      marker=f"{marker_prefix}{phase}", exact_marker=True)
+
+
 # --------------------------------------------------------------------------- verdict rules
 
 def evaluate_phase_output(*, console_output: str, log_text: str, exit_code: Optional[int],
@@ -627,7 +714,7 @@ def evaluate_phase_output(*, console_output: str, log_text: str, exit_code: Opti
                           accepted_patterns: list[str], cold_import: bool,
                           save_rejections: bool, known_shutdown_resources: list[int],
                           historical_baseline: bool, output_streams_open: bool = False,
-                          required_markers: Optional[list[str]] = None) -> dict:
+                          required_markers: Optional[list[str]] = None, exact_marker: bool = False) -> dict:
     """Pure judgment over a finished phase. Shared by the real runner and the synthetic tests."""
     combined = console_output + "\n" + log_text
     verdict: dict[str, Any] = {}
@@ -636,7 +723,7 @@ def evaluate_phase_output(*, console_output: str, log_text: str, exit_code: Opti
     passed = (not timed_out) and exit_code == 0 and not SCRIPT_ERROR_OR_FAIL_RE.search(combined) \
         and not crash and not output_streams_open
     if marker:
-        found = marker in combined
+        found = marker in combined.splitlines() if exact_marker else marker in combined
         verdict["marker_found"] = found
         passed = passed and found
     if required_markers:
@@ -763,7 +850,7 @@ class EngineRunner:
     def invoke(self, name: str, directory: Path, engine_args: list[str], *, marker: Optional[str] = None,
                cold_import: bool = False, known_shutdown_resources: Optional[list[int]] = None,
                save_rejections: bool = False, version_probe: bool = False,
-               required_markers: Optional[list[str]] = None) -> dict:
+               required_markers: Optional[list[str]] = None, exact_marker: bool = False) -> dict:
         known_shutdown_resources = list(known_shutdown_resources or [])
         engine_log = directory / f"{name}.log"
         if version_probe:
@@ -839,7 +926,7 @@ class EngineRunner:
                 cold_import=cold_import, save_rejections=save_rejections,
                 known_shutdown_resources=known_shutdown_resources,
                 historical_baseline=self.historical_baseline, output_streams_open=streams_open,
-                required_markers=required_markers)
+                required_markers=required_markers, exact_marker=exact_marker)
             for warning in verdict.pop("warnings"):
                 self.echo(f"WARNING: {name} {warning}")
             record.update(verdict)
@@ -926,7 +1013,7 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         prog="test_game.py",
         description="Isolated headless verification runner (Linux/Windows). Equivalent of the former test-game.ps1.")
     parser.add_argument("--suite", "-s", type=normalize_suite, default="All",
-                        help="All | Dictionary | Smoke | Combat | SaveLoad | ResourceLifecycle | CombatVictory | CombatDefeat")
+                        help="Framework suite (All) or an individual suite, including explicit PackScenario.")
     parser.add_argument("--godot-path", help="Engine executable. Default: .tools/ accepted build, then godot/godot4/godot-mono on PATH.")
     parser.add_argument("--source-game", help="Candidate game directory (default: <project>/game). Tests always come from <project>/tests.")
     parser.add_argument("--timeout-seconds", type=int, default=180, help="Per-process outer deadline, 10-900 (default 180).")
@@ -944,17 +1031,25 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser.add_argument("--pack", action="append", metavar="DIR", default=[],
                         help="Content pack directory with mod_info.json (repeatable). Installed only into the isolated copies under external/mods/<name>/ and enabled there.")
     parser.add_argument("--pack-tests", action="append", metavar="DIR", default=[],
-                        help="Directory of pack probes (*_probe.gd, repeatable); Smoke calls check_loaded(global_data). Requires --pack.")
+                        help="Smoke probes (repeatable) or one PackScenario directory with scenario.json. Requires --pack.")
     parser.add_argument("--content-profile", choices=CONTENT_PROFILES, default="test",
                         help="test (default): engine generates the built-in example/test content. pack: skip it so only "
-                             "external data and enabled packs load (Smoke only; needs --pack).")
+                             "external data and enabled packs load (Smoke or PackScenario; needs --pack).")
     args = parser.parse_args(argv)
-    if args.content_profile == "pack" and (args.suite != "Smoke" or not args.pack):
-        parser.error("--content-profile pack requires --suite Smoke and at least one --pack")
-    if args.pack_tests and not args.pack:
+    prepared_candidate = args.suite == "PackScenario" and args.source_game and not args.pack
+    if args.content_profile == "pack" and (args.suite not in ("Smoke", "PackScenario") or not (args.pack or prepared_candidate)):
+        parser.error("--content-profile pack requires --suite Smoke or PackScenario and at least one --pack")
+    if args.pack_tests and not args.pack and not prepared_candidate:
         parser.error("--pack-tests requires --pack")
-    if args.pack_tests and "Smoke" not in expand_suites(args.suite):
-        parser.error("--pack-tests runs inside Smoke; use --suite Smoke or All")
+    if args.pack_tests and "Smoke" not in expand_suites(args.suite) and args.suite != "PackScenario":
+        parser.error("--pack-tests requires --suite Smoke, All or PackScenario")
+    if args.suite == "PackScenario":
+        if not (args.pack or prepared_candidate) or len(args.pack_tests) != 1:
+            parser.error("PackScenario requires --pack (or a verified prepared --source-game) and exactly one --pack-tests")
+        if prepared_candidate and args.content_profile != "pack":
+            parser.error("A prepared PackScenario source requires --content-profile pack")
+        if args.no_isolate_appdata or args.historical_baseline:
+            parser.error("PackScenario requires isolated appdata and strict lifecycle checks")
     if not 10 <= args.timeout_seconds <= 900:
         parser.error("--timeout-seconds must be between 10 and 900")
     if args.force_failure and args.suite != "Smoke":
@@ -964,7 +1059,7 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 
 def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
     project_root = Path(args.project_root).resolve() if args.project_root else Path(__file__).resolve().parent.parent
-    source_game = Path(args.source_game).resolve() if args.source_game else project_root / "game"
+    source_game = Path(args.source_game).absolute() if args.source_game else project_root / "game"
     if not (source_game / "project.godot").is_file():
         raise RunnerError(f"Missing project.godot under source game: {source_game}")
     source_lock_path = project_root / "tools" / "upstream.json"
@@ -972,7 +1067,16 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
     patterns, policy_source = accepted_engine_patterns(source_lock, args.accept_engine_version)
     engine, discovery = discover_engine(project_root, args.godot_path, patterns)
     pack_dirs = [Path(p).resolve() for p in args.pack]
-    pack_test_dirs = [Path(p).resolve() for p in args.pack_tests]
+    pack_test_dirs = [Path(p).absolute() for p in args.pack_tests]
+    scenario = load_pack_scenario(pack_test_dirs[0]) if args.suite == "PackScenario" else None
+    prepared = None
+    if args.suite == "PackScenario" and not pack_dirs:
+        # Lazy import: preparation reuses our pure hash/pack helpers; it never starts an engine.
+        from prepare_pack import validate_prepared_game
+        try:
+            prepared = validate_prepared_game(source_game)
+        except ValueError as error:
+            raise RunnerError(f"Prepared PackScenario source rejected: {error}") from error
     for pack_dir in pack_dirs:
         resolve_pack_name(pack_dir)  # fail with exit 2 before any engine run
 
@@ -992,6 +1096,10 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
     manifest["content_profile"] = args.content_profile
     manifest["packs"] = {}
     manifest["pack_test_hashes"] = {}
+    if scenario is not None:
+        manifest["pack_scenario"] = scenario
+    if prepared is not None:
+        manifest["prepared_source"] = prepared
     runner = EngineRunner(engine=engine, run_root=run_root, manifest=manifest, env=env,
                           timeout_seconds=args.timeout_seconds, accepted_patterns=patterns,
                           historical_baseline=args.historical_baseline,
@@ -1011,6 +1119,18 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
             isolated_game = directory / "game"
             isolated_name = f"mycardgame-tests/{run_id}/{selected}"
             copy_info = copy_isolated_game(source_game, isolated_game, Path(isolation["user_data_root"]), isolated_name)
+            if prepared is not None:
+                try:
+                    if validate_prepared_game(source_game) != prepared:
+                        raise ValueError("prepared inputs changed after preflight")
+                    for relative, digest in prepared["output_hashes"].items():
+                        if relative == "project.godot":  # Only the copy's custom user:// was rewritten.
+                            continue
+                        copied = isolated_game / relative
+                        if not copied.is_file() or sha256_file(copied) != digest:
+                            raise ValueError(f"prepared snapshot hash mismatch: {relative}")
+                except ValueError as error:
+                    raise RunnerError(f"Prepared PackScenario copy rejected: {error}") from error
             isolation["user_dirs"][selected] = copy_info["user_dir"]
             manifest.setdefault("copy_exclusions", {})[selected] = {
                 k: len(v) for k, v in copy_info["skipped"].items()}
@@ -1035,9 +1155,15 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
                 manifest.setdefault("linked_mods_dropped", {})[selected] = dropped
                 echo(f"NOTE: {selected} copy drops linked mod entries {dropped}; use --pack to test them")
             manifest["packs"][selected] = install_packs(pack_dirs, isolated_game)
+            if prepared is not None:
+                manifest["packs"][selected] = prepared["packs"]
             probes: list[Path] = []
             if selected == "Smoke" and pack_test_dirs:
                 probes, pack_hashes = copy_pack_tests(pack_test_dirs, directory / "pack_tests")
+                manifest["pack_test_hashes"][selected] = pack_hashes
+            scenario_script = None
+            if selected == "PackScenario":
+                scenario_script, pack_hashes = copy_pack_scenario(pack_test_dirs[0], isolated_game, scenario)
                 manifest["pack_test_hashes"][selected] = pack_hashes
             runner.save()
             import_args = ["--headless", "--path", str(isolated_game), "--editor", "--import"]
@@ -1045,11 +1171,18 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
                                           known_shutdown_resources=known_counts)
             if import_record["cold_cache_uid_requires_recheck"]:
                 runner.invoke("import-verified", directory, import_args, known_shutdown_resources=known_counts)
+            if selected == "PackScenario":
+                run_pack_scenario(runner, directory, isolated_game, scenario_script, scenario, args.content_profile)
+                continue
             script_path = isolated_tests / SUITE_SCRIPTS[selected]
             test_args = ["--headless", "--path", str(isolated_game), "--script", str(script_path)]
             user_args = build_user_args(selected, force_failure=args.force_failure, probes=probes,
                                         content_profile=args.content_profile)
-            if selected == "SaveLoad":
+            if selected == "Boardless":
+                run_script_phases(runner, directory, test_args, user_args,
+                                  ("write", "read", "defeat", "scene_off"), phase_argument="boardless-phase",
+                                  marker_prefix="BOARDLESS PASS: ", log_prefix="boardless")
+            elif selected == "SaveLoad":
                 for phase in ("write", "read", "rejected"):
                     runner.invoke(f"save-{phase}", directory,
                                   test_args + ["--", *user_args, f"--phase={phase}", f"--source-game-path={source_game}"],

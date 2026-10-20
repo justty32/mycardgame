@@ -1,0 +1,186 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: project is in an isolated artifacts copy
+BOUNDARY: single combat with declared data fixtures; UI handler/signals, not mouse coordinates; autoload/save writes stay in the isolated project.
+PASS: isolated copy starts without an existing run save
+FIXTURE: scenario=victory; seed=20261019; red=80 HP/100 money/no artifacts; deck=3 native Basic Attack +2 native Basic Block; no-bonus start option; one 65 HP enemy with 14x1 intent; normal map/reward generation.
+PASS: native attack fixture contract is 20 damage / 1 energy
+PASS: native block fixture contract is 10 block / 1 energy
+PASS: fresh main menu offers New Run
+PASS: New Run UI navigation opens character menu
+PASS: Start Run button creates a real run
+PASS: run uses the requested deterministic seed
+PASS: run builds the declared five-card deck from character data
+PASS: normal run-start autosave is created in the isolated copy
+PASS: real start-option UI displays the declared no-bonus fixture
+PASS: start-option handler opens the travel map
+PASS: generated map contains an adjacent combat destination
+PASS: generated combat location has its actual map button
+PASS: map button starts combat and finishes initial draw
+PASS: visit action advances the player and marks the combat location visited
+PASS: one combat started through the map visit
+PASS: event spawns exactly one fixture enemy
+PASS: enemy spawn rolls the declared 65 HP
+PASS: enemy intent is a real 14-damage attack
+PASS: turn one draws all five fixture cards through the draw pipeline
+PASS: turn one begins with three energy
+PASS: legacy event without an encounter id synthesizes a default 5x5 board encounter
+PASS: synthesized encounter: hero on the south deploy cell, enemy on the north row, no free movement under the default rules
+PASS: turn one emits unit_action_started(hero) once and no unit_action_ended
+PASS: fixture enemy registers as an ENEMY-faction unit
+STATE: {"deck":5,"discard":0,"draw":0,"enemy_health":65,"energy":3,"hand":5,"health":80,"money":100,"signals":{"combat_ended":0,"combat_started":1,"drawn":5,"enemy_action_ended":0,"enemy_action_started":0,"enemy_dead":0,"enemy_turn":0,"hero_action_ended":0,"hero_action_started":1,"played":0,"player_dead":0,"player_death_animation":0},"stage":"turn_one_ready"}
+PASS: hand contains playable card_block_basic
+PASS: card UI accepts legal play: card_block_basic
+PASS: card action queue completes: card_block_basic
+PASS: card consumes exactly one energy: card_block_basic
+PASS: played card moves from hand to discard: card_block_basic
+PASS: native Block action grants exactly ten block
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: native Attack action deals twenty enemy HP damage
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: second paid attack leaves twenty-five enemy HP
+PASS: three legal plays consume all energy and emit three played events
+PASS: an extra attack remains for the zero-energy negative case
+PASS: card UI rejects insufficient energy
+PASS: rejected attack does not request a target
+PASS: rejected play neither executes nor removes the card
+PASS: rejected play changes neither enemy HP nor energy
+STATE: {"deck":5,"discard":3,"draw":0,"enemy_health":25,"energy":0,"hand":2,"health":80,"money":100,"signals":{"combat_ended":0,"combat_started":1,"drawn":5,"enemy_action_ended":0,"enemy_action_started":0,"enemy_dead":0,"enemy_turn":0,"hero_action_ended":0,"hero_action_started":1,"played":3,"player_dead":0,"player_death_animation":0},"stage":"turn_one_before_end"}
+PASS: End Turn UI runs the enemy intent and opens player turn two
+PASS: enemy's fourteen damage consumes ten block and four HP
+PASS: spent block does not remain on turn two
+PASS: turn two replenishes energy
+PASS: hero unit action signals track the legacy player turns
+PASS: the enemy's own action emitted unit_action_started/ended once
+PASS: equal speeds: hero and enemy act at tick 0, the second hero action at tick 1000
+PASS: discarded/played cards reshuffle and draw again on turn two
+PASS: first enemy turn neither kills player nor ends combat
+STATE: {"deck":5,"discard":0,"draw":0,"enemy_health":25,"energy":3,"hand":5,"health":76,"money":100,"signals":{"combat_ended":0,"combat_started":1,"drawn":10,"enemy_action_ended":1,"enemy_action_started":1,"enemy_dead":0,"enemy_turn":1,"hero_action_ended":1,"hero_action_started":2,"played":3,"player_dead":0,"player_death_animation":0},"stage":"turn_two_ready"}
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: turn-two attack leaves five enemy HP
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: lethal card damage and death animation naturally open combat rewards
+PASS: enemy dies once with no living combatants remaining
+PASS: combat victory follows five legitimate card plays with player alive
+PASS: legacy single-wave combat: wave_started(0), wave_cleared(0), then combat_ended (director victory path): ["started 0", "cleared 0", "ended"]
+PASS: combat stats leave the active combat state
+PASS: combat card copies leave the persistent deck intact
+STATE: {"deck":5,"discard":2,"draw":0,"enemy_health":0,"energy":1,"hand":3,"health":76,"money":100,"signals":{"combat_ended":1,"combat_started":1,"drawn":10,"enemy_action_ended":1,"enemy_action_started":1,"enemy_dead":1,"enemy_turn":1,"hero_action_ended":1,"hero_action_started":2,"played":5,"player_dead":0,"player_death_animation":0},"stage":"combat_won"}
+PASS: normal combat reward generation offers money and card draft
+PASS: generated money reward is positive
+PASS: money reward button grants the displayed amount
+PASS: card reward button opens the real draft picker
+PASS: draft selection completes its action and closes picker
+PASS: claimed card increases the persistent deck size by one
+PASS: claimed card ID matches the selected draft card
+PASS: reward Continue button returns to a travel-enabled map
+PASS: the won encounter has a next map destination
+PASS: single-combat test ends on map inside the ongoing run
+STATE: {"deck":6,"discard":2,"draw":0,"energy":1,"hand":3,"health":76,"money":125,"signals":{"combat_ended":1,"combat_started":1,"drawn":10,"enemy_action_ended":1,"enemy_action_started":1,"enemy_dead":1,"enemy_turn":1,"hero_action_ended":1,"hero_action_started":2,"played":5,"player_dead":0,"player_death_animation":0},"stage":"returned_to_map"}
+PASS: complete victory scenario returned
+COMBAT PASS: 90 checks, 0 failures

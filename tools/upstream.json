@@ -63,6 +63,12 @@
       "sha256": "b1ea6fbb71cce8982cd49b5e40f43d22a26d6ca6ad3aba9e0130dab3d1c2ccb1",
       "description": "Independent party/enemy boards with versioned SELECT_TARGET_CELL policy, atomic transfer/swap, board-local targeting/spawning and actor placement; field lifecycle, movement/ZOC and deterministic preview integration. Includes all game source additions relative to ac37a9a; applies after godot-4.7-baseline.patch.",
       "validation": "analysis/slay-the-robot/architecture/07_fields_zoc.md"
+    },
+    {
+      "file": "tools/patches/optional-board-module.patch",
+      "sha256": "5c02889c919ee0729bb380ee62d40f5cb620303f5a697e46dce799821376d5c3",
+      "description": "Optional scene-composed BoardCombatModule and generic card adapter preserve ordinary no-board combat, card costs and queues; board-only content fails before fees, module generations and copied request contexts preserve lifetime safety. Initial Act is configurable with side-effect-free invalid-input rejection. Fix duplicate-play logging argument. Includes all game source changes relative to 9ced42f.",
+      "validation": "analysis/slay-the-robot/design/board-module.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

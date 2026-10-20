@@ -1,6 +1,7 @@
 ## Unit spawning of one combat, owned by CombatDirector: spawns encounter wave units through the
-## combat's unit layer (EnemyContainer) and places them on the board (BoardController), and spawns
-## board summons (ActionSummonEnemies with spawn cells). A RefCounted created per combat.
+## combat's unit layer (EnemyContainer), optionally placing them on a mounted board, and spawns
+## board summons (ActionSummonEnemies with spawn cells). NONE retains ordinary enemy layout.
+## A RefCounted created per combat.
 ## Wave 0 spawns when combat starts (units act at enter delay + stagger * index + spawn delay).
 ## Later waves are scheduled by WaveController: a wave-start entry at the wave's start tick and one
 ## entry per unit at start + stagger * index + spawn_delay_ticks; CombatDirector enters due entries
@@ -64,6 +65,11 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
 		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
 		if enemy == null:
 			break	# positional events stop when their slots run out (legacy)
+		if not director.has_board_module():
+			if tick > 0:
+				spawn_delays[enemy.unit_uid] = tick
+			index += 1
+			continue
 		var anchor: Vector2i = _placement_anchor(entry, wave, enemy.footprint)
 		if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
 			_discard(enemy)
@@ -122,6 +128,9 @@ func enter_due(tick: int) -> void:
 			_enter_unit(entry)
 
 func _enter_unit(entry: Dictionary) -> void:
+	if not director.has_board_module():
+		_enter_unpositioned_unit(entry)
+		return
 	var wave: EncounterWaveData = director.encounter.encounter_waves[entry["wave"]]
 	var footprint: Vector2i = _footprint_of(entry["enemy_object_id"])
 	var anchor: Vector2i = _placement_anchor(entry, wave, footprint)
@@ -137,6 +146,15 @@ func _enter_unit(entry: Dictionary) -> void:
 		_discard(enemy)
 		if wave.wave_spawn_policy == EncounterWaveData.SPAWN_POLICIES.FAIL_SKIP or not _retry(entry, wave):
 			_skip(entry, "placement failed")
+		return
+	director.admit_wave_unit(enemy)
+
+## NONE retains wave timing and unit registration without inventing board coordinates.
+func _enter_unpositioned_unit(entry: Dictionary) -> void:
+	var unit_layer: Node = get_unit_layer()
+	var enemy: Enemy = unit_layer.spawn_board_enemy(entry["enemy_object_id"]) if unit_layer != null else null
+	if enemy == null:
+		_skip(entry, "no unit layer")
 		return
 	director.admit_wave_unit(enemy)
 
@@ -208,6 +226,8 @@ func _pick_enemy(unit_entry: Dictionary) -> String:
 
 ## Entry cell, or the default spawn origin when missing / off the board.
 func _entry_cell(unit_entry: Dictionary) -> Vector2i:
+	if not director.has_board_module():
+		return BaseCombatant.BOARD_ANCHOR_NONE
 	var board_id: String = _entry_board_id(unit_entry)
 	var board: BoardData = _board(board_id)
 	if board == null:
@@ -218,6 +238,8 @@ func _entry_cell(unit_entry: Dictionary) -> Vector2i:
 	return cell
 
 func _entry_board_id(unit_entry: Dictionary) -> String:
+	if not director.has_board_module():
+		return ""
 	var board_id: String = str(unit_entry.get("board_id", ""))
 	if board_id == "" and director.battlefield != null:
 		return director.battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)

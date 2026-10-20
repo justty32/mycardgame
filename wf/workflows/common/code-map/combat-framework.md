@@ -6,13 +6,13 @@
 
 ## 時間軸與單位
 
-[UnitRegistry.gd](../../../../game/scripts/combat/UnitRegistry.gd)（autoload）管 unit_uid、陣營、主角與 unit_spawned／unit_removed。[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)（`Global.get_combat_director()`）跑 CTB 行動迴圈與開戰／停止；每場建立的元件分擔其餘職責：[BoardController.gd](../../../../game/scripts/combat/BoardController.gd) 建棋盤、部署主角、放置單位與點格移動，[UnitSpawner.gd](../../../../game/scripts/combat/UnitSpawner.gd) 生成波次單位（待進場佇列與進場格策略）與棋盤召喚，[WaveController.gd](../../../../game/scripts/combat/WaveController.gd) 管波次開始／清空、下一波排程與勝利判定，[CombatActionPhases.gd](../../../../game/scripts/combat/CombatActionPhases.gd) 是一次行動固定的開始／結束階段，[CombatStartActions.gd](../../../../game/scripts/combat/CombatStartActions.gd) 是開戰前的初始動作；敵人意圖（含意圖移動）在 EnemyIntentController。排序在 [CombatTimeline.gd](../../../../game/scripts/combat/CombatTimeline.gd)，`controllers/` 分玩家與敵人。[CombatEndAction.gd](../../../../game/scripts/ui/CombatEndAction.gd) 等出牌佇列清空後結束行動，[TimelineBar.gd](../../../../game/scripts/ui/TimelineBar.gd) 顯示行動順序。
+[UnitRegistry.gd](../../../../game/scripts/combat/UnitRegistry.gd)（autoload）管 unit_uid、陣營、主角與 unit_spawned／unit_removed。[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)（`Global.get_combat_director()`）跑 CTB 行動迴圈與開戰／停止；可選 [BoardCombatModule](../../../../game/scripts/combat/board/BoardCombatModule.gd) 由 Combat 場景組裝，內部 [BoardController.gd](../../../../game/scripts/combat/BoardController.gd) 建棋盤、部署主角、放置單位與點格移動，[UnitSpawner.gd](../../../../game/scripts/combat/UnitSpawner.gd) 生成波次單位（待進場佇列與進場格策略）與棋盤召喚，[WaveController.gd](../../../../game/scripts/combat/WaveController.gd) 管波次開始／清空、下一波排程與勝利判定，[CombatActionPhases.gd](../../../../game/scripts/combat/CombatActionPhases.gd) 是一次行動固定的開始／結束階段，[CombatStartActions.gd](../../../../game/scripts/combat/CombatStartActions.gd) 是開戰前的初始動作；EnemyIntentController 在未掛模組時保留普通意圖，掛載時交 BoardCombatModule／BoardEnemyIntent 執行空間意圖。排序在 [CombatTimeline.gd](../../../../game/scripts/combat/CombatTimeline.gd)，`controllers/` 分玩家與敵人。[CombatEndAction.gd](../../../../game/scripts/ui/CombatEndAction.gd) 等出牌佇列清空後結束行動，[TimelineBar.gd](../../../../game/scripts/ui/TimelineBar.gd) 顯示行動順序。
 
 [BaseCombatant.gd](../../../../game/scripts/combatants/BaseCombatant.gd) 帶單位身分與每次行動的移動計數。[CombatRulesData.gd](../../../../game/data/readonly/CombatRulesData.gd)（`Global.get_combat_rules()`）定節奏與移動規則。
 
 ## 棋盤（Phase 2）
 
-`game/scripts/combat/board/` 下有四支：
+`game/scripts/combat/board/` 的核心查詢入口：
 
 - [BoardData.gd](../../../../game/scripts/combat/board/BoardData.gd)：格子、佔格、距離、由 BoardPathfinding 提供加權 Dijkstra 尋路與 NEAREST_EMPTY。
 - [BoardTargeting.gd](../../../../game/scripts/combat/board/BoardTargeting.gd)：形狀、陣營與出牌目標檢查，另提供 Validator 的上下文。
@@ -21,7 +21,7 @@
 
 遭遇資料是 [EncounterData.gd](../../../../game/data/readonly/EncounterData.gd)（波次在 embedded/EncounterWaveData.gd），沒有遭遇 id 的事件由它合成。棋盤 Action 在 `game/scripts/actions/board_actions/`（[ActionMoveUnit](../../../../game/scripts/actions/board_actions/ActionMoveUnit.gd)、[ActionDisplaceUnit](../../../../game/scripts/actions/board_actions/ActionDisplaceUnit.gd)、ActionGrantMovePoints、ActionComputeBoardValue），Validator 在 `game/scripts/validators/board/`。
 
-UI 是 [BoardView.gd](../../../../game/scripts/ui/BoardView.gd)，由 Combat 在執行時建立的自繪格子。[Hand.gd](../../../../game/scripts/ui/Hand.gd) 把 `cell_clicked` 轉成出牌目標或移動；生成仍經 [EnemyContainer.gd](../../../../game/scripts/ui/EnemyContainer.gd)。
+UI 是 [BoardView.gd](../../../../game/scripts/ui/BoardView.gd)，由模組的 [BoardCombatPresentation](../../../../game/scripts/ui/BoardCombatPresentation.gd) 管理格子、角色映射與 Undo。Hand／HandManager 只使用 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd) 通用 hooks；場景裝配的 [BoardCardAdapter](../../../../game/scripts/combat/board/BoardCardAdapter.gd) 與 BoardCardInput 接棋盤目標、預檢、點格與舊欄位轉譯。生成仍經 [EnemyContainer.gd](../../../../game/scripts/ui/EnemyContainer.gd)。
 
 ## 測試
 
@@ -36,3 +36,5 @@ Smoke 呼叫 [unit_registry_probe.gd](../../../../tests/unit_registry_probe.gd)�
 [BoardPathfinding](../../../../game/scripts/combat/board/BoardPathfinding.gd) 管 Dijkstra，[BoardMovementState](../../../../game/scripts/combat/board/BoardMovementState.gd) 管 ZOC 與 undo；[BoardMoveSequence](../../../../game/scripts/actions/board_actions/BoardMoveSequence.gd) 逐格反應，[BoardTransferAction](../../../../game/scripts/actions/board_actions/BoardTransferAction.gd) 原子轉移後發事件。意圖位置接點見 [board-intents](../../../../analysis/slay-the-robot/design/board-intents.md)。
 
 [BoardActorPresentation](../../../../game/scripts/ui/BoardActorPresentation.gd) 映射實際 sprite/HUD/hitbox 到兩盤，保留父節點與 UID，動畫位置不回寫資料格。專項為 [Field](../../../../tests/field_flow.gd)、[DualBoard](../../../../tests/dual_board_flow.gd)；需求／測試／證據依 [雙盤矩陣](../../../../analysis/slay-the-robot/design/dual-board/verification.json)。開發流程見 [fields-zoc](../../game-dev/fields-zoc.md)。
+
+可選模組責任及相容界線見 [架構分析](../../../../analysis/slay-the-robot/design/board-module.md)。真正未掛模組由 [Boardless](../../../../tests/boardless_flow.gd) 四階段驗證；中性包的自然三場流程由 [PackScenario](../../../../examples/board-lab/tests/scenario.json) 驗證。

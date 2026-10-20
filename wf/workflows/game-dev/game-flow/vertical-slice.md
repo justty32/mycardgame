@@ -18,7 +18,7 @@
 
 ### 建立角色到第一場戰鬥
 
-依 [content](../content.md) 建 CharacterData 與 PlayerData 配對、起始牌組、獎勵卡包與資料載入。NewRunMenu 目前列出全部角色；Global.start_run 硬編碼 act_1 與 location_0，替換初始幕前先確認接線，不假設角色 JSON 已能選起始幕。
+依 [content](../content.md) 建 CharacterData 與 PlayerData 配對、起始牌組、獎勵卡包與資料載入。NewRunMenu 目前列出全部角色；起始幕由 PlayerData prototype 的 player_act_id 指定（缺欄預設 act_1），Global.start_run 會在新局副作用前拒絕空或未登記的 Act。起點仍需 location_0；自訂短幕可用既有 act_action_script_path 產生完整路線，不改 Continue 存檔的當前幕。
 
 先驗角色設定 → 新局 → 起點選項 → 相鄰地圖按鈕 → 一場戰鬥勝利 → 領獎 → 可旅行地圖，再走真實傷害造成敗北 → 摘要 → End Run。利用現有 fixture 的做法補原創內容斷言，核對牌組、費用、HP、金錢與取得入口；範例 fixture 通過不代表新增內容通過。
 

@@ -17,7 +17,7 @@ Requires Python 3.10+ on PATH (python, py -3 or python3). Never opens a window.
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('All', 'Dictionary', 'Combat', 'SaveLoad', 'Smoke', 'ResourceLifecycle', 'CombatVictory', 'CombatDefeat', 'Ctb', 'Board', 'Wave', 'Field', 'DualBoard')]
+    [ValidateSet('All', 'Dictionary', 'Combat', 'SaveLoad', 'Smoke', 'ResourceLifecycle', 'CombatVictory', 'CombatDefeat', 'Ctb', 'Board', 'Wave', 'Field', 'DualBoard', 'Boardless', 'PackScenario')]
     [string]$Suite = 'All',
     [string]$GodotPath,
     [string]$SourceGame,

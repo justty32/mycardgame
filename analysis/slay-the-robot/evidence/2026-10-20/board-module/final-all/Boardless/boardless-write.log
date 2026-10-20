@@ -1,0 +1,266 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: known isolated boardless phase
+FIXTURE: scenario=victory; seed=20261019; red=80 HP/100 money/no artifacts; deck=3 native Basic Attack +2 native Basic Block; no-bonus start option; one 65 HP enemy with 14x1 intent; normal map/reward generation.
+BOUNDARY: explicit ordinary-card data fixtures; real menu/queue/intent/reward/save handlers; no physical UI input.
+PASS: boardless write begins without checkpoint
+PASS: real Start Run creates boardless campaign
+PASS: legacy start uses default Act and authored fixture deck
+PASS: normal start option exists
+PASS: normal start option opens map
+PASS: real generated map has adjacent combat for declared fixture
+PASS: map visit starts ordinary encounter and initial draw
+PASS: disabled combat has no BoardCombatModule instance
+PASS: disabled combat allocates no board controller battlefield field or preview
+PASS: disabled combat creates no board views standing actor controller or undo control
+PASS: passive card rejection adapter exists without allocating a board world
+PASS: ordinary units remain outside board occupancy
+PASS: ordinary units retain registry identities and real CTB timeline membership
+PASS: disabled scene tree contains no module or board view node
+PASS: run preflight has its legacy source character
+PASS: missing starting Act field retains valid act_1 default
+PASS: registered custom starting Act passes pure preflight
+PASS: invalid starting Act has a deterministic rejection: 
+WARNING: Global.start_run rejected: unknown_starting_act
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] start_run (res://autoload/Global.gd:254)
+       [1] run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/run_start_preflight_probe.gd:32)
+       [2] _write ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/boardless_campaign.gd:23)
+       [3] visit_fixture ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/boardless_flow.gd:77)
+       [4] _wait ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/combat_flow.gd:315)
+PASS: invalid starting Act returns false before beginning run: 
+PASS: rejected run leaves live player identity and serialized state unchanged: 
+PASS: rejected run consumes no prototype UID or action/run signal: 
+PASS: rejected run preserves checkpoint existence and bytes: 
+PASS: invalid starting Act has a deterministic rejection: preflight_missing_act
+WARNING: Global.start_run rejected: unknown_starting_act
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] start_run (res://autoload/Global.gd:254)
+       [1] run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/run_start_preflight_probe.gd:32)
+       [2] _write ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/boardless_campaign.gd:23)
+       [3] visit_fixture ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/boardless_flow.gd:77)
+       [4] _wait ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/combat_flow.gd:315)
+PASS: invalid starting Act returns false before beginning run: preflight_missing_act
+PASS: rejected run leaves live player identity and serialized state unchanged: preflight_missing_act
+PASS: rejected run consumes no prototype UID or action/run signal: preflight_missing_act
+PASS: rejected run preserves checkpoint existence and bytes: preflight_missing_act
+PASS: boardless card contract fixtures are naturally drawn
+PASS: ordinary no-board attack waits for enemy selection
+PASS: selection cancellation leaves ordinary card and energy unchanged
+PASS: ordinary queued play reserves exactly one energy while handler is busy
+PASS: real handler barrier drains after queue refund
+PASS: refunded queued card performs no damage and restores all reserved energy
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+Duplicating: Basic Attack
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: native duplicate play applies two ordinary attacks to the selected enemy
+PASS: duplicated play spends one fee and leaves one discard card
+PASS: hand contains playable card_block_basic
+PASS: card UI accepts legal play: card_block_basic
+PASS: card action queue completes: card_block_basic
+PASS: card consumes exactly one energy: card_block_basic
+PASS: played card moves from hand to discard: card_block_basic
+PASS: ordinary untargeted Block resolves to the hero without board geometry
+PASS: ordinary auto-play from discard completes through the public queue
+PASS: free auto-play preserves energy and pile while executing ordinary Block
+PASS: disabled module rejects spatial card before execution: action
+PASS: disabled spatial rejection preserves fee pile target and queue: action
+PASS: disabled module rejects spatial card before execution: geometry
+PASS: disabled spatial rejection preserves fee pile target and queue: geometry
+PASS: disabled module rejects spatial card before execution: request_action
+PASS: disabled spatial rejection preserves fee pile target and queue: request_action
+PASS: NONE uses ordinary hero target without interpreting range, NEAREST distance or teleport metadata
+PASS: NONE does not retain an ordinary attack as out of range
+PASS: previous lazy incoming update completes
+PASS: fixture incoming update completes
+PASS: NONE SELF preview targets the enemy and contributes no hero incoming damage
+PASS: NONE SELF keeps normal block, self-attack and custom-action ordering
+PASS: NONE SELF attack never hits the hero
+PASS: NONE pure intent preflight identifies nested board-only effects
+PASS: previous lazy incoming update completes
+PASS: fixture incoming update completes
+PASS: NONE rejected intent contributes no hero incoming damage
+WARNING: EnemyIntentController: board_module_required for enemy 'combat_flow_enemy'
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] _perform_plain_intent (res://scripts/combat/controllers/EnemyIntentController.gd:24)
+       [1] perform_intent (res://scripts/combat/controllers/EnemyIntentController.gd:15)
+       [2] run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/boardless_intent_cases.gd:52)
+       [3] _refresh_incoming ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/boardless_intent_cases.gd:67)
+       [4] _wait ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Boardless/tests/combat_flow.gd:315)
+PASS: NONE rejection retains the intent and skips reset/block/custom effects
+PASS: NONE rejection queues no ordinary attack or partial action payload
+PASS: NONE intent fixtures never construct a board, module or ThreatPreview
+PASS: previous lazy incoming update completes
+PASS: fixture incoming update completes
+PASS: no-board enemy really executes its intent after card contracts
+PASS: ordinary enemy attack consumes prior Block before next-turn reset
+PASS: unguarded ordinary enemy turn completes
+PASS: ordinary enemy intent deals real HP damage without board targeting
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: ordinary enemy intent and next hero action complete
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: ordinary enemy intent and next hero action complete
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: played card moves from hand to discard: card_attack_basic
+PASS: hand contains playable card_attack_basic
+PASS: card UI accepts legal play: card_attack_basic
+PASS: attack selection prompts for its target
+PASS: card action queue completes: card_attack_basic
+PASS: card consumes exactly one energy: card_attack_basic
+PASS: ordinary lethal card naturally opens rewards
+PASS: boardless combat reaches genuine victory once
+PASS: normal combat reward generation offers money and card draft
+PASS: generated money reward is positive
+PASS: money reward button grants the displayed amount
+PASS: card reward button opens the real draft picker
+PASS: draft selection completes its action and closes picker
+PASS: claimed card increases the persistent deck size by one
+PASS: claimed card ID matches the selected draft card
+PASS: ordinary reward Continue returns to map
+PASS: normal boardless reward adds one persistent card
+PASS: real generated map has adjacent combat for declared fixture
+PASS: map visit starts ordinary encounter and initial draw
+PASS: disabled combat has no BoardCombatModule instance
+PASS: disabled combat allocates no board controller battlefield field or preview
+PASS: disabled combat creates no board views standing actor controller or undo control
+PASS: passive card rejection adapter exists without allocating a board world
+PASS: ordinary units remain outside board occupancy
+PASS: ordinary units retain registry identities and real CTB timeline membership
+PASS: disabled scene tree contains no module or board view node
+PASS: second encounter visit persists naturally claimed card at checkpoint
+PASS: boardless checkpoint observation can be saved
+PASS: complete boardless phase write
+PASS: normal quit settles boardless cleanup
+BOARDLESS CHECKS: 149, failures: 0
+BOARDLESS PASS: write

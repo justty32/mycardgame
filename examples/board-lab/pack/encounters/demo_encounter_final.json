@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "object_id": "demo_encounter_final",
+    "encounter_board_mode": 1,
+    "encounter_boards": {
+      "party": {
+        "size": [
+          5,
+          5
+        ],
+        "deploy_cells": [
+          [
+            2,
+            4
+          ]
+        ],
+        "blocked_cells": [],
+        "initial_fields": []
+      },
+      "enemy": {
+        "size": [
+          5,
+          5
+        ],
+        "blocked_cells": [],
+        "initial_fields": []
+      }
+    },
+    "encounter_waves": [
+      {
+        "wave_units": [
+          {
+            "weights": {
+              "demo_enemy_warden": 1
+            },
+            "board_id": "enemy",
+            "cell": [
+              2,
+              2
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "patch_data": {}
+}

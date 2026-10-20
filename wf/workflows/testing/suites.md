@@ -10,7 +10,7 @@
 
 ```bash
 python3 tools/test_game.py --suite All
-# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb、Board、Wave、Field、DualBoard
+# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb、Board、Wave、Field、DualBoard、Boardless
 python3 tools/test_game.py --suite SaveLoad
 # Windows 包裝：./tools/test-game.ps1 -Suite SaveLoad
 ```
@@ -27,10 +27,26 @@ runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash �
 
 [Field](../../../tests/field_flow.gd) 與 [DualBoard](../../../tests/dual_board_flow.gd) 分別使用 `FIELD PASS:`／`DUAL_BOARD PASS:`，依序在 Wave 後、SaveLoad 前執行。前者驗場域、ZOC、位移、位置條件與 ordered lifecycle；後者從正常新局走預設雙盤、A targeting、原子 transfer/swap、兩盤場域與本體站格。各自的實際 assertions／執行結果見 [雙盤驗收表](../../../analysis/slay-the-robot/design/dual-board/verification.json)；工程仍在整合時不可引用舊 All 代替新增 suite。Board／Wave 的既有單盤案例以顯式 SINGLE 保持距離契約，DUAL 為正常新局預設。
 
+[Boardless](../../../tests/boardless_flow.gd) 在 All 的 DualBoard 後執行；四個程序共用隔離副本，以 `--boardless-phase=write/read/defeat/scene_off` 分別驗關閉棋盤的戰鬥、存讀、死亡及場景開關。逐階段要求整行 `BOARDLESS PASS: <phase>`，任一失敗停止。
+
 ## 新內容如何接到 runner
 
-目前 suite 是上面列出的固定集合，沒有 Custom 或任意 script 參數；題材內容包用 `--pack`／`--pack-tests` 裝入隔離副本並由 Smoke 呼叫其 probe，見 [題材內容包](../game-dev/content/pack.md)。runner 複製其專案 `tests/` 頂層所有 `.gd` 到每個隔離 suite 的 tests 目錄，再執行固定入口；新增 helper 只會被複製，必須由既有入口明確呼叫才有驗證。
+框架 suite 使用固定入口；內容包可用 Smoke probe 或下述 PackScenario，見 [題材內容包](../game-dev/content/pack.md)。runner 複製框架 `tests/` 頂層所有 `.gd`；新增 helper 必須由入口呼叫才有驗證。
 
 新 mod 的可操作範例見 [第一個 mod](../game-dev/content/bootstrap.md)：將專屬 helper 放 tests，以執行中腳本的相鄰路徑載入，於 Smoke 的 autoload ready 後、example_mod probe 前呼叫，交由既有 `_check()` 累計及退出。保留失敗傳遞、timeout、資源清理與完成標記。新 suite 需另改 runner 的選單、入口、標記與隔離契約，並同步 ps1 的 `ValidateSet` 與合成測試案例（Ctb 即照此加入），不可僅在文件寫出新命令。
 
 `--source-game`（ps1 `-SourceGame`）只換遊戲來源，不換 tests；完整候選演練須把 tools 與 tests 一併放到獨立候選根，再以 `--project-root` 指向它。source_hashes 涵蓋來源修復與雙盤／場域核心檔（實際清單見 runner 的 SOURCE_HASH_PATHS），新內容另記檔案雜湊。Combat 與 Ctb 的五張原生牌 fixture 會覆寫角色起手牌（含 append）；SaveLoad 也有自己的語意情境。這些 suite 通過不等於新增卡／敵人／事件／音效已被實際執行，報告須列明新 assertion 及到達入口。
+
+## PackScenario
+
+`--suite PackScenario --content-profile pack --pack DIR --pack-tests DIR` 不在 All 內；多包可疊載，但只接受一個 tests 目錄，其 `scenario.json` 格式固定：
+
+```json
+{"schema":"pack-scenario/1","entry":"entry.gd","phases":["write","read","defeat"]}
+```
+
+只允這三個鍵；entry 為目錄內 POSIX 相對 `.gd` 路徑，拒絕絕對路徑、穿越、連結與缺檔。phases 為 1–64 個唯一識別字，符合 `[a-z][a-z0-9_-]{0,63}`。全部 tests 檔複製至 `res://pack_tests/`，manifest 保存 scenario 與包／測試 hash。入口須拒絕未知 phase，失敗印 FAIL 並非零退出。
+
+依序以 `--scenario-phase=<id>` 啟動全新 headless 程序，共用隔離 game／user://／appdata，每階段有獨立 deadline、log、exit 與錯誤檢查。成功須獨立整行 `PACK SCENARIO PASS: <id>`；任一失敗停止後續。不得使用 historical-baseline 或 no-isolate-appdata；沒有 SaveLoad 預期拒絕的例外。
+
+已準備副本的輸入條件見 [內容包](../game-dev/content/pack.md)。純 Python 合成回歸：`python3 -I tests/test_pack_scenario.py`，不啟 Godot。

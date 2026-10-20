@@ -19,7 +19,7 @@ static func resolve_board(action: BaseAction, explicit_id: Variant = null) -> Bo
 static func resolve_effect_board(action: BaseAction, explicit_id: Variant, cell_value: Variant) -> BoardData:
 	var selected: BoardData = resolve_board(action, explicit_id)
 	if selected != null and cell_value == null and action.card_play_request != null and action.card_play_request.card_data != null:
-		return BoardTargeting.target_board_for_shape(selected, action.parent_combatant, action.card_play_request.card_data.card_shape)
+		return BoardTargeting.target_board_for_shape(selected, action.parent_combatant, BoardCardOptions.shape_of(action.card_play_request.card_data))
 	return selected
 
 static func resolve(action: BaseAction, board: BoardData, value: Variant, shape_default: bool = false) -> Array[Vector2i]:
@@ -39,8 +39,8 @@ static func resolve(action: BaseAction, board: BoardData, value: Variant, shape_
 		var selected: Vector2i = request.selected_cell
 		if selected == BaseCombatant.BOARD_ANCHOR_NONE and is_instance_valid(request.selected_target):
 			selected = request.selected_target.board_anchor
-		var shape: int = request.card_data.card_shape if request.card_data != null else BoardTargeting.TARGET_SHAPES.SINGLE
-		var maximum_range: int = request.card_data.card_range if request.card_data != null else -1
+		var shape: int = BoardCardOptions.shape_of(request.card_data) if request.card_data != null else BoardTargeting.TARGET_SHAPES.SINGLE
+		var maximum_range: int = BoardCardOptions.range_of(request.card_data) if request.card_data != null else -1
 		var geometry: Dictionary = BoardTargeting.geometry(board, parent, selected, shape, maximum_range)
 		if not geometry.get("valid", false) or geometry.get("board_id", "") != board.board_id:
 			return []

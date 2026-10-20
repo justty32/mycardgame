@@ -6,6 +6,8 @@
 
 ## 2026-10-20 Windows 4.7.2 Mono
 
+[可選棋盤模組最終證據](2026-10-20/board-module/README.md) 保存 All 1809 checks、真正無棋盤戰鬥、949 檔重建及工具驗證；以下是同日較早基準。
+
 [雙棋盤 A／Phase 2b 最終證據](2026-10-20/dual-board/README.md) 保存本輪 All 1470 checks、來源重建與 runner 143 項結果；包含角色本體站格、場域／控制區及跨程序存讀。以下 768 項結果為同日較早基準。
 
 [本輪精選證據](2026-10-20/README.md) 保存修後 All 768 checks、強制失敗出口、Windows runner／junction 合成驗證與引擎來源；詳細行為與限制見 [Windows 報告](../architecture/06_windows_validation.md)。原始 import 日誌、修前 All 與紅測留本機；發布內容以日期目錄的轉換清單核對來源及副本 hashes，不混用舊來源結果。

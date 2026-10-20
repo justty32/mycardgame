@@ -178,7 +178,9 @@ func run_exit(c) -> void:
 	summary.end_run_button.button_up.emit()
 	await c._wait(func(): return not Global.is_run and c._idle(), "End Run handler finishes the defeated run")
 	c._check(hero.position.is_equal_approx(original_position) and hero.scale.is_equal_approx(original_scale), "run exit restores the persistent hero's pre-combat position and scale")
-	c._check(presentation._actors.is_empty() and presentation._retired.is_empty() and presentation._tweens.is_empty(), "run exit releases presentation actor references and cancels movement tweens")
+	await c.flow.process_frame
+	await c.flow.process_frame
+	c._check(not is_instance_valid(presentation) and c.combat.actor_presentation == null and c.combat.board_views.is_empty(), "run exit releases presentation actor references and cancels movement tweens")
 	await _start_second_run(c)
 	c._check(c.player == hero and hero.unit_uid == uid and hero.scale.is_equal_approx(board_scale), "same Root starts a new run with the same hero identity and no cumulative board scaling")
 	_assert_unit(c, hero, "second-run hero")

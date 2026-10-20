@@ -1,0 +1,955 @@
+{
+  "suite": "PackScenario",
+  "run_id": "20261020-114335-3af4365d",
+  "source_game": "{PROJECT_ROOT}\\game",
+  "upstream_commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+  "source_lock_sha256": "DB6CD0E797ED2EF6B04907016A435CEF7A1675D131C7FE2398BA8188933AF0AC",
+  "checkout": {
+    "layout": "independent_game_checkout",
+    "repository_root": "{PROJECT_ROOT}\\game",
+    "commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+    "changes": [
+      "autoload/ActionGenerator.gd",
+      "autoload/ActionHandler.gd",
+      "autoload/FileLoader.gd",
+      "autoload/Global.gd",
+      "autoload/GlobalTestDataGenerator.gd",
+      "autoload/HandManager.gd",
+      "autoload/Scripts.gd",
+      "autoload/Signals.gd",
+      "autoload/StatsHandler.gd",
+      "data/CardPlayRequest.gd",
+      "data/SerializableData.gd",
+      "data/prototype/CardData.gd",
+      "data/prototype/EnemyData.gd",
+      "data/prototype/PlayerData.gd",
+      "data/readonly/CharacterData.gd",
+      "data/readonly/EventData.gd",
+      "data/readonly/StatusEffectData.gd",
+      "data/readonly/embedded/EnemyIntentData.gd",
+      "external/data/mod_info.json",
+      "project.godot",
+      "scenes/Root.tscn",
+      "scripts/Root.gd",
+      "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+      "scripts/action_interceptors/InterceptorDuplicateAttacks.gd",
+      "scripts/action_interceptors/InterceptorDuplicateCardPlays.gd",
+      "scripts/action_interceptors/InterceptorVulnerable.gd",
+      "scripts/actions/BaseAction.gd",
+      "scripts/actions/BaseAsyncAction.gd",
+      "scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+      "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+      "scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd",
+      "scripts/actions/combatant_actions/player_actions/ActionDraw.gd",
+      "scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd",
+      "scripts/combatants/BaseCombatant.gd",
+      "scripts/combatants/Enemy.gd",
+      "scripts/combatants/Player.gd",
+      "scripts/ui/Combat.gd",
+      "scripts/ui/CombatEndTurn.gd",
+      "scripts/ui/CombatEndTurn.gd.uid",
+      "scripts/ui/EnemyContainer.gd",
+      "scripts/ui/Hand.gd",
+      "scripts/ui/Map.gd",
+      "scripts/ui/TurnOverlay.gd",
+      "scripts/ui/menus/BaseMenu.gd",
+      "scripts/ui/menus/NewRunMenu.gd",
+      "scripts/validators/ValidatorEnemyAttacking.gd"
+    ]
+  },
+  "historical_baseline": false,
+  "source_hashes": {
+    "PackScenario": [
+      {
+        "path": "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+        "sha256": "C314210C1AACDBA4C63F82A7746690288F4E29E96C658CCD2A045E0679C2BC7E"
+      },
+      {
+        "path": "scripts/actions/BaseAsyncAction.gd",
+        "sha256": "0CBEFC4C9A9561E7809A467DFAF2D5AECDB349830323A71808CF1E301076275C"
+      },
+      {
+        "path": "autoload/ActionHandler.gd",
+        "sha256": "A0E22D0BF70014B98C3307D2B763B9C0F8E17AC0EC5F0DC440C393568A7A409B"
+      },
+      {
+        "path": "scripts/Root.gd",
+        "sha256": "03FEE2E393DA424296CF88DE403CB433536DB1C108D9D97E77890DC826A6EF3F"
+      },
+      {
+        "path": "scripts/ui/menus/BaseMenu.gd",
+        "sha256": "1AF391904595C33588B2D541F357FE1E86131DC1BBEB6F54DD240AB7ADE5BB4D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+        "sha256": "EE53DDB21F5B10BCD45EFBC3D6A3E49C3B35475C17E61B1F9F3E0743EADBF167"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+        "sha256": "ED39FAA0837C4FD564DA345775154CE85F89A928272623E6DEB0E7BFFDDAE598"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+        "sha256": "3B17626C233ED8EFED25A165F8F167E9173C6E8E12149A04F3C03A80234AC7FE"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+        "sha256": "EA60CFE6B7CDDD55B48D212D20E33E0E6C612C8FD5626679DF960666E1F7B96D"
+      },
+      {
+        "path": "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+        "sha256": "826E07C2B1B5270C9E5323889CA18728412F3D3F8714AB0C041167B468F48D68"
+      },
+      {
+        "path": "scripts/ui/Map.gd",
+        "sha256": "52FAD3AFC4EEB624025FB8B6D50DDDC12F2F9C2E7527C9E9C84EB40C1A51A906"
+      },
+      {
+        "path": "autoload/FileLoader.gd",
+        "sha256": "07B78A858EFFBBC51D7589598FF03B6CC22FB8B50B3576C663FF33E6BDE4C96A"
+      },
+      {
+        "path": "data/SerializableData.gd",
+        "sha256": "CAE8AED03DFBF6CD4E2F6973E23A3186A03229F5961A48BD4049855704925BE5"
+      },
+      {
+        "path": "autoload/Global.gd",
+        "sha256": "2E46DA7B80F5B470540084B00D42E7831C362CAD9D3E29F3AD2297A832315454"
+      },
+      {
+        "path": "scripts/ui/menus/NewRunMenu.gd",
+        "sha256": "310A69F2F18F8ADFC236DA16F3507484FAFBEE13B7800A676BDA0D0C25C6DF4A"
+      },
+      {
+        "path": "scripts/combat/CombatDirector.gd",
+        "sha256": "EB35E08CBEB4CEAFF67DF13B198F382834BD3D2B281868D38062E0A1F2E993FC"
+      },
+      {
+        "path": "scripts/combat/BoardController.gd",
+        "sha256": "CA9375273CFE00CDE09230B66D8AF47832A36F35C361658B12C7538061950A70"
+      },
+      {
+        "path": "scripts/combat/UnitSpawner.gd",
+        "sha256": "890F1AA572D47C2C98C436C17CDE73615C3195280BD4388A74FE6E9A0ED9C79A"
+      },
+      {
+        "path": "scripts/combat/CombatActionPhases.gd",
+        "sha256": "46CE108D8922C0BF21B0787D3C27F2360CF7E21873E123009701222DFEF7F181"
+      },
+      {
+        "path": "scripts/combat/board/CombatBattlefield.gd",
+        "sha256": "189334732B05FB02C0E5532B116101F2DDEB1BB1962A8B7CE11D73F3934E879C"
+      },
+      {
+        "path": "scripts/combat/board/BoardPosition.gd",
+        "sha256": "BA6ADF16AA8516D2B63A331C174345339AA67E861C2D6A54EDE9CEBEE7A88F38"
+      },
+      {
+        "path": "scripts/combat/board/CrossBoardPolicy.gd",
+        "sha256": "02122C2D04D3C89856216C0F018846DCC94DE3983F7CE78A0B917A6FEBA4FF19"
+      },
+      {
+        "path": "scripts/combat/board/BoardData.gd",
+        "sha256": "6B31AC0D3C997CD1E02E376D3E6AE4B852EF2C011BE85C3BF6E33CFE82C05F89"
+      },
+      {
+        "path": "scripts/combat/board/BoardPathfinding.gd",
+        "sha256": "12C91CE25865A252250DFEA1078303740980CBCD8712655D924FFC49228AAD85"
+      },
+      {
+        "path": "scripts/combat/board/BoardMovementState.gd",
+        "sha256": "A1B9098F076780E7F837C7EADD36FAFC8FB0D84574A5453632344B5F9BE59CA2"
+      },
+      {
+        "path": "scripts/combat/board/FieldController.gd",
+        "sha256": "E8429B28944AC424BC035F9F172FD6B49DE31C8D7A4A898977FB829957C03E03"
+      },
+      {
+        "path": "scripts/combat/board/FieldEventAction.gd",
+        "sha256": "E4D56CE9E41310524AA24CF61D6B9795910DAD00B0B05720CE29E8DDADE2C243"
+      },
+      {
+        "path": "scripts/combat/board/FieldPreview.gd",
+        "sha256": "BBB0A9B20FED89877E6AD01A9B560AFF88A3299EE4AF3096552C7B88CA20834D"
+      },
+      {
+        "path": "scripts/ui/BoardActorPresentation.gd",
+        "sha256": "CDC799F9219138BCEDE89BA4211E99A7C37B624F6AF3B46A376437BE4FA845F5"
+      },
+      {
+        "path": "scripts/ui/BoardView.gd",
+        "sha256": "953F48235B85230B59496C3F7DB1E0F3BBFF6B901F4298461BAD1861F8914750"
+      },
+      {
+        "path": "scripts/ui/Hand.gd",
+        "sha256": "E296418C1AB7B88732533C7DBB4A92A2009932DCACB4A3228EA618E71C197108"
+      },
+      {
+        "path": "autoload/HandManager.gd",
+        "sha256": "F95BC5CB9C3411E5826F5D00F39422BDB5B8BDCB4D291E80E36F1C6DB06894C1"
+      },
+      {
+        "path": "scripts/actions/BaseAction.gd",
+        "sha256": "3DFA4AFFF87B319202E3CDB47C03C93CE400D425186FC5B83487927443739ED8"
+      }
+    ]
+  },
+  "test_hashes": {
+    "PackScenario": [
+      {
+        "path": "board_cases.gd",
+        "sha256": "F293A2D1703D3436B32F98CEEF5CBC87BEBCF52BF7B38ECF62B2A07E7092B18D"
+      },
+      {
+        "path": "board_fixture.gd",
+        "sha256": "16965EE5984D5933C7B32C76AF5F616A2F76E506BD936B16232D8C1FB0FC720C"
+      },
+      {
+        "path": "board_flow.gd",
+        "sha256": "C5E70CE4647E39D049CF5728551158F4D90977990F35DC008455B97F5AA1BE34"
+      },
+      {
+        "path": "boardless_campaign.gd",
+        "sha256": "0D49BABDEF986EE71BA97EF855DDC166A9A95F9EC81299B0DC8F9639C7D7F030"
+      },
+      {
+        "path": "boardless_card_cases.gd",
+        "sha256": "EBF977435D3E2EDFFE95F77CBEBD78F35BA50E32DF1E9FDAFF3569644292BB75"
+      },
+      {
+        "path": "boardless_delay.gd",
+        "sha256": "F82A3E06799EFFCACFEF3AC0B7A2FE79D2ECC216401A713E711681EF0BD8CDA1"
+      },
+      {
+        "path": "boardless_fixture.gd",
+        "sha256": "9B4B39E4B506BACD1305A99B4DFBED38426C6EDA55DD8A4FF71E902160D2081A"
+      },
+      {
+        "path": "boardless_flow.gd",
+        "sha256": "92A2539B7E9760643EEB1824C1DAB8D93B5A83C6332F4312D8748AC55197D14C"
+      },
+      {
+        "path": "boardless_intent_cases.gd",
+        "sha256": "E2BAC4BC8CD3CC2E80335F22A7A8A9B2157A1B0DD406697E4DA7FB3783C412E0"
+      },
+      {
+        "path": "boardless_wave_cases.gd",
+        "sha256": "DA422E2AA2AD5376FC67A122F26535FA840E39B9C2979A1212B1E87F0D3775F0"
+      },
+      {
+        "path": "combat_fixture.gd",
+        "sha256": "FFA1ABF1E5FAAFEB45C6E5982C10ADD4FD8E02ED69F45A5A896166ACB4CA8A4B"
+      },
+      {
+        "path": "combat_flow.gd",
+        "sha256": "E2E583444FDC0B0524ED3DAC081260B885DBD7E9B646EED0B27BFD9DA95B6223"
+      },
+      {
+        "path": "ctb_fixture.gd",
+        "sha256": "60196398068C909B3D9BDA5F439AD408409A303868687ECA0124F86F0A78141B"
+      },
+      {
+        "path": "ctb_flow.gd",
+        "sha256": "3A524CD4F67CAACB7E96EE7D49096FCCE1EF76A90C230951BC1DA19DB26FE33F"
+      },
+      {
+        "path": "dictionary_regression.gd",
+        "sha256": "F6F7B0D303107F0E000276F828257EFBFEB3936BD9E8D3782C9E9784DDD4947E"
+      },
+      {
+        "path": "dual_board_adapter_cases.gd",
+        "sha256": "A049B3196D2D95E1A29AD04E02A3E9CD51F01ED323BED40D025F3A4AE34E348F"
+      },
+      {
+        "path": "dual_board_atomic_cases.gd",
+        "sha256": "F2E4E8017346AFB89119DD4F543755CAC63E7CBF0411A0B6ECF834069188C12C"
+      },
+      {
+        "path": "dual_board_cases.gd",
+        "sha256": "2C406FF7B4CC8F56E55614E35DF18E5B0DDD1684ED608EF27731ECECA748CFBD"
+      },
+      {
+        "path": "dual_board_clock_equivalence_cases.gd",
+        "sha256": "915EE46FBEC087629D292F901A5BDBDD7A5C78041E09BA39C529CF44C35CA602"
+      },
+      {
+        "path": "dual_board_duplicate_cases.gd",
+        "sha256": "66E7A13F3FA1B10BABC1A5FBA51E95421D4991ABAA9C1BF30198996C94519560"
+      },
+      {
+        "path": "dual_board_failing_board.gd",
+        "sha256": "AF7DBA12A6F1638AA0B6E5FF34B7470012E6CC51027CB898B88DCF215B0F1B50"
+      },
+      {
+        "path": "dual_board_field_cases.gd",
+        "sha256": "45F03EFC6242294B43FDEBCFA3D248DCAEED9905461E54DC6F82DEAE2A70C34A"
+      },
+      {
+        "path": "dual_board_fixture.gd",
+        "sha256": "F82100200607122D576885474CB24435FBE34607A585F368134D64894AE7FCE7"
+      },
+      {
+        "path": "dual_board_flow.gd",
+        "sha256": "4CBA4CDE8E0DF28E0B41A578B28215B5EC3529583CD8E0D7538CE41673DC7B66"
+      },
+      {
+        "path": "dual_board_intent_reaction_cases.gd",
+        "sha256": "D00AB6E19AF28F8A84DDAB2BCD29B2BF40DB74A58A29C8617BF3B538C72DD2CB"
+      },
+      {
+        "path": "dual_board_lifetime_cases.gd",
+        "sha256": "6BAC0950636F97884EF1D3A806C10AD2043734A68725CBCFE67C0524A05479C7"
+      },
+      {
+        "path": "dual_board_policy_cases.gd",
+        "sha256": "8C6DC8473456874B75961D3DED6063588456B65E2D3055591789FCBFD644095A"
+      },
+      {
+        "path": "dual_board_presentation_cases.gd",
+        "sha256": "91462C159E561885E5B91D4E7937E90F13BB4A136FDF85863E8DAA8891009CC8"
+      },
+      {
+        "path": "dual_board_transfer_cases.gd",
+        "sha256": "443EB9574E0196876931E12D51B62AA0B18D63D498A4FE81621494A9AC0A68BB"
+      },
+      {
+        "path": "dual_board_wave_cases.gd",
+        "sha256": "55F23A6EE354BFAEEB6603CAE5674C96D10EB363167B11E654C2428AEAF5A06A"
+      },
+      {
+        "path": "field_action_cases.gd",
+        "sha256": "4C42A9FF3A65F081A823695E9B6113861C808BC6E3745B118C12DAB7B236EBC0"
+      },
+      {
+        "path": "field_cases.gd",
+        "sha256": "8C05DD13232AB0796F424A0A619828D7C65FE516B184ACC9F497669943832F23"
+      },
+      {
+        "path": "field_clock_cases.gd",
+        "sha256": "03E72623FE8DF4CC2FC12339C91213FD0632477C0DF0677B6665718D69DAC412"
+      },
+      {
+        "path": "field_fixture.gd",
+        "sha256": "3C5802313E64427483BBA45890F10663ADA665CE9AB30F93DC171FA26E7A33A9"
+      },
+      {
+        "path": "field_flow.gd",
+        "sha256": "F7DC41794D64553CD3DA1DC09D67329A39E751FF7FB0FCB272DDC4EE205A5973"
+      },
+      {
+        "path": "field_intent_cases.gd",
+        "sha256": "36BB6793748950FAF7749601FA4B13BEE435085C5DA18FC3BEC21BEA4968CB3B"
+      },
+      {
+        "path": "field_lifetime_cases.gd",
+        "sha256": "5BC1B054F764326504A785D320540BAC3B61389BADA7AC6F79D7A635C32B4AF8"
+      },
+      {
+        "path": "field_lifetime_marker.gd",
+        "sha256": "82A81D471355A06FF723CBBCA29931628B84F269660292FEAF288432E024B6A5"
+      },
+      {
+        "path": "field_move_listener.gd",
+        "sha256": "9E6DC7D63099CF29F5BAAEE133F2E3EB70872C570E068210690B48AAF64AECE3"
+      },
+      {
+        "path": "field_movement_cases.gd",
+        "sha256": "44FBFD818B57A94DFEB9E422161EA301B689E742BDCAD64DAE3DF9297CF5DF8D"
+      },
+      {
+        "path": "field_query_cases.gd",
+        "sha256": "611417363940512F2F608E5F15EB6EA5DBA8E40D7BE4BF05D4340377D7B6F2BE"
+      },
+      {
+        "path": "field_reaction_cases.gd",
+        "sha256": "452FA08C203E941B02FA886BDF008B660207F671B35ED0437C18BC00AA71B885"
+      },
+      {
+        "path": "field_trace_action.gd",
+        "sha256": "8C51D3B4529D01231F4E248869EDAEA9994379D88FC1DF52E02E73380573744E"
+      },
+      {
+        "path": "file_loader_probe.gd",
+        "sha256": "F7050BA1C6E9ABC4F79BA2AECD1AD12D4D18C760611CE2C34A76AC185001E623"
+      },
+      {
+        "path": "framework_smoke.gd",
+        "sha256": "81E0DA0CA33BE6848DB7E3E3995D614DD8EAEC8698EAB86A93D109FBEEC5AAA4"
+      },
+      {
+        "path": "ordered_action_cases.gd",
+        "sha256": "05707EA5530B2BFC12A8B9F29FE5D5C0B777B5B4F7D959CC6437C6F7F328EAEC"
+      },
+      {
+        "path": "resource_lifecycle.gd",
+        "sha256": "35C82184A301650E81630E800E49C0D8040241CAB7B62F80D1A3F81EB55DB1E7"
+      },
+      {
+        "path": "resource_lifecycle_cases.gd",
+        "sha256": "A8310D08312B80D695D82908BE8A4130FA5C28F3181DC9E860B57BE3E0D7D30D"
+      },
+      {
+        "path": "resource_lifecycle_child.gd",
+        "sha256": "47686B92220B95AB599473198FB74E2EAF3B130AF6E5AE1F5712C76D7F2FD3E8"
+      },
+      {
+        "path": "resource_lifecycle_creation.gd",
+        "sha256": "BF77A05B6FE9BA875D42AF72C1194F7B642759E8CD871C513078EA71F8B985ED"
+      },
+      {
+        "path": "resource_lifecycle_interceptor.gd",
+        "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
+      },
+      {
+        "path": "run_start_preflight_probe.gd",
+        "sha256": "D53BED7BF1765F4FF29057323381AB26DE388BC03C4CAF0F8876F444EE587F6A"
+      },
+      {
+        "path": "save_load_flow.gd",
+        "sha256": "7394631246113C3F4ACA5B0B1B14A90ABA7FABE9301439922B774290687C6E74"
+      },
+      {
+        "path": "unit_registry_probe.gd",
+        "sha256": "66722C1C86B6C8128B355619949AF7E73150A96440BDA10234E76A54CA85B1C7"
+      },
+      {
+        "path": "wave_cases.gd",
+        "sha256": "5E752D76F88C8D19EE147A5A2681DC2946F8932A290CA007E4324D37E060E128"
+      },
+      {
+        "path": "wave_fixture.gd",
+        "sha256": "7674C83FC377BC83852605D81A61E2C2D5B19A07E6CA13ACDD159FB747D175DA"
+      },
+      {
+        "path": "wave_flow.gd",
+        "sha256": "45B3988AB183862131642F02FE927DE01E5E08E35A66F0A60992B1A28332319A"
+      }
+    ]
+  },
+  "engine": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+  "completed": true,
+  "results": [
+    {
+      "name": "version",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 29432,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T03:43:35.784119Z",
+      "ended_utc": "2026-10-20T03:43:35.846149Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 0.07,
+      "command_arguments": [
+        "--headless",
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\version.log",
+        "--version"
+      ],
+      "engine_version": "4.7.2.stable.mono.official.ed1daf0bf",
+      "engine_version_accepted": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "import",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 7768,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T03:43:38.039856Z",
+      "ended_utc": "2026-10-20T03:44:14.959875Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 36.93,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\import.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\game",
+        "--editor",
+        "--import"
+      ],
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "scenario-write",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 35952,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T03:44:14.989604Z",
+      "ended_utc": "2026-10-20T03:44:38.547069Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 23.58,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\scenario-write.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\game",
+        "--script",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\game\\pack_tests\\scenario.gd",
+        "--",
+        "--content-profile=pack",
+        "--scenario-phase=write"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "scenario-read",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 31716,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T03:44:38.564198Z",
+      "ended_utc": "2026-10-20T03:44:59.790158Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 21.24,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\scenario-read.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\game",
+        "--script",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\game\\pack_tests\\scenario.gd",
+        "--",
+        "--content-profile=pack",
+        "--scenario-phase=read"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    },
+    {
+      "name": "scenario-defeat",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario",
+      "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "launched_pid": 28184,
+      "launched_pid_kind": "console_wrapper",
+      "started_utc": "2026-10-20T03:44:59.803828Z",
+      "ended_utc": "2026-10-20T03:46:15.335239Z",
+      "status": "passed",
+      "exit_code": 0,
+      "exit_code_hex": "0x00000000",
+      "exit_code_raw": 0,
+      "exit_signal": null,
+      "timed_out": false,
+      "passed": true,
+      "native_crash_signatures": [],
+      "cold_cache_uid_requires_recheck": false,
+      "log_write_preflight": "passed",
+      "shutdown_resources": [],
+      "seconds": 75.54,
+      "command_arguments": [
+        "--log-file",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\scenario-defeat.log",
+        "--headless",
+        "--path",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\game",
+        "--script",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\PackScenario\\game\\pack_tests\\scenario.gd",
+        "--",
+        "--content-profile=pack",
+        "--scenario-phase=defeat"
+      ],
+      "marker_found": true,
+      "objectdb_leak": false,
+      "unexpected_error_lines": []
+    }
+  ],
+  "runner": {
+    "name": "test_game.py",
+    "version": "1.0.0",
+    "python": "3.13.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "os": "nt"
+  },
+  "engine_discovery": {
+    "method": "explicit",
+    "located": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+    "candidates_considered": []
+  },
+  "engine_policy": {
+    "accepted_version_patterns": [
+      "^4\\.7\\."
+    ],
+    "source": "tools/upstream.json engine_policy",
+    "baseline": "4.7"
+  },
+  "isolation": {
+    "removed": [],
+    "overrides": {
+      "APPDATA": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\appdata\\Roaming",
+      "LOCALAPPDATA": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\appdata\\Local",
+      "TEMP": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\appdata\\Temp",
+      "TMP": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\appdata\\Temp"
+    },
+    "user_data_root": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\appdata\\Roaming",
+    "appdata_isolated": true,
+    "user_dirs": {
+      "PackScenario": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114335-3af4365d\\appdata\\Roaming\\mycardgame-tests\\20261020-114335-3af4365d\\PackScenario"
+    }
+  },
+  "timeout_seconds": 300,
+  "force_failure": false,
+  "exit_code_semantics": "win32_status",
+  "content_profile": "pack",
+  "packs": {
+    "PackScenario": [
+      {
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\pack",
+        "name": "board_lab",
+        "mod_list_key": "external/mods/board_lab/",
+        "load_priority": 10,
+        "files": [
+          {
+            "path": "acts/demo_act.json",
+            "sha256": "A84A7998DA6A733DCB0962D03AEB4E7D65E85CE95B6823C741DFB1F19FC4A930"
+          },
+          {
+            "path": "animations/demo_animation_enemy.json",
+            "sha256": "DA3CFF9A0DFBEF9193808776CBE975124175DF6CC215235D14FE9BFC2C4F089E"
+          },
+          {
+            "path": "animations/demo_animation_player.json",
+            "sha256": "5C922B4398758FB36D0DCBE0FE30E99A48754307E484E268E1F087E4B6B2E998"
+          },
+          {
+            "path": "card_packs/demo_card_pack.json",
+            "sha256": "8C6B58206AFDA0981CB60C2496DFE78F2DBB6D0D2FD3731D40DDA0D8BFCCFEAA"
+          },
+          {
+            "path": "cards/demo_cross_step.json",
+            "sha256": "D839F67977EA395E6F69CAC003A585141FF345488635D436BB521FB57CA3ADC3"
+          },
+          {
+            "path": "cards/demo_field.json",
+            "sha256": "0924BBF9D4DBA796EF694E8B36AB57A12CCC7BEB327367BA2F4ADE31D6E17881"
+          },
+          {
+            "path": "cards/demo_guard.json",
+            "sha256": "DD037DDA5FAF61F1C192CCB4E291AF7C86344DEF57500846D7F1F8641281925E"
+          },
+          {
+            "path": "cards/demo_pulse.json",
+            "sha256": "AD7FF37A42E86D4086183717568BFC0970A88E100963B4E01F2FCB032D087144"
+          },
+          {
+            "path": "cards/demo_push.json",
+            "sha256": "DE017DE8C22F2AD72053337649D8F05CDE2DCC3A1CC949076529FAC92B44374F"
+          },
+          {
+            "path": "cards/demo_strike.json",
+            "sha256": "F0961C448A47C8B894ED688730108AB1A9344483180CFCED5016250871976FD5"
+          },
+          {
+            "path": "cards/demo_swap.json",
+            "sha256": "47FD780199ECF520DF83AD740286D023036F188FE22A790DDC9DDEB40FDF5D64"
+          },
+          {
+            "path": "characters/demo_character.json",
+            "sha256": "1C6D2405505FBB5FD42CDA5F82A06A4C72E7FB9A490225BDDE024BB846559A34"
+          },
+          {
+            "path": "colors/demo_color.json",
+            "sha256": "3E258DBEA527754A92E272EAF9C0959C0363F7922B903716BBA483999D9A345E"
+          },
+          {
+            "path": "combat_rules/combat_rules_default.json",
+            "sha256": "BFFED1962777142420E898497C2DD3DAC1F17342EAAD3FDB53485EC9B63C8563"
+          },
+          {
+            "path": "encounters/demo_encounter_entry.json",
+            "sha256": "99F102213FD2149C086721F6F1A19480D4BE85AB3F34A228035963B435191DD3"
+          },
+          {
+            "path": "encounters/demo_encounter_field.json",
+            "sha256": "3084C1B75BE9DDC2AF4AC16386252F51A3ABC46ED01B40363772E3C4814B4B59"
+          },
+          {
+            "path": "encounters/demo_encounter_final.json",
+            "sha256": "1D5528547C6C9A146EF10B2A06A75BB3C8E3D7E4190B4B0268D3DACC169573BF"
+          },
+          {
+            "path": "encounters/README.md",
+            "sha256": "80A4667C2D5E39077AE971F055A6117C85CB2BD7515C8ED645E9B1CE5BEA0D25"
+          },
+          {
+            "path": "enemies/demo_enemy_anchor.json",
+            "sha256": "EEFCB133444832D8F02D55707987783899BB95019DA95F5015C5A8B84F0D56FC"
+          },
+          {
+            "path": "enemies/demo_enemy_sentry.json",
+            "sha256": "0F0AFE5BBF4C63D867758F63BF578FC41A1CFCDAB35704A181AF53C5E09A29D8"
+          },
+          {
+            "path": "enemies/demo_enemy_walker.json",
+            "sha256": "73B6973DBD82673F6B81B70DB746BF9DF7E05AD6D10F0CB12E999431A29C6FB0"
+          },
+          {
+            "path": "enemies/demo_enemy_warden.json",
+            "sha256": "D1CF4278DB504C550676FC888CA51F968E19CD0DE96F9AD62A285F020688ECC8"
+          },
+          {
+            "path": "enemies/README.md",
+            "sha256": "7F763F800FB54D599FEEC342B54B5B26B2E63CB2D38F44CAC29AAB1BAA01C5B4"
+          },
+          {
+            "path": "event_pools/demo_pool_entry.json",
+            "sha256": "370C5504C933311C2192AA14C9913F32284DDDA8DEA5E111F605914FE3BEEAA6"
+          },
+          {
+            "path": "event_pools/demo_pool_field.json",
+            "sha256": "69FCA21AC07407DC1EAAD512952D3A585E93B2C98AB97B94F039BE5C8509522D"
+          },
+          {
+            "path": "event_pools/demo_pool_final.json",
+            "sha256": "DC4781559FB11F4D320FD337C786F72C3D311DAB28ED07CD6109CCD2D2B050E3"
+          },
+          {
+            "path": "event_pools/README.md",
+            "sha256": "BBCF5B39CF3677DBE793A69E51215D0822E0D4526164550362393C1C0F194F58"
+          },
+          {
+            "path": "events/demo_event_entry.json",
+            "sha256": "325B5EE19FEA05832513CCD27B318DBAC77C784009577E9B0BDE8DD5BFAFAA6F"
+          },
+          {
+            "path": "events/demo_event_field.json",
+            "sha256": "10D1A01EF99B39C12687F0516AB85DD3E5A41DF891703AA4437409B898F55B2C"
+          },
+          {
+            "path": "events/demo_event_final.json",
+            "sha256": "F491FEEC592C947511179B85ADB1869B1F10D43D2A9EC931CA056E82012F0FC1"
+          },
+          {
+            "path": "events/README.md",
+            "sha256": "165663703CE1B8A06B7ECC7F87F0B569E195F2050B339D27946CAC2B3D69FA76"
+          },
+          {
+            "path": "fields/demo_hazard.json",
+            "sha256": "E7F9D82E7C0D2344E0B0B0C989AFF71C7CD9D54035C8559D38B43EDAA2B2FCF4"
+          },
+          {
+            "path": "keywords/demo_keyword_boards.json",
+            "sha256": "224DD798D9031BE592BE149BF8D157F22C2103F89DB1C19EA9525E7743833822"
+          },
+          {
+            "path": "keywords/demo_keyword_field.json",
+            "sha256": "5802C9FE777F0BEF98D0B892C1E9EEE66ABC8416F9E257B1CF170AEA0FB6D814"
+          },
+          {
+            "path": "keywords/demo_keyword_zoc.json",
+            "sha256": "64D78142BD45901C318F74E143B43BA1488CB15C86A77024F1F2B6FDE62A4631"
+          },
+          {
+            "path": "mod_info.json",
+            "sha256": "195A9DBE1759A5D230750D02B3D34F94DFC6447951D599C0AAB2636755CFC888"
+          },
+          {
+            "path": "players/demo_player.json",
+            "sha256": "798E080133AEE5F37BE8940A89355928309AC4F613A701C7C568EBAA75ACF443"
+          },
+          {
+            "path": "run_start_options/demo_start.json",
+            "sha256": "DBFECB5F7DA24AF42E2757FA262FBC4C4E776F1708A9D54FFA249FE883F47360"
+          },
+          {
+            "path": "scripts/ActionGenerateBoardLab.gd",
+            "sha256": "246CA706E84594E2138F9B59D0E7F037C3A8CB6B9D4754CD26EE22B3F09518A6"
+          }
+        ],
+        "skipped": []
+      }
+    ]
+  },
+  "pack_test_hashes": {
+    "PackScenario": [
+      {
+        "path": "board_lab_probe.gd",
+        "sha256": "2F237DA4ACBAAEF5C4922B28913F603D6CD19B393A09FFA8F9F367892EC0C864",
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\board_lab_probe.gd"
+      },
+      {
+        "path": "scenario.gd",
+        "sha256": "A8FD910991A4FF6A3B7F44C1634F3EB72156396FB59376776A1D8A867DCEDD1C",
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario.gd"
+      },
+      {
+        "path": "scenario.json",
+        "sha256": "F9CAAC44A819054002525AAF224F55F754B21402FDADF1E6C27F49450FC70CA7",
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario.json"
+      },
+      {
+        "path": "scenario_campaign.gd",
+        "sha256": "288C72B57135B64B299CE371B0D3233E617701230A0D98F8BB0C76E2787DB88B",
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario_campaign.gd"
+      },
+      {
+        "path": "scenario_input_cases.gd",
+        "sha256": "0FD50080BF9F8189D7F4D72B9294255CC6BB183B6AC53D0F7121B2AF98498B9F",
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario_input_cases.gd"
+      },
+      {
+        "path": "scenario_lessons.gd",
+        "sha256": "D4992C0FA214158D8AC7FC367699DBD0D24364027B7D1562973EB7E950E3A11C",
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario_lessons.gd"
+      },
+      {
+        "path": "scenario_ui.gd",
+        "sha256": "63F5541227C58379710BA802FC70A716FE2C0CC59F98717D1268B4AE290E12A3",
+        "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario_ui.gd"
+      }
+    ]
+  },
+  "pack_scenario": {
+    "schema": "pack-scenario/1",
+    "entry": "scenario.gd",
+    "phases": [
+      "write",
+      "read",
+      "defeat"
+    ],
+    "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario.json",
+    "files": [
+      {
+        "path": "board_lab_probe.gd",
+        "sha256": "2F237DA4ACBAAEF5C4922B28913F603D6CD19B393A09FFA8F9F367892EC0C864"
+      },
+      {
+        "path": "scenario.gd",
+        "sha256": "A8FD910991A4FF6A3B7F44C1634F3EB72156396FB59376776A1D8A867DCEDD1C"
+      },
+      {
+        "path": "scenario.json",
+        "sha256": "F9CAAC44A819054002525AAF224F55F754B21402FDADF1E6C27F49450FC70CA7"
+      },
+      {
+        "path": "scenario_campaign.gd",
+        "sha256": "288C72B57135B64B299CE371B0D3233E617701230A0D98F8BB0C76E2787DB88B"
+      },
+      {
+        "path": "scenario_input_cases.gd",
+        "sha256": "0FD50080BF9F8189D7F4D72B9294255CC6BB183B6AC53D0F7121B2AF98498B9F"
+      },
+      {
+        "path": "scenario_lessons.gd",
+        "sha256": "D4992C0FA214158D8AC7FC367699DBD0D24364027B7D1562973EB7E950E3A11C"
+      },
+      {
+        "path": "scenario_ui.gd",
+        "sha256": "63F5541227C58379710BA802FC70A716FE2C0CC59F98717D1268B4AE290E12A3"
+      }
+    ]
+  },
+  "engine_version": "4.7.2.stable.mono.official.ed1daf0bf",
+  "source_changes": [
+    "autoload/ActionGenerator.gd",
+    "autoload/ActionHandler.gd",
+    "autoload/FileLoader.gd",
+    "autoload/Global.gd",
+    "autoload/GlobalTestDataGenerator.gd",
+    "autoload/HandManager.gd",
+    "autoload/Scripts.gd",
+    "autoload/Signals.gd",
+    "autoload/StatsHandler.gd",
+    "data/CardPlayRequest.gd",
+    "data/SerializableData.gd",
+    "data/prototype/CardData.gd",
+    "data/prototype/EnemyData.gd",
+    "data/prototype/PlayerData.gd",
+    "data/readonly/CharacterData.gd",
+    "data/readonly/EventData.gd",
+    "data/readonly/StatusEffectData.gd",
+    "data/readonly/embedded/EnemyIntentData.gd",
+    "external/data/mod_info.json",
+    "project.godot",
+    "scenes/Root.tscn",
+    "scripts/Root.gd",
+    "scripts/action_interceptors/ActionInterceptorProcessor.gd",
+    "scripts/action_interceptors/InterceptorDuplicateAttacks.gd",
+    "scripts/action_interceptors/InterceptorDuplicateCardPlays.gd",
+    "scripts/action_interceptors/InterceptorVulnerable.gd",
+    "scripts/actions/BaseAction.gd",
+    "scripts/actions/BaseAsyncAction.gd",
+    "scripts/actions/card_actions/cardset_actions/ActionAddCardsToHand.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionBasePickCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionCreateCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickDuplicateCards.gd",
+    "scripts/actions/card_actions/pick_card_actions/ActionPickUpgradeCards.gd",
+    "scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd",
+    "scripts/actions/combatant_actions/player_actions/ActionDraw.gd",
+    "scripts/actions/combatant_actions/player_actions/ActionEndTurn.gd",
+    "scripts/combatants/BaseCombatant.gd",
+    "scripts/combatants/Enemy.gd",
+    "scripts/combatants/Player.gd",
+    "scripts/ui/Combat.gd",
+    "scripts/ui/CombatEndTurn.gd",
+    "scripts/ui/CombatEndTurn.gd.uid",
+    "scripts/ui/EnemyContainer.gd",
+    "scripts/ui/Hand.gd",
+    "scripts/ui/Map.gd",
+    "scripts/ui/TurnOverlay.gd",
+    "scripts/ui/menus/BaseMenu.gd",
+    "scripts/ui/menus/NewRunMenu.gd",
+    "scripts/validators/ValidatorEnemyAttacking.gd"
+  ],
+  "copy_exclusions": {
+    "PackScenario": {
+      "dirs": 3,
+      "files": 2,
+      "links": 0
+    }
+  },
+  "known_shutdown_issues": false,
+  "verdict": "PASS"
+}

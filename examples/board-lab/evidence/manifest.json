@@ -1,0 +1,114 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-20",
+ "link_columns": [
+  "published_path"
+ ],
+ "redaction_rules": {
+  "PROJECT_ROOT": "project prefix",
+  "USER_PROFILE": "user home prefix"
+ },
+ "columns": [
+  "id",
+  "raw_artifact",
+  "published_path",
+  "raw_sha256",
+  "published_sha256",
+  "raw_bytes",
+  "published_bytes",
+  "transformation"
+ ],
+ "rows": [
+  {
+   "id": "standalone-results.json",
+   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/results.json",
+   "published_path": "standalone-results.json",
+   "raw_sha256": "113d00cabcbfa16ba2d26257e85590bea7a53cfa4a1754aaf3172d920c1caedc",
+   "published_sha256": "dd46789b1bb4d99c12c9b8bf7467fa9782714f94a7039281d222efb71bf7dc88",
+   "raw_bytes": 37217,
+   "published_bytes": 36726,
+   "transformation": "JSON UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "prepared-results.json",
+   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/results.json",
+   "published_path": "prepared-results.json",
+   "raw_sha256": "ece7f54fcd8dcca4ac36bd603c2879e80e2558d097a00b436809ea24fd12a26b",
+   "published_sha256": "526ed30e0a3e69374a2a17d2f979303681562c18578420bb9abfb571180a46d9",
+   "raw_bytes": 276294,
+   "published_bytes": 35569,
+   "transformation": "explicit summary; only embedded preparation source/output ledgers condensed; runtime phases retained; JSON UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "prepare-summary.json",
+   "raw_artifact": "artifacts/playable/1aa7d00bb8534aff9ef57ec9068aca85/manifest.json",
+   "published_path": "prepare-summary.json",
+   "raw_sha256": "204db408084c6c8a07937ba0583a777c683329b64006f2c4867640b87c3fb383",
+   "published_sha256": "0b0b5a3f7b7ac532084f01f4d670100ee13b9971fc0a1f1b8468f45e55a96e04",
+   "raw_bytes": 243636,
+   "published_bytes": 5134,
+   "transformation": "explicit summary; full framework ledgers replaced by count and canonical digest; installed pack hashes retained; JSON UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "standalone-PackScenario-scenario-write.log",
+   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/PackScenario/scenario-write.log",
+   "published_path": "standalone/PackScenario/scenario-write.log",
+   "raw_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
+   "published_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
+   "raw_bytes": 12321,
+   "published_bytes": 12321,
+   "transformation": "UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "standalone-PackScenario-scenario-read.log",
+   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/PackScenario/scenario-read.log",
+   "published_path": "standalone/PackScenario/scenario-read.log",
+   "raw_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
+   "published_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
+   "raw_bytes": 12050,
+   "published_bytes": 12050,
+   "transformation": "UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "standalone-PackScenario-scenario-defeat.log",
+   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/PackScenario/scenario-defeat.log",
+   "published_path": "standalone/PackScenario/scenario-defeat.log",
+   "raw_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
+   "published_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
+   "raw_bytes": 10995,
+   "published_bytes": 10995,
+   "transformation": "UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "prepared-PackScenario-scenario-write.log",
+   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-write.log",
+   "published_path": "prepared/PackScenario/scenario-write.log",
+   "raw_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
+   "published_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
+   "raw_bytes": 12321,
+   "published_bytes": 12321,
+   "transformation": "UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "prepared-PackScenario-scenario-read.log",
+   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-read.log",
+   "published_path": "prepared/PackScenario/scenario-read.log",
+   "raw_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
+   "published_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
+   "raw_bytes": 12050,
+   "published_bytes": 12050,
+   "transformation": "UTF-8 LF; path-prefix-redaction"
+  },
+  {
+   "id": "prepared-PackScenario-scenario-defeat.log",
+   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-defeat.log",
+   "published_path": "prepared/PackScenario/scenario-defeat.log",
+   "raw_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
+   "published_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
+   "raw_bytes": 10995,
+   "published_bytes": 10995,
+   "transformation": "UTF-8 LF; path-prefix-redaction"
+  }
+ ]
+}

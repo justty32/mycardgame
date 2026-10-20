@@ -72,6 +72,8 @@ func _run() -> void:
 		_check(_check_example_mod(character) == true, "example_mod probe completed")
 	_run_file_loader_probe(runtime_dir)
 	_run_unit_registry_probe(game_root)
+	if content_profile != global_data.CONTENT_PROFILE_PACK:
+		load(get_script().resource_path.get_base_dir().path_join("run_start_preflight_probe.gd")).new().run(_check)
 	_run_pack_probes()
 	if OS.get_cmdline_user_args().has("--capture"):
 		_check(await _capture_menu() == true, "main menu screenshot saved")

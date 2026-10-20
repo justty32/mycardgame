@@ -24,13 +24,15 @@
 
 從 `intent_initial` 指向第一輪可用意圖，每個可到達狀態寫出傷害×次數、格擋、custom actions、下一狀態權重與預告內容。權重須非負、總和大於零，目標 ID 全部存在；需要停留時明確自迴圈，不用空權重代表「維持原狀」。目前空權重實際回傳 null，不能相信旁邊的停留註解。
 
-敵人在進入時間軸等待時（開戰、生成、每次自身行動後）由 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 呼叫 `Enemy.decide_next_intent()` 切換意圖；輪到它時 `CombatDirector.perform_enemy_intent` 先依意圖的 `enemy_intent_move`（[IntentResolver](../../../game/scripts/combat/board/IntentResolver.gd)，射程／形狀／目標規則）在棋盤上移動，打不到就跳過攻擊並保留意圖，再以 `Enemy.build_intent_actions_data` 組出 stack：重設格擋（依 rules）、加格擋、攻擊、custom actions；custom actions 陣列也受逆序影響。每個敵人自己的行動依序處理 PRE_ENEMY_TURN → PRE_ENEMY_INTENT → 意圖 → POST_ENEMY_INTENT → POST_ENEMY_TURN 狀態；「先上易傷再攻擊」必須測實際次序，不能只看 JSON 排列。
+敵人在進入時間軸等待時（開戰、生成、自身行動後）由 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 呼叫 `Enemy.decide_next_intent()` 切換意圖。EnemyIntentController 依是否掛載 board_module 分派：有模組由 BoardEnemyIntent 處理移動、射程與命中；NONE 走普通 hero／SELF 目標，不查距離或移動。兩路均以 `Enemy.build_intent_actions_data` 組出 stack：重設格擋（依 rules）、加格擋、攻擊、custom actions；custom actions 也受逆序影響。每次行動依序處理 PRE_ENEMY_TURN → PRE_ENEMY_INTENT → 意圖 → POST_ENEMY_INTENT → POST_ENEMY_TURN；「先上易傷再攻擊」須測實際次序。
 
 預告用 attack／attack-generator 的 preview interception 算數字，圖示來自 `enemy_intent_display_types`。custom action 的視覺推導只有部分已知腳本；新腳本須同步描述／圖示契約。純防禦或召喚意圖明確將傷害與攻擊次數設 0。重複預覽前後比較狀態、RNG 與資源，證明預覽不改遊戲；數字斷言不等於玩家已看得懂。
 
 ### 難度與遭遇接線
 
 雙盤／移動意圖另讀 [棋盤意圖核實](../../../analysis/slay-the-robot/design/board-intents.md)。先指定來源與目標的實際 `board_id`，經 BoardTargeting.geometry → CrossBoardPolicy 查詢，不用 faction 推盤，也不把跨盤 A 當零距離。方向型跨盤效果在費用前拒絕，測例須包含 SINGLE 卡內巢狀推拉、request 值覆寫、全域／隨機目標、拒絕時費用與位置不變；只有 UI 拒絕不涵蓋自動／複製出牌。
+
+先驗模組 on/off 邊界：NONE 的普通攻擊、格擋、custom 與音效須保留；NEAREST／FARTHEST 沿 hero，SELF 不計入 hero 來傷。明確棋盤 payload 用 BoardContentPolicy 在排隊前整體拒絕，純 helper 與來傷預覽共用，不能部分執行。有模組但單位缺盤身分必須拒絕，不得退回 NONE。本輪拆分先有靜態契約；新增回歸結果另依整合報告。
 
 移動意圖至少對照預覽與真正 controller 的落點、命中與次序，覆蓋 move_after、rooted、禁閃現格、CHARGE 穿越去重及中途死亡／退出。NEAREST／FARTHEST 只比較同盤距離，無同盤候選按 uid；跨盤 ComputeBoardValue 卡整體拒絕。新自訂 payload 的估值未被標準預覽涵蓋時，另補實作與回歸，不能用數值 0 表示已模擬。此流程來自 2026-10-20 靜態接線核對；實測結果依該輪整合報告。
 

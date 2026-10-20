@@ -28,7 +28,8 @@ var player_block: int = 0 # in combat block. Not saved.
 ### Acts and Location Data
 @export var player_act: int = 1	# the act count the player is currently on
 @export var player_act_max: int = 3	# the number of acts before a victory is considered. -1 means endless run
-@export var player_act_id: String = "act_1"	# the ActData object_id of the act the player is currently on
+## Initial act on the character's prototype; current act once the run has started.
+@export var player_act_id: String = "act_1"
 
 ## LocationData id corresponding to the location in location_id_to_location_data of where the player
 ## is currently located in the act.

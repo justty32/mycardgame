@@ -76,7 +76,7 @@ func _start_combat() -> bool:
 	hand = combat.get_node("Hand")
 	map = game_root.get_node("RunScreen/Map")
 	player = combat.get_node("Player")
-	_check(combat.get_node_or_null("BoardView") != null and not combat.get_node("BoardView").visible, "BoardView exists and is hidden outside combat")
+	_check(combat.board_view == null and combat.board_views.is_empty(), "board presentation is unallocated outside combat")
 	game_root.get_node("TitleScreen/MainMenu/VBoxContainer/NewRunButton").button_up.emit()
 	var menu: Node = game_root.get_node("TitleScreen/NewRunMenu")
 	menu._on_character_selected("character_red")
@@ -117,7 +117,7 @@ func _action_one() -> bool:
 	for cell: Vector2i in [Vector2i(5, 0), Vector2i(6, 0), Vector2i(5, 1), Vector2i(6, 1)]:
 		big_cells = big_cells and board.get_unit_at(cell) == big
 	_check(big_cells and board.get_unit_cells(big).size() == 4, "2x2 enemy occupies 4 cells")
-	_check(combat.get_node("BoardView").visible, "BoardView is visible during combat")
+	_check(is_instance_valid(combat.board_view) and combat.board_view.is_inside_tree() and combat.board_view.visible, "BoardView is visible during combat")
 
 	# 1. free move point, click a cell at distance 1
 	_check(player.move_points == 1, "move 1: hero starts its action with move_points 1 (rules.free_move_per_action)")

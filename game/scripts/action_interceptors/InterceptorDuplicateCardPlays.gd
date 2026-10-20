@@ -21,12 +21,13 @@ func process_action_interception(action_interceptor_processor: ActionInterceptor
 			if status_effect.status_effect_script.status_secondary_charges > 0:
 				# remove a secondary charge
 				parent_combatant.add_status_effect_charges(DUPLICATE_CARD_PLAYS_STATUS_EFFECT_ID, 0, -1)
-				DebugLogger.log_line("Duplicating: ", action_interceptor_processor.parent_action.card_play_request.card_data.card_name)
+				DebugLogger.log_line("Duplicating: " + action_interceptor_processor.parent_action.card_play_request.card_data.card_name)
 				# duplicate the card play
 				var new_card_play_request: CardPlayRequest = HandManager.create_card_play_request(
 					card_play_request.card_data,
 					card_play_request.selected_target,
 					true, true)
+				new_card_play_request.copy_selection_context_from(card_play_request)
 				# NOTE: If you want duplicate plays to DISALLOW card mutations, eg an attack card
 				# does 5 damage but increases damage by 3 after play will just do 5 + 5 instead of 5 + 8
 				# then uncomment out the below line

@@ -1,0 +1,90 @@
+{
+  "upstream_commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
+  "baseline_commit": "9ced42f895344f69defc1ac89bca96319e920ddd",
+  "patch": "tools/patches/optional-board-module.patch",
+  "patch_sha256": "5c02889c919ee0729bb380ee62d40f5cb620303f5a697e46dce799821376d5c3",
+  "patches": [
+    {
+      "path": "tools/patches/framework-fixes.patch",
+      "sha256": "9f0d0eb3245d0d0f1731ccda016a23a55a1d2214fc8941715165aeb2e76a52cf",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/resource-lifecycle.patch",
+      "sha256": "ed27f763e8492d193c03324954d1533c2e9f03aa33a2a7bc115f6a7189610c8c",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/content-profile.patch",
+      "sha256": "bab32741edf84d042ba564d3877dbbd321b3eae09582dc98d4db18a4eabd46a2",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/combat-framework-phase0.patch",
+      "sha256": "465a53f2a159c61feb16d16e426545dbaf815156578cc7e9d9841ccfbf0a4e43",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/combat-framework-phase1.patch",
+      "sha256": "3c58636adf85c4919da0051b74686461e527bb8ca367d8b04ae17c9b5237d359",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/combat-framework-phase2.patch",
+      "sha256": "fcacb75f5f1e601d57ab6bac7cd01ece1c67d6907da4ff1e4eca8a0b29b8fa2f",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/combat-framework-phase3.patch",
+      "sha256": "43dbfc56077667cb839eb26799431998644388afe24463cbdbedf51296e7c068",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/json-data-files.patch",
+      "sha256": "dd61b0ebdfe5c2c9dc8f4b9bc2fb38a578346b0d50eb051eefacc4d9c40981e4",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/godot-4.7-baseline.patch",
+      "sha256": "ee9c8eac590bfa470adbcdf239d88a4069e0e8ad53c86c446d13adc8b2deba65",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/combat-framework-dual-board-fields.patch",
+      "sha256": "b1ea6fbb71cce8982cd49b5e40f43d22a26d6ca6ad3aba9e0130dab3d1c2ccb1",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    },
+    {
+      "path": "tools/patches/optional-board-module.patch",
+      "sha256": "5c02889c919ee0729bb380ee62d40f5cb620303f5a697e46dce799821376d5c3",
+      "apply_check": "PASS",
+      "apply": "PASS"
+    }
+  ],
+  "source_files": 949,
+  "new_source_files": 9,
+  "mismatches": [],
+  "source_drift": [],
+  "deleted_files": [],
+  "excluded_upstream_files": [
+    "external/user_settings.json"
+  ],
+  "exclusion_reason": "external/user_settings.json is pinned upstream user configuration; the published snapshot deliberately excludes personal settings, saves, caches and Git metadata.",
+  "baseline_provenance": "The preceding combat-framework-dual-board-fields.patch reconstructs published 9ced42f. This patch adds the optional board module, generic card adapter and configurable initial Act without changing the engine.",
+  "real_index_unchanged": true,
+  "verification": "Pure source reconstruction only; no engine, desktop, window, keyboard or mouse operations.",
+  "file_ledger_count": 949,
+  "file_ledger_sha256": "c2b4f25c6d99bab26acc415436135cf70c7282ec338a4390afb1a9963eb55be3",
+  "all_file_hashes_match": true,
+  "runtime_source_hashes_match": true
+}

@@ -18,7 +18,7 @@
 
 啟動與內容：[project.godot](../../../game/project.godot)、[Global.gd](../../../game/autoload/Global.gd)、[FileLoader.gd](../../../game/autoload/FileLoader.gd)。註冊 schema、生成資料、載入 mods；驗證用 [framework_smoke.gd](../../../tests/framework_smoke.gd)，其中 [file_loader_probe.gd](../../../tests/file_loader_probe.gd) 驗 JSON 資料檔過濾與排序。
 
-戰鬥與 UI：[ActionHandler.gd](../../../game/autoload/ActionHandler.gd)、[HandManager.gd](../../../game/autoload/HandManager.gd)、[Root.tscn](../../../game/scenes/Root.tscn)；[Combat.gd](../../../game/scripts/ui/Combat.gd) 只剩 HUD（流程見下段）。資料流見 [架構總覽](../../../analysis/slay-the-robot/architecture/01_overview.md)；[combat_flow.gd](../../../tests/combat_flow.gd) 搭配 [fixture](../../../tests/combat_fixture.gd) 驗單場戰鬥、獎勵與返回地圖。
+戰鬥與 UI：[ActionHandler.gd](../../../game/autoload/ActionHandler.gd)、[HandManager.gd](../../../game/autoload/HandManager.gd)、[Root.tscn](../../../game/scenes/Root.tscn)；[Combat.gd](../../../game/scripts/ui/Combat.gd) 管 HUD 與可選棋盤模組裝配（流程見下段）。資料流見 [架構總覽](../../../analysis/slay-the-robot/architecture/01_overview.md)；[combat_flow.gd](../../../tests/combat_flow.gd) 搭配 [fixture](../../../tests/combat_fixture.gd) 驗單場戰鬥、獎勵與返回地圖。
 
 戰鬥框架（[spec](../../specs/combat-framework/README.md)，Phase 3／雙盤 A／Phase 2b）：CTB 時間軸、單位註冊、棋盤／遭遇／移動、波次與 Board／Ctb／Wave 測試的檔案導航見 [code-map/combat-framework](code-map/combat-framework.md)；入口為 [CombatDirector.gd](../../../game/scripts/combat/CombatDirector.gd)。
 
@@ -28,7 +28,7 @@
 
 序列化與擴充：[SerializableData.gd](../../../game/data/SerializableData.gd)、[擴充契約與限制](../../../analysis/slay-the-robot/architecture/02_extension_points.md)。Dictionary merge 已修，公開 API 回歸見 [dictionary_regression.gd](../../../tests/dictionary_regression.gd)；跨程序讀寫、續玩與拒絕無效輸入見 [save_load_flow.gd](../../../tests/save_load_flow.gd)。
 
-本專案工具：[test_game.py](../../../tools/test_game.py) 為跨平台隔離回歸與流程驗證 runner（Python 3.10+），[test-game.ps1](../../../tools/test-game.ps1) 是 Windows 薄包裝；[game.ps1](../../../tools/game.ps1) 為 Windows 專用的舊 Run／Import／Smoke 入口；[upstream.json](../../../tools/upstream.json) 固定來源、引擎政策（基準 4.7.x）與本地修復。[link_pack.py](../../../tools/link_pack.py) 把題材內容包 link 進 game/external/mods/ 供編輯器載入，用法見 [題材內容包](../game-dev/content/pack.md)。
+本專案工具：[prepare_pack.py](../../../tools/prepare_pack.py) 產生不改個人資料的隔離可玩副本；[test_game.py](../../../tools/test_game.py) 為跨平台隔離回歸與流程驗證 runner（Python 3.10+），[test-game.ps1](../../../tools/test-game.ps1) 是 Windows 薄包裝；[game.ps1](../../../tools/game.ps1) 為 Windows 專用的舊 Run／Import／Smoke 入口；[upstream.json](../../../tools/upstream.json) 固定來源、引擎政策（基準 4.7.x）與本地修復。[link_pack.py](../../../tools/link_pack.py) 把題材內容包 link 進 game/external/mods/ 供編輯器載入，用法見 [題材內容包](../game-dev/content/pack.md)。
 
 程序診斷：[test_game.py](../../../tools/test_game.py) 保存退出碼、原生崩潰標記與逐階段結果；[test_runner_diagnostics.py](../../../tests/test_runner_diagnostics.py) 以假引擎驗 runner，不啟動 Godot；[test_link_pack.py](../../../tests/test_link_pack.py) 驗換行／BOM 還原與 Windows junction 隔離及 unlink。事故判讀見 [native-crash](../game-dev/native-crash.md)；執行前守 [使用者操作邊界](user.md)。
 

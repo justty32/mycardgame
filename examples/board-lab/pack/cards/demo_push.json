@@ -1,0 +1,35 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_push",
+    "card_name": "近身推擊",
+    "card_description": "將同盤 1 格內的敵人向外推 [distance] 格。受阻時，每個未移動格造成 [collision_damage_per_cell] 傷害。請先跨步進入敵人的棋盤。",
+    "card_texture_path": "external/sprites/cards/white/card_white.png",
+    "card_color_id": "demo_color",
+    "card_energy_cost": 1,
+    "card_type": 1,
+    "card_rarity": 2,
+    "card_requires_target": true,
+    "card_values": {
+      "distance": 2,
+      "collision_damage_per_cell": 3,
+      "board": {
+        "range": 1,
+        "shape": 0,
+        "target_faction": 0
+      }
+    },
+    "card_play_actions": [
+      {
+        "res://scripts/actions/board_actions/ActionDisplaceUnit.gd": {
+          "mode": "PUSH"
+        }
+      }
+    ],
+    "card_keyword_object_ids": [
+      "demo_keyword_boards"
+    ],
+    "card_upgrade_amount_max": 0,
+    "card_appears_in_card_packs": true
+  }
+}

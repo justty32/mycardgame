@@ -10,5 +10,5 @@
 
 ## 待使用者項
 
-- [game-dev] 實機打一場戰鬥，照 [合併清單](plans/combat-framework/phase-3.md#需使用者實機檢查headless-無法驗) 第 1–6 項回報 UI 觀感 → 我修 UI
+- [game-dev] 自行實機遊玩 [中性示範包](../examples/board-lab/README.md)，確認人物站格、選格／意圖可讀性與操作感；[headless 界線](../analysis/slay-the-robot/design/dual-board/presentation.md#生命週期與驗收) 不含人工觀感 → 回報後我修 UI
 - [repo 結構] 拆 repo 時決定框架是否改名、題材樹是否獨立成 repo（改名前 `mycardgame-tests` 等字串不動）→ 我改名修連結

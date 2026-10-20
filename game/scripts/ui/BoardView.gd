@@ -135,7 +135,7 @@ func _draw() -> void:
 		var battlefield: CombatBattlefield = director.battlefield
 		var hovered_board: BoardData = battlefield.get_board(_preview_board_id) if battlefield != null else null
 		if hovered_board != null and hovered_board.is_in_bounds(_preview_cell):
-			var effect_board: BoardData = BoardTargeting.target_board_for_shape(hovered_board, acting, selected_card.card_data.card_shape)
+			var effect_board: BoardData = BoardTargeting.target_board_for_shape(hovered_board, acting, BoardCardOptions.shape_of(selected_card.card_data))
 			if effect_board == board:
 				_draw_cells(BoardTargeting.resolve_card_cells(hovered_board, acting, selected_card.card_data, _preview_cell), COLOR_SHAPE)
 	elif acting != null and board.has_unit(acting) and acting.faction == BaseCombatant.FACTIONS.PARTY and director.is_player_action_pending():

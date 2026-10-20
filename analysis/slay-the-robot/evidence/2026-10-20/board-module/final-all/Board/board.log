@@ -1,0 +1,179 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: project is in an isolated artifacts copy
+BOUNDARY: one board combat with declared data fixtures; UI handler/signals, not mouse coordinates; test-only placement through BoardData.move; the combat is left unfinished and the scene freed.
+FIXTURE: seed=20261019; red 200 HP speed 10, deck=5 native Basic Block; rules free move 1, paid 2 cells x 20 delay; 7x5 board, hero (3,4), idle dummies 1x1 (0,0) and 2x2 (5,0); test cards cost 0.
+PASS: board presentation is unallocated outside combat
+PASS: Start Run button creates a real run
+PASS: start-option handler opens the travel map
+PASS: generated map contains an adjacent combat destination
+PASS: map button starts the board combat and the hero's first action becomes ready
+PASS: director built a board for the encounter
+PASS: 7x5 encounter board; hero on its deploy cell (3,4)
+PASS: wave 0 units stand on their encounter cells
+PASS: 2x2 enemy occupies 4 cells
+PASS: BoardView is visible during combat
+PASS: move 1: hero starts its action with move_points 1 (rules.free_move_per_action)
+PASS: move click completes
+PASS: move 1: clicking an empty cell at distance 1 emits unit_moved once
+PASS: move 1: move_points 0 and cells_moved_this_action 1 after the move
+PASS: base: distance after moving one cell is correct (Manhattan 3 + 3)
+PASS: paid move click completes
+PASS: move 2: paid move of 2 cells adds action_extra_delay 40
+PASS: move beyond the budget is ignored
+PASS: move 2: no budget left, a further click does not move
+PASS: helper dummies spawned on parking cells
+PASS: rejected card leaves the queue idle
+PASS: base: card_range 1 rejects a target at distance 2
+PASS: card play completes: board_card_cross
+PASS: base: CROSS shape resolves 3 units
+PASS: base: CROSS hits all three for 2
+PASS: base: LINE stops at the first unit
+PASS: card play completes: board_card_pierce
+PASS: base: LINE_PIERCE passes through and hits both units in the column
+PASS: card play completes: board_card_any
+PASS: base: any cell of the 2x2 enemy selects it
+PASS: validator 12: ValidatorDistance >= 3 to the nearest opponent at distance 2 makes the card unplayable and unlit
+PASS: card play completes: board_card_compute
+PASS: value 12: ActionComputeBoardValue writes card_values.distance = BoardData distance (2)
+PASS: card play completes: card_test_dash_strike
+PASS: dash 4: target in the column at distance 3 -> hero stops adjacent and deals 6
+PASS: rejected card leaves the queue idle
+PASS: dash 4: ValidatorInLine rejects a target off the hero's row and column
+PASS: card play completes: card_test_shove
+PASS: push 5: enemy at (3,3) pushed north 2 to (3,1)
+PASS: push 5: displaced_cells 2, no collision, only the 4 attack damage
+PASS: card play completes: card_test_shove
+PASS: push 5: enemy against the board edge does not move and collides
+PASS: push 5: collision damage 3 x 2 remaining cells on top of the attack
+PASS: card play completes: board_card_shove_wall
+PASS: push 5: blocked by a unit -> 0 cells, both take 3 (collision_damage_to_blocker variant)
+PASS: board actions complete
+PASS: displace 6: 2x2 enemy is not displaced (displace_max_footprint_area 1)
+PASS: board actions complete
+PASS: displace 6: is_immovable enemy is not displaced
+PASS: unplayable card leaves the queue idle
+PASS: rooted 6: status_rooted hero's card_test_blink is rejected by its validators (ValidatorPathExists: cannot move)
+PASS: card play completes: board_card_swap
+PASS: swap 7: SWAP with the neutral unit exchanges anchors and emits unit_moved twice
+PASS: card play completes: board_card_pull
+PASS: pull 7: PULL_ADJACENT pulls the enemy at (3,0) to (3,3)
+PASS: rejected card leaves the queue idle
+PASS: blink 8: an occupied cell is rejected
+PASS: rejected card leaves the queue idle
+PASS: blink 8: an empty cell at distance 4 is rejected by card_range 3
+PASS: card play completes: card_test_blink
+PASS: blink 8: an empty cell at distance 3 teleports the hero
+PASS: board actions complete
+PASS: summon 11: occupied spawn cell (3,2) -> nearest empty cell (3,1) (distance 1, smaller y), unit enters the timeline
+PASS: obstacles 3: blocked (3,2),(2,3),(4,3) -> reachable cells exclude (3,2) and the cell behind it
+PASS: obstacles 3: an enemy at (3,3) makes find_path to (3,2) detour (length 4)
+PASS: archer spawned at distance 2
+PASS: keep range 9: archer at distance 2 plans to step back to (3,1)
+PASS: keep range 9: planned cell is at distance 3 and in range
+PASS: threat 10: ThreatPreview expects the archer's 3 damage before the hero's next action
+PASS: hero has no block before ending action 1
+PASS: End Turn runs the timeline to the hero's next action
+PASS: move 2: paid cells add 40 to the 100 card delay -> next action at tick 1400 (400 ticks later)
+PASS: move 1: the next action resets move points and the paid delay
+PASS: keep range 9: archer acted from its planned cell at distance 3
+PASS: threat 10: actual damage (3) equals the ThreatPreview value
+PASS: charger spawned
+PASS: charge 9: off the hero's row and column CHARGE falls back to APPROACH
+PASS: approacher spawned
+PASS: charge / approach: planned cells are adjacent to the hero
+PASS: threat 10: preview sums the charger (4) and approacher (5) from their planned cells
+PASS: End Turn runs the charger and approacher to the hero's third action
+PASS: charge 9: charger in the hero's column at distance 4 (move 3) ends adjacent
+PASS: approach: APPROACH enemy moved adjacent before attacking
+PASS: threat 10: damage after CHARGE / APPROACH movement (9) equals the preview
+PASS: combat is still running with the hero alive
+PASS: complete board scenario returned
+PASS: freed run screen leaves no combat director behind
+BOARD PASS: 88 checks, 0 failures

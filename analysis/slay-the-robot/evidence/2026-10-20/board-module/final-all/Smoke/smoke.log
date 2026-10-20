@@ -1,0 +1,242 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+SMOKE: Global autoload _ready has already run; initial profile/settings reads or writes precede this script.
+PASS: test-runtime directory can be created
+PASS: profile writes resolve to artifacts/test-runtime
+PASS: configured main scene loads
+PASS: configured main scene instantiates
+PASS: main menu is visible after ready
+PASS: new run button initializes
+SMOKE: content profile test
+PASS: character_red is registered
+PASS: card prototypes are registered
+PASS: red character has a starting deck
+PASS: starting card resolves: card_attack_basic
+PASS: starting card resolves: card_attack_basic
+PASS: starting card resolves: card_attack_basic
+PASS: starting card resolves: card_block_basic
+PASS: starting card resolves: card_block_basic
+PASS: starting card resolves: card_block_basic
+PASS: starting card resolves: card_attack_all
+PASS: starting card resolves: card_attack_in_center
+PASS: starting card resolves: card_attack_money_on_lethal
+PASS: starting card resolves: card_next_attack_free
+PASS: starting card resolves: card_law
+PASS: starting card resolves: card_law
+PASS: starting card resolves: card_attack_with_conditional_block
+PASS: starting card resolves: card_damage_increase
+PASS: starting card resolves: card_attack_ignore_damage_increase
+PASS: starting card resolves: card_weaken_enemies
+PASS: starting card resolves: card_vulnerable_enemies
+PASS: starting card resolves: card_grant_energy
+PASS: starting card resolves: card_right_click_transform_mode_a
+PASS: SerializableData JSON patch appends to CharacterData Array
+PASS: array patch probe completed
+PASS: Dictionary JSON patch merge_keep preserves its strategy contract
+PASS: Dictionary JSON patch merge_overwrite preserves its strategy contract
+PASS: Dictionary JSON patch overwrite preserves its strategy contract
+PASS: Dictionary JSON patch unknown_strategy preserves its strategy contract
+PASS: dictionary patch assertions completed
+PASS: test-only mod list adapter compiles after autoload initialization
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+       [1] _check_example_mod ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/framework_smoke.gd:125)
+       [2] _run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/framework_smoke.gd:72)
+PASS: real FileLoader registers example_mod card
+PASS: example_mod appends one starting card and preserves original order
+PASS: example_mod probe leaves mod_list.json unchanged
+PASS: example_mod deserializes its play action
+PASS: example_mod takes over the debug action resource path
+PASS: ActionGenerator creates the card action with the replacement script
+SMOKE: example_mod enabled only in this process; no run started, save-game or mod-list file written by this probe.
+PASS: example_mod probe completed
+PASS: file loader probe loads
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+       [1] check ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/file_loader_probe.gd:37)
+       [2] _run_file_loader_probe ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/framework_smoke.gd:153)
+       [3] _run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/framework_smoke.gd:73)
+PASS: file loader probe returns assertions
+PASS: FileLoader fixture directory can be created
+PASS: FileLoader fixture writes external/mod_list.json
+PASS: FileLoader fixture writes external/mods/filter/mod_info.json
+PASS: FileLoader fixture writes external/mods/filter/colors/10_first.json
+PASS: FileLoader fixture writes external/mods/filter/colors/20_upper.JSON
+PASS: FileLoader fixture writes external/mods/filter/colors/90_last.json
+PASS: FileLoader fixture writes external/mods/filter/colors/notes.txt
+PASS: FileLoader fixture writes external/mods/filter/colors/backup.json.bak
+PASS: FileLoader fixture writes external/mods/filter/colors/editor.json~
+PASS: FileLoader fixture writes external/mods/filter/colors/.gitkeep
+PASS: FileLoader fixture writes external/mods/filter/colors/README.md
+PASS: FileLoader fixture writes external/mods/filter/colors/nested.json/inside.json
+PASS: FileLoader fixture enumerates ordinary non-JSON files
+PASS: FileLoader directory enumeration excludes directories ending in .json
+PASS: FileLoader accepts lowercase JSON and preserves sorted patch order
+PASS: FileLoader accepts uppercase JSON extension
+PASS: FileLoader ignores non-JSON notes and backup files
+PASS: FileLoader does not recursively load nested JSON
+PASS: FileLoader registers only the two expected fixture objects
+PASS: FileLoader probe restores the original global color table
+FILE LOADER PROBE DONE: 20 assertions
+PASS: unit registry probe loads
+PASS: unit registry probe returns assertions
+PASS: UnitRegistry autoload is present
+PASS: run screen Player registers as the UnitRegistry hero
+PASS: Global.get_player() delegates to the registry hero
+PASS: hero has a non-empty unit_uid
+PASS: hero resolves by unit_uid
+PASS: hero faction is PARTY
+PASS: hero defaults: speed 10, footprint 1x1, unplaced, no controller
+PASS: PARTY faction query returns only the hero
+PASS: no enemy units outside combat
+PASS: CombatRulesData is in Global.CLASS_NAME_TO_CLASS
+PASS: CombatRulesData is in the SerializableData script cache
+PASS: test profile registers combat_rules_default
+PASS: Global.get_combat_rules() resolves combat_rules_default
+PASS: default rules keep original pacing: refill energy, draw 5, hand 10
+PASS: default rules keep original turn end/start: discard hand, reset block
+PASS: default rules keep a single-character party
+PASS: refill rule gains full max energy
+PASS: per-action energy gain respects the cap
+PASS: CombatRulesData JSON patch sets int and Vector2i fields
+PASS: CombatRulesData exports Vector2i as a JSON array
+PASS: EncounterData is in Global.CLASS_NAME_TO_CLASS
+PASS: default rules keep movement off: no free / paid moves, split allowed, single-cell displacement
+PASS: legacy event (no encounter id) synthesizes one wave on the north row, centered
+PASS: board shapes: CROSS 5 cells, ROW 5 cells, LINE to the edge 4 cells
+PASS: board distance is Manhattan by default
+PASS: EncounterData JSON patch sets the board size (Vector2i) and cell lists
+PASS: Signals declares unit_action_started
+PASS: Signals declares unit_action_ended
+PASS: Signals declares combat_tick_advanced
+PASS: Signals declares timeline_changed
+PASS: Signals declares unit_moved
+PASS: Signals declares unit_spawned
+PASS: Signals declares unit_downed
+PASS: Signals declares unit_removed
+PASS: Signals declares wave_started
+PASS: Signals declares wave_cleared
+PASS: Signals declares end_action_requested
+PASS: Signals declares cell_clicked
+PASS: Signals declares cell_hovered
+PASS: Signals declares party_member_recruited
+PASS: Signals declares party_member_left
+PASS: Signals declares party_member_advanced
+PASS: Signals declares ai_plan_decided
+UNIT REGISTRY PROBE DONE: 43 assertions
+PASS: run preflight has its legacy source character
+PASS: missing starting Act field retains valid act_1 default
+PASS: registered custom starting Act passes pure preflight
+PASS: invalid starting Act has a deterministic rejection: 
+WARNING: Global.start_run rejected: unknown_starting_act
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] start_run (res://autoload/Global.gd:254)
+       [1] run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/run_start_preflight_probe.gd:32)
+       [2] _run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/framework_smoke.gd:76)
+PASS: invalid starting Act returns false before beginning run: 
+PASS: rejected run leaves live player identity and serialized state unchanged: 
+PASS: rejected run consumes no prototype UID or action/run signal: 
+PASS: rejected run preserves checkpoint existence and bytes: 
+PASS: invalid starting Act has a deterministic rejection: preflight_missing_act
+WARNING: Global.start_run rejected: unknown_starting_act
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] start_run (res://autoload/Global.gd:254)
+       [1] run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/run_start_preflight_probe.gd:32)
+       [2] _run ({PROJECT_ROOT}/artifacts/verification/20261020-113027-4ebd60e5/Smoke/tests/framework_smoke.gd:76)
+PASS: invalid starting Act returns false before beginning run: preflight_missing_act
+PASS: rejected run leaves live player identity and serialized state unchanged: preflight_missing_act
+PASS: rejected run consumes no prototype UID or action/run signal: preflight_missing_act
+PASS: rejected run preserves checkpoint existence and bytes: preflight_missing_act
+SMOKE PASS: 123 checks, 0 failures

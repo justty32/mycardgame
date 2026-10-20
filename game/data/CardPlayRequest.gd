@@ -12,17 +12,27 @@ var refundable_energy: int = 0	# how much energy the card play can refund if int
 var input_energy: int = 0	# how much energy is input into the card play. Can be positive even if refundable_energy is 0. Useful for X cost cards and card play duplications
 var is_duplicate_play: bool = false	# duplcate plays should not be further duplicated
 
-#region Board (combat framework Phase 2)
-## The unit playing the card (the acting unit); null = the hero (legacy requests).
+## Optional scene modules own their namespaced targeting payloads.
+var module_contexts: Dictionary = {}
+## Generic actor/targets also support non-spatial combat modules.
 var acting_unit: BaseCombatant = null
-## Board cell the player selected; BaseCombatant.BOARD_ANCHOR_NONE when no cell was selected.
-var selected_cell: Vector2i = Vector2i(-1, -1)
-## Explicit selected board; empty means infer from a selected unit or acting unit, never faction.
-var selected_board_id: String = ""
-## Units resolved from card_shape around selected_cell (HandManager uses them as the action targets
-## when not empty; empty = legacy [selected_target]).
 var resolved_targets: Array[BaseCombatant] = []
-#endregion
+## Compatibility accessors: storage only; the card core does not interpret these values.
+var selected_cell: Vector2i:
+	get:
+		return module_contexts.get("board", {}).get("cell", Vector2i(-1, -1))
+	set(value):
+		if not module_contexts.has("board"):
+			module_contexts["board"] = {}
+		module_contexts["board"]["cell"] = value
+var selected_board_id: String:
+	get:
+		return module_contexts.get("board", {}).get("id", "")
+	set(value):
+		if not module_contexts.has("board"):
+			module_contexts["board"] = {}
+		module_contexts["board"]["id"] = value
+
 
 ## Where the card being played came from. This will almost always be HandManager.HAND_PILE, but can be
 ## from other piles if played indirectly.
@@ -45,3 +55,10 @@ var card_destination_strategy: int = HandManager.PILE_INSERTION_STRATEGIES.TOP
 ## since it will include the played card (if it was played from hand) while it would otherwise exist
 ## in limbo.
 var hand_at_play_time: Array[CardData] = []
+
+## Duplicate only selection ownership, preserving live actor/unit identities while isolating
+## mutable module payload containers. Card values intentionally keep the factory's semantics.
+func copy_selection_context_from(source: CardPlayRequest) -> void:
+	module_contexts = source.module_contexts.duplicate(true)
+	acting_unit = source.acting_unit
+	resolved_targets = source.resolved_targets.duplicate()

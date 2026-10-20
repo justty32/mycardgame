@@ -1,0 +1,27 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_strike",
+    "card_name": "定點打擊",
+    "card_description": "對選定敵人造成 [damage] 傷害。",
+    "card_texture_path": "external/sprites/cards/white/card_white.png",
+    "card_color_id": "demo_color",
+    "card_energy_cost": 1,
+    "card_type": 0,
+    "card_rarity": 1,
+    "card_requires_target": true,
+    "card_values": {
+      "damage": 8
+    },
+    "card_play_actions": [
+      {
+        "res://scripts/actions/combatant_actions/ActionAttackGenerator.gd": {}
+      }
+    ],
+    "card_keyword_object_ids": [
+      "demo_keyword_boards"
+    ],
+    "card_upgrade_amount_max": 0,
+    "card_appears_in_card_packs": true
+  }
+}

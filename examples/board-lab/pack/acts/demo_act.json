@@ -1,0 +1,13 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_act",
+    "act_name": "Board Lab: Three Trials",
+    "act_codex_number": 1,
+    "act_action_script_path": "res://external/mods/board_lab/scripts/ActionGenerateBoardLab.gd",
+    "act_easy_combat_event_pool_object_id": "demo_pool_entry",
+    "act_hard_combat_event_pool_object_id": "demo_pool_field",
+    "act_boss_event_pool_object_id": "demo_pool_final",
+    "act_next_act_ids": []
+  }
+}

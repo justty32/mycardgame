@@ -1,0 +1,27 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_guard",
+    "card_name": "守勢",
+    "card_description": "獲得 [block] 格擋，於下次自身行動開始時清除。",
+    "card_texture_path": "external/sprites/cards/white/card_white.png",
+    "card_color_id": "demo_color",
+    "card_energy_cost": 1,
+    "card_type": 1,
+    "card_rarity": 1,
+    "card_requires_target": false,
+    "card_values": {
+      "block": 8
+    },
+    "card_play_actions": [
+      {
+        "res://scripts/actions/combatant_actions/ActionBlock.gd": {
+          "target_override": 1
+        }
+      }
+    ],
+    "card_keyword_object_ids": [],
+    "card_upgrade_amount_max": 0,
+    "card_appears_in_card_packs": true
+  }
+}

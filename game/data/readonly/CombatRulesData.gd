@@ -41,6 +41,9 @@ enum BOARD_MODES {SINGLE, DUAL}
 #endregion
 
 #region Board and movement
+## False leaves combat as an ordinary CTB battle without a mounted board component.
+## Combat.board_module_enabled must also be true for the component to be composed.
+@export var board_enabled: bool = true
 ## New combats use independent party/enemy boards. SINGLE is an explicit legacy fixture mode.
 @export var board_mode: int = BOARD_MODES.DUAL
 @export var cross_board_policy_version: int = 1

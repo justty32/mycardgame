@@ -1,0 +1,35 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_swap",
+    "card_name": "換位",
+    "card_description": "與選定敵人交換位置，可跨棋盤。這是強制位移，不觸發借機攻擊。",
+    "card_texture_path": "external/sprites/cards/white/card_white.png",
+    "card_color_id": "demo_color",
+    "card_energy_cost": 1,
+    "card_type": 1,
+    "card_rarity": 2,
+    "card_requires_target": true,
+    "card_values": {
+      "board": {
+        "range": -1,
+        "shape": 0,
+        "target_faction": 0
+      }
+    },
+    "card_play_actions": [
+      {
+        "res://scripts/actions/board_actions/ActionDisplaceUnit.gd": {
+          "mode": "SWAP",
+          "distance": 1
+        }
+      }
+    ],
+    "card_keyword_object_ids": [
+      "demo_keyword_boards"
+    ],
+    "card_upgrade_amount_max": 0,
+    "card_appears_in_card_packs": true,
+    "card_first_shuffle_priority": 1
+  }
+}

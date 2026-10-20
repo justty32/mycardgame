@@ -11,7 +11,6 @@
 
 ## 最新進度
 
-- [game-dev] 豐富中性示範包未做（教學移動／推拉／範圍卡與障礙遭遇）；正常新局已接雙盤與本體站格，不等同示範內容齊備 → 內容另做後配合 WAIT_USER 實機檢查
 - [dev-env] scratchpad 的 `playtest` worktree（detached c662729）是暫存，勿刪；不用後 `git worktree remove` 或目錄消失後 `git worktree prune`
 
 ## 各工作流 session-log

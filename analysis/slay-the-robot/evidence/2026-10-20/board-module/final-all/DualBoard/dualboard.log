@@ -1,0 +1,505 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+WARNING: res://scenes/ui/card/Card.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:3)
+WARNING: res://scenes/ui/card/CardDecorator.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:5)
+WARNING: res://scenes/ui/MapLocation.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:9)
+WARNING: res://scenes/combatants/Enemy.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:11)
+WARNING: res://scenes/combatants/Player.tscn:6 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:12)
+WARNING: res://scenes/combatants/StatusEffect.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:13)
+WARNING: res://scenes/ui/rewards/BaseRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:16)
+WARNING: res://scenes/ui/rewards/MoneyRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:17)
+WARNING: res://scenes/ui/rewards/CardRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:18)
+WARNING: res://scenes/ui/rewards/ArtifactRewardButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:19)
+WARNING: res://scenes/ui/ConsumableButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:23)
+WARNING: res://scenes/ui/CharacterSelectionButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:24)
+WARNING: res://scenes/ui/shop/ArtifactShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:30)
+WARNING: res://scenes/ui/shop/ConsumableShopButton.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:31)
+WARNING: res://scenes/combatants/fades/ArtifactFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:34)
+WARNING: res://scenes/combatants/fades/ImageFade.tscn:4 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:35)
+WARNING: res://scenes/ui/codex/CodexArtifact.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:44)
+WARNING: res://scenes/ui/codex/CodexConsumable.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:45)
+WARNING: res://scenes/ui/profile/CharacterStat.tscn:5 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:50)
+WARNING: res://scenes/ui/run_summary/RunHistoryCard.tscn:3 - ext_resource, invalid UID: uid://nh32y87hcke5 - using text path instead: res://icon.svg
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/Scenes.gd:52)
+WARNING: Loaded resource as image file, this will not work on export: 'res://sprites/missing_texture.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] @implicit_new (res://autoload/FileLoader.gd:23)
+FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag "exported" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html
+Debug Base Directory: res://
+PASS: DualBoard uses an isolated artifacts copy
+BOUNDARY: real Root run and handler actions; placement/rule changes are declared fixture setup; no screen, keyboard, mouse or GUI operations.
+PASS: fresh combat rules default to DUAL
+FIXTURE: seed=20261019; red 200 HP speed 10, deck=5 native Basic Block; rules free move 1, paid 2 cells x 20 delay; 7x5 board, hero (3,4), idle dummies 1x1 (0,0) and 2x2 (5,0); test cards cost 0.
+FIELD FIXTURE: same 7x5 real run; hero 2000 HP, 12 free move; field definitions registered through JSON patch schema; field actions have no audio.
+DUAL FIXTURE: production board_mode inherited, two 7x5 boards, hero and dummy share local (3,4) on different boards; test cards cost 1.
+PASS: board presentation is unallocated outside combat
+PASS: Start Run button creates a real run
+PASS: start-option handler opens the travel map
+PASS: generated map contains an adjacent combat destination
+PASS: map button starts the board combat and the hero's first action becomes ready
+PASS: director built a board for the encounter
+PASS: normal Root New Run builds two independent boards
+PASS: same coordinates on distinct boards have independent occupants
+PASS: enemy on other board still prevents victory
+PASS: initial run-start animation completes before standing-foot assertions
+PRESENTATION ANIMATION_TRACK res://animations/Player.res attack path=Visible/AnimatedSprite2D:offset keys=[[0.0, (0.0, 0.0)], [0.10000000149012, (30.0, 0.0)], [0.5, (0.0, 0.0)]]
+PRESENTATION ANIMATION_TRACK res://animations/Player.res run_start path=Visible/AnimatedSprite2D:offset keys=[[0.0, (-150.0, 0.0)], [1.0, (0.0, 0.0)]]
+PRESENTATION ANIMATION_TRACK res://animations/Combatant.res attack path=Visible/AnimatedSprite2D:offset keys=[[0.0, (0.0, 0.0)], [0.10000000149012, (-30.0, 0.0)], [0.5, (0.0, 0.0)]]
+PASS: actual animation libraries animate child transforms rather than the board-owned root transform
+PRESENTATION ORIGIN initial hero scene_file=res://scenes/combatants/Player.tscn sprite_path=Visible/AnimatedSprite2D captured_before_animation=true ready_origin=(64.0, 48.0) ready_offset=(0.0, 0.0) live_offset=(0.0, 0.0) cached_foot=(64.0, 96.0)
+PRESENTATION GEOMETRY initial hero viewport=[P: (0.0, 0.0), S: (1200.0, 700.0)] sprite=(266.0, 425.0) root=(238.0, 404.0) visible_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (0.0, 0.0)] sprite_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (64.0, 48.0)] scale=(0.4375, 0.4375) unclipped=true foot=(266.0, 446.0)
+PASS: initial hero canonical origin comes from pre-animation ready capture
+PASS: initial hero actual sprite and HP nodes are visible in the scene tree
+PASS: initial hero root maps to its board/footprint destination
+PASS: initial hero actual sprite origin lies on the owning board surface
+PASS: initial hero actual sprite origin is inside viewport and unclipped ancestors
+PASS: initial hero actual sprite feet align with the footprint bottom center
+PASS: initial hero actor depth remains above grids and below existing modal overlays
+PRESENTATION ORIGIN initial enemy scene_file=res://scenes/combatants/Enemy.tscn sprite_path=Visible/AnimatedSprite2D captured_before_animation=true ready_origin=(99.0, 128.0) ready_offset=(0.0, 0.0) live_offset=(0.0, 0.0) cached_foot=(99.0, 160.0)
+PRESENTATION GEOMETRY initial enemy viewport=[P: (0.0, 0.0), S: (1200.0, 700.0)] sprite=(836.0, 432.0) root=(792.6875, 376.0) visible_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (0.0, 0.0)] sprite_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (99.0, 128.0)] scale=(0.4375, 0.4375) unclipped=true foot=(836.0, 446.0)
+PASS: initial enemy canonical origin comes from pre-animation ready capture
+PASS: initial enemy actual sprite and HP nodes are visible in the scene tree
+PASS: initial enemy root maps to its board/footprint destination
+PASS: initial enemy actual sprite origin lies on the owning board surface
+PASS: initial enemy actual sprite origin is inside viewport and unclipped ancestors
+PASS: initial enemy actual sprite feet align with the footprint bottom center
+PASS: initial enemy actor depth remains above grids and below existing modal overlays
+PASS: board enemy has a stable free-position parent, never an HBox layout owner
+PASS: HP/intent/hitbox remain under their owning actual unit
+PASS: grid surfaces precede actor subtrees for Control hit testing
+PASS: actual actor button dispatches one board event without duplicate legacy enemy event
+PASS: enemy-board click without a card cannot walk the hero across boards
+PASS: pathless TELEPORT still produces a destination marker on the enemy's source board
+PASS: teleport destination marker never leaks to another board at the same local cell
+PASS: actual enemy intent row displays the teleport fallback mode label
+PASS: timeline entry hover routes to the same board preview and exit clears it
+PASS: presentation move completes through board handler
+PASS: allowed reversible movement exposes an enabled Undo button
+PASS: Undo button restores position and movement resources through Director gate
+PASS: Undo is hidden when the content rule disables it
+PASS: board actions complete
+PASS: field hover and actual actor hitbox expose stack and remaining ticks
+PASS: other board at identical coordinates does not inherit field tooltip
+PASS: board actions complete
+PASS: board actions complete
+PASS: rejected transfer leaves actual actor and sprite transforms unchanged
+PASS: board actions complete
+PRESENTATION ORIGIN transferred hero scene_file=res://scenes/combatants/Player.tscn sprite_path=Visible/AnimatedSprite2D captured_before_animation=true ready_origin=(64.0, 48.0) ready_offset=(0.0, 0.0) live_offset=(0.0, 0.0) cached_foot=(64.0, 96.0)
+PRESENTATION GEOMETRY transferred hero viewport=[P: (0.0, 0.0), S: (1200.0, 700.0)] sprite=(780.0, 425.0) root=(752.0, 404.0) visible_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (0.0, 0.0)] sprite_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (64.0, 48.0)] scale=(0.4375, 0.4375) unclipped=true foot=(780.0, 446.0)
+PASS: transferred hero canonical origin comes from pre-animation ready capture
+PASS: transferred hero actual sprite and HP nodes are visible in the scene tree
+PASS: transferred hero root maps to its board/footprint destination
+PASS: transferred hero actual sprite origin lies on the owning board surface
+PASS: transferred hero actual sprite origin is inside viewport and unclipped ancestors
+PASS: transferred hero actual sprite feet align with the footprint bottom center
+PASS: transferred hero actor depth remains above grids and below existing modal overlays
+PASS: movement tween interpolates only visuals after board identity and anchor are already committed
+PASS: transfer moves the real sprite, not only a grid marker
+PASS: board actions complete
+PASS: board actions complete
+PRESENTATION ORIGIN swapped hero scene_file=res://scenes/combatants/Player.tscn sprite_path=Visible/AnimatedSprite2D captured_before_animation=true ready_origin=(64.0, 48.0) ready_offset=(0.0, 0.0) live_offset=(0.0, 0.0) cached_foot=(64.0, 96.0)
+PRESENTATION GEOMETRY swapped hero viewport=[P: (0.0, 0.0), S: (1200.0, 700.0)] sprite=(836.0, 425.0) root=(808.0, 404.0) visible_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (0.0, 0.0)] sprite_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (64.0, 48.0)] scale=(0.4375, 0.4375) unclipped=true foot=(836.0, 446.0)
+PASS: swapped hero canonical origin comes from pre-animation ready capture
+PASS: swapped hero actual sprite and HP nodes are visible in the scene tree
+PASS: swapped hero root maps to its board/footprint destination
+PASS: swapped hero actual sprite origin lies on the owning board surface
+PASS: swapped hero actual sprite origin is inside viewport and unclipped ancestors
+PASS: swapped hero actual sprite feet align with the footprint bottom center
+PASS: swapped hero actor depth remains above grids and below existing modal overlays
+PRESENTATION ORIGIN swapped enemy scene_file=res://scenes/combatants/Enemy.tscn sprite_path=Visible/AnimatedSprite2D captured_before_animation=true ready_origin=(99.0, 128.0) ready_offset=(0.0, 0.0) live_offset=(0.0, 0.0) cached_foot=(99.0, 160.0)
+PRESENTATION GEOMETRY swapped enemy viewport=[P: (0.0, 0.0), S: (1200.0, 700.0)] sprite=(266.0, 432.0) root=(222.6875, 376.0) visible_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (0.0, 0.0)] sprite_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (99.0, 128.0)] scale=(0.4375, 0.4375) unclipped=true foot=(266.0, 446.0)
+PASS: swapped enemy canonical origin comes from pre-animation ready capture
+PASS: swapped enemy actual sprite and HP nodes are visible in the scene tree
+PASS: swapped enemy root maps to its board/footprint destination
+PASS: swapped enemy actual sprite origin lies on the owning board surface
+PASS: swapped enemy actual sprite origin is inside viewport and unclipped ancestors
+PASS: swapped enemy actual sprite feet align with the footprint bottom center
+PASS: swapped enemy actor depth remains above grids and below existing modal overlays
+PASS: transfer/swap preserve actual sprite/HUD/intent nodes and stable parents
+PASS: presentation moves never unregister or recreate units
+PASS: presentation transfer/swap retain the controller and single CTB membership/tick
+PASS: board actions complete
+PASS: existing attack AnimationPlayer leaves root standing transform and semantic board position intact
+PASS: existing attack animation completes headlessly
+PRESENTATION ORIGIN post-animation hero scene_file=res://scenes/combatants/Player.tscn sprite_path=Visible/AnimatedSprite2D captured_before_animation=true ready_origin=(64.0, 48.0) ready_offset=(0.0, 0.0) live_offset=(0.0, 0.0) cached_foot=(64.0, 96.0)
+PRESENTATION GEOMETRY post-animation hero viewport=[P: (0.0, 0.0), S: (1200.0, 700.0)] sprite=(266.0, 425.0) root=(238.0, 404.0) visible_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (0.0, 0.0)] sprite_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (64.0, 48.0)] scale=(0.4375, 0.4375) unclipped=true foot=(266.0, 446.0)
+PASS: post-animation hero canonical origin comes from pre-animation ready capture
+PASS: post-animation hero actual sprite and HP nodes are visible in the scene tree
+PASS: post-animation hero root maps to its board/footprint destination
+PASS: post-animation hero actual sprite origin lies on the owning board surface
+PASS: post-animation hero actual sprite origin is inside viewport and unclipped ancestors
+PASS: post-animation hero actual sprite feet align with the footprint bottom center
+PASS: post-animation hero actor depth remains above grids and below existing modal overlays
+PASS: policy A cross-board shape 0 ignores inter-board range
+PASS: cross-board shape 0 clips to selected board
+PASS: dual card play completes: dual_shape_0
+PASS: Hand executes accepted cross-board shape 0
+PASS: policy A cross-board shape 1 ignores inter-board range
+PASS: cross-board shape 1 clips to selected board
+PASS: dual card play completes: dual_shape_1
+PASS: Hand executes accepted cross-board shape 1
+PASS: policy A cross-board shape 2 ignores inter-board range
+PASS: cross-board shape 2 clips to selected board
+PASS: dual card play completes: dual_shape_2
+PASS: Hand executes accepted cross-board shape 2
+PASS: policy A cross-board shape 3 ignores inter-board range
+PASS: cross-board shape 3 clips to selected board
+PASS: dual card play completes: dual_shape_3
+PASS: Hand executes accepted cross-board shape 3
+PASS: policy A cross-board shape 4 ignores inter-board range
+PASS: cross-board shape 4 clips to selected board
+PASS: dual card play completes: dual_shape_4
+PASS: Hand executes accepted cross-board shape 4
+PASS: target rejection preserves piles/energy/RNG/positions before cleanup: cross_board_direction_unsupported
+PASS: dual rejected request drains
+PASS: directional shape 5 rejected before energy and damage
+PASS: target rejection preserves piles/energy/RNG/positions before cleanup: cross_board_direction_unsupported
+PASS: dual rejected request drains
+PASS: directional shape 6 rejected before energy and damage
+PASS: target rejection preserves piles/energy/RNG/positions before cleanup: cross_board_direction_unsupported
+PASS: dual rejected request drains
+PASS: cross-board directional push rejected before fee or displacement
+PASS: target rejection preserves piles/energy/RNG/positions before cleanup: cross_board_direction_unsupported
+PASS: dual rejected request drains
+PASS: nested/aliased directional payload rejected before payment: dual_nested_push
+PASS: target rejection preserves piles/energy/RNG/positions before cleanup: cross_board_direction_unsupported
+PASS: dual rejected request drains
+PASS: nested/aliased directional payload rejected before payment: dual_wrapper_pull
+PASS: SELF_AREA stays on caster actual board
+PASS: ALL shape covers only selected board
+PASS: old patch missing policy fields inherits explicit v1 A defaults
+PASS: unknown policy version fails closed
+PASS: unimplemented future policy is rejected rather than guessed
+PASS: unknown target board is rejected
+PASS: combat has one BoardView for each real board
+PASS: actual combatant roots follow board-derived positions
+PASS: same local cell has different global actor positions on different boards
+PASS: positioned nodes retain their actual AnimatedSprite2D actors
+PASS: board actions complete
+PASS: ordinary TO_CELL walking cannot enter another board
+PASS: board actions complete
+PASS: blocked transfer preserves source occupancy
+PASS: board actions complete
+PASS: board actions complete
+PASS: destination teleport-blocking field rejects transfer
+PASS: board actions complete
+PASS: dual card play completes: dual_transfer
+PASS: explicit transfer card enters selected enemy board through Hand
+PASS: successful transfer commits both board occupancies
+PASS: transfer retains UID/faction/controller/timeline and registry identity
+PASS: actual hero sprite root follows the transferred board position
+PASS: target rejection preserves piles/energy/RNG/positions before cleanup: out_of_range
+PASS: dual rejected request drains
+PASS: invader now shares board: range zero rejects adjacent target before fee
+PASS: dual card play completes: dual_shape_5
+PASS: invader same-board LINE keeps ordinary direction and range semantics
+PASS: dual card play completes: dual_push
+PASS: invader same-board PUSH is legal
+PASS: board actions complete
+PASS: dual card play completes: dual_swap
+PASS: explicit SWAP card exchanges units across boards
+PASS: cross-board swap commits both identities and endpoints
+PASS: both actual actor roots follow a cross-board swap
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: swap checks reverse endpoint teleport ban and changes neither participant
+PASS: board actions complete
+PASS: board actions complete
+PASS: multi-cell transfer validates trailing footprint before mutation
+PASS: board actions complete
+PASS: 2x2 transfer updates the entire footprint on both boards
+PASS: board actions complete
+PASS: board actions complete
+PASS: restore dual dummy after transfer tests
+PASS: board actions complete
+PASS: board actions complete
+PASS: same coordinates do not share field storage
+PASS: board actions complete
+PASS: transfer dispatches source-board leave before destination-board enter
+PASS: cross-board transfer executes both endpoint field payloads
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: field keeps owner UID across board movement
+PASS: board actions complete
+PASS: relative owner faction remains valid while owner occupies other board
+PASS: board actions complete
+PASS: board actions complete
+PASS: restore enemy after relative field test
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: ordinary transfer leaving hostile adjacency executes source-board opportunity snapshot
+PASS: board actions complete
+PASS: board actions complete
+PASS: forced cross-board placement has default ZOC immunity
+PASS: board actions complete
+PASS: board actions complete
+PASS: forced cross-board placement opt-in triggers source opportunity once
+PASS: board actions complete
+PASS: board actions complete
+PASS: dual field clock payloads drain
+PASS: one CTB advance interleaves both boards by tick 100/150/200
+PASS: board actions complete
+PASS: board actions complete
+PASS: setup hero at reaction path start
+PASS: board actions complete
+PASS: board actions complete
+PASS: reaction transfer invalidates old walking continuation without recreating source occupancy
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: refresh clock experiment drains
+PASS: refresh experiment leaves expected active field
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: refresh clock experiment drains
+PASS: refresh clock experiment drains
+PASS: refresh clock experiment drains
+PASS: refresh clock experiment drains
+PASS: refresh experiment leaves expected active field
+PASS: board actions complete
+PASS: board actions complete
+PASS: field bulk/stepwise equivalence for refresh: { "trace": ["refresh", "refresh", "refresh"], "created": 300, "expires": 600, "next": 400, "board": "party" }
+PASS: REPLACE refresh happens at each effective boundary, not final endpoint
+PASS: board actions complete
+PASS: death clock experiment drains
+PASS: death experiment leaves expected active field
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: death clock experiment drains
+PASS: death clock experiment drains
+PASS: death clock experiment drains
+PASS: death clock experiment drains
+PASS: death experiment leaves expected active field
+PASS: board actions complete
+PASS: board actions complete
+PASS: field bulk/stepwise equivalence for death: { "trace": ["death"], "created": 0, "expires": -1, "next": 400, "board": "enemy", "alive": false, "occupied": false }
+PASS: tick death removes target and later ticks do not replay payload
+PASS: board actions complete
+PASS: cross clock experiment drains
+PASS: cross experiment leaves expected active field
+PASS: board actions complete
+PASS: board actions complete
+PASS: board actions complete
+PASS: cross clock experiment drains
+PASS: cross clock experiment drains
+PASS: cross clock experiment drains
+PASS: cross clock experiment drains
+PASS: cross experiment leaves expected active field
+PASS: board actions complete
+PASS: board actions complete
+PASS: field bulk/stepwise equivalence for cross: { "trace": ["parent", "parent", "child", "child"], "created": 100, "expires": -1, "next": 400, "board": "enemy" }
+PASS: cross-board child created at 100 joins global 200/300 boundaries; equal ticks use board order
+PASS: board actions complete
+PASS: intent movement field reaction transfers the surviving enemy to the hero board
+PASS: post-movement hit query uses actual new board range and skips out-of-range attack
+PASS: board actions complete
+PASS: restore enemy before move_after reaction
+PASS: move_after re-resolves retreat on the board entered by attack custom actions
+PASS: move_after reaction still performs the original cross-board attack once
+PASS: restore enemy after reaction intent cases
+PASS: reaction cases keep the hero's position
+PASS: distance target rules have the original large-unit fixture
+PASS: distance rule 0 prefers comparable same-board opponent over cross-board hero at equal coordinates
+PASS: distance rule 1 prefers comparable same-board opponent over cross-board hero at equal coordinates
+PASS: place near local target for distance comparisons
+PASS: local distance fixture has distinct real footprint distances
+PASS: same-board real distance 0: threat preview resolves expected target
+PASS: same-board real distance 0: controller damages the previewed target once
+PASS: same-board real distance 0: other candidate is not hit
+PASS: same-board real distance 1: threat preview resolves expected target
+PASS: same-board real distance 1: controller damages the previewed target once
+PASS: same-board real distance 1: other candidate is not hit
+PASS: restore hero before cross-board UID fallback
+PASS: move all target candidates onto the other board
+PASS: distance rule 0 without local candidates uses stable UID, not cross-board coordinates
+PASS: cross-board stable UID 0: threat preview resolves expected target
+PASS: cross-board stable UID 0: controller damages the previewed target once
+PASS: cross-board stable UID 0: other candidate is not hit
+PASS: distance rule 1 without local candidates uses stable UID, not cross-board coordinates
+PASS: cross-board stable UID 1: threat preview resolves expected target
+PASS: cross-board stable UID 1: controller damages the previewed target once
+PASS: cross-board stable UID 1: other candidate is not hit
+PASS: restore large fixture after target rule tests
+PASS: cross-board lifecycle fixtures spawned
+PASS: ALL shape remains local despite an opponent on caster board
+PASS: board actions complete
+PASS: ALL_OPPONENTS override independently spans both boards
+PASS: board actions complete
+PASS: board actions complete
+PASS: swap commits both endpoints before source leave kills one participant
+PASS: lethal post-swap continuation neither recreates dead unit nor rolls back survivor
+PASS: board actions complete
+PASS: atomic fixture places 2x2 units on independent boards
+PASS: different entity with duplicate UID cannot occupy another board
+PASS: changing board_id cannot duplicate an already placed identity
+PASS: injected destination commit failure rejects transfer
+PASS: failed transfer restores every source footprint cell and target occupancy
+PASS: injected second endpoint commit failure rejects swap
+PASS: second endpoint failure rolls back both multi-cell occupancies atomically
+PASS: successful multi-cell swap commits complete footprints
+PASS: cancelled transfer queue becomes idle
+PASS: cancellation before transfer commit leaves both boards unchanged
+Duplicating: Field Card Create
+PASS: native duplicate completes two card plays: dual_duplicate_create
+PASS: native spatial duplicate spends one fee and leaves one discard: dual_duplicate_create
+PASS: native duplicate emits two observed requests: dual_duplicate_create
+PASS: duplicate inherits actual actor identity: dual_duplicate_create
+PASS: duplicate inherits board and cell even without selected unit: dual_duplicate_create
+PASS: duplicate keeps module instance module generation and Director generation: dual_duplicate_create
+PASS: duplicate module context containers are independent: dual_duplicate_create
+PASS: real DuplicateCardPlays preserves empty-cell field selection for both plays
+PASS: duplicate shape fixture retains its second live enemy
+PASS: duplicate shape fixture aligns two enemy footprints in one column
+PASS: native duplicate completes two card plays: dual_duplicate_column
+PASS: native spatial duplicate spends one fee and leaves one discard: dual_duplicate_column
+PASS: native duplicate emits two observed requests: dual_duplicate_column
+PASS: duplicate inherits actual actor identity: dual_duplicate_column
+PASS: duplicate inherits board and cell even without selected unit: dual_duplicate_column
+PASS: duplicate keeps module instance module generation and Director generation: dual_duplicate_column
+PASS: duplicate module context containers are independent: dual_duplicate_column
+PASS: duplicate retains both resolved shape targets
+PASS: real DuplicateAttacks preserves column shape and damages both enemies twice
+PASS: duplicate fixture restores second enemy position
+PASS: adapter lifecycle starts idle
+PASS: mounted missing membership never falls back to an ordinary attack or block
+PASS: restore enemy membership after mounted refusal
+PASS: spatial request reserves exactly one energy before lifecycle changes
+PASS: queued request binds module generation before payment
+PASS: duplicate context isolates containers while retaining actor identity and source targets
+PASS: same board module Node sets up again
+PASS: restore real unit geometry after remount: unit_1
+PASS: restore real unit geometry after remount: unit_3
+PASS: restore real unit geometry after remount: unit_2
+PASS: same Node reset changes only module generation
+PASS: stale spatial request refunds and ordinary guard completes
+PASS: lifecycle rejection refunds reserved energy exactly once: stale_board_context
+PASS: rejected spatial card stays in hand while ordinary block executes once
+PASS: ordinary queued card never acquires board context
+PASS: rejected lifecycle test card cleaned up
+PASS: spatial request reserves exactly one energy before lifecycle changes
+PASS: queued request binds module generation before payment
+PASS: queue_free detaches spatial module without stopping ordinary CTB
+PASS: stale spatial request refunds and ordinary guard completes
+PASS: lifecycle rejection refunds reserved energy exactly once: board_module_required
+PASS: rejected spatial card stays in hand while ordinary block executes once
+PASS: ordinary queued card never acquires board context
+PASS: rejected lifecycle test card cleaned up
+PASS: replacement board module sets up
+PASS: restore real unit geometry after remount: unit_1
+PASS: restore real unit geometry after remount: unit_3
+PASS: restore real unit geometry after remount: unit_2
+PASS: old request remains stale after a different module is mounted
+PASS: spatial remount leaves the ordinary combat generation intact
+PASS: board actions complete
+PASS: board actions complete
+PASS: lethal destination field displays the committed destination before the death callback
+PASS: actual hero death animation reaches defeat summary
+PASS: death animation preserves the last committed board root position
+PASS: End Run handler finishes the defeated run
+PASS: run exit restores the persistent hero's pre-combat position and scale
+PASS: run exit releases presentation actor references and cancels movement tweens
+PASS: second run starts through existing menu handlers
+PASS: second-run start option opens map
+PASS: second run has an adjacent combat destination
+PASS: second-run hero becomes ready on rebuilt battlefield
+PASS: second-run start animation completes before standing-foot assertions
+PASS: second run rebuilds independent boards after prior death teardown
+PASS: same Root starts a new run with the same hero identity and no cumulative board scaling
+PRESENTATION ORIGIN second-run hero scene_file=res://scenes/combatants/Player.tscn sprite_path=Visible/AnimatedSprite2D captured_before_animation=true ready_origin=(64.0, 48.0) ready_offset=(0.0, 0.0) live_offset=(0.0, 0.0) cached_foot=(64.0, 96.0)
+PRESENTATION GEOMETRY second-run hero viewport=[P: (0.0, 0.0), S: (1200.0, 700.0)] sprite=(266.0, 425.0) root=(238.0, 404.0) visible_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (0.0, 0.0)] sprite_transform=[X: (1.0, 0.0), Y: (0.0, 1.0), O: (64.0, 48.0)] scale=(0.4375, 0.4375) unclipped=true foot=(266.0, 446.0)
+PASS: second-run hero canonical origin comes from pre-animation ready capture
+PASS: second-run hero actual sprite and HP nodes are visible in the scene tree
+PASS: second-run hero root maps to its board/footprint destination
+PASS: second-run hero actual sprite origin lies on the owning board surface
+PASS: second-run hero actual sprite origin is inside viewport and unclipped ancestors
+PASS: second-run hero actual sprite feet align with the footprint bottom center
+PASS: second-run hero actor depth remains above grids and below existing modal overlays
+PASS: dual card play completes: dual_finish
+PASS: real card clears initial dual-board enemy
+PASS: dual card play completes: dual_finish
+PASS: real card clears initial dual-board enemy
+PASS: first dual wave clears through real death flow
+PASS: empty current boards do not end combat while second wave is pending
+PASS: End Turn admits second wave on both boards
+PASS: wave entries with same local cell occupy their explicit boards without changing faction
+PASS: both board wave units join the single timeline
+PASS: dual card play completes: dual_finish
+PASS: defeat enemy-board final-wave unit
+PASS: last party-board opponent remains after enemy-board death
+PASS: enemy faction on party board still prevents victory
+PASS: dual card play completes: dual_finish
+PASS: defeat invading party-board final-wave unit
+PASS: last opponent on either board triggers real victory
+PASS: two-board waves clear before exactly one combat_ended
+PASS: victory stops CTB and clears both boards' fields
+PASS: complete DualBoard scenario returned
+PASS: DualBoard run exit releases the director
+DUAL_BOARD PASS: 394 checks, 0 failures

@@ -6,7 +6,7 @@
 
 ## 目前範圍
 
-已導入 kernel + dev，工作流與背景收在 wf/，框架分析與教學收在 analysis/slay-the-robot/。遊戲原始碼位於 game/，本專案工具與測試在 tools/、tests/。使用者指定以 `justty32/mycardgame` 外層 snapshot 發布完整程式與本地修復；原本固定 HEAD 的獨立 game checkout 保留於開發機，公開 checkout 的 game/ 為一般追蹤檔案，詳細佈局見 dev-env。現階段用平台原生 sub-agent 協作。
+已導入 kernel + dev，工作流與背景收在 wf/，框架分析與教學收在 analysis/slay-the-robot/。遊戲原始碼位於 game/，本專案工具與測試在 tools/、tests/；examples/ 放題材中立、獨立啟用的可玩框架範例，不混入各款遊戲的題材或個人 mod 清單。使用者指定以 `justty32/mycardgame` 外層 snapshot 發布完整程式與本地修復；原本固定 HEAD 的獨立 game checkout 保留於開發機，公開 checkout 的 game/ 為一般追蹤檔案，詳細佈局見 dev-env。現階段用平台原生 sub-agent 協作。
 
 ## 框架
 

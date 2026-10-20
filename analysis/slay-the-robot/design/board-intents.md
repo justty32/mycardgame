@@ -4,6 +4,14 @@
 
 2026-10-20 靜態核對本輪原始碼與新增測例；headless 執行結果由整合 owner 的交付報告記錄，本頁不以測試檔存在代替通過證據。既有上游意圖輪替、難度與圖示限制仍見敵人分析。
 
+## 可選模組與普通戰鬥
+
+[EnemyIntentController](../../../game/scripts/combat/controllers/EnemyIntentController.gd) 依 `director.board_module` 分派。有掛載時由 [BoardCombatModule](../../../game/scripts/combat/board/BoardCombatModule.gd) 委派 [BoardEnemyIntent](../../../game/scripts/combat/board/BoardEnemyIntent.gd)，後者持有以下移動、幾何及 await 後重查盤身分的責任。有模組卻找不到單位棋盤時拒絕執行，不能當成普通戰鬥繼續攻擊。
+
+未掛載的 NONE 路徑不查棋盤、射程、形狀或移動，不建立 ThreatPreview。它沿 `Enemy.build_intent_actions_data` 執行重設格擋、格擋、攻擊與 custom actions，保留音效及等待／取消管線；SELF 選自己，其餘目標規則沿普通 hero 目標，NEAREST／FARTHEST 在這裡沒有距離含義。
+
+普通路徑在音效與排隊前，以 [BoardContentPolicy](../../../game/scripts/combat/board/BoardContentPolicy.gd) 檢查完整 payload，context 沿 BaseAction 的 `player_values` fallback。明確棋盤 actions、validators 或空間 target override（含巢狀／別名）會令整個意圖拒絕，回報 `board_module_required` 並保留意圖，不能只執行普通攻擊而吞掉棋盤效果。[Player](../../../game/scripts/combatants/Player.gd) 的普通來傷預覽只算存活敵人，排除 SELF 與同一純檢查判定拒絕的意圖；SELF 的數字攔截以敵人自己為目標。這些是本輪模組拆分的原始碼契約，尚不代表新增 NONE 回歸已通過。
+
 ## 盤身分與唯一幾何入口
 
 [BoardTargeting](../../../game/scripts/combat/board/BoardTargeting.gd) 的 `board` 參數是目標盤。`geometry()` 取得來源實際盤與 `BoardPosition`，所有形狀／距離合法性交給 [CrossBoardPolicy](../../../game/scripts/combat/board/CrossBoardPolicy.gd)。盤身分以 `board_id` 判斷，與陣營分開；入侵者與敵人在同盤時仍用原同盤距離。
@@ -12,11 +20,11 @@
 
 [BoardActionGeometry](../../../game/scripts/combat/board/BoardActionGeometry.gd) 連同卡牌的巢狀 ActionValidator、VariableActionGenerator、RandomSelection payload 檢查，遵循 action → request/card 值與 `custom_key_names`。條件／隨機分支保守檢查全部可能效果；全域隨機目標檢查所有候選，不消耗 RNG。跨盤選格的普通 TO_CELL 或相對移動不能借用另一盤座標；特殊 TELEPORT 須明確 `target_board_id`（可用 `SELECTED`），顯式本盤 `target_cell` 則仍是局部移動。
 
-Hand 先查合法性；[HandManager](../../../game/autoload/HandManager.gd) 在加入 queue、保留費用前再查，涵蓋自動／複製出牌，出隊時重新查實際位置。若較早的效果讓合法性改變，當前 request 退保留費用並留 `card_values.board_rejection`；不移到 limbo、不執行卡牌效果。
+Hand 的選格與合法性由棋盤 adapter 承擔；[HandManager](../../../game/autoload/HandManager.gd) 呼叫通用 adapter，在加入 queue、保留費用前及出隊時驗證。[BoardCardAdapter](../../../game/scripts/combat/board/BoardCardAdapter.gd) 負責棋盤重查，涵蓋自動／複製出牌。若較早效果改變合法性，當前 request 退保留費用並留 `card_values.board_rejection`；不移到 limbo、不執行卡牌效果。普通卡流程不自行讀棋盤規則。
 
 ## 意圖與預覽
 
-[IntentResolver](../../../game/scripts/combat/board/IntentResolver.gd) 回傳來源盤、效果盤、目的格、路徑、命中格／單位與拒絕原因；[EnemyIntentController](../../../game/scripts/combat/controllers/EnemyIntentController.gd) 經真正 Action 執行。普通移動不跨盤。跨盤目標沒有 APPROACH／FLANK／CHARGE 的局部方向，維持來源盤位置後依 A 攻擊；不能先假設兩盤共享座標。
+[IntentResolver](../../../game/scripts/combat/board/IntentResolver.gd) 回傳來源盤、效果盤、目的格、路徑、命中格／單位與拒絕原因；BoardEnemyIntent 經真正 Action 執行。以下均指模組已掛載的戰鬥。普通移動不跨盤。跨盤目標沒有 APPROACH／FLANK／CHARGE 的局部方向，維持來源盤位置後依 A 攻擊；不能先假設兩盤共享座標。
 
 NEAREST／FARTHEST 先在同盤可比較的敵對單位中比較真實距離；沒有同盤候選時，跨盤候選按穩定 `unit_uid` 選首個。HP 規則仍按 HP，比較相同用 uid 排序。這是 v1 的明確 fallback，不代表跨盤距離為 0。TARGET_RULES 的 RANDOM／MARKED 仍保留既有 HERO fallback，勿與已實作的 TELEPORT 選格規則混淆。
 

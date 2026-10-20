@@ -314,10 +314,10 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 		DebugLogger.log_error("HandManager.add_card_to_play_queue: No card supplied for card play")
 		return
 	
-	# Board rejection happens before reserving energy, including automated / duplicated plays.
-	var board_rejection: String = _validate_board_request(card_play_request)
-	if board_rejection != "":
-		card_play_request.card_values["board_rejection"] = board_rejection
+	# Optional scene rules reject before reserving energy, including automated / duplicated plays.
+	var play_rejection: String = get_card_play_adapter().validate_request(card_play_request)
+	if play_rejection != "":
+		card_play_request.card_values["play_rejection"] = play_rejection
 		return
 
 	# get intercepted card play results to determine energy costs
@@ -369,39 +369,13 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 	if (not ActionHandler.actions_being_performed) and (not cards_being_played):
 		_perform_card_plays()
 
-## Same targeting gate used by Hand, repeated here before payment and immediately before play.
-func _validate_board_request(request: CardPlayRequest) -> String:
-	var battlefield: CombatBattlefield = CombatBattlefield.get_active()
-	if battlefield == null or request == null or request.card_data == null:
-		return ""
-	var acting: BaseCombatant = request.acting_unit if is_instance_valid(request.acting_unit) else UnitRegistry.get_hero()
-	if acting == null or battlefield.get_board_for_unit(acting) == null:
-		return "off_board"
-	var cell: Vector2i = request.selected_cell
-	var board_id: String = request.selected_board_id
-	if is_instance_valid(request.selected_target):
-		# A selected unit may have moved since the request was queued. Follow its actual position.
-		var current_board: BoardData = battlefield.get_board_for_unit(request.selected_target)
-		if current_board == null:
-			return "off_board"
-		if board_id != current_board.board_id or current_board.get_unit_at(cell) != request.selected_target:
-			cell = request.selected_target.board_anchor
-		board_id = current_board.board_id
-	if cell == BaseCombatant.BOARD_ANCHOR_NONE:
-		var context_values: Dictionary = request.card_data.card_values.duplicate()
-		context_values.merge(request.card_values, true)
-		return BoardTargeting.check_action_geometry(battlefield.get_board_for_unit(acting), acting, acting.board_anchor, request.card_data.card_play_actions, context_values)
-	if board_id == "":
-		board_id = acting.board_id
-	var board: BoardData = battlefield.get_board(board_id)
-	if board == null:
-		return "off_board"
-	var reason: String = BoardTargeting.check_card_target(board, acting, request.card_data, cell, request.card_values)
-	if reason == "":
-		request.selected_board_id = board_id
-		request.selected_cell = cell
-		request.resolved_targets = BoardTargeting.resolve_targets(board, acting, cell, request.card_data.card_shape, request.card_data.card_target_faction, request.card_data.card_range)
-	return reason
+## Scene-supplied optional rules; fallback keeps ordinary card play independent of modules.
+func get_card_play_adapter() -> CardPlayAdapter:
+	if is_instance_valid(hand) and is_instance_valid(hand.combat):
+		var adapter: CardPlayAdapter = hand.combat.get("card_play_adapter")
+		if adapter != null:
+			return adapter
+	return CardPlayAdapter.new()
 
 ## Main looping/locking method for performing all cards in the card queue.
 ## WARNING: Do not invoke this anywhere other than add_card_to_play_queue()
@@ -420,10 +394,10 @@ func _perform_card_plays() -> void:
 		var card_target: BaseCombatant = card_play_request.selected_target
 		card_play_queue_reserved_energy_total -= max(card_energy_cost, 0)
 		
-		# Earlier queued effects may have transferred the caster/target or changed the board.
-		var board_rejection: String = _validate_board_request(card_play_request)
-		if board_rejection != "":
-			card_play_request.card_values["board_rejection"] = board_rejection
+		# Earlier queued effects may have changed the target or optional scene context.
+		var play_rejection: String = get_card_play_adapter().validate_request(card_play_request)
+		if play_rejection != "":
+			card_play_request.card_values["play_rejection"] = play_rejection
 			Global.player_data.player_energy += max(card_energy_cost, 0)
 			hand.combat.update_combat_display()
 			continue
@@ -481,21 +455,13 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 	if ActionHandler.actions_being_performed:
 		await ActionHandler.actions_ended
 	
-	# get targets: board shape targets when resolved (combat framework Phase 2), else the selected target
-	var targets: Array[BaseCombatant] = [card_play_request.selected_target]
-	if not card_play_request.resolved_targets.is_empty():
-		targets.assign(card_play_request.resolved_targets)
-	var acting_unit: BaseCombatant = hand.player
-	if card_play_request.acting_unit != null and is_instance_valid(card_play_request.acting_unit):
-		acting_unit = card_play_request.acting_unit
-	
-	### generate and perform play card actions
-	# generate the card actions (card_move_distance adds a move that runs before them)
-	var card_actions_data: Array[Dictionary] = card_play_request.card_data.card_play_actions.duplicate()
-	var card_move_action_data: Dictionary = _get_card_move_action_data(card_play_request)
-	if not card_move_action_data.is_empty():
-		card_actions_data.append(card_move_action_data)
-	var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(acting_unit, card_play_request, targets, card_actions_data, null)
+	# Optional scene rules supply targets and payload without owning fees or queue order.
+	var play: Dictionary = get_card_play_adapter().resolve_play(card_play_request, hand.player)
+	var targets: Array[BaseCombatant] = []
+	targets.assign(play.targets)
+	var card_actions_data: Array[Dictionary] = []
+	card_actions_data.assign(play.actions_data)
+	var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(play.actor, card_play_request, targets, card_actions_data, null)
 	# generate a special action which signifies the end of the card play, to be done after all the other card actions
 	var card_played_finished_action: Array[BaseAction] = [ActionGenerator.generate_card_play_finished(card_play_request)]
 	
@@ -517,20 +483,6 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 	HandManager.move_card_to_pile(card_play_request.card_data, card_origin_pile, card_destination_pile, card_destination_strategy, get_hand_limit(), true, send_signal)
 
 	hand.combat.update_combat_display()
-
-## ActionMoveUnit payload of a card's card_move_distance (empty when 0): to the selected cell for
-## EMPTY_CELL cards, else toward the selected target. Card movement uses no move points.
-func _get_card_move_action_data(card_play_request: CardPlayRequest) -> Dictionary:
-	var card_data: CardData = card_play_request.card_data
-	if card_data.card_move_distance <= 0 or BoardData.get_active() == null:
-		return {}
-	var values: Dictionary = {"distance": card_data.card_move_distance, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
-	if card_data.card_target_faction == BoardTargeting.TARGET_FACTIONS.EMPTY_CELL:
-		values["mode"] = ActionMoveUnit.MODE_TO_CELL
-	else:
-		values["mode"] = ActionMoveUnit.MODE_TOWARD
-		values["reference"] = ActionMoveUnit.REFERENCE_SELECTED_TARGET
-	return {Scripts.ACTION_MOVE_UNIT: values}
 
 ## Legacy name of perform_end_of_action_hand_actions().
 func perform_end_of_turn_hand_actions() -> void:

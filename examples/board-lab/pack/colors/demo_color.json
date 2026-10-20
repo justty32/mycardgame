@@ -1,0 +1,9 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_color",
+    "color": "#b8d8e8ff",
+    "color_name": "棋盤實驗",
+    "color_energy_icon_texture_path": "external/sprites/colors/blue_energy_icon.png"
+  }
+}

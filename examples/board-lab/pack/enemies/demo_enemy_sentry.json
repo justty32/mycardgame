@@ -1,0 +1,83 @@
+{
+  "properties": {
+    "object_id": "demo_enemy_sentry",
+    "enemy_name": "哨兵",
+    "enemy_animation_id": "demo_animation_enemy",
+    "enemy_texture_path": "external/sprites/enemies/enemy_yellow_small.png",
+    "enemy_health": 24,
+    "enemy_health_max": 24,
+    "enemy_health_max_random_lower": 24,
+    "enemy_health_max_random_upper": 24,
+    "enemy_type": 0,
+    "enemy_speed": 10,
+    "enemy_move_range": 1,
+    "enemy_footprint": [
+      1,
+      1
+    ],
+    "enemy_opportunity_actions": [
+      {
+        "res://scripts/actions/combatant_actions/ActionAttack.gd": {
+          "damage": 3,
+          "target_override": 0,
+          "time_delay": 0.0
+        }
+      }
+    ],
+    "enemy_intents": {
+      "intent_initial": {
+        "object_id": "intent_initial",
+        "enemy_intent_overrides_id": "intent_initial",
+        "enemy_intent_name": "進場",
+        "enemy_intent_attack_damage": 0,
+        "enemy_intent_number_of_attacks": 0,
+        "enemy_intent_block": 0,
+        "enemy_intent_display_types": [],
+        "enemy_intent_next_intent_weights": {
+          "demo_enemy_sentry_guard": 1
+        },
+        "enemy_intent_range": 1,
+        "enemy_intent_target_rule": 4,
+        "enemy_intent_move": 0,
+        "enemy_intent_move_distance": 1
+      },
+      "demo_enemy_sentry_guard": {
+        "object_id": "demo_enemy_sentry_guard",
+        "enemy_intent_overrides_id": "demo_enemy_sentry_guard",
+        "enemy_intent_name": "架盾",
+        "enemy_intent_attack_damage": 0,
+        "enemy_intent_number_of_attacks": 0,
+        "enemy_intent_block": 2,
+        "enemy_intent_display_types": [
+          1
+        ],
+        "enemy_intent_next_intent_weights": {
+          "demo_enemy_sentry_attack": 1
+        },
+        "enemy_intent_range": 1,
+        "enemy_intent_target_rule": 4,
+        "enemy_intent_move": 0,
+        "enemy_intent_move_distance": 1
+      },
+      "demo_enemy_sentry_attack": {
+        "object_id": "demo_enemy_sentry_attack",
+        "enemy_intent_overrides_id": "demo_enemy_sentry_attack",
+        "enemy_intent_name": "短擊",
+        "enemy_intent_attack_damage": 4,
+        "enemy_intent_number_of_attacks": 1,
+        "enemy_intent_block": 0,
+        "enemy_intent_display_types": [
+          0
+        ],
+        "enemy_intent_next_intent_weights": {
+          "demo_enemy_sentry_guard": 1
+        },
+        "enemy_intent_range": 1,
+        "enemy_intent_target_rule": 4,
+        "enemy_intent_move": 0,
+        "enemy_intent_move_distance": 1
+      }
+    }
+  },
+  "patch_data": {}
+}

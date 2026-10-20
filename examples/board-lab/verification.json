@@ -1,0 +1,124 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-20",
+ "link_columns": [
+  "test_file",
+  "run_path"
+ ],
+ "columns": [
+  "id",
+  "scope",
+  "test_file",
+  "assertion_ids",
+  "status",
+  "run_path"
+ ],
+ "rows": [
+  {
+   "id": "startup",
+   "scope": "真正NewRun選角與自訂Act，無Global注入",
+   "test_file": "tests/scenario_ui.gd",
+   "assertion_ids": [
+    "new run selects pack player and authored starting Act",
+    "natural character deck has the exact ten authored cards"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "adjacency",
+   "scope": "固定三遭遇正常鄰接入口",
+   "test_file": "tests/scenario_campaign.gd",
+   "assertion_ids": [
+    "map refuses jumping directly to the non-adjacent final battle",
+    "loaded run follows the remaining fixed adjacent event sequence"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "entry_cards",
+   "scope": "原始牌組真field/cross/swap/push/guard與控制區",
+   "test_file": "tests/scenario_lessons.gd",
+   "assertion_ids": [
+    "cross-step card transfers the real hero with stable UID",
+    "leaving adjacent hostile control consumes exactly three HP through a real opportunity attack",
+    "swapped enemy entering the authored field suffers five damage",
+    "enemy action starts with two field stay damage before its guard intent",
+    "same-board push moves one cell then deals three collision damage at the boundary",
+    "natural entry victory clears authored fields and releases the board world"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "cross_swap_aoe",
+   "scope": "雙盤真正交換與局部十字多目標",
+   "test_file": "tests/scenario_lessons.gd",
+   "assertion_ids": [
+    "local cross-shaped pulse hits both adjacent enemies for six each",
+    "real swap card atomically exchanges occupants across the two boards",
+    "killing the party-board invader alone does not end combat"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "reward",
+   "scope": "正常money/draft選牌加入永久牌組",
+   "test_file": "tests/scenario_ui.gd",
+   "assertion_ids": [
+    "real reward button grants displayed money",
+    "reward card comes from authored pack and persists in deck"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "save_read",
+   "scope": "跨程序存真reward deck於下遭遇入戰checkpoint再Continue",
+   "test_file": "tests/scenario_campaign.gd",
+   "assertion_ids": [
+    "Continue uses a genuinely different engine process",
+    "cross-process checkpoint retains player_deck",
+    "Continue restarts the authored second encounter with two fresh boards"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "victory",
+   "scope": "Boss真正致死到勝利結算",
+   "test_file": "tests/scenario_campaign.gd",
+   "assertion_ids": [
+    "final authored Boss produces true victory state",
+    "victory settlement records a win and removes only the isolated run checkpoint"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "defeat_restart",
+   "scope": "原始敵人攻擊真正敗北並重開",
+   "test_file": "tests/scenario_campaign.gd",
+   "assertion_ids": [
+    "real enemy attacks and damage signals account for the lethal health loss",
+    "natural lethal damage chooses defeat summary",
+    "normal restart resets authored health deck and Act"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  },
+  {
+   "id": "ordinary_board_input",
+   "scope": "普通牌於已掛棋盤的輸入翻譯，非法格拒絕與純request",
+   "test_file": "tests/scenario_input_cases.gd",
+   "assertion_ids": [
+    "ordinary successful request contains no board module context"
+   ],
+   "status": "PASS",
+   "run_path": "evidence/standalone-results.json"
+  }
+ ]
+}

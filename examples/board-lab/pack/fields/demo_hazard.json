@@ -1,0 +1,32 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "demo_hazard",
+    "field_name": "伏能場",
+    "field_color_id": "demo_color",
+    "field_icon_texture_path": "external/sprites/status_effects/status_effect_blue.png",
+    "field_duration_ticks": 300,
+    "field_faction_filter": 2,
+    "field_stack_policy": 0,
+    "field_triggers_on_pass_through": false,
+    "field_on_enter_actions": [
+      {
+        "res://scripts/actions/combatant_actions/ActionDirectDamage.gd": {
+          "damage": 5,
+          "time_delay": 0.0
+        }
+      }
+    ],
+    "field_on_stay_actions": [
+      {
+        "res://scripts/actions/combatant_actions/ActionDirectDamage.gd": {
+          "damage": 2,
+          "time_delay": 0.0
+        }
+      }
+    ],
+    "field_tags": [
+      "demo_hazard"
+    ]
+  }
+}

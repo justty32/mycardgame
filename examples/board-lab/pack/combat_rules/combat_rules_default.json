@@ -1,0 +1,28 @@
+{
+  "patch_data": {},
+  "properties": {
+    "object_id": "combat_rules_default",
+    "timeline_delay_scale": 10,
+    "default_action_delay": 100,
+    "wait_action_delay": 50,
+    "draw_per_action": 10,
+    "hand_limit": 10,
+    "energy_per_action": -1,
+    "energy_cap": -1,
+    "board_mode": 1,
+    "free_move_per_action": 2,
+    "zone_of_control": 2,
+    "zoc_triggers_on_forced_move": false,
+    "default_board_size": [
+      5,
+      5
+    ],
+    "board_min_size": [
+      5,
+      5
+    ],
+    "move_split_allowed": true,
+    "move_undo_allowed": true,
+    "paid_move_max_cells": 0
+  }
+}

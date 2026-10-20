@@ -1,0 +1,60 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-20",
+ "link_columns": [
+  "published_path"
+ ],
+ "columns": [
+  "id",
+  "raw_artifact",
+  "published_path",
+  "raw_sha256",
+  "published_sha256",
+  "raw_bytes",
+  "published_bytes",
+  "transformation"
+ ],
+ "rows": [
+  {
+   "id": "overlay-results.json",
+   "raw_artifact": "artifacts/verification/20261020-115010-d3ab82db/results.json",
+   "published_path": "overlay-results.json",
+   "raw_sha256": "9d1d909b7e6579c9ad5126567d53d63c0b01757461cbe7a324926afafb258da6",
+   "published_sha256": "79354bbfe30eed56ee56830a348e2803531897ecdf886421cc0a97ce72b1cfdd",
+   "raw_bytes": 26393,
+   "published_bytes": 26094,
+   "transformation": "UTF-8 LF; project/user path-prefix redaction; JSON pretty-print"
+  },
+  {
+   "id": "overlay-smoke.log",
+   "raw_artifact": "artifacts/verification/20261020-115010-d3ab82db/Smoke/smoke.log",
+   "published_path": "overlay-smoke.log",
+   "raw_sha256": "b89817b7965fb026afc4550d162c5fa711c896887b5c54c0a7c56669674e05e7",
+   "published_sha256": "d42b52aa018a011a12a6872d9a6f45e3f1bd50659970893abaac8d546754982f",
+   "raw_bytes": 16591,
+   "published_bytes": 16510,
+   "transformation": "UTF-8 LF; project/user path-prefix redaction"
+  },
+  {
+   "id": "pack-results.json",
+   "raw_artifact": "artifacts/verification/20261020-115148-e417eb83/results.json",
+   "published_path": "pack-results.json",
+   "raw_sha256": "5e6c43662a8109d88cb41ba3e1175cb2834b740c11f66f451946461e58855936",
+   "published_sha256": "7d8841f5a9bcda6a66b1de608994be33966e421ff657ff9c73c91a516011dcf0",
+   "raw_bytes": 26427,
+   "published_bytes": 26128,
+   "transformation": "UTF-8 LF; project/user path-prefix redaction; JSON pretty-print"
+  },
+  {
+   "id": "pack-smoke.log",
+   "raw_artifact": "artifacts/verification/20261020-115148-e417eb83/Smoke/smoke.log",
+   "published_path": "pack-smoke.log",
+   "raw_sha256": "8bba8accc851a2b170a9d3cdcb1a0ba4089e0257f3f00c1cefa856969d6639e8",
+   "published_sha256": "1f36e7b5cad12fb774a9bb1919534f610b8e84aedcaf4689bf98278868cf16a9",
+   "raw_bytes": 12604,
+   "published_bytes": 12577,
+   "transformation": "UTF-8 LF; project/user path-prefix redaction"
+  }
+ ]
+}

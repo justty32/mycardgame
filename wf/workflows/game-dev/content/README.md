@@ -8,4 +8,6 @@
 
 題材樹的內容包（`games/<game>/pack/`）以 runner `--pack` 隔離載入並跑題材 probe，見 [題材內容包](pack.md)。
 
+需要交付可手動遊玩的隔離副本，使用 [可玩副本](playable-copy.md)；中性實例見 [棋盤示範包](../../../../examples/board-lab/README.md)。包的完整新局／戰鬥／存讀流程由 PackScenario 驗證，不以載入 probe 代替。
+
 卡牌定位與平衡回 [卡牌設計](../card-design.md)／[評量](../card-evaluation.md)；新行為原語回 [機制](../mechanics.md)。完成後依內容入口交付真實取得入口與適用的專項驗收，不用教學成功代替產品需求。

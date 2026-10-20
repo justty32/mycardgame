@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "object_id": "demo_event_field",
+    "event_encounter_object_id": "demo_encounter_field",
+    "event_weighted_enemy_object_ids": [
+      {
+        "demo_enemy_anchor": 1
+      },
+      {
+        "demo_enemy_walker": 1
+      }
+    ],
+    "event_has_combat_rewards": true,
+    "event_death_message_bbcode": "觀察下一個意圖，再決定格擋、走位或換位。重新開始可以再試一次。"
+  },
+  "patch_data": {}
+}

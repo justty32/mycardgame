@@ -176,13 +176,16 @@ func update_incoming_damage_amount(recalculate_enemy_intent: bool = true) -> voi
 		incoming_damage_amount_text.text = str(incoming_damage_amount)
 		incoming_damage.visible = incoming_damage_amount > 0
 		return
-	for en in get_tree().get_nodes_in_group("enemies"):
-		var enemy: Enemy = en # typecast
+	for enemy: Enemy in Global.get_alive_enemies():
+		var intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
+		var targets_self: bool = intent != null and intent.enemy_intent_target_rule == EnemyIntentData.TARGET_RULES.SELF
 		
 		if recalculate_enemy_intent:
+			enemy.intended_target = enemy if targets_self else self
 			enemy.update_enemy_intent()
 		
-		incoming_damage_amount += enemy.enemy_intent_attack_damage * enemy.enemy_intent_number_of_attacks
+		if not targets_self and EnemyIntentController.get_plain_intent_error(enemy, intent) == "":
+			incoming_damage_amount += enemy.enemy_intent_attack_damage * enemy.enemy_intent_number_of_attacks
 
 	incoming_damage_amount_text.text = str(incoming_damage_amount)
 	incoming_damage.visible = incoming_damage_amount > 0

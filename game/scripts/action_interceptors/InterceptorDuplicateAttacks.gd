@@ -26,6 +26,7 @@ func process_action_interception(action_interceptor_processor: ActionInterceptor
 					card_play_request.card_data,
 					card_play_request.selected_target,
 					true, true)
+				new_card_play_request.copy_selection_context_from(card_play_request)
 				# NOTE: If you want duplicate plays to DISALLOW card mutations, eg an attack card
 				# does 5 damage but increases damage by 3 after play will just do 5 + 5 instead of 5 + 8
 				# then uncomment out the below line

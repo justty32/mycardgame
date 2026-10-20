@@ -31,7 +31,7 @@ var current_card_pick_action: ActionBasePickCards = null	# an action currently r
 @onready var background_button: TextureButton = $%BackgroundButton
 @onready var select_target_label: Label = $%SelectTargetLabel
 var current_selected_card: Card = null	# used for cards with targeting
-## Why the last board cell click did not play the selected card (BoardTargeting.REJECT_*), "" = played.
+## Why an optional targeting policy rejected the last selection; empty means accepted.
 var last_target_rejection: String = ""
 var selected_board_id: String = ""
 
@@ -91,10 +91,6 @@ func _ready():
 	
 	Signals.enemy_clicked.connect(_on_enemy_clicked)
 	Signals.enemy_hovered.connect(_on_enemy_hovered)
-	Signals.cell_clicked.connect(_on_cell_clicked)
-	Signals.cell_hovered.connect(_on_cell_hovered)
-	Signals.board_cell_clicked.connect(_on_board_cell_clicked)
-	Signals.board_cell_hovered.connect(_on_board_cell_hovered)
 	
 	confirm_pick_button.button_up.connect(_on_confirm_pick_button_up)
 	
@@ -225,7 +221,7 @@ func _on_card_selected(card: Card):
 				return
 		
 		# check if autoplaying card based on targeting type (board cards may need a cell)
-		if BoardTargeting.card_needs_cell(card.card_data):
+		if HandManager.get_card_play_adapter().needs_selection(card.card_data):
 			current_selected_card = card
 			_prompt_target(card)
 		else:
@@ -234,7 +230,10 @@ func _on_card_selected(card: Card):
 			var card_play_request: CardPlayRequest = HandManager.create_card_play_request(card_data, null, true, true)
 			card_play_request.card_destination_pile = card_data.card_play_destination
 			card_play_request.card_destination_strategy = card_data.card_play_destination_strategy
-			_fill_board_request(card_play_request, BaseCombatant.BOARD_ANCHOR_NONE)
+			var rejection: String = HandManager.get_card_play_adapter().prepare_request(card_play_request, {"actor": _get_acting_unit()})
+			if rejection != "":
+				last_target_rejection = rejection
+				return
 			
 			HandManager.add_card_to_play_queue(card_play_request, true, false)
 			current_selected_card = null
@@ -262,133 +261,52 @@ func _on_background_button_up():
 
 func _on_enemy_clicked(enemy: Enemy):
 	if current_selected_card != null:
-		var board: BoardData = _get_target_board(enemy.board_id)
-		if board != null and board.has_unit(enemy):
-			attempt_play_selected_card_at_cell(enemy.board_anchor, enemy, enemy.board_id)
-			return
-		_play_selected_card(enemy, BaseCombatant.BOARD_ANCHOR_NONE)
+		attempt_play_selected_card(HandManager.get_card_play_adapter().selection_for_target(enemy))
 
-## Legacy cell signals resolve exclusively to the acting unit's actual board.
+## Compatibility entry points; optional scene policy owns their meaning and subscriptions.
 func _on_cell_clicked(cell: Vector2i) -> void:
-	var acting: BaseCombatant = _get_acting_unit()
-	_on_board_cell_clicked(acting.board_id if acting != null else "shared", cell)
+	HandManager.get_card_play_adapter().handle_cell_clicked(self, "", cell)
 
 func _on_board_cell_clicked(id: String, cell: Vector2i) -> void:
-	if current_card_pick_action != null:
-		return
-	if current_selected_card != null:
-		attempt_play_selected_card_at_cell(cell, null, id)
-		return
-	if hand_disabled or performing_card_right_click:
-		return
-	var director: CombatDirector = Global.get_combat_director()
-	var acting: BaseCombatant = _get_acting_unit()
-	# Ordinary walking never crosses a board, even at identical local coordinates.
-	if director != null and acting != null and acting.board_id == id:
-		director.request_player_move(cell, id)
+	HandManager.get_card_play_adapter().handle_cell_clicked(self, id, cell)
 
 func _on_cell_hovered(cell: Vector2i) -> void:
-	var acting: BaseCombatant = _get_acting_unit()
-	_on_board_cell_hovered(acting.board_id if acting != null else "shared", cell)
+	HandManager.get_card_play_adapter().handle_cell_hovered(self, "", cell)
 
 func _on_board_cell_hovered(id: String, cell: Vector2i) -> void:
-	if current_selected_card == null:
-		return
-	var board: BoardData = _get_target_board(id)
-	if board != null:
-		current_selected_card.update_card_display(board.get_unit_at(cell) as Enemy)
+	HandManager.get_card_play_adapter().handle_cell_hovered(self, id, cell)
 
-func _get_target_board(id: String = "") -> BoardData:
-	var battlefield: CombatBattlefield = CombatBattlefield.get_active()
-	if battlefield == null:
-		return BoardData.get_active()
-	if id == "":
-		var acting: BaseCombatant = _get_acting_unit()
-		id = acting.board_id if acting != null else "shared"
-	return battlefield.get_board(id)
-
-## Plays the selected card at a board cell after the range, faction and board-validator checks
-## (BoardTargeting.check_card_target). A rejected cell keeps the card selected. Returns true if queued.
 func attempt_play_selected_card_at_cell(cell: Vector2i, clicked_unit: BaseCombatant = null, target_board_id: String = "") -> bool:
+	return attempt_play_selected_card({"target": clicked_unit, "cell": cell, "id": target_board_id})
+
+## Selection stays active on rejection. Fees and queueing remain HandManager's responsibility.
+func attempt_play_selected_card(selection: Dictionary) -> bool:
 	if current_selected_card == null:
 		return false
 	var card_data: CardData = current_selected_card.card_data
-	var board: BoardData = _get_target_board(target_board_id)
-	if board == null and CombatBattlefield.get_active() != null:
-		last_target_rejection = "invalid_board"
+	var request: CardPlayRequest = HandManager.create_card_play_request(card_data, selection.get("target"), true, true)
+	request.card_destination_pile = card_data.card_play_destination
+	request.card_destination_strategy = card_data.card_play_destination_strategy
+	var context: Dictionary = selection.duplicate()
+	context["actor"] = _get_acting_unit()
+	var reason: String = HandManager.get_card_play_adapter().prepare_request(request, context)
+	if reason != "":
+		last_target_rejection = reason
 		return false
-	var acting_unit: BaseCombatant = _get_acting_unit()
-	var target: BaseCombatant = clicked_unit
-	if board != null:
-		var reason: String = BoardTargeting.check_card_target(board, acting_unit, card_data, cell)
-		match card_data.card_target_faction:
-			BoardTargeting.TARGET_FACTIONS.EMPTY_CELL:
-				target = null
-			BoardTargeting.TARGET_FACTIONS.SELF:
-				target = acting_unit
-			_:
-				target = board.get_unit_at(cell)
-		if reason == "" and _has_board_validators(card_data):
-			var probe_request: CardPlayRequest = HandManager.create_card_play_request(card_data, target, true, false)
-			probe_request.acting_unit = acting_unit
-			probe_request.selected_cell = cell
-			probe_request.selected_board_id = board.board_id
-			var probe_action: BaseAction = ActionGenerator.create_actions(acting_unit, probe_request, [target], [{Scripts.ACTION_CARD_PLAY: {}}], null)[0]
-			if not Global.validate(card_data.card_play_validators, card_data, probe_action):
-				reason = BoardTargeting.REJECT_VALIDATORS
-		if reason != "":
-			last_target_rejection = reason
-			return false
 	last_target_rejection = ""
-	selected_board_id = board.board_id if board != null else target_board_id
-	_play_selected_card(target, cell, selected_board_id)
+	_unprompt_target()
+	HandManager.add_card_to_play_queue(request, true, false)
+	current_selected_card = null
 	return true
 
 func _play_selected_card(target: BaseCombatant, cell: Vector2i, target_board_id: String = "") -> void:
-	_unprompt_target()
-	# generate the card play request and enqueue it
-	var card_data: CardData = current_selected_card.card_data
-	var card_play_request: CardPlayRequest = HandManager.create_card_play_request(card_data, target, true, true)
-	card_play_request.card_destination_pile = card_data.card_play_destination
-	card_play_request.card_destination_strategy = card_data.card_play_destination_strategy
-	_fill_board_request(card_play_request, cell, target_board_id)
-	
-	HandManager.add_card_to_play_queue(card_play_request, true, false)
-	current_selected_card = null
-
-## Sets the acting unit, selected cell and shape-resolved targets of a card play request.
-func _fill_board_request(card_play_request: CardPlayRequest, cell: Vector2i, target_board_id: String = "") -> void:
-	var acting_unit: BaseCombatant = _get_acting_unit()
-	card_play_request.acting_unit = acting_unit
-	card_play_request.selected_cell = cell
-	var board: BoardData = _get_target_board(target_board_id)
-	card_play_request.selected_board_id = board.board_id if board != null else target_board_id
-	var card_data: CardData = card_play_request.card_data
-	if board == null or card_data == null or acting_unit == null:
-		return
-	var shape: int = card_data.card_shape
-	if cell == BaseCombatant.BOARD_ANCHOR_NONE:
-		# untargeted cards: only area shapes around the acting unit resolve targets
-		if shape != BoardTargeting.TARGET_SHAPES.SELF_AREA and shape != BoardTargeting.TARGET_SHAPES.ALL:
-			return
-		cell = acting_unit.board_anchor
-	if card_data.card_target_faction == BoardTargeting.TARGET_FACTIONS.EMPTY_CELL and shape == BoardTargeting.TARGET_SHAPES.SINGLE:
-		return
-	card_play_request.resolved_targets = BoardTargeting.resolve_targets(board, acting_unit, cell, shape, card_data.card_target_faction, card_data.card_range)
+	attempt_play_selected_card({"target": target, "cell": cell, "id": target_board_id})
 
 func _get_acting_unit() -> BaseCombatant:
 	var director: CombatDirector = Global.get_combat_director()
 	if director != null and director.acting_unit != null and director.acting_unit.faction == BaseCombatant.FACTIONS.PARTY:
 		return director.acting_unit
 	return player
-
-## Board validators read the selected cell / target, so they are re-checked once a cell is chosen.
-func _has_board_validators(card_data: CardData) -> bool:
-	for validator_data: Dictionary in card_data.card_play_validators:
-		for validator_script_path: String in validator_data:
-			if validator_script_path.contains("/validators/board/"):
-				return true
-	return false
 
 func _on_enemy_hovered(enemy: Enemy):
 	if current_selected_card != null:

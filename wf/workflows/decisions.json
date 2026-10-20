@@ -128,6 +128,12 @@
    "decision": "角色與敵人的實際sprite／演出主體直接站在棋盤上，依board_id＋cell／footprint定位，普通移動、特卡跨盤及交換時本體跟隨；呈現雙方對峙的日式RPG回合戰鬥感（使用者確認）。",
    "rejected_and_why": "僅格內token加固定容器人物不符合使用者要求。沒有將JRPG推定為側面、斜視、透視或3D；這些仍未決。",
    "premise": "2026-10-20確認呈現時僅規劃；同日使用者隨後已授權雙盤A／本體站格與完整Phase2b實作及headless。沿用現有2D sprites作功能基線，最終鏡頭、美術與人工觀感另驗。"
+  },
+  {
+   "date": "2026-10-20",
+   "decision": "棋盤採戰鬥場景可選掛載模組；普通抽牌、費用、出牌、結算不讀棋盤規則，棋盤 targeting/preflight/preview/位置與舊欄位相容轉譯由 adapter 承擔。示範包保留雙盤 A 與顯式棋盤效果。",
+   "rejected_and_why": "拒絕在 Hand／HandManager／Global 繼續加棋盤特判，也不以單棋盤冒充未掛載模式；不建立大型 plugin／DI 系統。既有整合需實際搬責任並以普通卡與真正 boardless 戰鬥回歸。",
+   "premise": "2026-10-20 使用者於中性示範包工作中明示；正常卡牌機制維持原義，模組不存在時棋盤專屬效果費用前明確拒絕。原雙棋盤與 Phase 2b 功能須守住。"
   }
  ]
 }

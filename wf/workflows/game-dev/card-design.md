@@ -76,3 +76,5 @@
 ## 交接
 
 交 [card-evaluation](card-evaluation.md) 時附 brief、版本／mod 次序、實際 card／pack／character ID、基礎與升級期望、可到達情境、測試與未驗項。圖片、聲音、UI 文案仍需相應領域驗收；目前禁止視窗與桌面操作，背景資料證據不能當作視覺／可玩樂趣評價。更新領域分析與流程，導航由整合 agent 維護。
+
+棋盤卡的新選項與舊欄位相容見 [可選模組](mechanics/board-module.md)。普通卡維持原出牌路徑。

@@ -22,7 +22,7 @@ func _scenario() -> bool:
 	_check(director.has_living_opponents() and not director.is_combat_over(), "enemy on other board still prevents victory")
 	var presentation: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join("dual_board_presentation_cases.gd")).new()
 	await presentation.run(self)
-	for script: String in ["dual_board_policy_cases.gd", "dual_board_transfer_cases.gd", "dual_board_field_cases.gd", "dual_board_clock_equivalence_cases.gd", "dual_board_intent_reaction_cases.gd", "dual_board_lifetime_cases.gd", "dual_board_atomic_cases.gd"]:
+	for script: String in ["dual_board_policy_cases.gd", "dual_board_transfer_cases.gd", "dual_board_field_cases.gd", "dual_board_clock_equivalence_cases.gd", "dual_board_intent_reaction_cases.gd", "dual_board_lifetime_cases.gd", "dual_board_atomic_cases.gd", "dual_board_duplicate_cases.gd", "dual_board_adapter_cases.gd"]:
 		var group: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join(script)).new()
 		await group.run(self)
 	await presentation.run_exit(self)

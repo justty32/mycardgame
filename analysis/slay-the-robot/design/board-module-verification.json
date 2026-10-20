@@ -1,0 +1,113 @@
+{
+ "contract": "wf-table/1",
+ "source": "board-module.md",
+ "extracted": "2026-10-20",
+ "link_columns": [
+  "test_file",
+  "run_path"
+ ],
+ "columns": [
+  "id",
+  "scope",
+  "test_file",
+  "assertion_ids",
+  "status",
+  "run_path"
+ ],
+ "rows": [
+  {
+   "id": "none_world",
+   "scope": "rules off 與 scene opt-out 的真實新局／Continue，沒有棋盤世界",
+   "test_file": "../../../tests/boardless_flow.gd",
+   "assertion_ids": [
+    "disabled combat has no BoardCombatModule instance",
+    "disabled combat allocates no board controller battlefield field or preview",
+    "ordinary units retain registry identities and real CTB timeline membership"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  },
+  {
+   "id": "ordinary_cards",
+   "scope": "普通牌取消、排隊預扣退款、真重複、免費出牌、非法棋盤牌費用前拒絕",
+   "test_file": "../../../tests/boardless_card_cases.gd",
+   "assertion_ids": [
+    "refunded queued card performs no damage and restores all reserved energy",
+    "native duplicate play applies two ordinary attacks to the selected enemy",
+    "disabled spatial rejection preserves fee pile target and queue: geometry"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  },
+  {
+   "id": "none_intents",
+   "scope": "NONE 自身／主角意圖與完整盤面 payload 拒絕；明標 API fixture",
+   "test_file": "../../../tests/boardless_intent_cases.gd",
+   "assertion_ids": [
+    "NONE SELF keeps normal block, self-attack and custom-action ordering",
+    "NONE rejection queues no ordinary attack or partial action payload"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  },
+  {
+   "id": "none_waves",
+   "scope": "NONE 後續波次延遲、登場、真 CTB 行動與末波勝利",
+   "test_file": "../../../tests/boardless_wave_cases.gd",
+   "assertion_ids": [
+    "delayed wave enemy executes at authored entry tick before hero resumes",
+    "NONE waves retain start-clear-final-victory ordering"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  },
+  {
+   "id": "none_campaign",
+   "scope": "真普通傷害勝利、reward永久牌、第二遭遇 checkpoint、跨程序完整牌組續玩與真敗北",
+   "test_file": "../../../tests/boardless_campaign.gd",
+   "assertion_ids": [
+    "ordinary enemy intent deals real HP damage without board targeting",
+    "normal boardless reward adds one persistent card",
+    "boardless checkpoint retains player_deck",
+    "loaded ordinary card damages actual selected enemy"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  },
+  {
+   "id": "run_preflight",
+   "scope": "預設／自訂 Act 純前置檢查，空／未知 Act 拒絕無副作用",
+   "test_file": "../../../tests/run_start_preflight_probe.gd",
+   "assertion_ids": [
+    "missing starting Act field retains valid act_1 default",
+    "invalid starting Act returns false before beginning run: preflight_missing_act",
+    "rejected run preserves checkpoint existence and bytes: preflight_missing_act"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  },
+  {
+   "id": "mounted_duplicate",
+   "scope": "真空格 Field 與列形 Attack 複製，單費單 discard、保留三種生命週期與獨立容器",
+   "test_file": "../../../tests/dual_board_duplicate_cases.gd",
+   "assertion_ids": [
+    "real DuplicateCardPlays preserves empty-cell field selection for both plays",
+    "real DuplicateAttacks preserves column shape and damages both enemies twice"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  },
+  {
+   "id": "mounted_lifecycle",
+   "scope": "同 Node 重用、真正 queue_free、普通卡仍可執行、重掛舊請求拒絕退款",
+   "test_file": "../../../tests/dual_board_adapter_cases.gd",
+   "assertion_ids": [
+    "same Node reset changes only module generation",
+    "queue_free detaches spatial module without stopping ordinary CTB",
+    "old request remains stale after a different module is mounted"
+   ],
+   "status": "PASS",
+   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+  }
+ ]
+}

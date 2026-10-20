@@ -120,7 +120,7 @@ static func resolve_card_cells(board: BoardData, acting_unit: BaseCombatant, car
 	var result: Array[Vector2i] = []
 	if check_card_target(board, acting_unit, card_data, cell) != "":
 		return result
-	result.assign(geometry(board, acting_unit, cell, card_data.card_shape, card_data.card_range).get("cells", []))
+	result.assign(geometry(board, acting_unit, cell, BoardCardOptions.shape_of(card_data), BoardCardOptions.range_of(card_data)).get("cells", []))
 	return result
 
 ## Living targets of a shape on the selected board. SELF_AREA remains on the caster's board.
@@ -143,11 +143,11 @@ static func resolve_targets(board: BoardData, acting_unit: BaseCombatant, cell: 
 static func check_card_target(board: BoardData, acting_unit: BaseCombatant, card_data: CardData, cell: Vector2i, request_values: Dictionary = {}) -> String:
 	if board == null:
 		return ""
-	var resolved: Dictionary = geometry(board, acting_unit, cell, card_data.card_shape, card_data.card_range)
+	var resolved: Dictionary = geometry(board, acting_unit, cell, BoardCardOptions.shape_of(card_data), BoardCardOptions.range_of(card_data))
 	if not resolved.valid:
 		return resolved.error
 	var effect_board: BoardData = _battlefield_for(board).get_board(resolved.board_id)
-	var effective_cell: Vector2i = acting_unit.board_anchor if card_data.card_shape == TARGET_SHAPES.SELF_AREA else cell
+	var effective_cell: Vector2i = acting_unit.board_anchor if BoardCardOptions.shape_of(card_data) == TARGET_SHAPES.SELF_AREA else cell
 	var context_values: Dictionary = card_data.card_values.duplicate()
 	context_values.merge(request_values, true)
 	var action_error: String = check_action_geometry(effect_board, acting_unit, effective_cell, card_data.card_play_actions, context_values)
@@ -155,7 +155,7 @@ static func check_card_target(board: BoardData, acting_unit: BaseCombatant, card
 		return action_error
 	if resolved.cross_board and card_data.card_move_distance > 0:
 		return "cross_board_walk_unsupported"
-	match card_data.card_target_faction:
+	match BoardCardOptions.faction_of(card_data):
 		TARGET_FACTIONS.EMPTY_CELL:
 			if effect_board.get_unit_at(effective_cell) != null or not effect_board.can_stand(acting_unit, effective_cell):
 				return REJECT_CELL_NOT_FREE
@@ -163,7 +163,7 @@ static func check_card_target(board: BoardData, acting_unit: BaseCombatant, card
 			pass
 		_:
 			var unit: BaseCombatant = effect_board.get_unit_at(effective_cell)
-			if unit == null or not unit.is_alive() or not faction_matches(acting_unit, unit, card_data.card_target_faction):
+			if unit == null or not unit.is_alive() or not faction_matches(acting_unit, unit, BoardCardOptions.faction_of(card_data)):
 				return REJECT_NO_TARGET
 	return ""
 
@@ -173,7 +173,7 @@ static func check_action_geometry(board: BoardData, parent: BaseCombatant, cell:
 
 ## Whether a card needs a board cell from the player (target selection) before it is played.
 static func card_needs_cell(card_data: CardData) -> bool:
-	return card_data.card_requires_target or card_data.card_target_faction == TARGET_FACTIONS.EMPTY_CELL
+	return card_data.card_requires_target or BoardCardOptions.faction_of(card_data) == TARGET_FACTIONS.EMPTY_CELL
 
 #region Validator context (board validators run with or without an action)
 ## The unit a validator checks "from": the action's parent, else the acting party unit, else the hero.

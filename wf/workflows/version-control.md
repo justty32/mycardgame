@@ -38,6 +38,8 @@
 
 首次發布在獨立 clone 或 archive 讀回檔案，核對 game 不是 gitlink、來源補丁與證據 hashes、來源 metadata 的 snapshot 分支，以及文件 lint。若與已驗來源完全一致，這些發布檢查不需要重跑所有遊戲場景；發現內容差異才回到對應驗證。
 
+2026-10-20 中性示範包驗證留下的 ignored 遊戲副本含安裝後不成立的作者樹文件連結，直接掃工作根目錄會把歷史副本也列為 broken。保留原始失敗日誌與副本；以全部 tracked 現檔加明確核准的非 ignored 新檔建立完整待發布 snapshot，逐檔核對雜湊後，在其根目錄執行相同 `bash wf/tools/wf-lint.sh --strict .` 與 `python3 tools/boundary_lint.py`。不得縮成只驗 wf/，也不得刪除歷史副本、放寬 broken 規則或宣稱原工作根目錄通過；交付需記錄 snapshot 範圍與檢查結果。
+
 2026-10-19 發布預檢曾發現 Git Bash 可跑的 workflow shell 檔，在 WSL 因 CRLF 出現 `set: -\r: invalid option`。目前以 `.gitattributes` 的 `*.sh text eol=lf` 保持 shell 檔 LF；遇到同類錯誤先查檔案換行與實際執行器，再在 staging／fresh clone 跑相同 lint。此修正只處理 shell 可攜性，不證明遊戲或其他環境已驗收。
 
 ## 交接

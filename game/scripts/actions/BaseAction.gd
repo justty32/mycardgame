@@ -233,25 +233,10 @@ func get_adjusted_action_targets() -> Array[BaseCombatant]:
 				for unit: BaseCombatant in card_play_request.resolved_targets:
 					if is_instance_valid(unit) and (unit.is_alive() or force_dead_targets):
 						returned_targets.append(unit)
-		TARGET_OVERRIDES.UNITS_IN_RANGE:
-			var board: BoardData = BoardData.get_for_unit(parent_combatant)
-			var unit_range: int = int(get_action_value("range", 1))
-			if board != null and parent_combatant != null and board.has_unit(parent_combatant):
-				for unit: BaseCombatant in board.get_units():
-					if unit != parent_combatant and unit.is_alive() and board.unit_distance(parent_combatant, unit) <= unit_range:
-						returned_targets.append(unit)
-		TARGET_OVERRIDES.UNITS_ON_FIELD:
-			var board: BoardData = FieldActionCells.resolve_board(self, get_action_value("board_id", null))
-			if board != null:
-				var field_id: String = str(get_action_value("field_id", ""))
-				var tag: String = str(get_action_value("tag", ""))
-				for cell: Vector2i in board.fields:
-					for instance: FieldInstance in board.get_fields(cell, tag):
-						if field_id != "" and instance.field_data.object_id != field_id:
-							continue
-						var unit: BaseCombatant = board.get_unit_at(cell)
-						if is_instance_valid(unit) and (unit.is_alive() or force_dead_targets) and not returned_targets.has(unit):
-							returned_targets.append(unit)
+		TARGET_OVERRIDES.UNITS_IN_RANGE, TARGET_OVERRIDES.UNITS_ON_FIELD:
+			var director: CombatDirector = Global.get_combat_director()
+			if director != null:
+				returned_targets.assign(director.resolve_module_action_targets(self, target_override, force_dead_targets))
 		TARGET_OVERRIDES.MEMBER_UID:
 			var member: BaseCombatant = UnitRegistry.get_unit(str(get_action_value("member_uid", "")))
 			if member != null and (member.is_alive() or force_dead_targets):
