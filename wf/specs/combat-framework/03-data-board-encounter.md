@@ -19,12 +19,12 @@ BaseCombatant
   + faction: int = {PARTY, ENEMY, NEUTRAL}
   + board_anchor: Vector2i
   + footprint: Vector2i
-  + speed: int（getter；內容由狀態效果攔截器修飾，見 §3.6；修訂 2026-10-19：實作為 base_speed + 唯讀 speed／get_speed()）
+  + speed: int（getter；內容由狀態效果攔截器修飾，見 §3.6；修訂：實作為 base_speed + 唯讀 speed／get_speed()）
   + move_range: int
   + next_action_tick: int
   + last_action_tick: int
   + action_count: int
-  + controller: BaseUnitController（修訂 2026-10-19：Phase 0 暫型別 RefCounted；修訂 2026-10-19：Phase 1 起型別 BaseUnitController）
+  + controller: BaseUnitController（修訂：Phase 0 暫型別 RefCounted；修訂：Phase 1 起型別 BaseUnitController）
 ```
 
 ## 3.1.4 遭遇與波次（讀取資料）
@@ -43,7 +43,7 @@ EventData
   + event_encounter_object_id: String   # 空 = 由 event_weighted_enemy_object_ids 自動合成單波遭遇（北側一列、預設尺寸）→ 既有事件零改動
 ```
 
-修訂 2026-10-19（實作 Phase 2）：格子清單欄位（deploy／spawn zone／blocked）為 `Array[Array]`（`[[x, y], ...]`，JSON 友善）；`encounter_board_size` 預設 (0,0) = `rules.default_board_size`；合成遭遇的敵人排在北側一列置中，主角取部署格第一格（預設南側中央）；`event_encounter_object_id` 指向不存在的 id 時記錯誤並改用合成。
+修訂（實作 Phase 2）：格子清單欄位（deploy／spawn zone／blocked）為 `Array[Array]`（`[[x, y], ...]`，JSON 友善）；`encounter_board_size` 預設 (0,0) = `rules.default_board_size`；合成遭遇的敵人排在北側一列置中，主角取部署格第一格（預設南側中央）；`event_encounter_object_id` 指向不存在的 id 時記錯誤並改用合成。
 
 ## 3.1.5 卡牌、意圖與目標
 

@@ -2,7 +2,7 @@
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[INDEX](../../INDEX.md)
 
-範圍：spec phases.json 第 0 列。這是純重構，現有遊戲行為與回歸測試的數值契約都不變。程式 commit 為 `91f3655`，本地補丁為 `tools/patches/combat-framework-phase0.patch`（登記在 [upstream.json](../../../tools/upstream.json)）。
+範圍：spec [Phase 0](../../specs/combat-framework/08a-phase-0.md)。這是純重構，現有遊戲行為與回歸測試的數值契約都不變。程式 commit 為 `91f3655`，本地補丁為 `tools/patches/combat-framework-phase0.patch`（登記在 [upstream.json](../../../tools/upstream.json)）。
 
 ## 步驟
 

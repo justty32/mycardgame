@@ -36,7 +36,7 @@ StatusEffect 範例（框架測試資料）：status_rooted —— 攔截 Action
 ValidatorDisplaceable {target}   # 非 immovable 且 footprint 面積 ≤ 上限
 ```
 
-修訂 2026-10-19（實作 Phase 2）：ValidatorDisplaceable 以靜態函式 `ActionDisplaceUnit.is_displaceable(board, unit)` 實作；ActionDisplaceUnit 另加 `TO_CELL`（放到 target_cell／所選格）；`delay_on_collision`、`displace_resistance`、多格位移照 16 留到 2b。
+修訂（實作 Phase 2）：ValidatorDisplaceable 以靜態函式 `ActionDisplaceUnit.is_displaceable(board, unit)` 實作；ActionDisplaceUnit 另加 `TO_CELL`（放到 target_cell／所選格）；`delay_on_collision`、`displace_resistance`、多格位移照 16 留到 2b。
 
 ### 2.3 與 CTB 的互動
 

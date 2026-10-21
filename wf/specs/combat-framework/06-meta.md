@@ -4,4 +4,34 @@
 
 ## 3.7 局外
 
-（表）已抽到 [meta-design.json](meta-design.json)（8 列）。欄位：項目、設計。
+### 招募
+
+新 Action `ActionRecruitPartyMember {character_object_id, control_mode?, ai_profile_id?, replace_member_uid?}`：檢查 `player_party_size_max` 與 `character_recruit_validators`，從 `CharacterData` 建 `PartyMemberData`（起始牌組、HP、能量上限、速度、牌池、第一階），`party_member_recruited`。可從對話選項、事件、商店、戰後獎勵（`ActionGrantRewards` 的 `custom_action_data`）呼叫；`ActionDismissPartyMember` 對應。`DialogueOverlay`／`RewardOverlay` 不需新 UI，只要能顯示 `CharacterData` 摘要（名稱、描述、傾向名）即可；第一版用現有按鈕文字。
+
+### 隊伍上限
+
+`player_party_size_max` / `player_deploy_size_max`；超出時招募 Action 失敗並 `DebugLogger.log_warning`；替換出戰名單的 UI 留後（資料可由 `ActionSetActiveMembers` 改）。
+
+### 牌獎
+
+`Random.get_location_card_rewards()`改為對每個出戰且未倒下的成員各產一組抽牌（用該成員的牌池快取），`card_drafts` 元素加 `member_uid`；`RewardOverlay.add_rewards` 顯示成員名；主角（PLAYER 控制）的 draft 走現有 `CardDraftSelectionOverlay`；AI 成員的 draft 由 `AiDraftScorer` 立即決定並以 `ActionAddCardToMemberDeck` 加入，畫面顯示「X 選了 Y」摘要（可跳過）。`PlayerData.add_card_to_deck` 系列（`add_card_to_deck`／`remove_card_from_deck`／`transform_card_in_deck`）改成 `member.add_card_to_deck(card)`，`PlayerData` 保留主角 proxy。
+
+### 購卡
+
+`ShopData` 不變。玩家按「離開商店」時，對每名 AI 成員以 `player_party_budget_ratio × 金錢 ÷ AI 人數` 為預算，`AiShopper` 從剩餘 `shop_cards` 中挑 `AiDraftScorer` 最高且買得起者，走 `ActionShopPurchaseItems` 同一條路（扣錢、`card_purchased`）；預算 0 即關閉。
+
+### 升階
+
+`ActionAdvanceMember {member_uid, tier_object_id}`：驗 `tier_requirement_validators`（材料、金錢、統計都用既有 validators），執行 `tier_on_advance_actions`（加／移卡、`ActionUpdatePlayerValue` 類改屬性）、設 `member_tier_id`、`party_member_advanced`。分支選擇：玩家控制成員由 UI 選；AI 成員依 `tier_ai_branch_weights × ai_draft_weights` 選。觸發入口由內容包放在休息動作／事件（`RestActionData` 既有 `rest_action_*_actions`）。
+
+### 休息動作對象
+
+`RestActionData` 新增 `rest_action_targets_member: bool`；為 true 時 UI 先選成員再執行（`ActionBasePickCards` 的 `DECK` 類選牌改讀該成員牌組）。
+
+### 存檔版本
+
+`PlayerData.player_save_version = 2`。**已決：不支援舊存檔，不做 v1→v2 遷移**（decisions.json 第 14 列）。 `FileLoader.load_game()`在 `set_serializable_properties_from_json_patch` 前檢查版本：缺失、1 或不可辨識 → 拒絕載入並提示「舊格式存檔，請新開局」（沿用現有「Save rejected」訊息格式，`save_load_flow.gd` 的 rejected 清單加一條）；不寫 `SaveMigration`。`ProfileData` 的 run history 不動（只記主角 id）。
+
+### UI 骨架（`RunScreen/Combat`）
+
+`TimelineBar`（HBox，未來 N 筆投影：頭像＋刻數＋意圖小圖示；點擊高亮該單位格）、`BoardView`（Control 自繪格，§4.2；單位節點 reparent 到格上；層：格底／部署區／高亮／單位／意圖預覽）、`ActiveUnitPanel`（行動者名稱、能量、抽／棄／耗盡數；取代 `Combat.gd` 的全域能量與牌堆標籤（`energy_count`、`draw_count` 等））、`Hand`（綁行動單位）、`EndActionButton`（原 `EndTurnButton`）、`TargetPreview`（選牌後懸停格顯示 `cells_in_shape` 高亮；`SelectTargetLabel` 沿用）、`WaveLabel`（第 i／n 波）。`EnemyContainer` 退役（保留一個 `UnitLayer` 供 BoardView 放單位）。

@@ -2,7 +2,7 @@
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[Phase 2](phase-2.md)｜[INDEX](../../INDEX.md)
 
-範圍：spec phases.json 第 3 列，加上 [14](../../specs/combat-framework/14-movement-intent-spawn.md) §7 的 WAIT_UNTIL_FREE／FAIL_SKIP（原列 2b，提前做）。不做 Phase 2b（場域格、控制區）與 Phase 4。程式 commit 為 `0d9da24`（重構）與 `4c386e0`（波次），本地補丁 `tools/patches/combat-framework-phase3.patch` 涵蓋兩者（`git diff c662729..4c386e0` 的 game/，已在 Phase 2 樹上 apply --check），登記在 [upstream.json](../../../tools/upstream.json)。
+範圍：spec [Phase 3](../../specs/combat-framework/08e-phase-3-2b.md#phase-3波次)，加上 [14](../../specs/combat-framework/14-movement-intent-spawn.md) §7 的 WAIT_UNTIL_FREE／FAIL_SKIP（原列 2b，提前做）。不做 Phase 2b（場域格、控制區）與 Phase 4。程式 commit 為 `0d9da24`（重構）與 `4c386e0`（波次），本地補丁 `tools/patches/combat-framework-phase3.patch` 涵蓋兩者（`git diff c662729..4c386e0` 的 game/，已在 Phase 2 樹上 apply --check），登記在 [upstream.json](../../../tools/upstream.json)。
 
 ## 步驟一：拆 CombatDirector（行為不變）
 
@@ -63,7 +63,7 @@ UnitSpawner 的待進場佇列：單位進場刻＝開始刻 + stagger×序號 +
 
 ## 與 spec 的偏差
 
-已在 phases.json 第 3 列標「修訂 2026-10-19（實作 Phase 3）」，共 (a)–(h)。重點：
+已在 spec Phase 3 標「修訂（實作 Phase 3）」，共 (a)–(h)。重點：
 
 - 清波只在擊殺後（等動作佇列清空）與每批進場後檢查。
 - short-circuit 用 `has_remaining_opponents()`，不用 `is_combat_over()`，以保留雜兵存活時不短路的舊行為。
@@ -82,7 +82,7 @@ UnitSpawner 的待進場佇列：單位進場刻＝開始刻 + stagger×序號 +
 
 ## 需使用者實機檢查（headless 無法驗）
 
-Phase 1～3 的實機檢查合併在此（2026-10-19 整理；各 plan 末節保留原文）。Linux 開窗加 `--display-driver x11`，見 [dev-env](../../workflows/dev-env.md)。
+Phase 1～3 的實機檢查合併在此（各 plan 末節保留原文）。Linux 開窗加 `--display-driver x11`，見 [dev-env](../../workflows/dev-env.md)。
 
 1. 時間軸：TimelineBar 在頂端列的位置、重疊與字的可讀性；WaveLabel 的位置與可讀性。
 2. 回合與 overlay：TurnOverlay 文字；開始／結束 overlay 動畫；End Turn 是否抽牌後才可按。
@@ -94,6 +94,6 @@ Phase 1～3 的實機檢查合併在此（2026-10-19 整理；各 plan 末節保
 
 第 4、5 項要有移動與範圍卡，等中性示範內容包做好才看得到。已登記在 [WAIT_USER](../../WAIT_USER.md)。
 
-## 後續決議（2026-10-20）
+## 後續決議
 
-上方保留 Phase 3 當時驗收狀態；第 7 項已由使用者確認：角色與敵人本體直接站在棋盤上、移動時跟隨，採雙方對峙的日式 RPG 回合戰鬥感。現行工程與未定美術細節見 [雙棋盤呈現分析](../../../analysis/slay-the-robot/design/dual-board/presentation.md)。本體站格已完成工程接線與 headless 回歸；最終 All 證據見現行分析，人工觀感仍未驗。第 1–6 項人工驗收仍未完成。
+上方保留 Phase 3 當時驗收狀態；第 7 項已由使用者確認（[decisions.json](../../workflows/decisions.json) 第 20 列）：角色與敵人本體直接站在棋盤上、移動時跟隨，採雙方對峙的日式 RPG 回合戰鬥感。現行工程與未定美術細節見 [雙棋盤呈現分析](../../../analysis/slay-the-robot/design/dual-board/presentation.md)。本體站格已完成工程接線與 headless 回歸；最終 All 證據見現行分析，人工觀感仍未驗。第 1–6 項人工驗收仍未完成。

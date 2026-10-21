@@ -11,27 +11,27 @@
   {
    "監聽者": "`Combat.gd:43-48, 360-502`",
    "現況": "整段回合流程",
-   "遷移": "刪除，流程搬 `CombatDirector`；`Combat.gd` 只監聽 `unit_action_started/ended` 更新 HUD（顯示行動單位的能量／牌堆）；**修訂 2026-10-19（Phase 1 完成）**：回合流程已刪，`Combat.gd` 只剩 HUD；仍負責解析事件並經 EnemyContainer 生成敵人後呼叫 `begin_combat()`（生成搬 Director 留 Phase 2），End Turn 按鈕在 `unit_action_started(hero)` 啟用、請求／結束時停用；戰鬥結束仍由此依敵人死亡動畫判定"
+   "遷移": "刪除，流程搬 `CombatDirector`；`Combat.gd` 只監聽 `unit_action_started/ended` 更新 HUD（顯示行動單位的能量／牌堆）；**修訂（Phase 1 完成）**：回合流程已刪，`Combat.gd` 只剩 HUD；仍負責解析事件並經 EnemyContainer 生成敵人後呼叫 `begin_combat()`（生成搬 Director 留 Phase 2），End Turn 按鈕在 `unit_action_started(hero)` 啟用、請求／結束時停用；戰鬥結束仍由此依敵人死亡動畫判定"
   },
   {
    "監聽者": "`BaseCombatant.gd:28-32, 406-410`",
    "現況": "連 player_turn 空 hook",
-   "遷移": "改連 `unit_action_started/ended` 並過濾 `unit == self`；子類覆寫 `_on_own_action_started/ended`；**修訂 2026-10-19（Phase 1 完成）**：`controller` 型別為 `BaseUnitController`；新增 `get_unit_display_name()` 與 `perform_tick_status_effects(prev, now)`（`EVERY_N_TICKS`）"
+   "遷移": "改連 `unit_action_started/ended` 並過濾 `unit == self`；子類覆寫 `_on_own_action_started/ended`；**修訂（Phase 1 完成）**：`controller` 型別為 `BaseUnitController`；新增 `get_unit_display_name()` 與 `perform_tick_status_effects(prev, now)`（`EVERY_N_TICKS`）"
   },
   {
    "監聽者": "`Enemy.gd:243-244`",
    "現況": "玩家回合開始切意圖",
-   "遷移": "刪除；改在 `CombatDirector` 於該敵人進入等待時呼叫 `decide_next_intent()`；**修訂 2026-10-19（Phase 1 完成）**：`_on_player_turn_started` 覆寫已刪；Director 在開戰、生成與每次自身行動後呼叫 `decide_next_intent()`；新增 `build_intent_actions_data(intent, include_reset_block)`，`base_speed` 讀 `enemy_speed`"
+   "遷移": "刪除；改在 `CombatDirector` 於該敵人進入等待時呼叫 `decide_next_intent()`；**修訂（Phase 1 完成）**：`_on_player_turn_started` 覆寫已刪；Director 在開戰、生成與每次自身行動後呼叫 `decide_next_intent()`；新增 `build_intent_actions_data(intent, include_reset_block)`，`base_speed` 讀 `enemy_speed`"
   },
   {
    "監聽者": "`Player.gd:138-160, 217-221`",
    "現況": "即將受傷加總所有敵人到單一玩家",
-   "遷移": "搬到 `ThreatPreview`（§3.5），每個我方單位自己顯示；**修訂 2026-10-19**：延到 Phase 2（Phase 1 未動 `update_incoming_damage`）；Phase 1 只加 `base_speed` = `character_speed` 與 `get_unit_display_name`"
+   "遷移": "搬到 `ThreatPreview`（§3.5），每個我方單位自己顯示；**修訂**：延到 Phase 2（Phase 1 未動 `update_incoming_damage`）；Phase 1 只加 `base_speed` = `character_speed` 與 `get_unit_display_name`"
   },
   {
    "監聽者": "`StatsHandler.gd:44-47, 283-296`",
    "現況": "`is_player_turn`、`turn_count` 靠敵方回合末遞增",
-   "遷移": "`is_player_turn` = 行動中單位為玩家控制且等待輸入；`turn_count` = **主角 action_count**（`unit_action_started` 且 unit 為主角時 +1 並 `reset_turn_stats`）；新增 `combat_tick`、`unit_action_counts`；`cards_played_this_turn` 改以主角行動為界（`PLAYED_THIS_TURN/LAST_TURN` 語意跟著）；**修訂 2026-10-19（Phase 1 完成，時點偏差）**：`turn_count` 改由 Director 在主角行動開始、動畫與 `player_turn_started` 之前呼叫 `begin_hero_action()` 遞增並重置本回合統計（不靠抽牌後的 `unit_action_started`）；`is_player_turn` 為 `player_turn_started/ended` 之間；`combat_tick`、`unit_action_counts` 已加"
+   "遷移": "`is_player_turn` = 行動中單位為玩家控制且等待輸入；`turn_count` = **主角 action_count**（`unit_action_started` 且 unit 為主角時 +1 並 `reset_turn_stats`）；新增 `combat_tick`、`unit_action_counts`；`cards_played_this_turn` 改以主角行動為界（`PLAYED_THIS_TURN/LAST_TURN` 語意跟著）；**修訂（Phase 1 完成，時點偏差）**：`turn_count` 改由 Director 在主角行動開始、動畫與 `player_turn_started` 之前呼叫 `begin_hero_action()` 遞增並重置本回合統計（不靠抽牌後的 `unit_action_started`）；`is_player_turn` 為 `player_turn_started/ended` 之間；`combat_tick`、`unit_action_counts` 已加"
   },
   {
    "監聽者": "`ValidatorPlayerTurn.gd`",
@@ -46,47 +46,47 @@
   {
    "監聽者": "`ValidatorEnemyAttacking.gd:6-10`",
    "現況": "任一敵人意圖為攻擊",
-   "遷移": "改為「任一敵人的已解析意圖會命中**行動單位**」（透過 ThreatPreview）；**修訂 2026-10-19**：延到 Phase 2（ThreatPreview）"
+   "遷移": "改為「任一敵人的已解析意圖會命中**行動單位**」（透過 ThreatPreview）；**修訂**：延到 Phase 2（ThreatPreview）"
   },
   {
    "監聽者": "`TurnOverlay.gd:7`",
    "現況": "顯示 Turn N",
-   "遷移": "顯示「刻 T／主角第 N 次行動」；**修訂 2026-10-19（Phase 1 完成）**：顯示「Tick T - Action N」"
+   "遷移": "顯示「刻 T／主角第 N 次行動」；**修訂（Phase 1 完成）**：顯示「Tick T - Action N」"
   },
   {
    "監聽者": "`BaseArtifact.gd:15-17, 49-61`",
    "現況": "回合開始／結束動作、首回合、計數器重置",
-   "遷移": "改連 `unit_action_started/ended`；`ArtifactData` 新增 `artifact_trigger_scope: {HERO, BEARER, ANY_PARTY_UNIT}`（**已決，使用者 2026-10-19**：每件遺物在資料指定；未指定時歸主角 HERO = 現行行為）；`artifact_counter_reset_on_turn_start` 欄位名保留；**修訂 2026-10-19（延到 Phase 4）**：仍連 `player_turn_*`，其語意已是「主角行動開始、抽牌前」，時點與舊版相同；`artifact_trigger_scope` 與改連 `unit_action_*` 隨持有者概念在 Phase 4 做"
+   "遷移": "改連 `unit_action_started/ended`；`ArtifactData` 新增 `artifact_trigger_scope: {HERO, BEARER, ANY_PARTY_UNIT}`（**已決**（decisions.json 第 12 列）：每件遺物在資料指定；未指定時歸主角 HERO = 現行行為）；`artifact_counter_reset_on_turn_start` 欄位名保留；**修訂（延到 Phase 4）**：仍連 `player_turn_*`，其語意已是「主角行動開始、抽牌前」，時點與舊版相同；`artifact_trigger_scope` 與改連 `unit_action_*` 隨持有者概念在 Phase 4 做"
   },
   {
    "監聽者": "`ArtifactEasyMode.gd:6-9`、`ArtifactRetainHand.gd:9`",
    "現況": "同上",
-   "遷移": "隨 BaseArtifact；**修訂 2026-10-19（延到 Phase 4）**：同 BaseArtifact"
+   "遷移": "隨 BaseArtifact；**修訂（延到 Phase 4）**：同 BaseArtifact"
   },
   {
    "監聽者": "`CardDecoratorDynamicValueModifier.gd:15-20`",
    "現況": "回合開始重算",
-   "遷移": "改連 `unit_action_started`，過濾 unit 為卡牌持有者；**修訂 2026-10-19（延到 Phase 4）**：仍連 `player_turn_started`（單一主角下持有者即主角），隨持有者概念改連"
+   "遷移": "改連 `unit_action_started`，過濾 unit 為卡牌持有者；**修訂（延到 Phase 4）**：仍連 `player_turn_started`（單一主角下持有者即主角），隨持有者概念改連"
   },
   {
    "監聽者": "`ActionEndTurn.gd:7`",
    "現況": "發 `end_turn_requested`",
-   "遷移": "發 `end_action_requested`；**修訂 2026-10-19（Phase 1 完成）**：已發 `end_action_requested`；`end_turn_requested` 保留為舊別名，Director 兩者都聽"
+   "遷移": "發 `end_action_requested`；**修訂（Phase 1 完成）**：已發 `end_action_requested`；`end_turn_requested` 保留為舊別名，Director 兩者都聽"
   },
   {
    "監聽者": "`CombatEndTurn.gd`",
    "現況": "等待出牌佇列後 `end_turn_animation`",
-   "遷移": "改呼叫 `CombatDirector.finish_player_action()`；**修訂 2026-10-19（Phase 1 完成）**：檔案已刪，由 `scripts/ui/CombatEndAction.gd`（`END_ACTION_QUEUE_IMMEDIACY`，值同舊枚舉）取代，經 `CombatDirector.request_end_action()`／`finish_player_action()`"
+   "遷移": "改呼叫 `CombatDirector.finish_player_action()`；**修訂（Phase 1 完成）**：檔案已刪，由 `scripts/ui/CombatEndAction.gd`（`END_ACTION_QUEUE_IMMEDIACY`，值同舊枚舉）取代，經 `CombatDirector.request_end_action()`／`finish_player_action()`"
   },
   {
    "監聽者": "`HandManager.gd:97-103, 553-580`",
    "現況": "combat_started 重置單一牌堆",
-   "遷移": "改為建立每個出戰單位的 `UnitPiles`；`player_killed` → `unit_downed`；**修訂 2026-10-19**：`UnitPiles` 與 `unit_downed` 延到 Phase 4；Phase 1 只加 `get_hand_limit()`（讀 `rules.hand_limit`）與 `perform_end_of_action_hand_actions`（舊名保留為別名）"
+   "遷移": "改為建立每個出戰單位的 `UnitPiles`；`player_killed` → `unit_downed`；**修訂**：`UnitPiles` 與 `unit_downed` 延到 Phase 4；Phase 1 只加 `get_hand_limit()`（讀 `rules.hand_limit`）與 `perform_end_of_action_hand_actions`（舊名保留為別名）"
   },
   {
    "監聽者": "`tests/combat_flow.gd:150-156, 318-320, 337`",
    "現況": "數 `enemy_turn_started`、`turn_count==2`、`is_player_turn`",
-   "遷移": "改數 `unit_action_started`（enemy）與 `unit_action_ended`；在框架預設規則下數值斷言（抽 5、能量 3、14 傷害消 10 格擋）不變；**修訂 2026-10-19（Phase 1 完成）**：已加敵人 `unit_action_started/ended` 與刻數斷言，敗北路徑驗致命行動不發 ended；舊數值契約不變；新 `tests/ctb_flow.gd`（suite Ctb）驗 CTB 順序"
+   "遷移": "改數 `unit_action_started`（enemy）與 `unit_action_ended`；在框架預設規則下數值斷言（抽 5、能量 3、14 傷害消 10 格擋）不變；**修訂（Phase 1 完成）**：已加敵人 `unit_action_started/ended` 與刻數斷言，敗北路徑驗致命行動不發 ended；舊數值契約不變；新 `tests/ctb_flow.gd`（suite Ctb）驗 CTB 順序"
   }
  ]
 }

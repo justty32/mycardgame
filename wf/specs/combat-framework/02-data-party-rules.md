@@ -28,7 +28,7 @@ PartyMemberData extends PrototypeData（新；SCHEMA 不登記為讀取資料夾
   member_move_range: int
   member_footprint: Vector2i = (1,1)
   member_deck: Array[CardData]
-  member_reward_card_pack_ids: Array[String]（+ 不存檔的 filter/rarity cache，搬自 PlayerData.gd:122-124）
+  member_reward_card_pack_ids: Array[String]（+ 不存檔的 filter/rarity cache，搬自 PlayerData 的牌池 filter/rarity cache）
   member_tier_id: String             # 目前階位（CharacterTierData.object_id）
   member_values: Dictionary          # 取代 player_values 的角色層
   member_is_downed: bool             # 倒下；戰後依 CombatRulesData.downed_member_policy 處理
@@ -41,7 +41,7 @@ PartyMemberData extends PrototypeData（新；SCHEMA 不登記為讀取資料夾
 
 ```
 CombatRulesData extends SerializableData（SCHEMA: "combat_rules/"；框架在測試資料註冊 object_id "combat_rules_default"；
-  修訂 2026-10-19：pack 側寫不跑測試資料，Global.get_combat_rules() 無此 id 時退回內建預設物件）
+  修訂：pack 側寫不跑測試資料，Global.get_combat_rules() 無此 id 時退回內建預設物件）
   timeline_delay_scale: int = 100        # wait = action_delay * scale / speed
   default_action_delay: int = 100
   wait_action_delay: int = 50            # 空等

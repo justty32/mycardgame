@@ -2,9 +2,8 @@
 
 [README](README.md)
 
-狀態：草案（2026-10-19 併入）。本檔起 11–16 為「移動規則增補」，題材中立；內容原意不改，只做編排。分檔：11 主動移動、12 強制位移與控制區、13 場域格與位置條件、14 敵人移動意圖與波次進場、15 卡牌關鍵字與積木、16 分階段。
+狀態：草案，已併入本 spec。本檔起 11–15 為「移動規則增補」，題材中立；內容原意不改，只做編排。分檔：11 主動移動、12 強制位移與控制區、13 場域格與位置條件、14 敵人移動意圖與波次進場、15 卡牌關鍵字與積木；原 §9 分階段分配已併入 [08-phases.md](08-phases.md#移動增補的階段分配原移動草案-9)。原草案的合併落點為 03、05、08、10（Phase 2 欄併入 [Phase 2](08c-phase-2.md)、之後欄成為 Phase 2b）。
 
-狀態：草案，2026-10-19，供合併進 `wf/specs/combat-framework/`（主要落 03、05、08、10 與 phases.json）。不動 repo，由實作 Phase 1 的 agent 決定合併時機。
 前提：沿用 spec 既有定義——共用棋盤 `BoardData`、`footprint`／佔格、曼哈頓距離、`free_move_per_action`、`move_range`、`extra_move_delay_per_cell`、`card_move_distance` + `ActionMoveUnit`、`enemy_intent_move {HOLD, APPROACH, RETREAT}`、`reachable_cells()`、`unit_moved` 訊號、訊號／枚舉只在尾端新增。
 原則：**預設值一律保守＝不改變既有行為**（框架預設下沒有免費移動、沒有控制區、沒有場域格），全部由內容包的 `combat_rules_default` patch 與卡牌／敵人資料開啟。所有解析都是純函式（`BoardData` + 資料 → 格與單位），UI、AI、敵人意圖共用同一份，避免看到不同事實。
 
@@ -64,7 +63,7 @@ ValidatorCellFree {cell: "SELECTED_CELL", for_unit: "PARENT"}   # footprint 全�
 | 卡牌移動 | 牌自身 `card_action_delay` | 已含在 max 內 |
 | 強制位移（§2） | 0 | 被位移者時間軸不變 |
 
-修訂 2026-10-19（實作 Phase 2）：延遲單位是「行動延遲」，換成刻數要再乘 `timeline_delay_scale ÷ speed`（付費 2 格 × 20 = +40 延遲，速度 10 下 = +400 刻）；Phase 2 尋路只做四向 BFS，`move_cost`／八向／穿越友軍／撤銷留到 2b。
+修訂（實作 Phase 2）：延遲單位是「行動延遲」，換成刻數要再乘 `timeline_delay_scale ÷ speed`（付費 2 格 × 20 = +40 延遲，速度 10 下 = +400 刻）；Phase 2 尋路只做四向 BFS，`move_cost`／八向／穿越友軍／撤銷留到 2b。
 
 ### 1.4 AI
 

@@ -2,7 +2,7 @@
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[Phase 0](phase-0.md)｜[INDEX](../../INDEX.md)
 
-範圍：spec phases.json 第 1 列。一名主角對多個敵人，依速度在時間軸上排隊；速度相同且用預設規則時，順序等於舊的回合交替（hero@0、enemy@0、hero@1000、enemy@1000…）。程式 commit 為 `ef33568`，本地補丁為 `tools/patches/combat-framework-phase1.patch`（登記在 [upstream.json](../../../tools/upstream.json)）。
+範圍：spec [Phase 1](../../specs/combat-framework/08b-phase-1.md)。一名主角對多個敵人，依速度在時間軸上排隊；速度相同且用預設規則時，順序等於舊的回合交替（hero@0、enemy@0、hero@1000、enemy@1000…）。程式 commit 為 `ef33568`，本地補丁為 `tools/patches/combat-framework-phase1.patch`（登記在 [upstream.json](../../../tools/upstream.json)）。
 
 ## 步驟
 
@@ -16,7 +16,7 @@
 
 Combat.gd 只剩 HUD：解析事件、經 EnemyContainer 生成敵人，然後呼叫 `begin_combat()`。`end_combat()` 每場只跑一次。End Turn 按鈕發 `end_action_requested`，在 `unit_action_started(hero)` 時啟用。Root.tscn 的 start_turn 只保留 TurnOverlay 軌與 `update_turn_label`，end_turn 只保留 disabled 軌。Director 播放這兩段動畫並等它們結束。TurnOverlay 顯示「Tick T - Action N」。
 
-資料新增欄位：`enemy_speed` 與 `character_speed` 預設 10。`card_action_delay` 為 -1 時用 `rules.default_action_delay`，一次行動的 delay 取該次所出各牌的最大值。另有 `enemy_intent_action_delay`。StatusEffectData 尾端加 UNIT_ACTION_START、UNIT_ACTION_END、EVERY_N_TICKS，`status_effect_tick_interval` 預設 100，舊時點的重釋見 loop-notes 第 5 列。
+資料新增欄位：`enemy_speed` 與 `character_speed` 預設 10。`card_action_delay` 為 -1 時用 `rules.default_action_delay`，一次行動的 delay 取該次所出各牌的最大值。另有 `enemy_intent_action_delay`。StatusEffectData 尾端加 UNIT_ACTION_START、UNIT_ACTION_END、EVERY_N_TICKS，`status_effect_tick_interval` 預設 100，舊時點的重釋見 [§3.2 迴圈要點](../../specs/combat-framework/04-combat-loop-signals.md#迴圈要點)（5）。
 
 HandManager 新增 `get_hand_limit()`，讀 `rules.hand_limit`。`perform_end_of_action_hand_actions()` 保留舊名當別名。`reset_block_on_action_start` 同時用在主角和敵人的意圖 payload。
 
@@ -69,7 +69,7 @@ Ctb 斷言：前 8 筆行動為 fast@0、hero@0、slow@0、fast@500、fast@1000�
 
 pack 側寫 Smoke 通過（60 checks）；證據在本機 artifacts/verification/20261019-214534-ff8942d8（未提交）。runner 合成測試 136 項（新增 2 項）、boundary lint 測試 19 項、new_pack 測試 14 項全過；boundary lint violations 0，strict 文件 lint 回傳 0。
 
-## 與 spec 的偏差（已在 phases.json 等處標「修訂 2026-10-19」）
+## 與 spec 的偏差（已在 spec Phase 1 等處標「修訂」）
 
 - (a) 遺物三檔與 CardDecoratorDynamicValueModifier 仍連 `player_turn_*`（時點同舊版）；`artifact_trigger_scope` 延到 Phase 4。
 - (b) `turn_count` 由 Director 在動畫前呼叫 `begin_hero_action()` 遞增，不靠 `unit_action_started`。

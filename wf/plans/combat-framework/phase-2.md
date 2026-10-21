@@ -2,7 +2,7 @@
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[Phase 1](phase-1.md)｜[INDEX](../../INDEX.md)
 
-範圍：spec phases.json 第 2 列，含移動增補（[11](../../specs/combat-framework/11-movement-active.md)–[16](../../specs/combat-framework/16-movement-phasing.md) 的「Phase 2」欄）。不做 Phase 2b（場域格、控制區）與 Phase 3（波次流程）。程式 commit 為 `0196e91`，本地補丁為 `tools/patches/combat-framework-phase2.patch`（登記在 [upstream.json](../../../tools/upstream.json)）。
+範圍：spec [Phase 2](../../specs/combat-framework/08c-phase-2.md)，含移動增補（[11](../../specs/combat-framework/11-movement-active.md)–[15](../../specs/combat-framework/15-movement-cards.md) 與 [分配表](../../specs/combat-framework/08-phases.md#移動增補的階段分配原移動草案-9) 的「Phase 2」欄）。不做 Phase 2b（場域格、控制區）與 Phase 3（波次流程）。程式 commit 為 `0196e91`，本地補丁為 `tools/patches/combat-framework-phase2.patch`（登記在 [upstream.json](../../../tools/upstream.json)）。
 
 ## 預設與相容
 
@@ -23,7 +23,7 @@
 
 棋盤 Action 放在 `game/scripts/actions/board_actions/`：ActionMoveUnit（TO_CELL／TOWARD／AWAY／TELEPORT）、ActionDisplaceUnit（PUSH／PULL／PULL_ADJACENT／SWAP／TO_CELL，撞牆或撞單位會停住，並依碰撞造成傷害）、ActionGrantMovePoints、ActionComputeBoardValue。Validator 放在 `game/scripts/validators/board/`：Distance、CellsMoved、InLine、PathExists、CellFree。InterceptorRooted（測試資料 `status_rooted`）把移動與位移的 distance 設為 0。都登記在 Scripts 常數。
 
-資料欄位：卡牌、意圖、敵人、角色、規則尾端與 BaseCombatant 依 phases.json 第 2 列加入，預設值都保留舊行為；CardPlayRequest 加 `acting_unit`、`selected_cell`、`resolved_targets`；TARGET_OVERRIDES 尾端加 7 個值。
+資料欄位：卡牌、意圖、敵人、角色、規則尾端與 BaseCombatant 依 spec Phase 2 加入，預設值都保留舊行為；CardPlayRequest 加 `acting_unit`、`selected_cell`、`resolved_targets`；TARGET_OVERRIDES 尾端加 7 個值。
 
 輸入流程：[Hand](../../../game/scripts/ui/Hand.gd) 以 `cell_clicked` 選目標。檢查順序是射程、陣營、空格，最後在選定格之後重跑一次棋盤 Validator；被拒時 `last_target_rejection` 記錄原因，牌保持選取。沒有選牌時，點格就是移動。點敵人圖像（`enemy_clicked`）會轉成點它所在的格。`HandManager._play_card` 有 `resolved_targets` 時用它當目標，出牌者改為 acting_unit，`card_move_distance` 會加一個先執行的移動。
 
@@ -43,9 +43,7 @@
 
 新 suite `Board`：[board_flow.gd](../../../tests/board_flow.gd) 負責回報，情境在 [board_cases.gd](../../../tests/board_cases.gd)，fixture 是 [board_fixture.gd](../../../tests/board_fixture.gd)。共 88 checks，標記 `BOARD PASS:`，在 All 中排在 Ctb 與 SaveLoad 之間；runner、ps1 ValidateSet 與合成測試都已加入。fixture 在記憶體裡把規則改成免費 1 格、付費 2 格、每格 +20；棋盤 7×5，主角在 (3,4)。
 
-phases.json 的 13 條 Done when 全部有斷言：
-
-phases.json 的 13 條 Done when 全部有斷言，逐條結果記在 [phase-2-done-when.json](phase-2-done-when.json)（13 列，欄位：no、結果）。
+spec 的 [13 條 Done when](../../specs/combat-framework/08d-phase-2-done-when.md) 全部有斷言，逐條結果記在 [phase-2-done-when.json](phase-2-done-when.json)（13 列，欄位：no、結果）。
 
 基本項另驗距離、射程拒絕、CROSS 命中 3 個單位、LINE／LINE_PIERCE，以及點 2×2 單位的任一格都能選中它。Smoke 的 probe 驗合成遭遇、各形狀的格數、曼哈頓距離與 EncounterData 的 JSON patch。
 
@@ -64,7 +62,7 @@ phases.json 的 13 條 Done when 全部有斷言，逐條結果記在 [phase-2-d
 
 pack 側寫的 Smoke（題材內容包加其 tests）通過，共 66 checks。runner 合成測試 138 項、boundary lint 測試 19 項、new_pack 14 項全過；boundary lint 的 violations 為 0，strict 文件 lint 回傳 0。
 
-## 與 spec 的偏差（已在 phases.json 第 2 列標「修訂 2026-10-19（實作 Phase 2）」）
+## 與 spec 的偏差（已在 spec Phase 2 標「修訂（實作 Phase 2）」）
 
 偏差 (a)–(n) 記在 [phase-2-deviations.json](phase-2-deviations.json)（14 列，欄位：id、說明）。重點：BoardView 是執行時建立的自繪 Control、戰鬥者圖像不跟棋盤移動；EnemyContainer 未改名；尋路只做四向 BFS；FLANK／TELEPORT 等留到 2b 並有退回規則；ThreatPreview 每個敵人只計一次當前意圖；Done when 第 2、5、6、13 條的數值或落點有調整。
 

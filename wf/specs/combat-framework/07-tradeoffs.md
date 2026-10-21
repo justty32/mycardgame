@@ -19,8 +19,8 @@
 
 | | TileMapLayer | 自繪 Control 網格（選） |
 |---|---|---|
-| 輸入 | 需自行把滑鼠座標換算成格、無 per-cell 事件 | 每格一個 `BoardCell`（Button）→ `cell_clicked/hovered` 訊號；與現有 `Hand`／`Enemy.selection_button`（`Hand.gd:255-271`）同模式，headless 測試可直接 `emit` |
-| 單位節點 | `BaseCombatant` 是 Control（`BaseCombatant.gd:2`），放進 TileMap 要混用 Node2D 座標 | 直接 `add_child` 到格或 UnitLayer，用格的 `global_position` 定位 |
+| 輸入 | 需自行把滑鼠座標換算成格、無 per-cell 事件 | 每格一個 `BoardCell`（Button）→ `cell_clicked/hovered` 訊號；與現有 `Hand`／`Enemy.selection_button`（`Hand._on_enemy_clicked`）同模式，headless 測試可直接 `emit` |
+| 單位節點 | `BaseCombatant` 是 Control（`extends Control`），放進 TileMap 要混用 Node2D 座標 | 直接 `add_child` 到格或 UnitLayer，用格的 `global_position` 定位 |
 | 高亮／預覽層 | 要多層 TileMap 或自繪 | Control 疊 ColorRect／TextureRect，簡單 |
 | 美術 | 自動拼接、大地圖強 | 小棋盤（≤ 9×9）用單一格貼圖即可；內容包給 `encounter_cell_texture_path` |
 | 決定 | 不用 | 採用；日後若要大地圖或地形拼接再換 |
@@ -48,4 +48,4 @@ HandManager 是 autoload，且 `Hand` UI、14 個外部讀者都綁單例；改�
 
 ### 4.7 存檔：拒絕舊檔 vs 遷移
 
-**已決（使用者 2026-10-19）：拒絕舊檔並提示，不做 v1→v2 遷移。** 遷移（單角色 → 一人隊伍的鍵名對映）技術上成本低，但要長期維護 `SaveMigration` 與真實 v1 fixture；存檔格式仍在開發期，故不採用。`save_load_flow.gd` 的跨程序讀寫骨架改加「拒絕舊格式」階段。
+**已決（decisions.json 第 14 列）：拒絕舊檔並提示，不做 v1→v2 遷移。** 遷移（單角色 → 一人隊伍的鍵名對映）技術上成本低，但要長期維護 `SaveMigration` 與真實 v1 fixture；存檔格式仍在開發期，故不採用。`save_load_flow.gd` 的跨程序讀寫骨架改加「拒絕舊格式」階段。
