@@ -50,7 +50,7 @@ SoundManager 收到焦點外移且設定啟用時 mute Master；焦點回來無�
 
 ## 事件語意與畫面轉移補查
 
-2026-10-19 子流程冷讀後核實完整函式，而非僅依搜尋命中判斷。聲音工作流已拆為 [子流程入口](../../../wf/workflows/game-dev/audio/README.md)，本節是靜態證據，沒有音訊修復或 runtime 通過宣稱。
+2026-10-19 子流程冷讀後核實完整函式，而非僅依搜尋命中判斷。聲音工作流已拆為 [子流程入口](../../../wf/workflows/game-dev/audio.md)，本節是靜態證據，沒有音訊修復或 runtime 通過宣稱。
 
 [HandManager._play_card](../../../game/autoload/HandManager.gd) 在卡移入 limbo 後發 card_play_started；[ActionCardPlayEnd](../../../game/scripts/actions/card_actions/card_play_actions/ActionCardPlayEnd.gd) 才發 card_played。前者是出牌開始，後者是該次 action 鏈的完成通知，兩者不是兩個成功音。HandManager 另有不足能量拒絕及死亡目標退款；[Hand](../../../game/scripts/ui/Hand.gd) 的 _on_card_selected 在禁用、不可出及已排隊時 return，沒有統一拒絕 signal。預覽／查詢能否出牌不能當手動拒絕事件。
 
@@ -74,7 +74,7 @@ prepare 重設 bus／volume／pitch，但未明確重設 stream_paused；music �
 
 ## 完整場景的音訊接點補查
 
-2026-10-19 依場景用途需求補查，操作分流見 [聲音子流程](../../../wf/workflows/game-dev/audio/README.md)；沒有新增音效資產或遊戲功能。
+2026-10-19 依場景用途需求補查，操作分流見 [聲音子流程](../../../wf/workflows/game-dev/audio.md)；沒有新增音效資產或遊戲功能。
 
 [DialogueOverlay](../../../game/scripts/ui/DialogueOverlay.gd) 在 start_dialogue 解析成功、populate 初始 state 後發 dialogue_started；prompt 直接 parse_bbcode，沒有逐字或配音 API。[DialogueOption](../../../game/scripts/ui/general/DialogueOption.gd) 只有 option_enabled 且 left_click 才發選項 signal，不能靠這個 signal 接禁用拒絕音。Overlay 將選項 actions 加佇列，等待 actions_ended 後檢查玩家生死並換 state；reset 也在死亡／run／非 EVENT 節點呼叫，不等於正常完成。語音、文字音與分支取消 token 均是新能力。
 

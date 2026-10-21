@@ -1,6 +1,6 @@
 # 動畫：人物逐格、UI 動態與場景演出
 
-[設計入口](README.md)｜[人物動畫](../../../wf/workflows/game-dev/art-assets/animation.md)｜[UI 動態](../../../wf/workflows/game-dev/art-assets/ui-motion.md)｜[場景編排](../../../wf/workflows/game-dev/art-assets/scene-choreography.md)｜[呈現](presentation.md)｜[VFX](vfx.md)
+[設計入口](README.md)｜[人物動畫](../../../wf/workflows/game-dev/art-assets/animation.md)｜[UI 動態與場景編排](../../../wf/workflows/game-dev/art-assets/motion/README.md)｜[呈現](presentation.md)｜[VFX](vfx.md)
 
 2026-10-19 靜態核實：上游及本機 game HEAD 為 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`，ActionHandler 等已有本地修復，依 [來源鎖](../../../tools/upstream.json)。這輪沒有啟動 Godot、修改遊戲、生成素材或做視覺驗收。
 

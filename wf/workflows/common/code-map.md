@@ -40,7 +40,7 @@
 
 靜態美術沿 [素材製作](../game-dev/art-assets.md) 查 FileLoader 與資料消費端；人物動畫及短效分別沿 [動畫](../game-dev/art-assets/animation.md)、[特效](../game-dev/art-assets/vfx.md) 查 AnimationData、BaseCombatant、AnimatedCombatEffect 與 Action 接點。尺寸、播放／等待與回收契約在各領域分析。
 
-UI 的 [元件／版面與互動入口](../game-dev/ui/README.md) 導向 Root、Card／Hand、HUD、theme 與 CustomUIData；音訊的 [製作與接線入口](../game-dev/audio/README.md) 導向 [SoundManager](../../../game/addons/sound_manager/sound_manager.gd)、FileLoader 與 SettingsMenu。同一出牌事件跨領域時先用 [演出整合](../game-dev/presentation-delivery.md) 定觸發與停止責任；素材載入不等於事件驗證。
+UI 的 [元件／版面與互動入口](../game-dev/ui.md) 導向 Root、Card／Hand、HUD、theme 與 CustomUIData；音訊的 [製作與接線入口](../game-dev/audio.md) 導向 [SoundManager](../../../game/addons/sound_manager/sound_manager.gd)、FileLoader 與 SettingsMenu。同一出牌事件跨領域時先用 [演出整合](../game-dev/presentation-delivery.md) 定觸發與停止責任；素材載入不等於事件驗證。
 
 完整對話、商店、戰鬥等畫面從 [完整場景製作](../game-dev/scene-pack.md) 分派子流程，以同一狀態轉移串接圖像、UI、聲音與動畫；基礎元件流程不代替完整畫面契約。
 
