@@ -1,12 +1,14 @@
 # 對話與商店 — 內容展示到操作結果
 
-[共通責任與取消](README.md)｜[UI 動態](../ui-motion.md)｜[場景編排](../scene-choreography.md)
+[共通契約](README.md)｜[美術入口](../../art-assets.md)
 
-**何時用**：製作對話或商店的完整畫面序列。 **何時不用**：只改布局／互動走 [UI 畫面](../../ui/screens/README.md)。標「新增」者為待實作，本輪僅靜態核實與文件。
+**何時用**：製作對話或商店的完整畫面序列。
+
+**何時不用**：只改布局／互動走 [UI 畫面](../../ui/screens/README.md)。標「新增」者為待實作。
 
 ## Done when
 
-用途記錄及所需素材／控制器檔存在，包含時間段、輸入與還原政策；專項日誌列實際斷言及退出碼。未落地者標「僅規格」，文件 lint 通過，視覺未驗明列。
+用途記錄及所需素材／控制器檔存在，包含時間段、輸入與還原政策；專項日誌列實際斷言及退出碼。未落地者標「僅規格」，視覺未驗明列；文件 lint 通過（見 [testing](../../../testing.md)）。
 
 ## 流程
 
@@ -30,20 +32,20 @@
 
 ### 商店：商品入場、購買成功、拒絕與售罄
 
-**現況**：[ShopOverlay](../../../../../game/scripts/ui/ShopOverlay.gd) 控制 RunScreen/ShopOverlay 的 CardContainer／ArtifactContainer／ConsumableContainer 與 ContinueButton；populate_shop 先清子項再建立商品，沒有商品入場動畫。卡面、遺物／消耗品 icon、價格由各 shop button 顯示；價格不足時 BaseShopButton 只把 price_label 變紅，沒有搖晃或拒絕訊號。
+**現況**：商店根是 RunScreen/ShopOverlay（[ShopOverlay](../../../../../game/scripts/ui/ShopOverlay.gd)），目前沒有商品入場、拒絕搖晃或成交演出。清空重建、買不起的呈現、purchased 與扣款的先後、售罄與 Continue 的程式行為只記在 [商店的程式事實](../../ui/screens/shop-rest.md#商店的程式事實)，本節只寫動態的時點與 owner。
 
 美術先交商品／價籤／面板、hover／disabled、成功提示與售罄標記。動畫根應是商品的內層視覺或新增快照層，Container 仍負責布局。定「資料到位→商品揭示→可購買」，重建清單時只播放新入場的一輪；不要每次價格刷新讓所有商品重新飛入。減少動態版立即完整顯示，用文字與靜態標記表示狀態。
 
-**接受不是交易全部完成**：[ActionShopPurchaseItems](../../../../../game/scripts/actions/shop_actions/ActionShopPurchaseItems.gd) 核價／餘額（消耗品另驗空槽）後排入扣款與取得 actions、移除庫存，再發 purchased。ShopOverlay 收到後等 actions_ended 才 populate。cue 須分為「提交待定→接受／拒絕→效果完成／重建」，若成功文字宣稱錢與物品已到位，要在後續 actions 完成後核對實際結果；單憑 button_up 不得播放成交演出。
+**接受不是交易全部完成**：cue 須分為「提交待定→接受／拒絕→效果完成／重建」；若成功文字宣稱錢與物品已到位，要在後續 actions 完成後核對實際結果，單憑 button_up 不得播放成交演出。
 
-新增控制器在提交即禁同一商品重按；成功時先快照視覺，避免重建 queue_free 使 Tween 失去目標，僅由交易邏輯扣款／移庫存。拒絕（不足錢、滿槽、無效庫存）維持原商品與可再嘗試狀態，需新增可識別結果事件或明確驗證結果；不要把「沒收到 purchased」經任意 timer 當拒絕。現況售出項消失，沒有保留 SOLD OUT 格；想留標記需新增商品槽／售罄資料呈現，不是單加貼圖。
+新增控制器在提交即禁同一商品重按；成功時先快照視覺，避免重建 queue_free 使 Tween 失去目標，僅由交易邏輯扣款／移庫存。拒絕（不足錢、滿槽、無效庫存）維持原商品與可再嘗試狀態，需新增可識別結果事件或明確驗證結果；不要把「沒收到 purchased」經任意 timer 當拒絕。想保留 SOLD OUT 標記需新增商品槽／售罄資料呈現，不是單加貼圖。
 
 **驗收**：一筆正常交易、錢不足、空槽不足、同商品連點、刷新後 hover、接受但等待途中離店、重回同商店與已售商品；檢查錢／物品／庫存與成功 cue 各一次。關閉使舊重建回呼失效，所有商品控制器釋放，下一次依真實庫存重建，不回滾已接受交易。聲音依 [商店 cues](../../audio/shop-cues.md)，業務 fixture 依 [商店／休息](../../ui/screens/shop-rest.md)。
 
 
 ## 專項驗收
 
-依每節驗收建立有限 timeout 的 fixture；另驗中斷後重開、新資料覆蓋舊資料、減少動態同樣可完成操作。畫面根關閉後零自建Tween／timer／音訊cue殘留。 測試接入與授權邊界沿共通契約；現有套件不會自動涵蓋新增演出。
+依每節驗收建立有限 timeout 的 fixture；另驗中斷後重開、新資料覆蓋舊資料、減少動態同樣可完成操作。畫面根關閉後零自建Tween／timer／音訊cue殘留。測試接入與驗收判讀沿 [共通契約](README.md#驗證)。
 
 ## 交接
 

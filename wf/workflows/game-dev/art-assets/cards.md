@@ -1,6 +1,6 @@
 # 卡牌視覺套件：卡框、卡圖與狀態
 
-[素材子流程](README.md)｜[共同製作與驗收](static-assets.md)｜[卡牌來源](../../../../analysis/slay-the-robot/design/art-production.md#卡框裝飾與未實作卡背)
+[美術入口](../art-assets.md)｜[共同製作與驗收](static-assets.md)｜[卡牌來源](../../../../analysis/slay-the-robot/design/art-production.md#卡框裝飾與未實作卡背)
 
 **何時用**：交付一套可進手牌、商店、圖鑑及選牌畫面的卡牌視覺，或替換卡框／卡圖／費用與裝飾。**何時不用**：只改卡牌效果走 [card-design](../card-design.md)；卡背翻轉與新視覺狀態若需邏輯，先由 [UI 互動](../ui/interaction-states.md) 定義消費端。
 
@@ -32,8 +32,8 @@ CardGlow 是 validator／選牌標記，不能直接當作可出牌狀態；hove
 
 先完成共同 static-assets 的來源、解碼、版本及 loader 驗證，再用 [UI 驗證](../ui/verification.md) 接實際 helper。目標卡經 update_card_display 的等待後，要核對 card_texture、文字、費用 texture／可見性、ColorBackground、decorator 數量與值；切換 validator、選牌與費用狀態時，分別核對 glow／文字的實際條件與解除後沒有殘留。新增框／背面／稀有度圖層則各加 node 與映射斷言，不能只證明檔案已放入。
 
-同套 Card 被手牌、商店與選牌重用。至少以最長實際文案、0／可變費用、多裝飾及使用中的稀有度測容器；CardShopButton 的價錢位於牌底之外，不把價錢烘入卡面。牌尺寸改動交 Hand 寬度／曲線、CardButton 命中區及 shop 容器一併驗。當前禁止 GUI／桌面／截圖與 Godot 的文件任務，只保存待跑檢查；文字／rect 斷言也不能證明遮擋與可讀性。
+同套 Card 被手牌、商店與選牌重用。至少以最長實際文案、0／可變費用、多裝飾及使用中的稀有度測容器；CardShopButton 的價錢位於牌底之外，不把價錢烘入卡面。牌尺寸改動交 Hand 寬度／曲線、CardButton 命中區及 shop 容器一併驗。文字／rect 斷言不能證明遮擋與可讀性；需要 GUI 的檢查未執行時列為待驗。
 
 ## 交接
 
-交 UI 卡牌分層順序、每層原點／透明窗、切片、狀態映射、文字保留區與未接線項；交內容卡 ID→圖路徑、ColorData 及既有 decorator ID。母稿與正式輸出使用同一批次／風格版本；卡背或稀有度變體未有消費端時保持候選，不能掛完成狀態。卡牌移動／翻面／狀態轉場交 [UI 動態](ui-motion.md)，不以製圖改出牌規則；需要角色動作時才另接角色動畫。
+交 UI 卡牌分層順序、每層原點／透明窗、切片、狀態映射、文字保留區與未接線項；交內容卡 ID→圖路徑、ColorData 及既有 decorator ID。母稿與正式輸出使用同一批次／風格版本；卡背或稀有度變體未有消費端時保持候選，不能掛完成狀態。卡牌移動／翻面／狀態轉場交 [UI 動態](motion/cards.md)，不以製圖改出牌規則；需要角色動作時才另接角色動畫。

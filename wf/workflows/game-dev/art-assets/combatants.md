@@ -1,6 +1,6 @@
 # 玩家、敵人與頭目的外觀套件
 
-[素材子流程](README.md)｜[共同製作](static-assets.md)｜[角色來源](../../../../analysis/slay-the-robot/design/art-production.md#戰鬥人物與頭目共用的容器)
+[美術入口](../art-assets.md)｜[共同製作](static-assets.md)｜[角色來源](../../../../analysis/slay-the-robot/design/art-production.md#戰鬥人物與頭目共用的容器)
 
 **何時用**：製作玩家、一般敵人、精英／頭目的立繪、選角頭像、圖鑑圖與動畫母稿，或批次換外觀。**何時不用**：敵人意圖與數值走 [enemy-design](../enemy-design.md)，逐格及時間線走 [animation](animation.md)，純血條／目標介面走 [UI](../ui.md)。
 
@@ -34,7 +34,7 @@
 
 檔案層完整解碼並核對透明邊與非空主體規格；背景接線層分別驗 CharacterSelectionButton.texture_normal、CodexEnemiesMenu texture、Player／Enemy 的實際 SpriteFrames。目標 loader 不可 fallback；動畫狀態／播放／釋放由 animation 流程驗，不能由母稿檢查代替。
 
-頭目與大型敵人須放到該事件的自動 HBoxContainer 或定位 slots 專項驗；查相鄰敵人、血條、意圖、傷害數字與玩家目標區是否重疊。可用 rect／節點資料檢查幾何與父子關係，不能據此宣稱畫面無遮擋。至少覆蓋正常、目標預覽、多狀態圖示與退出／死亡後的場景狀態；本次文件任務不啟動 Godot，視覺、真實命中與動畫一致性保留待驗。
+頭目與大型敵人須放到該事件的自動 HBoxContainer 或定位 slots 專項驗；查相鄰敵人、血條、意圖、傷害數字與玩家目標區是否重疊。可用 rect／節點資料檢查幾何與父子關係，不能據此宣稱畫面無遮擋。至少覆蓋正常、目標預覽、多狀態圖示與退出／死亡後的場景狀態；視覺、真實命中與動畫一致性需要 GUI，未執行時保留待驗。
 
 ## 交接
 

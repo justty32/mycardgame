@@ -1,6 +1,6 @@
 # 場景與環境：戰鬥、節點與主選單背景
 
-[素材子流程](README.md)｜[共同製作](static-assets.md)｜[背景來源](../../../../analysis/slay-the-robot/design/art-production.md#場景背景幾何與前後層)
+[美術入口](../art-assets.md)｜[共同製作](static-assets.md)｜[背景來源](../../../../analysis/slay-the-robot/design/art-production.md#場景背景幾何與前後層)
 
 **何時用**：替戰鬥、事件地點、休息／商店場景或主選單製作背景與前後層套件。**何時不用**：地圖拓撲／遭遇分配走 [level-design](../level-design.md)，介面面板走 [interface-assets](interface-assets.md)，動態全畫面效果走 [vfx](vfx.md)。
 
@@ -40,7 +40,7 @@
 
 先驗每層完整解碼、長寬／alpha 與輸出 hash；再針對 Act-only、Location override、Event override、全空與連續跨節點切換建立 loader／texture 斷言。主選單及新增前景另驗其實際 scene 節點和繪圖／輸入順序，不以戰鬥背景測試代替。多層需求須驗離場與重入後沒有重複層或殘留。
 
-實際視覺需在玩家／最大敵人、滿手牌、意圖提示、長文 modal 等需求情境檢查對比、裁切與遮擋；rect 斷言只能證明配置。當前不啟動 Godot、不開 GUI／桌面／視窗／截圖或操作焦點，因此本次只補流程與靜態來源，視覺與 runtime 明列待驗。外部背景發行還須依共同流程驗成品 external 與 exported feature。
+實際視覺需在玩家／最大敵人、滿手牌、意圖提示、長文 modal 等需求情境檢查對比、裁切與遮擋；rect 斷言只能證明配置。需要 GUI 的視覺檢查未執行時明列待驗。外部背景發行還須依共同流程驗成品 external 與 exported feature。
 
 ## 交接
 

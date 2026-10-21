@@ -1,6 +1,6 @@
 # 介面圖像套件：對話、商店、獎勵、地圖與選單
 
-[素材子流程](README.md)｜[共同製作](static-assets.md)｜[UI 場景組合](../ui/screens/README.md)｜[介面來源](../../../../analysis/slay-the-robot/design/art-production.md#介面圖片與程式樣式的界線)
+[美術入口](../art-assets.md)｜[共同製作](static-assets.md)｜[UI 場景組合](../ui/screens/README.md)｜[介面來源](../../../../analysis/slay-the-robot/design/art-production.md#介面圖片與程式樣式的界線)
 
 **何時用**：要為一個完整畫面交付一致的圖像／按鈕／面板素材包，而非單張 icon。**何時不用**：畫面流程、命中、焦點與事件接線由 UI 場景流程負責；卡面走 [cards](cards.md)，人物走 [combatants](combatants.md)，全景走 [environments](environments.md)。
 
@@ -36,7 +36,7 @@
 
 依 [UI 專項驗證](../ui/verification.md) 驗實際 scene 節點取得正確資源、長文字容器與輸入層不被新增裝飾取代。對話至少驗兩個有圖狀態及空圖切換；商店驗不同商品與缺錢／購入後狀態；獎勵驗領取／取消；地圖驗已知／未知及可走／不可走；選單驗選取、停用與返回後重入。這是情境選擇，不代表現有 suite 已涵蓋，需接實際 helper 才有證據。
 
-檔案解碼與 hash、背景 scene／狀態斷言、畫面可讀性及真實輸入分層驗收。當前文件任務不啟動 Godot，也不開 GUI／桌面／截圖或操作焦點；明列未驗，不能讓設計稿存在替代互動結果。
+檔案解碼與 hash、背景 scene／狀態斷言、畫面可讀性及真實輸入分層驗收。需要 GUI 的可讀性與真實輸入檢查未執行時明列未驗，不能讓設計稿存在替代互動結果。
 
 ## 交接
 

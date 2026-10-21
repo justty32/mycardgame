@@ -1,6 +1,6 @@
 # 靜態素材：從批次製作到資料與場景接線
 
-[素材子流程](README.md)｜[風格版本](style-guide.md)｜[核實來源](../../../../analysis/slay-the-robot/design/art-production.md)
+[美術入口](../art-assets.md)｜[風格版本](style-guide.md)｜[核實來源](../../../../analysis/slay-the-robot/design/art-production.md)
 
 **何時用**：依既定方向製作卡圖、角色立繪／頭像、圖示及背景，或替換同一批素材。**何時不用**：角色狀態／切格走 [animation](animation.md)，命中／投射物走 [vfx](vfx.md)，純排版走 [UI](../ui.md)。
 
@@ -24,21 +24,21 @@
 
 母稿置於專案約定的原創設計位置，遊戲實際引用的輸出置於 mod 的 `sprites/` 分類目錄。檔名用穩定內容 ID 與用途，避免以生成序號作內容 ID。記錄母稿→裁切／縮放／去背等處理→輸出，以及實際工具／版本、參考檔 hash；未知模型／seed 寫未提供。輸出檔每次變更更新 hash，重算其派生圖。檔案版本不等於風格版本，兩者都保留。
 
-先完成代表樣本再批次；檢查透明背景是真透明而非棋盤格畫進圖中，主體沒有切斷、四周留白一致。機械檢查只能證明像素／尺寸，審美與辨識度仍需視覺證據。未有可用視覺檢查授權時標待驗，不啟動編輯器或預覽窗。
+先完成代表樣本再批次；檢查透明背景是真透明而非棋盤格畫進圖中，主體沒有切斷、四周留白一致。機械檢查只能證明像素／尺寸，審美與辨識度仍需視覺證據。需要 GUI 的視覺檢查未執行時標待驗。
 
 ### 整合：完整路徑與可重現替換
 
 外部欄位填 `external/mods/<mod_id>/sprites/<用途>/<內容_id>.png` 的完整專案相對路徑；角括號是待替換參數。它不是相對資料 JSON。新增 mod 與資料 patch 包裝依 [bootstrap](../content/bootstrap.md)；母稿與未採用候選不放進會掃 JSON 的資料目錄。
 
-FileLoader 依完整路徑快取，不以既有程序熱換檔後的畫面作證據。需要引擎驗證時只用當前已授權的新隔離背景程序。scene 的 `ext_resource`／theme 則走 Godot 匯入與 UID；外部 ImageTexture 不靠 `.import` 完成同一套行為。保留前版與欄位改動對照，方便退回已驗版本，不覆蓋使用者其他素材。
+FileLoader 依完整路徑快取，不以既有程序熱換檔後的畫面作證據。需要引擎驗證時另開新的隔離背景程序。scene 的 `ext_resource`／theme 則走 Godot 匯入與 UID；外部 ImageTexture 不靠 `.import` 完成同一套行為。保留前版與欄位改動對照，方便退回已驗版本，不覆蓋使用者其他素材。
 
 ### 驗收層次與失敗定位
 
-先用現有可用的無視窗圖像解碼工具完整讀取每張檔案，核對格式、實際長寬、alpha 像素範圍及是否全透明；僅讀 IHDR 要註明是標頭檢查。工具缺失時明列未解碼，不為此自行安裝 GUI。以 `sha256sum` 留輸出身分（Windows 用 `Get-FileHash -Algorithm SHA256`），再查引用路徑大小寫、內容 ID 與缺檔。不得把 alpha 通道存在當作透明邊緣正確。
+先用現有可用的無視窗圖像解碼工具完整讀取每張檔案，核對格式、實際長寬、alpha 像素範圍及是否全透明；僅讀 IHDR 要註明是標頭檢查。工具缺失時明列未解碼。以 `sha256sum` 留輸出身分（Windows 用 `Get-FileHash -Algorithm SHA256`），再查引用路徑大小寫、內容 ID 與缺檔。不得把 alpha 通道存在當作透明邊緣正確。
 
 接入任務需在 [bootstrap](../content/bootstrap.md) 的 helper 接線方式加入目標斷言，依 [validation](../validation.md) 跑已授權套件；沒有現成「素材 suite」。目標 loader 結果不能是 MISSING_TEXTURE，且尺寸非零並符合輸出；Card 要等待 display 的 process_frame 後核對實際 texture。背景驗 Act／Location／Event 各自及空白切換；共用圖示驗各使用端，角色頭像驗對應按鈕。既有 Smoke 只表示其既定斷言通過，新增 helper 必須真的被呼叫。
 
-允許視覺驗收後，對最小顯示尺寸與實際背景檢查可辨識性、裁切、透明邊、模糊、色彩語意、文字遮擋與批次一致性；目前禁止桌面／UI／截圖與 GUI，此層保留待驗。發行包另驗 `exported` feature 與 exe 旁 external，不能引用開發載入結果代替。
+可做視覺驗收時，對最小顯示尺寸與實際背景檢查可辨識性、裁切、透明邊、模糊、色彩語意、文字遮擋與批次一致性；這一層需要 GUI，未執行時保留待驗（操作邊界見 [user.md](../../common/user.md#桌面與程序邊界)）。發行包另驗 `exported` feature 與 exe 旁 external，不能引用開發載入結果代替。
 
 ## 交接
 

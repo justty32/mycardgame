@@ -2,11 +2,13 @@
 
 [共通契約](README.md)｜[休息 UI](../../ui/screens/rest-services.md)｜[選牌 UI](../../ui/screens/card-selection.md)
 
-**何時用**：休息服務、牌庫／牌堆 VIEW／SELECT。**何時不用**：草稿走 [獎勵](rewards-map.md)，升級結果走 [卡牌](cards.md)。新增演出與防護均待實作，本輪只靜態文件。
+**何時用**：休息服務、牌庫／牌堆 VIEW／SELECT。
+
+**何時不用**：草稿走 [獎勵](rewards-map.md)，升級結果走 [卡牌](cards.md)。本篇的新增演出與防護均待實作。
 
 ## Done when
 
-用途包有素材、根、request 身分、階段與輸入政策，成功／取消／重開專項有日誌；僅規劃明標未實作，觀感與真人操作未驗，文件 lint 通過。
+用途包有素材、根、request 身分、階段與輸入政策，成功／取消／重開專項有日誌；僅規劃明標未實作，觀感與真人操作未驗；文件 lint 通過（見 [testing](../../../testing.md)）。
 
 ## 流程
 
@@ -50,4 +52,4 @@ VIEW 展示永久牌庫／抽牌／棄牌／消耗堆，點牌不暫選，Back �
 
 休息 fixture 覆蓋三種 cost type、多於 min 的可升級牌、不可升級牌與可移除牌；真實按鈕→ActionPickCards→Confirm／Back，驗 HP／永久牌組／升級／stat／excluded 差及 cue 次數。選牌 fixture 驗不足／足額／反選／max、Confirm、Back 允許及禁止、quick_pick、零候選及恰 min、四種 VIEW 零資料變更。兩者另驗等待時換點／run_end、重開第二次只完成一次、減少動態；以有界 action idle／狀態等待而非任意 sleep，記 stale callback=0。
 
-背景啟動前須在候選攔截聲音及 Map.show_map 焦點副作用；headless 不等於無聲／無焦點。本輪不啟動引擎。下一 agent 交接素材、根、opener token、cue owner、取消結果、命令／斷言日誌與未驗項，再請獨立復走。
+背景啟動前須在候選攔截聲音及 Map.show_map 焦點副作用；headless 不等於無聲／無焦點，攔截前不啟動引擎。下一 agent 交接素材、根、opener token、cue owner、取消結果、命令／斷言日誌與未驗項，再請獨立復走。

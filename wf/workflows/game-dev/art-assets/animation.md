@@ -1,6 +1,6 @@
 # 動畫 — 逐格製作、人物接線與時序驗收
 
-[素材](README.md)｜[分析與 JSON](../../../../analysis/slay-the-robot/design/animation.md)｜[特效](vfx.md)｜[UI 動態](ui-motion.md)｜[場景編排](scene-choreography.md)
+[美術入口](../art-assets.md)｜[分析與 JSON](../../../../analysis/slay-the-robot/design/animation.md)｜[特效](vfx.md)｜[UI 動態與場景演出](motion/README.md)
 
 **何時用**：製作或替換角色／敵人的 idle、attack、hit、death，調整逐格節奏，或判斷 sheet／骨骼能否接入。
 
@@ -8,7 +8,7 @@
 
 ## Done when
 
-素材與 AnimationData／人物引用檔存在，交接記錄填有尺寸、基準點、frame 順序、fps、相對 duration、next、觸發與中斷規則。所選背景檢查有目標 ID 的斷言、退出碼及日誌；文件 lint 回傳 0。未接的 hit／重播／死亡時點及未做的視覺驗收明列，不用既有 Smoke PASS 代替新動畫證據。
+素材與 AnimationData／人物引用檔存在，交接記錄填有尺寸、基準點、frame 順序、fps、相對 duration、next、觸發與中斷規則。所選背景檢查有目標 ID 的斷言、退出碼及日誌；文件 lint 通過（見 [testing](../../testing.md)）。未接的 hit／重播／死亡時點及未做的視覺驗收明列，不用既有 Smoke PASS 代替新動畫證據。
 
 ## 流程
 
@@ -24,7 +24,7 @@ AnimationPlayer 已用在人物 run_start／death，與逐格並行，不由 Ani
 
 先寫內容 ID、朝向、顯示尺寸、共同畫布、透明背景、腳底／重心座標與留白；所有狀態同畫布、同原點，不逐格緊裁。命名如 `enemy_id_attack_000.png`，播放依陣列順序，loader 不排序。原始素材、切片參數、授權與輸出沿素材入口記錄。
 
-核對 Player／Enemy.tscn 的 AnimatedSprite2D 位置、SelectionButton 與血條父子關係；圖片放大不會放大選取區。人物不消費 AnimationData.animation_offset；腳底優先統一畫布，節點位置交 [UI](../ui.md)，不照搬 VFX offset。腳底、輪廓與文字遮擋待視覺驗收；當前禁止 GUI／截圖。
+核對 Player／Enemy.tscn 的 AnimatedSprite2D 位置、SelectionButton 與血條父子關係；圖片放大不會放大選取區。人物不消費 AnimationData.animation_offset；腳底優先統一畫布，節點位置交 [UI](../ui.md)，不照搬 VFX offset。腳底、輪廓與文字遮擋需要視覺驗收，需要 GUI 而未執行時列待驗。
 
 ### 狀態與時長要寫成資料契約
 
@@ -50,17 +50,17 @@ ActionAttackGenerator 的 `attack_animation_name` 預設 animation_attack，播�
 
 BaseCombatant 在 animation_finished 查當前狀態的 next 並播放；迴圈不發 finished。同名 play 不是可靠的重頭契約，既有 wrapper 不重設 frame／progress；連擊短於動畫長時尤其要驗。若需求是每擊從頭，需在實作中明確重設並驗兩次播放，不能只追加相同 ActionPlayAnimation。中途切到別名會換狀態，不保證舊動畫走到 finished。
 
-死亡同時啟動逐格 animation_death 與另一個 AnimationPlayer。Player 有「animation_player 沒在播」的 guard；Enemy 用獨立 death_animation_player。死亡完成 signal 由 `_on_death_animtation_finished()` 回呼發出，不是 BaseCombatant 的逐格 finished。二進位 .res 的實際 method track／時點本輪未解碼；改 death 長度前需背景載入檢查它與結算的關係，不能保證長逐格播完才離場。
+死亡同時啟動逐格 animation_death 與另一個 AnimationPlayer。Player 有「animation_player 沒在播」的 guard；Enemy 用獨立 death_animation_player。死亡完成 signal 由 `_on_death_animtation_finished()` 回呼發出，不是 BaseCombatant 的逐格 finished。二進位 .res 的實際 method track／時點尚未解碼；改 death 長度前需背景載入檢查它與結算的關係，不能保證長逐格播完才離場。
 
 當前 animation action 沒有可取消等待。若新增 BaseAsyncAction，必須讓完成、取消、死亡、目標離樹與 Root 切換都能恰好一次結束；force_action_end 斷開自建 signal／timer 並禁止延遲傷害，沿 [生命週期](../resource-lifecycle.md) 的既有契約。不要只 await animation_finished：loop、被替換或目標釋放可能永遠等不到。clear_all_actions 清行動，不等於把所有 sprite 停播。
 
 ### 背景可驗與視覺未驗
 
-先靜態驗 JSON、路徑與大小寫、圖片可解碼、尺寸／alpha、序號無缺漏。取得背景引擎執行授權後，依 bootstrap 把專屬 helper 接到既有 Smoke，驗 Global 查得到 ID、人物持有同一 SpriteFrames、各狀態的 frame 數／fps／duration／loop／next、texture 有尺寸且非 fallback。僅新增 helper 而沒有入口呼叫不算測試。
+先靜態驗 JSON、路徑與大小寫、圖片可解碼、尺寸／alpha、序號無缺漏。接著依 bootstrap 把專屬 helper 接到既有 Smoke，驗 Global 查得到 ID、人物持有同一 SpriteFrames、各狀態的 frame 數／fps／duration／loop／next、texture 有尺寸且非 fallback。僅新增 helper 而沒有入口呼叫不算測試。
 
 時序需求另加有限 timeout 的專項：attack 回 idle、連續同名播放、中途 hit／death、致死完成 signal 一次、combat 結束與離樹後無殘留等待；加入真實攻擊的 HP／格擋斷言，證明調動畫未改規則。接線後才跑 `python3 tools/test_game.py --suite Smoke`；戰鬥／取消有改動再選 Combat／ResourceLifecycle，套件入口與通過標記依 [testing](../../testing.md)。現有套件未自動覆蓋這批素材。
 
-背景不驗節奏觀感、接觸格、視覺跳動、透明邊或 viewport。當前僅文件工作不跑 Godot；視覺項保留未驗，不開編輯器或預覽視窗。
+背景不驗節奏觀感、接觸格、視覺跳動、透明邊或 viewport；這些視覺項需要 GUI，未執行時保留未驗。
 
 ## 交接
 

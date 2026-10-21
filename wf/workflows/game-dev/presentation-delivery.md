@@ -1,13 +1,13 @@
 # presentation-delivery — 一次出牌的跨領域交付
 
-[遊戲開發](README.md)｜[完整畫面交付](scene-pack.md)｜[美術](art-assets/README.md)｜[聲音](audio/README.md)｜[UI](ui/README.md)｜[驗收](validation.md)
+[遊戲開發](README.md)｜[完整畫面交付](scene-pack.md)｜[美術](art-assets.md)｜[聲音](audio.md)｜[UI](ui.md)｜[驗收](validation.md)
 
 **何時用**：同一張卡或戰鬥事件同時涉及人物動畫、VFX、音效與 UI，需要交接事件、素材和清理責任。
 **何時不用**：只替換單張圖或單段音檔走對應子流程；改傷害、等待、攔截或取消語意走 [mechanics](mechanics.md)。
 
 ## Done when
 
-任務交付記錄存在，填明每個事件的唯一觸發 owner、素材版本、消費欄位、數量、回退、離場清理與已測／待測結果。來源查核和適用的專項命令有結果；文件 strict lint 回傳 0。沒有執行證據的項目明列未驗，不能用動畫完成、靜態路由或 Smoke 成功代替命中／聲音／輸入驗收。
+任務交付記錄存在，填明每個事件的唯一觸發 owner、素材版本、消費欄位、數量、回退、離場清理與已測／待測結果。來源查核和適用的專項命令有結果；文件 lint 通過（見 [testing](../testing.md)）。沒有執行證據的項目明列未驗，不能用動畫完成、靜態路由或 Smoke 成功代替命中／聲音／輸入驗收。
 
 ## 流程
 
@@ -47,14 +47,14 @@ Hand／HandManager 的拒絕 return 沒有統一拒絕信號。UI 回饋如需�
 
 把母稿／輸出版本接到穩定內容 ID 和消費欄位：卡圖是 card_texture_path，人物是 character_animation_id／enemy_animation_id，命中特效是 impact_vfx_animation_id，聲音是 audio_path。動畫交尺寸、原點、frame 順序、duration／fps、loop／next；UI 交顯示框與文字／數值安全區，音訊交格式、bus、loop、停止及無聲替代。批次同質記錄超過 1 KB 依 [資料契約](../common/data-files.md) 落資料檔，不複製到各領域文件。
 
-外部素材交完整專案相對路徑，不能假設相對 JSON；FileLoader 的路徑快取要求在新隔離驗證程序檢查替換結果，不控制既有程序。缺圖／音訊的 MISSING fallback 只保底，不是採用成功；音訊 fallback 也不代表靜音。查實際解碼、尺寸／frame 與非 fallback 身份，勿單靠 resource_path。缺 AnimationData 時效果略過，缺軌／錯 loop 可能無法完成清理。回退應明列沿用哪個已驗資產或停用哪個純呈現接點，不能改規則值補救。
+外部素材的完整專案相對路徑與 FileLoader 快取規則見 [靜態素材整合](art-assets/static-assets.md#整合完整路徑與可重現替換)。缺圖／音訊的 MISSING fallback 只保底，不是採用成功；音訊 fallback 也不代表靜音。查實際解碼、尺寸／frame 與非 fallback 身份，勿單靠 resource_path。缺 AnimationData 時效果略過，缺軌／錯 loop 可能無法完成清理。回退應明列沿用哪個已驗資產或停用哪個純呈現接點，不能改規則值補救。
 
 ### 最小驗收與交接
 
 交付同一可取得卡牌與 fixture，記錄正常一次、全格擋、等額破盾、多擊／多目標、不可出牌、選目標取消、預覽及離場的預期事件數和資料狀態。先以引用／檔頭／JSON／source 核對；實作時再由 runtime owner 依 [validation](validation.md) 接入專項 helper，不能直接執行聲音 action 就宣稱成功出牌鏈已驗。
 
-只改文件時不啟動 Godot。本輪禁止 GUI、桌面／視窗／截圖／焦點／音訊與既有程序控制；未來背景音訊驗證仍先證明 Dummy 或替身無實體輸出。背景斷言只能證明事件、狀態與清理；動畫連貫、同步感、文字遮擋、聽感和真實輸入保留待授權驗收。
+背景音訊驗證先證明 Dummy 或替身沒有實體輸出。背景斷言只能證明事件、狀態與清理；動畫連貫、同步感、文字遮擋、聽感和真實輸入需要 GUI，未執行時保留待驗（操作邊界見 [user.md](../common/user.md#桌面與程序邊界)）。
 
 ## 交接
 
-整合 owner 將素材／事件契約和未驗項交給對應領域；規則或等待需求接 mechanics，獨立冷接手復走接 [agent-session](../agent-session.md)。本流程依 2026-10-19 固定上游加現有 lifecycle 修復查碼，詳細來源沿各領域分析追蹤；更換版本後重查事件序，不以本輪文件修補宣稱遊戲已修復。
+整合 owner 將素材／事件契約和未驗項交給對應領域；規則或等待需求接 mechanics，獨立冷接手復走接 [agent-session](../agent-session.md)。本流程的查碼基準是 2026-10-19 固定的上游加現有 lifecycle 修復，詳細來源沿各領域分析追蹤；更換版本後重查事件序，不以文件修補宣稱遊戲已修復。

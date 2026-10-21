@@ -1,13 +1,13 @@
 # scene-pack — 完整畫面的圖像、UI、聲音與動畫交付
 
-[遊戲開發](README.md)｜[美術用途](art-assets/README.md)｜[UI 用途](ui/README.md)｜[音訊](audio/README.md)｜[出牌時序](presentation-delivery.md)
+[遊戲開發](README.md)｜[美術用途](art-assets.md)｜[UI 用途](ui.md)｜[音訊](audio.md)｜[出牌時序](presentation-delivery.md)
 
 **何時用**：使用者要做完整戰鬥畫面、敵人／頭目、對話、商店、休息、獎勵選牌、地圖、選角或結算；需要整套呈現而非只換一張圖。
 **何時不用**：單一資產替換走美術／音訊子流程；新增價格、獎勵、對話後果或戰鬥規則走 [內容](content.md)／[關卡](level-design.md)／[mechanics](mechanics.md)。本流程不決定未定產品規則。
 
 ## Done when
 
-交付記錄填齊 UI 組成、圖像包、聲音 cue、動畫時序、資料來源、退出責任與驗收結果；採用檔案和引用存在，跨領域使用同一版本。適用專項有結果及未驗範圍，文件 strict lint 回傳 0。
+交付記錄填齊 UI 組成、圖像包、聲音 cue、動畫時序、資料來源、退出責任與驗收結果；採用檔案和引用存在，跨領域使用同一版本。適用專項有結果及未驗範圍；文件 lint 通過（見 [testing](../testing.md)）。
 
 ## 流程
 
@@ -26,24 +26,24 @@
 <!-- wf-nav -->
 | 完整任務 | UI／狀態 | 圖像套件 | 聲音 cue | 動畫／轉場 |
 |---|---|---|---|---|
-| 卡框＋卡圖＋互動狀態，連同戰鬥 HUD／目標／tooltip | [戰鬥](ui/screens/combat.md) | [卡牌](art-assets/cards.md)、[介面](art-assets/interface-assets.md) | [戰鬥聲包](audio/combat-cues.md) | [卡牌與UI動作](art-assets/ui-motion.md)、[出牌時序](presentation-delivery.md) |
-| 一般敵人＋頭目：身體、意圖、狀態、選取區、死亡與圖鑑 | [戰鬥](ui/screens/combat.md) | [人物敵人](art-assets/combatants.md) | [戰鬥聲包](audio/combat-cues.md) | [人物狀態](art-assets/animation.md)、[場景編排](art-assets/scene-choreography.md) |
-| 對話：敘事圖／頭像、文字、選項、失敗理由及進出 | [對話](ui/screens/dialogue.md) | [介面圖像](art-assets/interface-assets.md) | [對話聲包](audio/dialogue-cues.md) | [對話編排](art-assets/scene-choreography.md) |
-| 商店購買與休息服務兩畫面，各含不可用／結果／返回 | [商店與休息](ui/screens/shop-rest.md) | [介面圖像](art-assets/interface-assets.md)、[商品卡](art-assets/cards.md) | [商店](audio/shop-cues.md)、[休息](audio/screen-cues.md) | [場景編排](art-assets/scene-choreography.md) |
-| 獎勵列＋draft＋牌庫選牌：暫選、確認／Skip／Back及取得結果 | [獎勵選牌](ui/screens/rewards-selection.md) | [卡牌](art-assets/cards.md)、[介面](art-assets/interface-assets.md) | [畫面聲包](audio/screen-cues.md) | [場景編排](art-assets/scene-choreography.md) |
-| 選角起局→地圖選點→勝／敗結算返回，三畫面均交付 | [地圖](ui/screens/map.md)、[選角與結算](ui/screens/menus-collection.md) | [人物](art-assets/combatants.md)、[介面](art-assets/interface-assets.md) | [畫面聲包](audio/screen-cues.md) | [UI動作](art-assets/ui-motion.md)、[場景編排](art-assets/scene-choreography.md) |
+| 卡框＋卡圖＋互動狀態，連同戰鬥 HUD／目標／tooltip | [戰鬥](ui/screens/combat.md) | [卡牌](art-assets/cards.md)、[介面](art-assets/interface-assets.md) | [戰鬥聲包](audio/combat-cues.md) | [卡牌動態](art-assets/motion/cards.md)、[出牌時序](presentation-delivery.md) |
+| 一般敵人＋頭目：身體、意圖、狀態、選取區、死亡與圖鑑 | [戰鬥](ui/screens/combat.md) | [人物敵人](art-assets/combatants.md) | [戰鬥聲包](audio/combat-cues.md) | [人物狀態](art-assets/animation.md)、[演出契約](art-assets/motion/README.md) |
+| 對話：敘事圖／頭像、文字、選項、失敗理由及進出 | [對話](ui/screens/dialogue.md) | [介面圖像](art-assets/interface-assets.md) | [對話聲包](audio/dialogue-cues.md) | [對話演出](art-assets/motion/dialogue-shop.md) |
+| 商店購買與休息服務兩畫面，各含不可用／結果／返回 | [商店與休息](ui/screens/shop-rest.md) | [介面圖像](art-assets/interface-assets.md)、[商品卡](art-assets/cards.md) | [商店](audio/shop-cues.md)、[休息](audio/screen-cues.md) | [商店演出](art-assets/motion/dialogue-shop.md)、[休息演出](art-assets/motion/rest-selection.md) |
+| 獎勵列＋draft＋牌庫選牌：暫選、確認／Skip／Back及取得結果 | [獎勵選牌](ui/screens/rewards-selection.md) | [卡牌](art-assets/cards.md)、[介面](art-assets/interface-assets.md) | [畫面聲包](audio/screen-cues.md) | [獎勵演出](art-assets/motion/rewards-map.md)、[牌庫選牌演出](art-assets/motion/rest-selection.md) |
+| 選角起局→地圖選點→勝／敗結算返回，三畫面均交付 | [地圖](ui/screens/map.md)、[選角與結算](ui/screens/menus-collection.md) | [人物](art-assets/combatants.md)、[介面](art-assets/interface-assets.md) | [畫面聲包](audio/screen-cues.md) | [選角與結算轉場](art-assets/motion/menus.md)、[地圖演出](art-assets/motion/rewards-map.md) |
 
 卡牌／戰鬥包用同一 CardPlayRequest 串資料結果和媒體；成功、命中與取消按出牌時序定義。敵人包分戰鬥身體與圖鑑、UI選取區；頭目未定的轉階段規則不因素材需求而新增。
 
 對話、商店、休息各有不同的結果／重建／退出 owner，選項或交易接受不等於效果完成；不要由通用按鈕音取代領域結果。獎勵選牌須區分暫選、取得與返回，既有 Skip／Back 的資料結果依 action 配置，不能假定取消一律效果零次。相關來源陷阱和 fixture 前提集中在上述子篇。
 
-最後一包以完整旅程驗三畫面，不能只驗地圖便整包通過。商店／休息也必須兩者各自具備七項契約。各畫面的空資料、不可用、等待、退出及重入要分別列結果，跨畫面音樂和持續效果則由整合 owner 確認接手／停止，不讓兩個 owner 同播。
+最後一包以完整旅程驗三畫面，不能只驗地圖便整包通過。商店／休息也必須兩者各自具備完整的七項交付內容，也就是 Done when 所列的 UI 組成、圖像包、聲音 cue、動畫時序、資料來源、退出責任與驗收結果，不能由其中一個畫面代表另一個。各畫面的空資料、不可用、等待、退出及重入要分別列結果，跨畫面音樂和持續效果則由整合 owner 確認接手／停止，不讓兩個 owner 同播。
 
 ### 串行整合與驗收
 
 先交代表資產與接線，由場景 owner 用同一 fixture 串玩家任務，驗結果唯一發生再擴變體。缺素材指定已驗回退或停用純呈現接點；MISSING fallback 不是完成。UI 重建不得重複 connect／cue，持續音效、Tween、timer、listener 都需離場 owner。
 
-先驗來源／hash／解碼／ID／scene 引用；實作後按 [UI 驗證](ui/verification.md) 與 [validation](validation.md) 接 helper，驗資料、播放計數、狀態和清理。此輪只文件／靜態，不 Godot、GUI、桌面／視窗／截圖／焦點／音訊或既有程序控制；視覺／聽感／實際輸入明列未驗。
+先驗來源／hash／解碼／ID／scene 引用；實作後按 [UI 驗證](ui/verification.md) 與 [validation](validation.md) 接 helper，驗資料、播放計數、狀態和清理。背景斷言不等於視覺驗收：視覺、聽感與實際輸入需要 GUI，未執行時明列未驗（操作邊界見 [user.md](../common/user.md#桌面與程序邊界)）。
 
 ## 交接
 

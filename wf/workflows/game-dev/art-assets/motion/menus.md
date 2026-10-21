@@ -1,12 +1,14 @@
 # 畫面轉場 — 回合、選角、選單與結算
 
-[共通責任與取消](README.md)｜[UI 動態](../ui-motion.md)｜[場景編排](../scene-choreography.md)
+[共通契約](README.md)｜[美術入口](../../art-assets.md)
 
-**何時用**：製作回合提示、選角回饋、頁面轉場及終局演出。 **何時不用**：只改布局／互動走 [UI 畫面](../../ui/screens/README.md)。標「新增」者為待實作，本輪僅靜態核實與文件。
+**何時用**：製作回合提示、選角回饋、頁面轉場及終局演出。
+
+**何時不用**：只改布局／互動走 [UI 畫面](../../ui/screens/README.md)。標「新增」者為待實作。
 
 ## Done when
 
-用途記錄及所需素材／控制器檔存在，包含時間段、輸入與還原政策；專項日誌列實際斷言及退出碼。未落地者標「僅規格」，文件 lint 通過，視覺未驗明列。
+用途記錄及所需素材／控制器檔存在，包含時間段、輸入與還原政策；專項日誌列實際斷言及退出碼。未落地者標「僅規格」，視覺未驗明列；文件 lint 通過（見 [testing](../../../testing.md)）。
 
 ## 流程
 
@@ -14,9 +16,9 @@
 
 ### 回合提示與規則回呼
 
-Root 的 CombatAnimation 有 start_turn（1 秒）／end_turn（0.5 秒）。2026-10-19 Phase 1 起由 [CombatDirector](../../../../../game/scripts/combat/CombatDirector.gd) 在主角行動開始／結束時播放並 await animation_finished；動畫內已無流程 callback 與 EndTurnButton 解鎖軌，start_turn 只剩 TurnOverlay 淡入淡出與 update_turn_label，end_turn 只剩 disabled 軌。改時長會直接改變行動節奏。
+Root 的 CombatAnimation 有 start_turn（1 秒）／end_turn（0.5 秒）。[CombatDirector](../../../../../game/scripts/combat/CombatDirector.gd) 經 [CombatActionPhases](../../../../../game/scripts/combat/CombatActionPhases.gd) 在主角行動開始／結束時播放並 await animation_finished；動畫內已無流程 callback 與 EndTurnButton 解鎖軌，start_turn 只剩 TurnOverlay 淡入淡出與 update_turn_label method 軌，end_turn 只剩 EndTurnButton:disabled 軌。改時長會直接改變行動節奏。
 
-這段既有動畫含玩法回呼；縮短、跳過或減少動態不能只停掉動畫，否則可能漏開始回合或解除按鈕。若改造，先把一次性回合完成責任與純視覺效果分開，驗 start/end 各一次、無提前輸入與無重複抽牌。人物攻擊動畫則不自動管命中，兩者不可套同一假設。
+這段既有動畫仍承載回合標籤更新與按鈕 disabled 狀態，而且行動流程在等它的 animation_finished；縮短、跳過或減少動態不能只停掉動畫，否則可能漏更新回合標籤、留下錯誤的按鈕狀態，或讓流程等不到 finished。若改造，先把一次性回合完成責任與純視覺效果分開，驗 start/end 各一次、無提前輸入與無重複抽牌。人物攻擊動畫則不自動管命中，兩者不可套同一假設。
 
 ### 選角、選單與結算
 
@@ -29,7 +31,7 @@ Root 的 CombatAnimation 有 start_turn（1 秒）／end_turn（0.5 秒）。202
 
 ## 專項驗收
 
-驗 start/end 回合各一次、最新選角 ID、導航中斷後不跳舊頁、反覆返回不留輸入鎖、結算跳過顯示最終值、減少動態不漏 method track 的玩法責任。離樹零回呼，沒有重複開始run／發獎／改統計。 測試接入與授權邊界沿共通契約；現有套件不會自動涵蓋新增演出。
+驗 start/end 回合各一次、最新選角 ID、導航中斷後不跳舊頁、反覆返回不留輸入鎖、結算跳過顯示最終值、減少動態不漏 method track 的玩法責任。離樹零回呼，沒有重複開始run／發獎／改統計。測試接入與驗收判讀沿 [共通契約](README.md#驗證)。
 
 ## 交接
 
