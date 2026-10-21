@@ -73,6 +73,7 @@ func _run() -> void:
 	_run_file_loader_probe(runtime_dir)
 	_run_unit_registry_probe(game_root)
 	load(get_script().resource_path.get_base_dir().path_join("prepared_encounter_probe.gd")).new().run(_check, game_root.get_node("RunScreen/Combat"))
+	load(get_script().resource_path.get_base_dir().path_join("prepared_schema_cases.gd")).new().run(_check)
 	if content_profile != global_data.CONTENT_PROFILE_PACK:
 		load(get_script().resource_path.get_base_dir().path_join("run_start_preflight_probe.gd")).new().run(_check)
 	_run_pack_probes()

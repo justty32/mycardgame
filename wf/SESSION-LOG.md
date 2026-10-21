@@ -11,7 +11,6 @@
 
 ## 最新進度
 
-- [game-dev] A／B 已完成並驗證；下一步 C 接新格式的明確空集合／任意正盤、能力錯誤與開場失敗清理，不先定部署玩法，0~N 目標尚未完成 → [遷移計畫](plans/multi-board/README.md)
 
 ## 各工作流 session-log
 

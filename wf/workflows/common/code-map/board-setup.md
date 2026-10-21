@@ -6,4 +6,4 @@
 
 [BoardLayout](../../../../game/scripts/ui/BoardLayout.gd) 只映射穩定 ID 到畫面矩形；[BoardView](../../../../game/scripts/ui/BoardView.gd) 接收槽尺寸，[BoardCombatPresentation](../../../../game/scripts/ui/BoardCombatPresentation.gd) 管理 View 與 actor 映射，重排不回寫世界。
 
-[UnitSpawner](../../../../game/scripts/combat/UnitSpawner.gd) 的首波內部相容選項分開實體生成與舊事件畫面槽限制，後續仍共用 placement admission。現有內容預設相容，新外部格式選路由 C 接續；不能依 Event ID 猜新語意。驗證入口見 [suite coverage](../../testing/suite-coverage.md)。
+[UnitSpawner](../../../../game/scripts/combat/UnitSpawner.gd) 的首波相容選項分開實體生成與舊事件畫面槽限制，後續仍共用 placement admission。Prepared 依 legacy／明確正盤格式選路，不能依 Event ID 猜新語意。外部欄位見 [資料格式](../../../specs/board-module/encounter-format.md)，驗證入口見 [suite coverage](../../testing/suite-coverage.md)。

@@ -12,6 +12,8 @@ var threat_preview: ThreatPreview = null
 var presentation: BoardCombatPresentation = null
 ## Changes on every clear/setup; queued requests cannot survive reuse of this same Node.
 var generation: int = 0
+var _committed: bool = false
+var setup_error: Dictionary = {"code": "", "detail": ""}
 ## Retained weakly after clear so a later tree exit can detach the old instance safely.
 var _director_ref: WeakRef = null
 ## Spatial card policy; Combat exposes it as card_play_adapter while this module is mounted.
@@ -40,30 +42,76 @@ func get_card_play_adapter() -> CardPlayAdapter:
 func attached_director() -> CombatDirector:
 	return _director_ref.get_ref() as CombatDirector if _director_ref != null else null
 
+static func prepare_encounter(encounter: EncounterData, rules: CombatRulesData) -> Dictionary:
+	var raw: Variant = encounter.encounter_board_setup
+	if not raw is Dictionary:
+		return {"ok": false, "code": "invalid_board_setup", "detail": "encounter_board_setup must be an object"}
+	var setup: BoardSetup = BoardSetup.from_legacy(encounter, rules) if raw is Dictionary and raw.is_empty() else BoardSetup.from_explicit(raw, rules)
+	if not setup.is_valid():
+		return {"ok": false, "code": setup.error, "detail": setup.error_detail}
+	if setup.explicit and not setup.get_board_ids().is_empty():
+		for wave_index: int in encounter.encounter_waves.size():
+			var wave: EncounterWaveData = encounter.encounter_waves[wave_index]
+			if wave == null:
+				continue
+			for unit_index: int in wave.wave_units.size():
+				var location: Dictionary = setup.deployment.resolve_spawn_location(wave.wave_units[unit_index])
+				if location.get("error", "") != "":
+					return {"ok": false, "code": "invalid_wave_deployment", "detail": "wave %s unit %s requires a valid board_id/cell or deployment.spawn" % [wave_index, unit_index]}
+	return {"ok": true, "code": "", "detail": "", "setup": setup}
+
 func setup(combat_director: CombatDirector, encounter: EncounterData) -> bool:
 	clear()
+	var result: Dictionary = prepare_encounter(encounter, combat_director.rules)
+	if not result.ok:
+		setup_error = {"code": result.code, "detail": result.detail}
+		return false
+	if not setup_prepared(combat_director, encounter, result.setup):
+		return false
+	commit_setup()
+	return true
+
+func setup_prepared(combat_director: CombatDirector, encounter: EncounterData, prepared: Variant) -> bool:
+	clear()
+	setup_error = {"code": "", "detail": ""}
 	director = combat_director
 	_director_ref = weakref(combat_director)
-	return _setup_resources(encounter)
-
-func _setup_resources(encounter: EncounterData) -> bool:
+	if not prepared is BoardSetup or not prepared.is_valid():
+		setup_error = {"code": "unprepared_board_setup", "detail": "module requires a validated BoardSetup"}
+		clear()
+		return false
 	board_controller = BoardController.new(director.rules)
-	if not board_controller.setup(encounter):
+	if not board_controller.setup_prepared(encounter, prepared):
+		setup_error = {"code": board_controller.error, "detail": board_controller.error_detail}
 		clear()
 		return false
 	threat_preview = ThreatPreview.new(director)
+	return true
+
+func get_setup_generation() -> int:
+	return generation
+
+func get_setup_error() -> Dictionary:
+	return setup_error.duplicate(true)
+
+func commit_setup() -> void:
+	if _committed or board_controller == null or director == null:
+		return
+	_committed = true
 	Signals.unit_moved.connect(_on_unit_moved)
 	Signals.field_created.connect(_on_field_changed)
 	Signals.field_removed.connect(_on_field_changed)
 	Signals.field_changed.connect(_on_field_changed)
 	Signals.board_changed.connect(_on_board_changed)
 	presentation = BoardCombatPresentation.new()
+	presentation.layout_slots.assign(board_controller.board_setup.layout_slots)
 	add_child(presentation)
 	presentation.setup(director, self)
-	return true
+	board_controller.commit_setup()
 
 func clear(preserve_presentation: bool = false) -> void:
 	generation += 1
+	_committed = false
 	if Signals.unit_moved.is_connected(_on_unit_moved):
 		Signals.unit_moved.disconnect(_on_unit_moved)
 	if Signals.field_created.is_connected(_on_field_changed):
@@ -107,7 +155,8 @@ func prepare_spawned_unit(unit: BaseCombatant) -> bool:
 		return false
 	if board_controller.get_board_for_unit(unit) != null:
 		return true
-	return board_controller.place_unit_nearest(unit, board_controller.default_spawn_origin())
+	var location: Dictionary = board_controller.deployment.resolve_spawn_location({}, unit.faction)
+	return location.get("error", "") == "" and board_controller.place_unit_nearest(unit, location.cell, location.board_id)
 
 func on_unit_spawned(unit: BaseCombatant) -> void:
 	var fields: FieldController = FieldController.get_for_unit(unit)

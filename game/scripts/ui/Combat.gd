@@ -71,7 +71,6 @@ func _ready():
 
 	Signals.enemy_killed.connect(_on_enemy_killed)
 
-	Signals.combat_started.connect(_on_combat_started)
 	Signals.combat_ended.connect(_on_combat_ended)
 
 	Signals.unit_action_started.connect(_on_unit_action_started)
@@ -219,29 +218,84 @@ func _on_enemy_killed(enemy: Enemy):
 	ActionHandler.add_actions(generated_actions)
 
 
-func _on_combat_started(event_id: String):
-	var current_event: EventData = null
-	if event_id == "":
-		# if no event is provided, it will be derived from the location
-		var current_location: LocationData = Global.get_player_location_data()
-		current_event = Global.get_player_event_data()
-		current_location.location_visited = true
-	else:
-		current_event = Global.get_event_data(event_id)
+var last_start_error: Dictionary = {}
+var _starting: bool = false
 
+## UI owned by this scene only; safe before ready and while children leave the tree.
+func stop_combat_input() -> void:
+	if is_instance_valid(hand) and hand.is_node_ready():
+		hand.disable_hand(true)
+	var consumables: Node = get_node_or_null("Consumables")
+	if is_instance_valid(consumables) and consumables.is_node_ready():
+		consumables.deselect_consumable()
+
+
+## combat_started is a committed notification, never an unvalidated request.
+func request_combat_start(event_id: String = "") -> bool:
+	var event_data: EventData = Global.get_player_event_data() if event_id == "" else Global.get_event_data(event_id)
+	if event_data == null:
+		return _reject_start("missing_event", "unknown event %s" % event_id)
+	return request_combat_event(event_data)
+
+func request_combat_event(event_data: EventData = null) -> bool:
+	if _starting:
+		return false
+	_starting = true
+	combat_director._stop()
+	var unit_layer: Node = get_node("EnemyContainer")
+	for unit: BaseCombatant in UnitRegistry.get_all_units():
+		if unit is Enemy and unit_layer.is_ancestor_of(unit):
+			unit.get_parent().remove_child(unit)
+			unit.queue_free()
+	last_start_error = {}
+	var prepared: PreparedEncounter = PreparedEncounter.prepare(event_data, Callable(), board_module_enabled)
+	if not prepared.is_valid():
+		return _reject_start(prepared.error_code, prepared.error_detail)
+	compose_combat_module(prepared)
+	if not combat_director.stage_prepared_combat(prepared):
+		return _reject_start(combat_director.last_start_error.get("code", "module_setup_failed"), combat_director.last_start_error.get("detail", "module setup failed"))
+	# No fallible author-data checks remain; ordinary subscribers now initialize once.
 	_combat_ending = false
 	end_turn_button.disabled = true
-
 	Global.player_data.player_energy = Global.player_data.player_energy_max
 	set_combat_display_visibility(true)
+	var current_location: LocationData = Global.get_player_location_data()
+	if current_location != null:
+		current_location.location_visited = true
+	var generation: int = combat_director.get_generation()
+	Signals.combat_started.emit(combat_director.event.object_id if combat_director.event != null else "")
+	if combat_director.prepared_encounter != prepared or combat_director.get_generation() != generation:
+		_starting = false
+		if combat_director.prepared_encounter == null:
+			set_combat_display_visibility(false)
+			end_turn_button.disabled = true
+		return false
 	update_combat_display()
-
-	# compose / drop the optional module, then the director sets it up, spawns the encounter's
-	# units and runs the action timeline
-	var prepared: PreparedEncounter = PreparedEncounter.prepare(current_event)
-	_compose_board_module(prepared)
-	combat_director.begin_prepared_combat(prepared)
 	timeline_bar.visible = true
+	combat_director.begin_prepared_combat(prepared)
+	_starting = false
+	if combat_director.prepared_encounter != prepared:
+		if combat_director.prepared_encounter == null:
+			set_combat_display_visibility(false)
+			end_turn_button.disabled = true
+		return false
+	return true
+
+func _reject_start(code: String, detail: String) -> bool:
+	_starting = false
+	last_start_error = {"code": code, "detail": detail}
+	combat_director._stop()
+	compose_combat_module()
+	set_combat_display_visibility(false)
+	end_turn_button.disabled = true
+	timeline_bar.visible = false
+	# Travel already reached this node; leave it uncompleted and retryable rather than
+	# pretending to undo location selection, encounter draws or the pre-visit autosave.
+	var map: Node = get_parent().get_node_or_null("Map")
+	if map != null:
+		map.can_travel = true
+		map.show_map()
+	return false
 
 func _on_combat_ended():
 	set_combat_display_visibility(false)

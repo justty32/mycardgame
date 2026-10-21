@@ -1,8 +1,10 @@
-# 每場 0~N 盤：解耦架構草案
+> 封存 2026-10-21，由 analysis/slay-the-robot/architecture/10_multi_board_encounters.md 取代；現行資料與生命週期契約位於 wf/specs/board-module/。
+
+# 每場 0~N 盤：解耦架構
 
 [棋盤模組現況](../board-module/README.md)｜[現況調查](../../notes/investigations/2026-10-21-multi-board-feasibility.md)｜[遷移計畫](../../plans/multi-board/README.md)
 
-狀態：2026-10-21 架構先行規劃；其後遷移 A／B 已完成每場準備及內部盤定義、部署與排版分離，C 尚未實作。使用者確認目標為每場 0~N 盤，要求乾淨解耦，不先定死部署玩法。本草案不把調查 M1、陣營主場、盤數上限或排版提案升為產品決策。調查基準為 `7eba093`，A／B 實作基準分別為 `2b3dec8`／`7b26416`；證據見 [準備分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)及[盤定義分析](../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)。
+狀態：2026-10-21 已實作 A／B／C，D 適用工程驗收與來源交付已核對。使用者確認每場 0~N 盤、乾淨解耦且不先定死部署玩法；本架構不將陣營主場、盤數上限或自動排版升為產品決策。A／B 的核實見 [準備分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)及[盤定義分析](../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)；C 的格式與正式開場見 [整合分析](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)。
 
 ## 方案
 
@@ -44,8 +46,8 @@ flowchart TD
 
 不把全功能拓樸或策略系統一次建完。先抽出現有相容行為、證明依賴方向與 0 路徑，再接任意明確盤集合。效能資源保護與 UI 可讀性分開衡量；若需限制，依格數、單位數或量測成本明列可配置邊界與錯誤，不隱藏截斷或自行把 N 定為小常數。
 
-此規劃不決定主角初始盤、敵我各幾盤、隊友是否入盤、跨盤距離或最終排版。這些答案後續落在內容與具體政策；目前足以先規劃與重整責任，不要求使用者先回答玩法。外部 JSON 欄位名稱與相容版本也尚未定稿；實作前依 [契約](contracts.md) 的可觀察條件定案。
+此規劃不決定主角初始盤、敵我各幾盤、隊友是否入盤、跨盤距離或最終排版。這些答案後續落在內容與具體政策；新內容由具體政策與明確資料給出位置，不要求使用者先回答永久玩法。外部序列化使用 [資料格式 v1](data-format.md)，省略與合法空集合有不同語意。
 
 ## 驗收邊界
 
-`2b3dec8` 的初次交付只含架構與分階段計畫、獨立靜態審查及文件 lint；其後 A／B 已有隔離 headless 證據，見 [遷移計畫](../../plans/multi-board/README.md)。C 仍待實作，內部任意盤集合與 slot-free 生成專項通過不等於 0~N 已可玩。
+`2b3dec8` 的初次交付為架構與計畫；A／B／C 的實作證據各自記錄。C 涵蓋正式 0→DUAL→0→三盤開場、生成與目標操作，1／2／3／7 盤集合另有幾何專項。這不代表七盤完整遊玩、大 N 效能、全部內容包、多幕通關或 GUI 已驗；最終範圍見 [整合分析](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)。

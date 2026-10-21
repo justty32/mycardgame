@@ -103,7 +103,10 @@ func _on_map_location_button_up(map_location: MapLocation):
 	# map must be in travel mode
 	if can_travel:
 		# must be adjacent to player location
-		if Global.get_next_locations().has(map_location.location_data):
+		var current: LocationData = Global.get_player_location_data()
+		var unfinished_combat: bool = current != null and not current.location_visited and current.location_type in [LocationData.LOCATION_TYPES.COMBAT, LocationData.LOCATION_TYPES.MINIBOSS, LocationData.LOCATION_TYPES.BOSS]
+		var retry_current: bool = unfinished_combat and map_location.location_data == current
+		if retry_current or (not unfinished_combat and Global.get_next_locations().has(map_location.location_data)):
 			# visit the location
 			ActionGenerator.generate_visition_location(map_location.location_data.location_id)
 	

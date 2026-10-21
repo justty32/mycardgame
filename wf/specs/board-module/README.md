@@ -1,14 +1,14 @@
 # 棋盤是可選的 Combat 模組
 
-[設計分析入口](../../../analysis/slay-the-robot/design/README.md)｜[工作流](../../workflows/game-dev/mechanics/board-module.md)｜[雙盤 A 契約](../dual-board/README.md)｜[棋盤大小](board-size.md)｜[驗收矩陣](verification.json)
+[設計分析入口](../../../analysis/slay-the-robot/design/README.md)｜[工作流](../../workflows/game-dev/mechanics/board-module.md)｜[雙盤 A 契約](../dual-board/README.md)｜[棋盤大小](board-size.md)｜[驗收矩陣](verification.json)｜[每場格式](encounter-format.md)｜[資料責任](encounter-contracts.md)｜[開始與清理](encounter-lifecycle.md)
 
 2026-10-20 核實，2026-10-21 依審查改為相依層面可移除。[證據](../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/README.md) 對應矩陣 8 列：scope 是需求，test_file／assertion_ids 是測例，status／run_path 是實證；2026-10-21 的 All（含新 suite BoardRemoved）與 PackScenario 結果只存本機 artifacts/verification/，未另選入 evidence。
 
 ## 裝配與責任
 
-本節描述現有程式。2026-10-21 已決定盤數由每場 Encounter 決定（含 0 盤）；目前遷移 A 已集中每場準備與裝配資料，但尚未接上新盤數 schema。缺口基準見 [盤數調查](../../notes/investigations/2026-10-21-multi-board-feasibility.md)，後續依 [解耦架構](../multi-board/README.md) 漸進遷移，不能把目前旗標開關當作 0~N 已完成。
+本節描述現有程式。2026-10-21 每場 0~N 盤已接上 [資料格式 v1](encounter-format.md)：省略走 legacy、明確空集合真正不掛模組、明確正盤使用集合與獨立部署／矩形。幾何、政策與呈現的責任見 [整合實證](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)，正式開場與驗證範圍見 [整合分析](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)。不將測試 fixture 的位置政策升為永久陣營玩法。
 
-遷移 B 的 [盤定義、部署與排版](../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md) 已分責：Battlefield 消費正規化集合，舊 mode 由 BoardSetup 相容轉譯，部署政策與畫面矩形各有獨立入口。正式內容仍走舊格式，內部任意 ID／矩形與不受畫面槽限制的生成專項不等於 C 已完成。
+Battlefield 消費正規化集合，舊 mode 只在 BoardSetup 相容轉譯。新格式選擇不受 EnemyContainer 畫面槽數限制的生成；舊 positional event 截斷保留在相容路徑。
 
 Combat 開戰時先建立 PreparedEncounter，再裝配並交 Director；`_ready` 不預掛載。Director 保存唯一 active prepared，場景相容重掛只讀它，停止後無參數裝配不復活舊場。規則／Event／Encounter 使用獨立資料快照；普通卡規則與 Director 共用當場值，下場準備另讀配置來源，詳見 [核實分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。
 
@@ -25,7 +25,7 @@ flowchart TD
   Optional --> View[BoardCombatPresentation]
 ```
 
-[Combat.gd](../../../game/scripts/ui/Combat.gd) 是場景裝配點。其 `board_module_enabled` 與 [CombatRulesData](../../../game/data/readonly/CombatRulesData.gd) 的 `board_enabled` 都為 true、且 `BOARD_MODULE_SCRIPT` 檔案存在時，才以路徑 load [BoardCombatModule](../../../game/scripts/combat/board/BoardCombatModule.gd) 成為 child。兩個旗標預設為 true，以保留已有棋盤內容與雙盤 A 決策（場景旗標＝此畫面有沒有裝模組，規則旗標＝內容要不要棋盤；尚無遭遇層級開關）。關閉任一旗標稱為 NONE：沒有棋盤模組實例，也不建立 BoardController、FieldController 或 ThreatPreview；SINGLE 仍是一個真正存在的共用棋盤，不能拿它冒充 NONE。
+[Combat.gd](../../../game/scripts/ui/Combat.gd) 是場景裝配點。其 `board_module_enabled` 與 [CombatRulesData](../../../game/data/readonly/CombatRulesData.gd) 的 `board_enabled` 都為 true、且 `BOARD_MODULE_SCRIPT` 檔案存在時，才以路徑 load [BoardCombatModule](../../../game/scripts/combat/board/BoardCombatModule.gd) 成為 child。兩個旗標預設為 true，以保留已有棋盤內容與雙盤 A 決策（場景／規則旗標是能力邊界；每場遭遇另表達盤集合意圖）。新格式明確正盤但缺能力會拒絕開場；明確 0 或 legacy 關閉旗標時為 NONE：沒有棋盤模組實例，也不建立 BoardController、FieldController 或 ThreatPreview；SINGLE 仍是一個真正存在的共用棋盤，不能拿它冒充 NONE。
 
 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 保留 CTB、行動等待、generation、角色控制器、波次與勝敗流程，獨立保存 Encounter。它只認識核心的 [CombatModule](../../../game/scripts/combat/CombatModule.gd) 介面（setup／clear、單位進出、行動開始、時鐘、出牌、目標解析、敵人意圖、威脅與位置放置 hooks），不引用任何棋盤類別。`board_module`、`board_controller`、`battlefield`、`field_controller`、`board` 與 `threat_preview` 是無型別相容轉送，未掛載時回 null。移動、Undo、移動預算與放置 API 屬於模組；Director 只提供 `can_request_player_input()` 輸入時機閘。
 

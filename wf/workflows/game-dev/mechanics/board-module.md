@@ -10,11 +10,11 @@
 
 ## 先確定裝配與範圍
 
-遇到每場 0~N 盤需求，先對照 [架構與遷移計畫](../../../specs/multi-board/README.md)；[調查 H0](../../../notes/investigations/2026-10-21-multi-board-feasibility.md) 的先裝配後解析是 `7eba093` 舊基準。遷移 A 已以 PreparedEncounter 統一準備與裝配，尚未加入每場新盤數格式。改開戰入口時沿同份 prepared，不自行再查 Global 遭遇；本場規則讀 `get_combat_rules`，下一場準備才讀 `get_configured_combat_rules`，停止後清唯一 active prepared。核實及專項見 [準備分析](../../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。後續仍須驗同場景 0→正盤→0，不得以空盤／空覆寫字典冒充 0；主場與生成政策不先定死。
+每場 0~N 盤先讀 [資料格式 v1](../../../specs/board-module/encounter-format.md)；[調查 H0](../../../notes/investigations/2026-10-21-multi-board-feasibility.md) 的先裝配後解析是 `7eba093` 舊基準。PreparedEncounter 區分 legacy、合法 0、明確正盤與錯誤；0 不掛模組，明確正盤缺能力拒絕，舊格式保留 fallback。改開戰入口時沿同份 prepared，不自行再查 Global 遭遇；本場規則讀 `get_combat_rules`，下一場準備讀 `get_configured_combat_rules`。正式入口、失敗與專項見 [C 分析](../../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)。不得以空 Battlefield 或舊空覆寫字典冒充 0，也不從 faction／首末盤猜新格式位置。
 
 讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd)、[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)、[BoardCombatModule.gd](../../../../game/scripts/combat/board/BoardCombatModule.gd)，確認場景 `board_module_enabled` 與 rules `board_enabled` 的實際值（兩者都開才掛載，見 [架構分析的裝配與責任](../../../specs/board-module/README.md#裝配與責任)）。不要把 SINGLE、隱藏 BoardView、空棋盤或零移動點當作關閉功能。
 
-盤定義、部署與呈現的接點見 [遷移 B 分析](../../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)：新增幾何消費 BoardSetup 集合，舊 mode 只在相容轉譯解讀；部署政策只產位置，BoardLayout 只產畫面矩形。不能把 party／enemy 或畫面槽數重新塞回通用盤定義。首波 `use_event_slots` 是內部相容選項，舊內容預設不變，外部新盤數格式選路留 C；改呼叫時同時核對顯式 Encounter 的 positional 相容測例。
+盤定義、部署與呈現的接點見 [遷移 B 分析](../../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)：幾何消費 BoardSetup 集合，舊 mode 只在相容轉譯解讀；部署政策只產位置，BoardLayout 只產畫面矩形。不能把 party／enemy 或畫面槽數重新塞回通用盤定義。首波 `use_event_slots` 由 prepared 的格式選擇，新正盤不受畫面槽限制，舊內容預設不變；改呼叫時同時核對顯式 Encounter 的 positional 相容測例。
 
 先定義改動是在開局前切換內容設定，還是要支援戰鬥中真正卸載 Node。後者必須涵蓋排隊請求、await 恢復、舊實例延遲 exit 與新實例身份；不要在未完成相關驗收前把「可選掛載」擴稱成任意時刻熱切換。
 

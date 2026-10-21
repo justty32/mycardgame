@@ -1,8 +1,10 @@
+> 封存 2026-10-21，由 analysis/slay-the-robot/architecture/10_multi_board_encounters.md 取代；現行資料與生命週期契約位於 wf/specs/board-module/。
+
 # 每場 0~N 盤：漸進遷移計畫
 
 [架構草案](../../specs/multi-board/README.md)｜[planning](../../workflows/planning.md)｜[遊戲驗收](../../workflows/game-dev/validation.md)
 
-狀態：2026-10-21 規劃先於 `2b3dec8` 交付，持續工作已完成 A／B；C 尚未實作。使用者要求先把結構規劃乾淨；本計畫不是部署玩法的定案。開工依 game-dev，先在 SESSION-LOG 記實際範圍，再分配檔案唯一 owner 與單一背景 runtime owner。上游身份看 tools/upstream.json，A／B 的外層基準分別為 `2b3dec8`／`7b26416`。
+狀態：2026-10-21 規劃先於 `2b3dec8` 交付，持續工作已完成 A／B／C 與 D 適用工程驗收。使用者要求先把結構規劃乾淨；本計畫不是部署玩法的定案。開工依 game-dev，先在 SESSION-LOG 記實際範圍，再分配檔案唯一 owner 與單一背景 runtime owner。上游身份看 tools/upstream.json，A／B 的外層基準分別為 `2b3dec8`／`7b26416`。
 
 ## A．集中每場準備，保持既有行為
 
@@ -26,13 +28,15 @@
 
 完成條件：省略／空集合在真實反序列化後仍可區分，新舊欄位衝突有測例；錯誤資料不降級為 0，新格式明確正盤缺能力回 unavailable，舊 BoardRemoved 仍相容。同場景 0→DUAL→0→正盤與 setup 失敗後重開通過；失敗前不發初始場域效果，場景 HUD／輸入與啟動狀態確實復原；普通牌／盤面牌能力拒絕、generation、呈現清理符合 [生命週期](../../specs/multi-board/lifecycle.md)。無設定的新部署政策要回明確缺資料，不能用第一盤或 faction 猜出玩法。
 
+2026-10-21 已完成：版本化外部資料、真正 0 與任意明確正盤、能力錯誤、單一成功開始邊界、失敗清理／重開與取消 token。獨立 25 項 audit 無產品 blocker；1／2／3／7 集合及正式三盤操作的範圍見 [整合分析](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)。
+
 ## D．整合與可攜交付
 
 新增 helper 接到既有 suite，必要時才新增 runner suite（新增時同步 Python、ps1 與 diagnostics）。核心／裝配變更必驗 Smoke、Boardless、BoardRemoved、DualBoard；集合／尺寸／幾何回歸加 Board；生命週期變更驗 ResourceLifecycle，若波次/場域/存讀受影響再驗 Wave／Field／SaveLoad。每階段只跑相應必要範圍，最終覆蓋所有受影響路徑，不能以 Smoke 代替專項。
 
 程式修改後同步 board-module 現行契約、code map、suite coverage、受影響 analysis 與來源補丁／upstream 鎖。補丁按明確來源基準產生並檢查順序／hash；未改遊戲的本輪不產生空補丁。測試副本留 artifacts，必要證據才依版本控制流程取可攜副本。
 
-所有階段完成後依 STRUCTURE 封存 plan；目前 A／B 完成，保留 C open，不將 0~N 目標標完成。GUI、所有內容包、多幕通關與大規模效能未經實測都另列限制。
+所有階段完成後依 STRUCTURE 封存 plan；C／D 已完成：12 套 2166 checks、18 測試階段、42 程序階段全部通過；7 套最終 hash、5 套窄 UI delta 重用均明列於整合分析，不誤稱全套同版本重跑。GUI、所有內容包、多幕通關與大規模效能未經實測都另列限制。
 
 ## 初次規劃驗收（2b3dec8）
 

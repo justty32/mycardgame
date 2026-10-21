@@ -16,11 +16,6 @@ func run(c) -> void:
 	explicit.event_initial_combat_actions.assign([{Scripts.ACTION_ADD_MONEY: {"money_amount": 7}}])
 	var money: int = Global.player_data.player_money
 	var generation: int = c.director.get_generation()
-	# Exercise the Director compatibility entry while the normal start signal initializes
-	# stats/deck/UI subscribers. Only the scene forwarding callback is replaced here.
-	c.signals.combat_started.disconnect(c.combat._on_combat_started)
-	c.signals.combat_started.emit(current.object_id)
-	c.signals.combat_started.connect(c.combat._on_combat_started)
 	c.director.begin_combat(explicit)
 	# Mutation after the synchronous preparation must not change the awaited start actions.
 	explicit.event_initial_combat_actions[0][Scripts.ACTION_ADD_MONEY].money_amount = 50

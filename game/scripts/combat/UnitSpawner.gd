@@ -48,6 +48,7 @@ func clear() -> void:
 ## spawner), in the event's placement mode, placed on their cell by the wave's spawn policy.
 func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event_slots: bool = true) -> void:
 	spawn_delays.clear()
+	var generation: int = director.get_generation()
 	var unit_layer: Node = get_unit_layer()
 	if unit_layer == null or encounter.encounter_waves.is_empty():
 		return
@@ -55,6 +56,8 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event
 	var wave: EncounterWaveData = encounter.encounter_waves[0]
 	var index: int = 0
 	for unit_entry: Dictionary in wave.wave_units:
+		if director.get_generation() != generation:
+			return
 		var enemy_object_id: String = _pick_enemy(unit_entry)
 		if enemy_object_id == "":
 			index += 1
@@ -70,6 +73,9 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event
 		var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id) if board_entry else unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
 		if enemy == null:
 			break	# positional events stop when their slots run out (legacy)
+		if director.get_generation() != generation:
+			_discard(enemy)
+			return
 		if placement == null:
 			if tick > 0:
 				spawn_delays[enemy.unit_uid] = tick
@@ -252,11 +258,11 @@ func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i, board_id: Stri
 	var placement: CombatModule = director.get_placement_module()
 	if unit_layer == null or placement == null:
 		return null
-	var zone: String = str(placement.resolve_spawn_location({"board_id": board_id}).board_id)
+	var zone: String = str(placement.resolve_spawn_location({"board_id": board_id, "cell": cell}).board_id)
 	if not placement.has_zone(zone):
 		return null
 	var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id)
-	if enemy != null and not placement.place_unit_nearest(enemy, cell, board_id):
+	if enemy != null and not placement.place_unit_nearest(enemy, cell, zone):
 		_discard(enemy)
 		return null
 	return enemy

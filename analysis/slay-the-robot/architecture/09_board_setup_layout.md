@@ -1,6 +1,6 @@
 # 盤定義、部署與排版：遷移 B
 
-[分析入口](../README.md)｜[遷移計畫](../../../wf/plans/multi-board/README.md)｜[模組流程](../../../wf/workflows/game-dev/mechanics/board-module.md)
+[分析入口](../README.md)｜[整合實證](10_multi_board_encounters.md)｜[模組流程](../../../wf/workflows/game-dev/mechanics/board-module.md)
 
 2026-10-21，基於 snapshot `7b26416`。B 把既有棋盤建置、初始位置政策與畫面矩形分開；新外部 0／N 盤格式、沒有預設的部署政策及完整開場失敗交易仍由 C 接續。
 

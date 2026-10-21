@@ -2,7 +2,7 @@
 
 > 2026-10-21 使用者已決定：盤數每場決定，含 0 盤。
 >
-> 狀態：2026-10-21 唯讀調查，未實作。使用者後續要求先規劃乾淨解耦結構，不先定死部署玩法；接 [架構草案](../../specs/multi-board/README.md)。原語意模型與推薦方案保留在 [models](2026-10-21-multi-board-models.md)，不視為決策。
+> 狀態：2026-10-21 唯讀調查，未實作。使用者後續要求先規劃乾淨解耦結構，不先定死部署玩法；接 [整合實證](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)。原語意模型與推薦方案保留在 [models](2026-10-21-multi-board-models.md)，不視為決策。
 
 日期：2026-10-21｜基準：main @ bc7fe2d｜方式：唯讀靜態讀碼，未跑 Godot、未改檔。
 

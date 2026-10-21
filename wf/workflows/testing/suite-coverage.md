@@ -14,6 +14,8 @@
 
 Smoke 呼叫 [prepared_encounter_probe.gd](../../../tests/prepared_encounter_probe.gd)，驗未知遭遇不提前掛載、只解析一次、Event／Rules／Encounter 巢狀快照隔離與舊模式相容。DualBoard 呼叫 [prepared_start_cases.gd](../../../tests/prepared_start_cases.gd)，在正常戰鬥停止後驗無參數裝配不復活舊場，再經 Director 相容入口啟動明確不同 Event，核對實際初始效果與首波；另驗當場普通卡規則與 Director 共用、下一場讀新配置。這些測例不代表每場 0／N 盤新 schema 已實作；結果與限制見 [準備分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。
 
+C 新增 [prepared_schema_cases.gd](../../../tests/prepared_schema_cases.gd) 的真 JSON／公開 serializer 往返與能力錯誤；[multi_board_module_cases.gd](../../../tests/multi_board_module_cases.gd) 接 Board，驗任意集合、政策／矩形與初始場域 trial／提交；[multi_board_start_cases.gd](../../../tests/multi_board_start_cases.gd) 接 DualBoard，驗同場景 0→DUAL→0→N、普通付款與後波、N 生成／目標操作、失敗保存狀態及地圖重試、真 callback 取消。BoardRemoved 另驗新正盤缺檔拒絕與新 0 普通攻擊。結果與能力界線見 [C 分析](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)。
+
 ## Dictionary、Combat、SaveLoad、ResourceLifecycle
 
 - [Dictionary](../../../tests/dictionary_regression.gd) 走 JSON patch API，涵蓋完整 patch 邊界。

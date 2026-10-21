@@ -31,7 +31,28 @@ func _removed(c) -> bool:
 	c.combat.end_turn_button.button_up.emit()
 	if not await c._wait(func(): return c._player_ready() and c.counts.hero_action_started > hero_action, "removed-module enemy executes its ordinary intent"): return false
 	c._check(c.counts.enemy_action_started > 0, "ordinary enemy acts in the core-only build")
-	return await c.win_combat()
+	if not await c.win_combat(): return false
+	var schema: RefCounted = load(get_script().resource_path.get_base_dir().path_join("prepared_schema_cases.gd")).new()
+	var encounter := EncounterData.new("removed_explicit_encounter")
+	encounter.encounter_board_setup = schema.fixture(1)
+	var wave := EncounterWaveData.new()
+	wave.wave_units.assign([{"weights": {"combat_flow_enemy": 1}}])
+	encounter.encounter_waves.assign([wave])
+	Global.register_rod(encounter)
+	var event := EventData.new("removed_explicit_event")
+	event.event_encounter_object_id = encounter.object_id
+	event.event_has_combat_rewards = false
+	Global.register_rod(event)
+	var prepared: PreparedEncounter = PreparedEncounter.prepare(event)
+	c._check(prepared.error_code == "board_module_unavailable" and prepared.unavailable_reason == "module_missing", "removed files reject explicit positive content with module_missing")
+	c._check(not c.combat.request_combat_start(event.object_id), "removed build refuses formal positive start before effects")
+	encounter.encounter_board_setup = {"version": 1, "boards": []}
+	c._check(c.combat.request_combat_start(event.object_id), "removed build accepts formal explicit zero")
+	if not await c._wait(c._player_ready, "removed build zero reaches ordinary action"): return false
+	c.enemy = Global.get_alive_enemies()[0]
+	c.assert_no_board()
+	return await c._play("card_attack_basic", true)
+
 
 func _write(c) -> bool:
 	if not c._check(not FileLoader.has_save_file(), "boardless write begins without checkpoint"): return false

@@ -1,0 +1,1046 @@
+diff --git a/autoload/Global.gd b/autoload/Global.gd
+index 866118e53477a98279834625fde0a6585705a1bc..573def4375e6b8c22247c415288fdf4aecdbd12b 100644
+--- a/autoload/Global.gd
++++ b/autoload/Global.gd
+@@ -600,7 +600,7 @@ func get_event_encounter_data(event_data: EventData, combat_rules: CombatRulesDa
+ 		var encounter_data: EncounterData = get_encounter_data(event_data.event_encounter_object_id)
+ 		if encounter_data != null:
+ 			return encounter_data
+-		DebugLogger.log_error("Global: EncounterData \"{0}\" of event \"{1}\" not found; synthesizing".format([event_data.event_encounter_object_id, event_data.object_id]))
++		return null	# A named missing encounter is invalid, never a different synthesized fight.
+ 	return EncounterData.synthesize_from_event(event_data, combat_rules if combat_rules != null else get_combat_rules())
+ #endregion
+ 
+diff --git a/autoload/Signals.gd b/autoload/Signals.gd
+index 161e77ab9983617b68982dde54ed07d1be937627..48a77d130d79507c3ef07999752e26dfc0e352ef 100644
+--- a/autoload/Signals.gd
++++ b/autoload/Signals.gd
+@@ -100,7 +100,7 @@ signal rest_action_ended(rest_action_id: String) # a rest action has finished
+ # actions on the combat timeline (CombatDirector). Legacy turn signals are kept with new meaning:
+ # player_turn_* = the hero's action started (before energy/draw) / ended (after discard);
+ # enemy_turn_* = one enemy's action started / ended. Prefer unit_action_* in new code.
+-signal combat_started(event_id: String) # invokes combat when emitted. If empty string for event_id, will use the location's combat event
++signal combat_started(event_id: String) # Success notification after scene request/preparation/staging; not a request entry.
+ signal combat_ended
+ signal player_turn_started
+ signal player_turn_ended
+diff --git a/data/readonly/EncounterData.gd b/data/readonly/EncounterData.gd
+index e1f6d4990eaeb44af54f519a06145c30fa8f1ce9..264fde5d6f79b4565c5083ab653af410418b85c8 100644
+--- a/data/readonly/EncounterData.gd
++++ b/data/readonly/EncounterData.gd
+@@ -29,6 +29,37 @@ const BOARD_SIZE_DEFAULT: Vector2i = Vector2i(0, 0)
+ @export var encounter_cell_texture_path: String = ""
+ @export var encounter_background_texture_path: String = ""
+ 
++## Raw envelope is deliberately Variant: malformed scalar/null inputs must survive loading.
++## Local serialization handles it before SerializableData's typed Dictionary assignment.
++var encounter_board_setup: Variant = {}
++
++func get_serializable_property_names() -> Array[String]:
++	var names: Array[String] = super.get_serializable_property_names()
++	names.append("encounter_board_setup")
++	return names
++
++func get_serializable_properties(json_friendly: bool = true) -> Dictionary:
++	var properties: Dictionary = super.get_serializable_properties(json_friendly)
++	properties["encounter_board_setup"] = _copy_setup_value(encounter_board_setup)
++	return properties
++
++func set_serializable_properties(object_data: Dictionary, json_friendly: bool = true, patch_data: Dictionary = {}) -> void:
++	var remaining: Dictionary = object_data.duplicate()
++	if remaining.has("encounter_board_setup"):
++		var incoming: Variant = remaining.encounter_board_setup
++		if encounter_board_setup is Dictionary and incoming is Dictionary:
++			encounter_board_setup = patch_dictionary(encounter_board_setup.duplicate(true), incoming.duplicate(true), patch_data.get("encounter_board_setup", "overwrite"))
++		else:
++			encounter_board_setup = _copy_setup_value(incoming)
++		remaining.erase("encounter_board_setup")
++	super.set_serializable_properties(remaining, json_friendly, patch_data)
++
++static func _copy_setup_value(value: Variant) -> Variant:
++	return value.duplicate(true) if value is Array or value is Dictionary else value
++
++func has_legacy_board_overrides() -> bool:
++	return encounter_board_mode != -1 or encounter_board_size != BOARD_SIZE_DEFAULT or not encounter_boards.is_empty() or not encounter_deploy_cells.is_empty() or not encounter_spawn_zone_cells.is_empty() or not encounter_blocked_cells.is_empty() or not encounter_initial_fields.is_empty()
++
+ func _get_native_properties() -> Dictionary:
+ 	return {
+ 		"encounter_board_size": Vector2i(),
+diff --git a/scripts/actions/world_interaction_actions/ActionStartCombat.gd b/scripts/actions/world_interaction_actions/ActionStartCombat.gd
+index 5b577db7da12be94dafc363550265549dd582d00..f85fc41961da45e1850266d01bd90641972bd140 100644
+--- a/scripts/actions/world_interaction_actions/ActionStartCombat.gd
++++ b/scripts/actions/world_interaction_actions/ActionStartCombat.gd
+@@ -8,4 +8,6 @@ func perform_action() -> void:
+ 		var event_object_id: String = get_action_value("event_object_id", "")
+ 		
+ 		# simulate combat starting for the given event
+-		Signals.combat_started.emit(event_object_id)
++		var director: CombatDirector = Global.get_combat_director()
++		if director != null:
++			director.get_parent().request_combat_start(event_object_id)
+diff --git a/scripts/combat/CombatDirector.gd b/scripts/combat/CombatDirector.gd
+index a43926a330af84010e2842d5ca1e37cb42fcf492..3853e49f5528d67336c90e5d10e3bc9bdef96b9e 100644
+--- a/scripts/combat/CombatDirector.gd
++++ b/scripts/combat/CombatDirector.gd
+@@ -43,6 +43,9 @@ var waves: WaveController = null
+ var encounter: EncounterData = null
+ var prepared_encounter: PreparedEncounter = null
+ var event: EventData = null
++var last_start_error: Dictionary = {}
++var _staged_component: CombatModule = null
++var _staged_module_generation: int = 0
+ 
+ ## Compatibility forwards (untyped, no module class dependency): the mounted board module and
+ ## its current resources, or null. Board-specific work belongs to the module itself.
+@@ -155,15 +158,35 @@ func project_timeline(count: int) -> Array[Dictionary]:
+ ## Called by Combat: sets up any mounted module, spawns wave 0 and runs the CTB loop.
+ ## event_data null = the player's current event.
+ func begin_combat(event_data: EventData = null) -> void:
+-	var prepared: PreparedEncounter = PreparedEncounter.prepare(event_data)
+-	get_parent().compose_combat_module(prepared)
+-	await begin_prepared_combat(prepared)
++	get_parent().request_combat_event(event_data)
+ 
+-func begin_prepared_combat(prepared: PreparedEncounter) -> void:
++## Synchronous preflight. No wave, timeline, start notification or action is published here.
++func stage_prepared_combat(prepared: PreparedEncounter) -> bool:
++	if not prepared.is_valid():
++		return false
+ 	_generation += 1
+-	var generation: int = _generation
+ 	prepared_encounter = prepared
+ 	rules = prepared.get_rules()
++	event = prepared.get_event()
++	encounter = prepared.get_encounter()
++	combat_module = get_parent().get("combat_module") as CombatModule
++	last_start_error = {}
++	if combat_module != null and not combat_module.setup_prepared(self, encounter, prepared.get_module_setup()):
++		last_start_error = combat_module.get_setup_error()
++		_stop()
++		return false
++	_staged_component = combat_module
++	_staged_module_generation = combat_module.get_setup_generation() if combat_module != null else 0
++	return true
++
++## Called only after the scene publishes the successful start notification.
++func begin_prepared_combat(prepared: PreparedEncounter) -> void:
++	if prepared_encounter != prepared:
++		return
++	if combat_module != _staged_component or (_staged_component != null and (not is_instance_valid(_staged_component) or _staged_component.get_setup_generation() != _staged_module_generation)):
++		_stop()
++		return
++	var generation: int = _generation
+ 	timeline = CombatTimeline.new(rules)
+ 	current_tick = 0
+ 	acting_unit = null
+@@ -171,23 +194,29 @@ func begin_prepared_combat(prepared: PreparedEncounter) -> void:
+ 	_player_finish_pending = false
+ 	_cards_played_this_action.clear()
+ 	reset_end_action()
+-	event = prepared.get_event()
+ 	var event_data: EventData = event
+-	encounter = prepared.get_encounter()
+-	# The scene composition owns the optional component; the core never creates it.
+-	combat_module = get_parent().get("combat_module") as CombatModule
+-	if combat_module != null and not combat_module.setup(self, encounter):
++	var component: CombatModule = combat_module
++	var module_generation: int = component.get_setup_generation() if component != null else 0
++	if component != null:
++		component.commit_setup()
++	if generation != _generation or prepared_encounter != prepared:
++		return
++	if combat_module != component or (component != null and component.get_setup_generation() != module_generation):
+ 		_stop()
+ 		return
+ 	unit_spawner = UnitSpawner.new(self)
+ 	waves = WaveController.new(self, encounter)
+-	unit_spawner.spawn_first_wave(event_data, encounter)
++	unit_spawner.spawn_first_wave(event_data, encounter, prepared.uses_event_slots())
++	if generation != _generation or prepared_encounter != prepared:
++		return
+ 	for unit: BaseCombatant in UnitRegistry.get_all_units():
+ 		if not unit.is_alive():
+ 			continue
+ 		unit.reset_unit_combat_state()
+ 		unit.next_action_tick = unit_spawner.first_action_tick(unit)
+ 		_assign_controller(unit)
++		if generation != _generation or prepared_encounter != prepared:
++			return
+ 		timeline.push(unit)
+ 	unit_spawner.clear()
+ 	# enemies decide their first intent while waiting for their first action
+@@ -197,8 +226,12 @@ func begin_prepared_combat(prepared: PreparedEncounter) -> void:
+ 	if combat_module != null:
+ 		for unit: BaseCombatant in UnitRegistry.get_all_units():
+ 			combat_module.on_unit_spawned(unit)
++			if generation != _generation or prepared_encounter != prepared:
++				return
+ 	refresh_threats()
+ 	Signals.timeline_changed.emit()
++	if generation != _generation or prepared_encounter != prepared:
++		return
+ 	waves.enter_wave(0)
+ 	await _wait_actions(generation)
+ 	if _aborted(generation):
+@@ -211,13 +244,20 @@ func begin_prepared_combat(prepared: PreparedEncounter) -> void:
+ 		acting_unit = null
+ 
+ func _stop(preserve_presentation: bool = false) -> void:
++	var scene: Node = get_parent()
++	if is_instance_valid(scene) and scene.has_method("stop_combat_input"):
++		scene.stop_combat_input()
++	_staged_component = null
++	_staged_module_generation = 0
+ 	prepared_encounter = null
+ 	_generation += 1
+ 	is_running = false
+ 	acting_unit = null
+ 	var component: CombatModule = combat_module
+ 	if component == null and is_instance_valid(get_parent()):
+-		component = get_parent().get("combat_module") as CombatModule
++		var candidate: Variant = get_parent().get("combat_module")
++		if is_instance_valid(candidate):
++			component = candidate as CombatModule
+ 	if component != null:
+ 		component.clear(preserve_presentation)
+ 	combat_module = null
+diff --git a/scripts/combat/CombatModule.gd b/scripts/combat/CombatModule.gd
+index 41570dd25c738817718378d2d50850b720c1c071..0e877600791f965e1aadbf077383f77cba70290f 100644
+--- a/scripts/combat/CombatModule.gd
++++ b/scripts/combat/CombatModule.gd
+@@ -16,6 +16,20 @@ func get_module_id() -> StringName:
+ func setup(_director: CombatDirector, _encounter: EncounterData) -> bool:
+ 	return true
+ 
++## Stages validated module configuration without publishing gameplay effects.
++func setup_prepared(director: CombatDirector, encounter: EncounterData, _setup: Variant) -> bool:
++	return setup(director, encounter)
++
++func get_setup_generation() -> int:
++	return 0
++
++func get_setup_error() -> Dictionary:
++	return {"code": "module_setup_failed", "detail": "module could not stage the encounter"}
++
++## Publishes the successfully staged setup. All fallible checks precede this call.
++func commit_setup() -> void:
++	pass
++
+ ## Releases per-combat resources; must be idempotent and re-entrant.
+ func clear(_preserve_presentation: bool = false) -> void:
+ 	pass
+diff --git a/scripts/combat/PreparedEncounter.gd b/scripts/combat/PreparedEncounter.gd
+index c769bff362deab9af85739b98cd6b99df06862cd..129ada21f6af7ccc4c298d225f1948d3f60cd9cf 100644
+--- a/scripts/combat/PreparedEncounter.gd
++++ b/scripts/combat/PreparedEncounter.gd
+@@ -1,13 +1,19 @@
+-## Detached author-data snapshots for one start. No runtime objects or module dependencies.
++## Detached author data and an optional data-only module setup for one start.
+ extends RefCounted
+ class_name PreparedEncounter
+ 
++const BOARD_MODULE_SCRIPT: String = "res://scripts/combat/board/BoardCombatModule.gd"
+ var _event: Dictionary = {}
+ var _rules: Dictionary = {}
+ var _encounter: Dictionary = {}
++var _module_setup: Variant = null
++var _mount_board: bool = false
++var board_format: String = "legacy"
++var error_code: String = ""
++var error_detail: String = ""
++var unavailable_reason: String = ""
+ 
+-## The optional resolver supports the same single lookup in compatibility callers and probes.
+-static func prepare(event_data: EventData = null, resolver: Callable = Callable()) -> PreparedEncounter:
++static func prepare(event_data: EventData = null, resolver: Callable = Callable(), scene_board_enabled: bool = true) -> PreparedEncounter:
+ 	if event_data == null:
+ 		event_data = Global.get_player_event_data()
+ 	var prepared := PreparedEncounter.new()
+@@ -16,9 +22,62 @@ static func prepare(event_data: EventData = null, resolver: Callable = Callable(
+ 	prepared._rules = Global.get_configured_combat_rules().get_serializable_properties().duplicate(true)
+ 	var event_snapshot: EventData = prepared.get_event()
+ 	var resolved: EncounterData = resolver.call(event_snapshot) if resolver.is_valid() else Global.get_event_encounter_data(event_snapshot, prepared.get_rules())
++	if resolved == null:
++		return prepared._reject("missing_encounter", "event %s names an unavailable encounter" % (event_data.object_id if event_data != null else ""))
+ 	prepared._encounter = resolved.get_serializable_properties().duplicate(true)
++	var raw: Variant = resolved.encounter_board_setup
++	if not raw is Dictionary:
++		return prepared._reject("invalid_board_setup", "encounter_board_setup must be an object")
++	if not raw.is_empty():
++		var version: Variant = raw.get("version")
++		if not (version is int or version is float) or version != 1 or not raw.get("boards") is Array:
++			return prepared._reject("invalid_board_setup", "encounter_board_setup requires version 1 and boards array")
++		if resolved.has_legacy_board_overrides():
++			return prepared._reject("conflicting_board_formats", "new setup cannot be combined with nondefault legacy board overrides")
++		for key: Variant in raw:
++			if key not in ["version", "boards", "deployment", "presentation"]:
++				return prepared._reject("invalid_board_setup", "unknown setup key %s" % key)
++		prepared.board_format = "zero" if raw.boards.is_empty() else "explicit"
++		if prepared.board_format == "zero" and (raw.has("deployment") or raw.has("presentation")):
++			return prepared._reject("invalid_board_setup", "zero boards has no deployment or presentation configuration")
++	for wave: EncounterWaveData in resolved.encounter_waves:
++		if wave == null:
++			return prepared._reject("invalid_encounter_wave", "encounter wave must not be null")
++		for entry: Dictionary in wave.wave_units:
++			if not entry.get("weights", {}) is Dictionary:
++				return prepared._reject("invalid_encounter_wave", "wave weights must be an object")
++			for enemy_id: Variant in entry.get("weights", {}):
++				var weight: Variant = entry.weights[enemy_id]
++				if not (weight is int or weight is float) or weight < 0 or weight != floorf(float(weight)):
++					return prepared._reject("invalid_encounter_wave", "wave weights must be nonnegative whole numbers")
++				if not enemy_id is String or Global.get_enemy_data(enemy_id) == null:
++					return prepared._reject("invalid_encounter_enemy", "unknown wave enemy %s" % enemy_id)
++	if not scene_board_enabled:
++		prepared.unavailable_reason = "scene_disabled"
++	elif not prepared._rules.get("board_enabled", true):
++		prepared.unavailable_reason = "rules_disabled"
++	elif not ResourceLoader.exists(BOARD_MODULE_SCRIPT):
++		prepared.unavailable_reason = "module_missing"
++	if prepared.board_format == "zero":
++		return prepared
++	if prepared.unavailable_reason != "":
++		return prepared._reject("board_module_unavailable", prepared.unavailable_reason) if prepared.board_format == "explicit" else prepared
++	var module_script: Variant = load(BOARD_MODULE_SCRIPT)
++	var checked: Dictionary = module_script.prepare_encounter(prepared.get_encounter(), prepared.get_rules())
++	if not checked.ok:
++		return prepared._reject(checked.code, checked.detail)
++	prepared._module_setup = checked.setup
++	prepared._mount_board = true
+ 	return prepared
+ 
++func _reject(code: String, detail: String) -> PreparedEncounter:
++	error_code = code
++	error_detail = detail
++	return self
++
++func is_valid() -> bool:
++	return error_code == ""
++
+ func get_event() -> EventData:
+ 	if _event.is_empty():
+ 		return null
+@@ -36,5 +95,12 @@ func get_encounter() -> EncounterData:
+ 	data.set_serializable_properties(_encounter.duplicate(true))
+ 	return data
+ 
++## Detached data-only copy, with no parser rerun and no mutable alias to preparation.
++func get_module_setup() -> Variant:
++	return _module_setup.detached_copy() if _module_setup != null else null
++
+ func allows_board_module() -> bool:
+-	return bool(_rules.get("board_enabled", true))
++	return is_valid() and _mount_board
++
++func uses_event_slots() -> bool:
++	return board_format != "explicit"
+diff --git a/scripts/combat/UnitSpawner.gd b/scripts/combat/UnitSpawner.gd
+index e01c1334aa861ef43dcba2efe77fbfbdb6b9e783..d008e6ff1c42bca727d0c6a7d356a98ed2d504b5 100644
+--- a/scripts/combat/UnitSpawner.gd
++++ b/scripts/combat/UnitSpawner.gd
+@@ -48,6 +48,7 @@ func clear() -> void:
+ ## spawner), in the event's placement mode, placed on their cell by the wave's spawn policy.
+ func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event_slots: bool = true) -> void:
+ 	spawn_delays.clear()
++	var generation: int = director.get_generation()
+ 	var unit_layer: Node = get_unit_layer()
+ 	if unit_layer == null or encounter.encounter_waves.is_empty():
+ 		return
+@@ -55,6 +56,8 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event
+ 	var wave: EncounterWaveData = encounter.encounter_waves[0]
+ 	var index: int = 0
+ 	for unit_entry: Dictionary in wave.wave_units:
++		if director.get_generation() != generation:
++			return
+ 		var enemy_object_id: String = _pick_enemy(unit_entry)
+ 		if enemy_object_id == "":
+ 			index += 1
+@@ -70,6 +73,9 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event
+ 		var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id) if board_entry else unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
+ 		if enemy == null:
+ 			break	# positional events stop when their slots run out (legacy)
++		if director.get_generation() != generation:
++			_discard(enemy)
++			return
+ 		if placement == null:
+ 			if tick > 0:
+ 				spawn_delays[enemy.unit_uid] = tick
+@@ -252,11 +258,11 @@ func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i, board_id: Stri
+ 	var placement: CombatModule = director.get_placement_module()
+ 	if unit_layer == null or placement == null:
+ 		return null
+-	var zone: String = str(placement.resolve_spawn_location({"board_id": board_id}).board_id)
++	var zone: String = str(placement.resolve_spawn_location({"board_id": board_id, "cell": cell}).board_id)
+ 	if not placement.has_zone(zone):
+ 		return null
+ 	var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id)
+-	if enemy != null and not placement.place_unit_nearest(enemy, cell, board_id):
++	if enemy != null and not placement.place_unit_nearest(enemy, cell, zone):
+ 		_discard(enemy)
+ 		return null
+ 	return enemy
+diff --git a/scripts/combat/board/BoardCombatModule.gd b/scripts/combat/board/BoardCombatModule.gd
+index 293c7314d8c274427a5b237b1f5d414366b8b77f..1ad263be2215e18ff1f7f656696b70525a214d88 100644
+--- a/scripts/combat/board/BoardCombatModule.gd
++++ b/scripts/combat/board/BoardCombatModule.gd
+@@ -12,6 +12,8 @@ var threat_preview: ThreatPreview = null
+ var presentation: BoardCombatPresentation = null
+ ## Changes on every clear/setup; queued requests cannot survive reuse of this same Node.
+ var generation: int = 0
++var _committed: bool = false
++var setup_error: Dictionary = {"code": "", "detail": ""}
+ ## Retained weakly after clear so a later tree exit can detach the old instance safely.
+ var _director_ref: WeakRef = null
+ ## Spatial card policy; Combat exposes it as card_play_adapter while this module is mounted.
+@@ -40,30 +42,76 @@ func get_card_play_adapter() -> CardPlayAdapter:
+ func attached_director() -> CombatDirector:
+ 	return _director_ref.get_ref() as CombatDirector if _director_ref != null else null
+ 
++static func prepare_encounter(encounter: EncounterData, rules: CombatRulesData) -> Dictionary:
++	var raw: Variant = encounter.encounter_board_setup
++	if not raw is Dictionary:
++		return {"ok": false, "code": "invalid_board_setup", "detail": "encounter_board_setup must be an object"}
++	var setup: BoardSetup = BoardSetup.from_legacy(encounter, rules) if raw is Dictionary and raw.is_empty() else BoardSetup.from_explicit(raw, rules)
++	if not setup.is_valid():
++		return {"ok": false, "code": setup.error, "detail": setup.error_detail}
++	if setup.explicit and not setup.get_board_ids().is_empty():
++		for wave_index: int in encounter.encounter_waves.size():
++			var wave: EncounterWaveData = encounter.encounter_waves[wave_index]
++			if wave == null:
++				continue
++			for unit_index: int in wave.wave_units.size():
++				var location: Dictionary = setup.deployment.resolve_spawn_location(wave.wave_units[unit_index])
++				if location.get("error", "") != "":
++					return {"ok": false, "code": "invalid_wave_deployment", "detail": "wave %s unit %s requires a valid board_id/cell or deployment.spawn" % [wave_index, unit_index]}
++	return {"ok": true, "code": "", "detail": "", "setup": setup}
++
+ func setup(combat_director: CombatDirector, encounter: EncounterData) -> bool:
+ 	clear()
++	var result: Dictionary = prepare_encounter(encounter, combat_director.rules)
++	if not result.ok:
++		setup_error = {"code": result.code, "detail": result.detail}
++		return false
++	if not setup_prepared(combat_director, encounter, result.setup):
++		return false
++	commit_setup()
++	return true
++
++func setup_prepared(combat_director: CombatDirector, encounter: EncounterData, prepared: Variant) -> bool:
++	clear()
++	setup_error = {"code": "", "detail": ""}
+ 	director = combat_director
+ 	_director_ref = weakref(combat_director)
+-	return _setup_resources(encounter)
+-
+-func _setup_resources(encounter: EncounterData) -> bool:
++	if not prepared is BoardSetup or not prepared.is_valid():
++		setup_error = {"code": "unprepared_board_setup", "detail": "module requires a validated BoardSetup"}
++		clear()
++		return false
+ 	board_controller = BoardController.new(director.rules)
+-	if not board_controller.setup(encounter):
++	if not board_controller.setup_prepared(encounter, prepared):
++		setup_error = {"code": board_controller.error, "detail": board_controller.error_detail}
+ 		clear()
+ 		return false
+ 	threat_preview = ThreatPreview.new(director)
++	return true
++
++func get_setup_generation() -> int:
++	return generation
++
++func get_setup_error() -> Dictionary:
++	return setup_error.duplicate(true)
++
++func commit_setup() -> void:
++	if _committed or board_controller == null or director == null:
++		return
++	_committed = true
+ 	Signals.unit_moved.connect(_on_unit_moved)
+ 	Signals.field_created.connect(_on_field_changed)
+ 	Signals.field_removed.connect(_on_field_changed)
+ 	Signals.field_changed.connect(_on_field_changed)
+ 	Signals.board_changed.connect(_on_board_changed)
+ 	presentation = BoardCombatPresentation.new()
++	presentation.layout_slots.assign(board_controller.board_setup.layout_slots)
+ 	add_child(presentation)
+ 	presentation.setup(director, self)
+-	return true
++	board_controller.commit_setup()
+ 
+ func clear(preserve_presentation: bool = false) -> void:
+ 	generation += 1
++	_committed = false
+ 	if Signals.unit_moved.is_connected(_on_unit_moved):
+ 		Signals.unit_moved.disconnect(_on_unit_moved)
+ 	if Signals.field_created.is_connected(_on_field_changed):
+@@ -107,7 +155,8 @@ func prepare_spawned_unit(unit: BaseCombatant) -> bool:
+ 		return false
+ 	if board_controller.get_board_for_unit(unit) != null:
+ 		return true
+-	return board_controller.place_unit_nearest(unit, board_controller.default_spawn_origin())
++	var location: Dictionary = board_controller.deployment.resolve_spawn_location({}, unit.faction)
++	return location.get("error", "") == "" and board_controller.place_unit_nearest(unit, location.cell, location.board_id)
+ 
+ func on_unit_spawned(unit: BaseCombatant) -> void:
+ 	var fields: FieldController = FieldController.get_for_unit(unit)
+diff --git a/scripts/combat/board/BoardController.gd b/scripts/combat/board/BoardController.gd
+index 78b7eaae902050fcc5cafca8a256c7a007389292..d79343aae8ff3c604531aa48060db33c9f1ca635 100644
+--- a/scripts/combat/board/BoardController.gd
++++ b/scripts/combat/board/BoardController.gd
+@@ -1,5 +1,5 @@
+ ## Owns the boards, field controllers and movement state of one combat.
+-## Initial faction selects a home board; all subsequent queries use actual board identity.
++## Placement policy supplies initial positions; subsequent queries use actual board identity.
+ extends RefCounted
+ class_name BoardController
+ 
+@@ -7,12 +7,19 @@ var rules: CombatRulesData
+ var encounter: EncounterData
+ var battlefield: CombatBattlefield
+ var board_setup: BoardSetup
++var error: String = ""
++var error_detail: String = ""
++var _hero: BaseCombatant
++var _hero_location: Dictionary = {}
+ var deployment: BoardDeployment
+ var field_controllers: Dictionary[String, FieldController] = {}
+ ## Legacy query seam: shared board in SINGLE, party board in DUAL.
+ var board: BoardData:
+ 	get:
+-		return battlefield.get_board(deployment.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
++		if battlefield == null or deployment == null:
++			return null
++		var id: String = deployment.hero_location(BaseCombatant.FACTIONS.PARTY).board_id
++		return battlefield.get_board(id)
+ var field_controller: FieldController:
+ 	get:
+ 		return FieldController.for_board(board)
+@@ -21,40 +28,72 @@ func _init(combat_rules: CombatRulesData) -> void:
+ 	rules = combat_rules
+ 
+ func setup(encounter_data: EncounterData) -> bool:
++	if not setup_prepared(encounter_data, BoardSetup.from_legacy(encounter_data, rules)):
++		return false
++	commit_setup()
++	return true
++
++## Detached resources and pure placement queries only; no hero mutation or public events.
++func setup_prepared(encounter_data: EncounterData, prepared: BoardSetup) -> bool:
+ 	encounter = encounter_data
+-	board_setup = BoardSetup.from_legacy(encounter, rules)
++	board_setup = prepared.detached_copy()
+ 	deployment = board_setup.deployment
+ 	battlefield = CombatBattlefield.new(board_setup, rules)
+ 	if not battlefield.valid:
+-		DebugLogger.log_error("BoardController: %s: %s" % [battlefield.error, battlefield.error_detail])
+-		return false
++		return _fail(battlefield.error, battlefield.error_detail)
++	if deployment == null or deployment.error != "":
++		return _fail("invalid_board_deployment", "positive boards require deployment")
+ 	var shared_opportunities: Dictionary = {}
+ 	for current: BoardData in battlefield.boards.values():
+ 		current.movement_state.used_opportunities = shared_opportunities
+-		field_controllers[current.board_id] = FieldController.new(current)
++		var controller := FieldController.new(current)
++		controller.published = false
++		field_controllers[current.board_id] = controller
+ 		var config: Dictionary = board_setup.get_config(current.board_id)
+-		var deploy: Array[Vector2i] = deployment.deploy_cells(current.board_id)
+-		for cell: Vector2i in deploy:
++		for cell: Vector2i in deployment.deploy_cells(current.board_id):
+ 			if current.is_in_bounds(cell):
+ 				current.get_cell(cell).is_deploy_zone = true
+-		var spawn: Array[Vector2i] = deployment.spawn_cells(current.board_id)
+-		for cell: Vector2i in spawn:
++		for cell: Vector2i in deployment.spawn_cells(current.board_id):
+ 			if current.is_in_bounds(cell):
+ 				current.get_cell(cell).is_spawn_zone = true
+ 		for entry: Dictionary in config.initial_fields:
+ 			var data: FieldData = Global.get_field_data(str(entry.get("field_id", "")))
+ 			if data == null:
+-				continue
++				if not board_setup.explicit:
++					continue
++				return _fail("invalid_initial_field", "board %s unknown field_id %s" % [current.board_id, entry.get("field_id", "")])
+ 			for cell: Vector2i in EncounterData.cells_from_json(entry.get("cells", [])):
+-				field_controllers[current.board_id].create_field(data, cell, null, 0, int(entry.get("duration", -2)))
+-	var hero: BaseCombatant = UnitRegistry.get_hero()
+-	if hero != null:
+-		var location: Dictionary = deployment.hero_location(hero.faction)
+-		if not place_unit_nearest(hero, location.cell, location.board_id):
+-			return false
++				controller.create_field(data, cell, null, 0, int(entry.get("duration", -2)))
++	_hero = UnitRegistry.get_hero()
++	if _hero != null:
++		_hero_location = deployment.hero_location(_hero.faction)
++		var current: BoardData = battlefield.get_board(_hero_location.board_id)
++		if current == null:
++			return _fail("invalid_hero_deployment", "hero destination board is missing")
++		var anchor: Vector2i = _hero_location.cell if current.can_stand(_hero, _hero_location.cell) else current.nearest_empty_anchor(_hero, _hero_location.cell)
++		if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
++			return _fail("hero_deployment_full", "hero footprint has no legal placement")
++		_hero_location.cell = anchor
+ 	return true
+ 
++func commit_setup() -> void:
++	if is_instance_valid(_hero) and not _hero_location.is_empty():
++		battlefield.get_board(_hero_location.board_id).place(_hero, _hero_location.cell)
++	_hero = null
++	_hero_location.clear()
++	for controller: FieldController in field_controllers.values():
++		controller.discard_trial_fields()
++	for controller: FieldController in field_controllers.values():
++		controller.publish_fields()
++
++func _fail(code: String, detail: String) -> bool:
++	error = code
++	error_detail = detail
++	return false
++
+ func clear() -> void:
++	_hero = null
++	_hero_location.clear()
+ 	for controller: FieldController in field_controllers.values():
+ 		controller.clear()
+ 	field_controllers.clear()
+diff --git a/scripts/combat/board/BoardDeployment.gd b/scripts/combat/board/BoardDeployment.gd
+index 887510d324fe430e3a56e05f56a9bbbd19fa7e12..f152f45d1da34a67079c65050ee32cefeba90515 100644
+--- a/scripts/combat/board/BoardDeployment.gd
++++ b/scripts/combat/board/BoardDeployment.gd
+@@ -4,6 +4,9 @@ class_name BoardDeployment
+ 
+ var _definitions: Dictionary = {}
+ var error: String = ""
++var explicit: bool = false
++var _hero: Dictionary = {}
++var _spawn: Dictionary = {}
+ var _party_id: String = ""
+ var _enemy_id: String = ""
+ 
+@@ -18,17 +21,21 @@ func _init(definitions: Dictionary = {}, party_id: String = "", enemy_id: String
+ 	_enemy_id = enemy_id
+ 
+ func default_board_id(faction: int) -> String:
++	if explicit:
++		return "" # Explicit policy never infers placement from faction.
+ 	return _party_id if faction == BaseCombatant.FACTIONS.PARTY else _enemy_id
+ 
+ func deploy_cells(id: String) -> Array[Vector2i]:
+ 	var config: Dictionary = _definitions.get(id, {})
+ 	if config.is_empty():
+ 		return []
++	if explicit:
++		return EncounterData.cells_from_json(config.deploy_cells)
+ 	var cells: Array[Vector2i] = EncounterData.cells_from_json(config.deploy_cells)
+ 	return cells if not cells.is_empty() else default_deploy_cells(id)
+ 
+ func default_deploy_cells(id: String) -> Array[Vector2i]:
+-	if not _definitions.has(id):
++	if not _definitions.has(id) or explicit:
+ 		return []
+ 	var size: Vector2i = _definitions[id].size
+ 	var cells: Array[Vector2i] = [Vector2i(int(size.x / 2), size.y - 1)]
+@@ -43,7 +50,7 @@ func spawn_cells(id: String) -> Array[Vector2i]:
+ 	if config.is_empty():
+ 		return []
+ 	var cells: Array[Vector2i] = EncounterData.cells_from_json(config.spawn_zone_cells)
+-	if cells.is_empty():
++	if cells.is_empty() and not explicit:
+ 		var size: Vector2i = config.size
+ 		for y: int in min(2, size.y):
+ 			for x: int in size.x:
+@@ -51,6 +58,8 @@ func spawn_cells(id: String) -> Array[Vector2i]:
+ 	return cells
+ 
+ func spawn_origin(id: String = "") -> Vector2i:
++	if explicit:
++		return _spawn.get("cell", BaseCombatant.BOARD_ANCHOR_NONE) if id == "" or id == _spawn.get("board_id", "") else BaseCombatant.BOARD_ANCHOR_NONE
+ 	if id == "":
+ 		id = _enemy_id
+ 	if not _definitions.has(id):
+@@ -59,11 +68,19 @@ func spawn_origin(id: String = "") -> Vector2i:
+ 	return Vector2i(int(size.x / 2), 0)
+ 
+ func hero_location(faction: int) -> Dictionary:
++	if explicit:
++		return _hero.duplicate(true)
+ 	var id: String = default_board_id(faction)
+ 	var cells: Array[Vector2i] = deploy_cells(id)
+ 	return {"board_id": id, "cell": cells[0] if not cells.is_empty() else BaseCombatant.BOARD_ANCHOR_NONE}
+ 
+ func resolve_spawn_location(entry: Dictionary, faction: int = BaseCombatant.FACTIONS.ENEMY) -> Dictionary:
++	if explicit:
++		var location: Dictionary = _spawn.duplicate(true)
++		for key: String in ["board_id", "cell"]:
++			if entry.has(key):
++				location[key] = entry[key]
++		return _checked_location(_definitions, location)
+ 	var id: String = str(entry.get("board_id", ""))
+ 	if id == "":
+ 		id = default_board_id(faction)
+@@ -75,3 +92,37 @@ func resolve_spawn_location(entry: Dictionary, faction: int = BaseCombatant.FACT
+ 	if cell.x < 0 or cell.y < 0 or cell.x >= size.x or cell.y >= size.y:
+ 		cell = spawn_origin(id)
+ 	return {"board_id": id, "cell": cell}
++
++static func from_explicit(definitions: Dictionary, settings: Dictionary) -> BoardDeployment:
++	var policy := BoardDeployment.new()
++	policy.error = ""
++	policy.explicit = true
++	if settings.get("policy", "") != "explicit_positions":
++		policy.error = "invalid_deployment_policy"
++		return policy
++	policy._definitions = definitions.duplicate(true)
++	policy._hero = _checked_location(definitions, settings.get("hero", {}))
++	policy._spawn = _checked_location(definitions, settings.get("spawn", {}))
++	if policy._hero.get("error", "") != "" or (settings.has("spawn") and policy._spawn.get("error", "") != ""):
++		policy.error = "invalid_board_deployment"
++	return policy
++
++static func _checked_location(definitions: Dictionary, value: Variant) -> Dictionary:
++	var invalid: Dictionary = {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE, "error": "missing_board_location"}
++	if not value is Dictionary or not value.get("board_id") is String or not definitions.has(value.board_id):
++		return invalid
++	var size: Vector2i = EncounterData.cell_from_json(definitions[value.board_id].size)
++	if not BoardSetup._valid_cell(value.get("cell"), size):
++		return invalid
++	return {"board_id": value.board_id, "cell": EncounterData.cell_from_json(value.cell)}
++
++func detached_copy() -> BoardDeployment:
++	var copy := BoardDeployment.new()
++	copy._definitions = _definitions.duplicate(true)
++	copy.error = error
++	copy.explicit = explicit
++	copy._party_id = _party_id
++	copy._enemy_id = _enemy_id
++	copy._hero = _hero.duplicate(true)
++	copy._spawn = _spawn.duplicate(true)
++	return copy
+diff --git a/scripts/combat/board/BoardSetup.gd b/scripts/combat/board/BoardSetup.gd
+index f0504c4917919ee6435972b7003131eea67edbed..7d067e74a5435b941fb6cc44ccaa8aca093ac71b 100644
+--- a/scripts/combat/board/BoardSetup.gd
++++ b/scripts/combat/board/BoardSetup.gd
+@@ -4,6 +4,8 @@ class_name BoardSetup
+ 
+ var _definitions: Dictionary = {}
+ var deployment: BoardDeployment = null
++var layout_slots: Dictionary[String, Rect2] = {}
++var explicit: bool = false
+ var _validated: bool = false
+ var error: String = ""
+ var error_detail: String = ""
+@@ -91,3 +93,64 @@ static func _invalid(code: String, detail: String) -> BoardSetup:
+ 	setup.error = code
+ 	setup.error_detail = detail
+ 	return setup
++
++## Versioned author input; omitted/empty envelope is exclusively the legacy path.
++static func from_explicit(raw: Dictionary, rules: CombatRulesData) -> BoardSetup:
++	if raw.get("version") != 1 or not raw.get("boards") is Array:
++		return _invalid("invalid_board_setup", "encounter_board_setup requires version 1 and boards array")
++	var definitions: Dictionary = {}
++	for entry: Variant in raw.boards:
++		if not entry is Dictionary or not entry.get("id") is String or entry.id == "" or definitions.has(entry.id):
++			return _invalid("invalid_board_id", "boards require unique nonempty string IDs")
++		definitions[entry.id] = entry.duplicate(true)
++	var result: BoardSetup = from_definitions(definitions, rules)
++	result.explicit = true
++	if not result.is_valid() or definitions.is_empty():
++		return result
++	for id: String in result.get_board_ids():
++		for field: Dictionary in result.get_config(id).initial_fields:
++			if not field.get("field_id", "") is String or field.get("field_id", "") == "":
++				return _invalid("invalid_board_definition_fields", "board %s requires field_id" % id)
++			var duration: Variant = field.get("duration", -2)
++			if not (duration is int or duration is float) or not is_finite(float(duration)) or float(duration) != floor(float(duration)):
++				return _invalid("invalid_board_definition_fields", "board %s field duration must be a whole number" % id)
++	var placement: Variant = raw.get("deployment", {})
++	if not placement is Dictionary:
++		return _invalid("invalid_board_deployment", "deployment must be an object")
++	var normalized_definitions: Dictionary = {}
++	for id: String in result.get_board_ids():
++		normalized_definitions[id] = result.get_config(id)
++	result.deployment = BoardDeployment.from_explicit(normalized_definitions, placement)
++	if result.deployment.error != "":
++		return _invalid(result.deployment.error, "deployment.hero requires a valid board_id and cell; spawn must be valid when supplied")
++	var presentation: Variant = raw.get("presentation", {})
++	if not presentation is Dictionary or not presentation.get("slots") is Array:
++		return _invalid("invalid_board_layout", "presentation.slots must specify every board rectangle")
++	for slot: Variant in presentation.slots:
++		if not slot is Dictionary or not slot.get("board_id") is String or not definitions.has(slot.board_id) or result.layout_slots.has(slot.board_id):
++			return _invalid("invalid_board_layout", "slots require unique known board_id")
++		var rect: Variant = slot.get("rect")
++		if not rect is Array or rect.size() != 4:
++			return _invalid("invalid_board_layout", "rect must be [x,y,width,height]")
++		for value: Variant in rect:
++			if not (value is int or value is float) or not is_finite(float(value)):
++				return _invalid("invalid_board_layout", "rect values must be finite numbers")
++		var rectangle := Rect2(float(rect[0]), float(rect[1]), float(rect[2]), float(rect[3]))
++		if not BoardLayout.valid_slot(rectangle):
++			return _invalid("invalid_board_layout", "rect width and height must be positive")
++		result.layout_slots[slot.board_id] = rectangle
++	if result.layout_slots.size() != definitions.size():
++		return _invalid("invalid_board_layout", "every board requires a presentation slot")
++	return result
++
++## Config-only copy; callers never receive mutable aliases to the prepared snapshot.
++func detached_copy() -> BoardSetup:
++	var copy := BoardSetup.new()
++	copy._definitions = _definitions.duplicate(true)
++	copy.layout_slots.assign(layout_slots)
++	copy.explicit = explicit
++	copy._validated = _validated
++	copy.error = error
++	copy.error_detail = error_detail
++	copy.deployment = deployment.detached_copy() if deployment != null else null
++	return copy
+diff --git a/scripts/combat/board/FieldController.gd b/scripts/combat/board/FieldController.gd
+index e975a54f21a3ebaabc7344b52f5caab600cf799f..f61d70ac462157d142538763400a57dc6879e3a4 100644
+--- a/scripts/combat/board/FieldController.gd
++++ b/scripts/combat/board/FieldController.gd
+@@ -6,6 +6,10 @@ class_name FieldController
+ var _board_ref: WeakRef
+ var generation: int = 0
+ var active: bool = true
++## Setup stages fields without observable events until the whole module is ready.
++var published: bool = true
++var _staged_creates: Array[Dictionary] = []
++var _trial_discarded: bool = false
+ var board: BoardData:
+ 	get:
+ 		return _board_ref.get_ref() if _board_ref != null else null
+@@ -29,6 +33,8 @@ func create_field(data: FieldData, cell: Vector2i, owner: BaseCombatant = null,
+ 		current_tick: int = 0, duration_override: int = -2) -> FieldInstance:
+ 	if not active or board == null or data == null or not board.is_in_bounds(cell):
+ 		return null
++	if not published:
++		_staged_creates.append({"data": data, "cell": cell, "owner": owner, "tick": current_tick, "duration": duration_override})
+ 	for existing: FieldInstance in board.get_fields(cell):
+ 		if existing.field_data.object_id != data.object_id:
+ 			continue
+@@ -38,7 +44,8 @@ func create_field(data: FieldData, cell: Vector2i, owner: BaseCombatant = null,
+ 			FieldData.STACK_POLICIES.STACK:
+ 				existing.stacks += 1
+ 				existing.refresh(current_tick, duration_override)
+-				Signals.field_changed.emit(existing)
++				if published:
++					Signals.field_changed.emit(existing)
+ 				if existing.expires_tick == current_tick:
+ 					remove_field(existing)
+ 				return existing
+@@ -51,12 +58,34 @@ func create_field(data: FieldData, cell: Vector2i, owner: BaseCombatant = null,
+ 	if not board.fields.has(cell):
+ 		board.fields[cell] = []
+ 	board.fields[cell].append(instance)
+-	Signals.field_created.emit(instance)
++	if published:
++		Signals.field_created.emit(instance)
+ 	# A zero-duration field is observable as created/removed, but cannot trigger effects.
+ 	if instance.expires_tick == current_tick:
+ 		remove_field(instance)
+ 	return instance
+ 
++## Remove invisible trial instances on every board before the first public callback.
++func discard_trial_fields() -> void:
++	if not published and active and board != null and not _trial_discarded:
++		board.fields.clear()
++		_trial_discarded = true
++
++## Publish only after every fallible setup step has succeeded.
++func publish_fields() -> void:
++	if published or not active:
++		return
++	var creates: Array[Dictionary] = _staged_creates
++	_staged_creates = []
++	# Discard invisible trial instances, then replay original operations so callbacks see
++	# the same stack, membership and zero-duration state as ordinary create_field.
++	discard_trial_fields()
++	published = true
++	for operation: Dictionary in creates:
++		if not active:
++			break
++		create_field(operation.data, operation.cell, operation.owner, operation.tick, operation.duration)
++
+ func has_field(instance: FieldInstance) -> bool:
+ 	return active and board != null and board.get_fields(instance.cell).has(instance)
+ 
+@@ -66,7 +95,8 @@ func remove_field(instance: FieldInstance) -> bool:
+ 	board.fields[instance.cell].erase(instance)
+ 	if board.fields[instance.cell].is_empty():
+ 		board.fields.erase(instance.cell)
+-	Signals.field_removed.emit(instance)
++	if published:
++		Signals.field_removed.emit(instance)
+ 	return true
+ 
+ func remove_fields(cells: Array[Vector2i] = [], field_id: String = "", tag: String = "") -> int:
+@@ -161,6 +191,7 @@ func preview_hazard(cell: Vector2i, unit: BaseCombatant) -> float:
+ func clear() -> void:
+ 	generation += 1
+ 	active = false
++	_staged_creates.clear()
+ 	for instance: FieldInstance in _all_fields():
+ 		remove_field(instance)
+ 	if board != null and board.field_controller != null and board.field_controller.get_ref() == self:
+diff --git a/scripts/ui/Combat.gd b/scripts/ui/Combat.gd
+index e8f8f6f59dbf77800228a83313962f762f317b34..efeb561fd4db21d1809a00ea928268273914f294 100644
+--- a/scripts/ui/Combat.gd
++++ b/scripts/ui/Combat.gd
+@@ -71,7 +71,6 @@ func _ready():
+ 
+ 	Signals.enemy_killed.connect(_on_enemy_killed)
+ 
+-	Signals.combat_started.connect(_on_combat_started)
+ 	Signals.combat_ended.connect(_on_combat_ended)
+ 
+ 	Signals.unit_action_started.connect(_on_unit_action_started)
+@@ -219,29 +218,84 @@ func _on_enemy_killed(enemy: Enemy):
+ 	ActionHandler.add_actions(generated_actions)
+ 
+ 
+-func _on_combat_started(event_id: String):
+-	var current_event: EventData = null
+-	if event_id == "":
+-		# if no event is provided, it will be derived from the location
+-		var current_location: LocationData = Global.get_player_location_data()
+-		current_event = Global.get_player_event_data()
+-		current_location.location_visited = true
+-	else:
+-		current_event = Global.get_event_data(event_id)
+-
++var last_start_error: Dictionary = {}
++var _starting: bool = false
++
++## UI owned by this scene only; safe before ready and while children leave the tree.
++func stop_combat_input() -> void:
++	if is_instance_valid(hand) and hand.is_node_ready():
++		hand.disable_hand(true)
++	var consumables: Node = get_node_or_null("Consumables")
++	if is_instance_valid(consumables) and consumables.is_node_ready():
++		consumables.deselect_consumable()
++
++
++## combat_started is a committed notification, never an unvalidated request.
++func request_combat_start(event_id: String = "") -> bool:
++	var event_data: EventData = Global.get_player_event_data() if event_id == "" else Global.get_event_data(event_id)
++	if event_data == null:
++		return _reject_start("missing_event", "unknown event %s" % event_id)
++	return request_combat_event(event_data)
++
++func request_combat_event(event_data: EventData = null) -> bool:
++	if _starting:
++		return false
++	_starting = true
++	combat_director._stop()
++	var unit_layer: Node = get_node("EnemyContainer")
++	for unit: BaseCombatant in UnitRegistry.get_all_units():
++		if unit is Enemy and unit_layer.is_ancestor_of(unit):
++			unit.get_parent().remove_child(unit)
++			unit.queue_free()
++	last_start_error = {}
++	var prepared: PreparedEncounter = PreparedEncounter.prepare(event_data, Callable(), board_module_enabled)
++	if not prepared.is_valid():
++		return _reject_start(prepared.error_code, prepared.error_detail)
++	compose_combat_module(prepared)
++	if not combat_director.stage_prepared_combat(prepared):
++		return _reject_start(combat_director.last_start_error.get("code", "module_setup_failed"), combat_director.last_start_error.get("detail", "module setup failed"))
++	# No fallible author-data checks remain; ordinary subscribers now initialize once.
+ 	_combat_ending = false
+ 	end_turn_button.disabled = true
+-
+ 	Global.player_data.player_energy = Global.player_data.player_energy_max
+ 	set_combat_display_visibility(true)
++	var current_location: LocationData = Global.get_player_location_data()
++	if current_location != null:
++		current_location.location_visited = true
++	var generation: int = combat_director.get_generation()
++	Signals.combat_started.emit(combat_director.event.object_id if combat_director.event != null else "")
++	if combat_director.prepared_encounter != prepared or combat_director.get_generation() != generation:
++		_starting = false
++		if combat_director.prepared_encounter == null:
++			set_combat_display_visibility(false)
++			end_turn_button.disabled = true
++		return false
+ 	update_combat_display()
+-
+-	# compose / drop the optional module, then the director sets it up, spawns the encounter's
+-	# units and runs the action timeline
+-	var prepared: PreparedEncounter = PreparedEncounter.prepare(current_event)
+-	_compose_board_module(prepared)
+-	combat_director.begin_prepared_combat(prepared)
+ 	timeline_bar.visible = true
++	combat_director.begin_prepared_combat(prepared)
++	_starting = false
++	if combat_director.prepared_encounter != prepared:
++		if combat_director.prepared_encounter == null:
++			set_combat_display_visibility(false)
++			end_turn_button.disabled = true
++		return false
++	return true
++
++func _reject_start(code: String, detail: String) -> bool:
++	_starting = false
++	last_start_error = {"code": code, "detail": detail}
++	combat_director._stop()
++	compose_combat_module()
++	set_combat_display_visibility(false)
++	end_turn_button.disabled = true
++	timeline_bar.visible = false
++	# Travel already reached this node; leave it uncompleted and retryable rather than
++	# pretending to undo location selection, encounter draws or the pre-visit autosave.
++	var map: Node = get_parent().get_node_or_null("Map")
++	if map != null:
++		map.can_travel = true
++		map.show_map()
++	return false
+ 
+ func _on_combat_ended():
+ 	set_combat_display_visibility(false)
+diff --git a/scripts/ui/Map.gd b/scripts/ui/Map.gd
+index b56faabd7b14678e0218a4a633e9cb09d924d8b2..b6620c19f9b93ec818da721a5f93be5eb7ad66de 100644
+--- a/scripts/ui/Map.gd
++++ b/scripts/ui/Map.gd
+@@ -103,7 +103,10 @@ func _on_map_location_button_up(map_location: MapLocation):
+ 	# map must be in travel mode
+ 	if can_travel:
+ 		# must be adjacent to player location
+-		if Global.get_next_locations().has(map_location.location_data):
++		var current: LocationData = Global.get_player_location_data()
++		var unfinished_combat: bool = current != null and not current.location_visited and current.location_type in [LocationData.LOCATION_TYPES.COMBAT, LocationData.LOCATION_TYPES.MINIBOSS, LocationData.LOCATION_TYPES.BOSS]
++		var retry_current: bool = unfinished_combat and map_location.location_data == current
++		if retry_current or (not unfinished_combat and Global.get_next_locations().has(map_location.location_data)):
+ 			# visit the location
+ 			ActionGenerator.generate_visition_location(map_location.location_data.location_id)
+ 	
+diff --git a/scripts/ui/MapLocation.gd b/scripts/ui/MapLocation.gd
+index ae16b7c524c00fa29e89142d03ac844f621b7daa..992a5de3f3951a1e243da78b4abed09a66d8fdb7 100644
+--- a/scripts/ui/MapLocation.gd
++++ b/scripts/ui/MapLocation.gd
+@@ -24,5 +24,6 @@ func flash_location() -> void:
+ 	animation_player.play("flash_map_location")
+ 
+ func _on_button_up():
+-	location_data.location_visited = true
++	if location_data.location_type not in [LocationData.LOCATION_TYPES.COMBAT, LocationData.LOCATION_TYPES.MINIBOSS, LocationData.LOCATION_TYPES.BOSS]:
++		location_data.location_visited = true
+ 	map_location_button_up.emit(self)
+diff --git a/scripts/ui/RewardOverlay.gd b/scripts/ui/RewardOverlay.gd
+index a285d86f1c1f7e6900981d7647bbe698609a8a96..37fd8bc9458423707fd7e7c39ae5513703109c30 100644
+--- a/scripts/ui/RewardOverlay.gd
++++ b/scripts/ui/RewardOverlay.gd
+@@ -186,12 +186,9 @@ func _on_reward_clear_requested(reward_group: int):
+ func _on_combat_started(event_object_id: String):
+ 	visible = false
+ 	# generate rewards if the event has them
+-	var event_data: EventData = null
+-	if event_object_id == "":
+-		event_data = Global.get_player_event_data()
+-	else:
+-		event_data = Global.get_event_data(event_object_id)
+-	
++	var director: CombatDirector = Global.get_combat_director()
++	var event_data: EventData = director.event if director != null else null
++
+ 	if event_data == null:
+ 		DebugLogger.log_error("No event with id of {0} found to populate rewards".format(event_object_id))
+ 		return

@@ -6,6 +6,10 @@ class_name FieldController
 var _board_ref: WeakRef
 var generation: int = 0
 var active: bool = true
+## Setup stages fields without observable events until the whole module is ready.
+var published: bool = true
+var _staged_creates: Array[Dictionary] = []
+var _trial_discarded: bool = false
 var board: BoardData:
 	get:
 		return _board_ref.get_ref() if _board_ref != null else null
@@ -29,6 +33,8 @@ func create_field(data: FieldData, cell: Vector2i, owner: BaseCombatant = null,
 		current_tick: int = 0, duration_override: int = -2) -> FieldInstance:
 	if not active or board == null or data == null or not board.is_in_bounds(cell):
 		return null
+	if not published:
+		_staged_creates.append({"data": data, "cell": cell, "owner": owner, "tick": current_tick, "duration": duration_override})
 	for existing: FieldInstance in board.get_fields(cell):
 		if existing.field_data.object_id != data.object_id:
 			continue
@@ -38,7 +44,8 @@ func create_field(data: FieldData, cell: Vector2i, owner: BaseCombatant = null,
 			FieldData.STACK_POLICIES.STACK:
 				existing.stacks += 1
 				existing.refresh(current_tick, duration_override)
-				Signals.field_changed.emit(existing)
+				if published:
+					Signals.field_changed.emit(existing)
 				if existing.expires_tick == current_tick:
 					remove_field(existing)
 				return existing
@@ -51,11 +58,33 @@ func create_field(data: FieldData, cell: Vector2i, owner: BaseCombatant = null,
 	if not board.fields.has(cell):
 		board.fields[cell] = []
 	board.fields[cell].append(instance)
-	Signals.field_created.emit(instance)
+	if published:
+		Signals.field_created.emit(instance)
 	# A zero-duration field is observable as created/removed, but cannot trigger effects.
 	if instance.expires_tick == current_tick:
 		remove_field(instance)
 	return instance
+
+## Remove invisible trial instances on every board before the first public callback.
+func discard_trial_fields() -> void:
+	if not published and active and board != null and not _trial_discarded:
+		board.fields.clear()
+		_trial_discarded = true
+
+## Publish only after every fallible setup step has succeeded.
+func publish_fields() -> void:
+	if published or not active:
+		return
+	var creates: Array[Dictionary] = _staged_creates
+	_staged_creates = []
+	# Discard invisible trial instances, then replay original operations so callbacks see
+	# the same stack, membership and zero-duration state as ordinary create_field.
+	discard_trial_fields()
+	published = true
+	for operation: Dictionary in creates:
+		if not active:
+			break
+		create_field(operation.data, operation.cell, operation.owner, operation.tick, operation.duration)
 
 func has_field(instance: FieldInstance) -> bool:
 	return active and board != null and board.get_fields(instance.cell).has(instance)
@@ -66,7 +95,8 @@ func remove_field(instance: FieldInstance) -> bool:
 	board.fields[instance.cell].erase(instance)
 	if board.fields[instance.cell].is_empty():
 		board.fields.erase(instance.cell)
-	Signals.field_removed.emit(instance)
+	if published:
+		Signals.field_removed.emit(instance)
 	return true
 
 func remove_fields(cells: Array[Vector2i] = [], field_id: String = "", tag: String = "") -> int:
@@ -161,6 +191,7 @@ func preview_hazard(cell: Vector2i, unit: BaseCombatant) -> float:
 func clear() -> void:
 	generation += 1
 	active = false
+	_staged_creates.clear()
 	for instance: FieldInstance in _all_fields():
 		remove_field(instance)
 	if board != null and board.field_controller != null and board.field_controller.get_ref() == self:

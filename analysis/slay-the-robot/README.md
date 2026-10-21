@@ -18,6 +18,7 @@
 - [雙盤與場域整合](architecture/07_fields_zoc.md)：雙盤 A、場域／ZOC、ordered 生命週期與專項證據。
 - [每場戰鬥準備](architecture/08_combat_preparation.md)：遷移 A 的單次遭遇解析、資料快照、裝配與規則所有權。
 - [盤定義、部署與排版](architecture/09_board_setup_layout.md)：遷移 B 的盤集合、相容位置政策及畫面槽分離。
+- [每場 0／N 盤與開始提交](architecture/10_multi_board_encounters.md)：遷移 C 的正式資料、能力錯誤與成功開始邊界。
 - [設計與呈現能力](design/README.md)：卡牌、敵人、關卡、圖像／UI 與音訊的實際接線及已知缺口。
 - [首次接手演練](onboarding/README.md)：不同任務從 wf 出發的缺口、補強與獨立復走證據。
 - [教學更正紀錄](tutorial/verification.md)：舊範例與目前原始碼的差異。

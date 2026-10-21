@@ -43,6 +43,9 @@ var waves: WaveController = null
 var encounter: EncounterData = null
 var prepared_encounter: PreparedEncounter = null
 var event: EventData = null
+var last_start_error: Dictionary = {}
+var _staged_component: CombatModule = null
+var _staged_module_generation: int = 0
 
 ## Compatibility forwards (untyped, no module class dependency): the mounted board module and
 ## its current resources, or null. Board-specific work belongs to the module itself.
@@ -155,15 +158,35 @@ func project_timeline(count: int) -> Array[Dictionary]:
 ## Called by Combat: sets up any mounted module, spawns wave 0 and runs the CTB loop.
 ## event_data null = the player's current event.
 func begin_combat(event_data: EventData = null) -> void:
-	var prepared: PreparedEncounter = PreparedEncounter.prepare(event_data)
-	get_parent().compose_combat_module(prepared)
-	await begin_prepared_combat(prepared)
+	get_parent().request_combat_event(event_data)
 
-func begin_prepared_combat(prepared: PreparedEncounter) -> void:
+## Synchronous preflight. No wave, timeline, start notification or action is published here.
+func stage_prepared_combat(prepared: PreparedEncounter) -> bool:
+	if not prepared.is_valid():
+		return false
 	_generation += 1
-	var generation: int = _generation
 	prepared_encounter = prepared
 	rules = prepared.get_rules()
+	event = prepared.get_event()
+	encounter = prepared.get_encounter()
+	combat_module = get_parent().get("combat_module") as CombatModule
+	last_start_error = {}
+	if combat_module != null and not combat_module.setup_prepared(self, encounter, prepared.get_module_setup()):
+		last_start_error = combat_module.get_setup_error()
+		_stop()
+		return false
+	_staged_component = combat_module
+	_staged_module_generation = combat_module.get_setup_generation() if combat_module != null else 0
+	return true
+
+## Called only after the scene publishes the successful start notification.
+func begin_prepared_combat(prepared: PreparedEncounter) -> void:
+	if prepared_encounter != prepared:
+		return
+	if combat_module != _staged_component or (_staged_component != null and (not is_instance_valid(_staged_component) or _staged_component.get_setup_generation() != _staged_module_generation)):
+		_stop()
+		return
+	var generation: int = _generation
 	timeline = CombatTimeline.new(rules)
 	current_tick = 0
 	acting_unit = null
@@ -171,23 +194,29 @@ func begin_prepared_combat(prepared: PreparedEncounter) -> void:
 	_player_finish_pending = false
 	_cards_played_this_action.clear()
 	reset_end_action()
-	event = prepared.get_event()
 	var event_data: EventData = event
-	encounter = prepared.get_encounter()
-	# The scene composition owns the optional component; the core never creates it.
-	combat_module = get_parent().get("combat_module") as CombatModule
-	if combat_module != null and not combat_module.setup(self, encounter):
+	var component: CombatModule = combat_module
+	var module_generation: int = component.get_setup_generation() if component != null else 0
+	if component != null:
+		component.commit_setup()
+	if generation != _generation or prepared_encounter != prepared:
+		return
+	if combat_module != component or (component != null and component.get_setup_generation() != module_generation):
 		_stop()
 		return
 	unit_spawner = UnitSpawner.new(self)
 	waves = WaveController.new(self, encounter)
-	unit_spawner.spawn_first_wave(event_data, encounter)
+	unit_spawner.spawn_first_wave(event_data, encounter, prepared.uses_event_slots())
+	if generation != _generation or prepared_encounter != prepared:
+		return
 	for unit: BaseCombatant in UnitRegistry.get_all_units():
 		if not unit.is_alive():
 			continue
 		unit.reset_unit_combat_state()
 		unit.next_action_tick = unit_spawner.first_action_tick(unit)
 		_assign_controller(unit)
+		if generation != _generation or prepared_encounter != prepared:
+			return
 		timeline.push(unit)
 	unit_spawner.clear()
 	# enemies decide their first intent while waiting for their first action
@@ -197,8 +226,12 @@ func begin_prepared_combat(prepared: PreparedEncounter) -> void:
 	if combat_module != null:
 		for unit: BaseCombatant in UnitRegistry.get_all_units():
 			combat_module.on_unit_spawned(unit)
+			if generation != _generation or prepared_encounter != prepared:
+				return
 	refresh_threats()
 	Signals.timeline_changed.emit()
+	if generation != _generation or prepared_encounter != prepared:
+		return
 	waves.enter_wave(0)
 	await _wait_actions(generation)
 	if _aborted(generation):
@@ -211,13 +244,20 @@ func begin_prepared_combat(prepared: PreparedEncounter) -> void:
 		acting_unit = null
 
 func _stop(preserve_presentation: bool = false) -> void:
+	var scene: Node = get_parent()
+	if is_instance_valid(scene) and scene.has_method("stop_combat_input"):
+		scene.stop_combat_input()
+	_staged_component = null
+	_staged_module_generation = 0
 	prepared_encounter = null
 	_generation += 1
 	is_running = false
 	acting_unit = null
 	var component: CombatModule = combat_module
 	if component == null and is_instance_valid(get_parent()):
-		component = get_parent().get("combat_module") as CombatModule
+		var candidate: Variant = get_parent().get("combat_module")
+		if is_instance_valid(candidate):
+			component = candidate as CombatModule
 	if component != null:
 		component.clear(preserve_presentation)
 	combat_module = null

@@ -1,0 +1,391 @@
+{
+ "contract": "wf-table/1",
+ "source": "10_multi_board_encounters.md",
+ "extracted": "2026-10-21",
+ "reviewer": "architecture_challenge; workflow_lead updated final runtime evidence",
+ "source_base": "b510dff",
+ "description": "25 obligation audit rows; product/test paths are repo-relative identifiers, local raw runtime evidence is summarized in the adjacent portable verification table.",
+ "columns": [
+  "id",
+  "condition",
+  "product_files",
+  "test_files",
+  "evidence",
+  "status",
+  "remaining_or_limit"
+ ],
+ "rows": [
+  {
+   "id": "C01",
+   "condition": "省略/真正{}沿legacy；version1 boards[]明確0；scalar/null/非空缺鍵不丟失或降級",
+   "product_files": [
+    "game/data/readonly/EncounterData.gd",
+    "game/scripts/combat/PreparedEncounter.gd"
+   ],
+   "test_files": [
+    "tests/prepared_schema_cases.gd"
+   ],
+   "evidence": "Smoke helper已接；真JSON.parse/stringify/public patch roundtrip斷言存在；Smoke 20261021-211749-363bf9ef，158 checks PASS",
+   "status": "verified",
+   "remaining_or_limit": "Dictionary patch 重用原 patch_dictionary；非 overwrite 策略為 source 核對，無獨立新斷言。"
+  },
+  {
+   "id": "C02",
+   "condition": "新舊格式衝突、命名Encounter缺失明確拒絕",
+   "product_files": [
+    "game/data/readonly/EncounterData.gd",
+    "game/autoload/Global.gd",
+    "game/scripts/combat/PreparedEncounter.gd"
+   ],
+   "test_files": [
+    "tests/prepared_schema_cases.gd"
+   ],
+   "evidence": "conflicting_board_formats / missing_encounter斷言；Smoke 20261021-211749-363bf9ef PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C03",
+   "condition": "正盤1/2/3/更多盤，盤數從集合導出且不依enum",
+   "product_files": [
+    "game/scripts/combat/board/BoardSetup.gd",
+    "game/scripts/combat/board/CombatBattlefield.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_module_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：explicit board count 1/2/3/7及order/geometry全PASS",
+   "status": "verified",
+   "remaining_or_limit": "1/2/7為parser+world專項，3另有正式開場；未宣稱7盤完整遊玩或效能。"
+  },
+  {
+   "id": "C04",
+   "condition": "任意穩定ID與重排不猜hero/home",
+   "product_files": [
+    "game/scripts/combat/board/BoardSetup.gd",
+    "game/scripts/combat/board/BoardDeployment.gd"
+   ],
+   "test_files": [
+    "tests/board_setup_cases.gd",
+    "tests/multi_board_module_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：west/east/reserve與zone反序；world order never selects hero destination PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C05",
+   "condition": "幾何不要求部署；政策只產位置，未知目的盤不按faction猜",
+   "product_files": [
+    "game/scripts/combat/board/BoardSetup.gd",
+    "game/scripts/combat/board/BoardDeployment.gd",
+    "game/scripts/combat/board/BoardController.gd"
+   ],
+   "test_files": [
+    "tests/board_setup_cases.gd",
+    "tests/multi_board_module_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：geometry independent / policy no mutate / no_spawn caller complete PASS",
+   "status": "verified",
+   "remaining_or_limit": "explicit_positions是當前明確選用政策；未來home/隊友/盤外混合非工程缺口。"
+  },
+  {
+   "id": "C06",
+   "condition": "缺檔core可import；新正盤unavailable；legacy與明確0仍ordinary",
+   "product_files": [
+    "game/scripts/combat/PreparedEncounter.gd",
+    "game/scripts/ui/Combat.gd"
+   ],
+   "test_files": [
+    "tests/boardless_flow.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-212029-83ebef91/results.json：BoardRemoved186/0，removed positive module_missing、formal positive拒絕、zero普通攻擊PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C07",
+   "condition": "場景/規則關閉保留能力原因，不改寫內容意圖",
+   "product_files": [
+    "game/scripts/combat/PreparedEncounter.gd"
+   ],
+   "test_files": [
+    "tests/prepared_schema_cases.gd",
+    "tests/boardless_flow.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-210938-925f0e5a/results.json：Boardless286/0 legacy rules/scene off；schema scene_disabled斷言；PreparedEncounter 先依 scene/rules 設不同 reason，隨後共用 zero／explicit unavailable／legacy fallback 分流；Boardless 真實規則關閉及場景關閉分開執行。",
+   "status": "verified",
+   "remaining_or_limit": "explicit positive + rules_disabled 未獨立組合測試；source 只在 reason 賦值分支不同，後續拒絕與 scene_disabled 共用同段。"
+  },
+  {
+   "id": "C08",
+   "condition": "合法0真正不掛module/controller/field/view/helper；普通支付與後波保留",
+   "product_files": [
+    "game/scripts/ui/Combat.gd",
+    "game/scripts/combat/PreparedEncounter.gd",
+    "game/scripts/combat/CombatDirector.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_start_cases.gd",
+    "tests/boardless_flow.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：zero no module/anchor、paid block、ordinary attack與later wave PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C09",
+   "condition": "同場景0→DUAL→0→N，舊位置與呈現回收",
+   "product_files": [
+    "game/scripts/ui/Combat.gd",
+    "game/scripts/combat/board/BoardCombatModule.gd",
+    "game/scripts/ui/BoardCombatPresentation.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_start_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：四次normal scene request及每次成功通知恰一次PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C10",
+   "condition": "N正式生成不受螢幕slot限制；既有positional路徑不變",
+   "product_files": [
+    "game/scripts/combat/PreparedEncounter.gd",
+    "game/scripts/combat/UnitSpawner.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_start_cases.gd",
+    "tests/board_spawn_policy_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：formal explicit three boards/three units despite one slot；legacy slot對照PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C11",
+   "condition": "N正式目標解析與行動使用同盤ID/既有跨盤規則",
+   "product_files": [
+    "game/scripts/combat/board/CrossBoardPolicy.gd",
+    "game/scripts/combat/board/BoardTargeting.gd",
+    "game/scripts/combat/board/BoardActionTargets.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_start_cases.gd",
+    "tests/board_setup_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：zone_2 SINGLE正式牌造成傷害PASS；artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：arbitrary-ID spatial CrossBoardPolicy PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C12",
+   "condition": "明確位置召喚在spawn default省略時可解析",
+   "product_files": [
+    "game/scripts/combat/UnitSpawner.gd",
+    "game/scripts/combat/board/BoardDeployment.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_module_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：no_spawn complete position policy PASS；spawn_enemy_at_cell source帶cell且用resolved zone；Board 的 tests/board_cases.gd summon 11 正式 ACTION_SUMMON_ENEMIES→ActionSummonEnemies→Director→UnitSpawner→module.place_unit_nearest，驗 occupied cell 最近空格與 timeline admission；新 policy 專項驗無 default 時完整 caller 可接受，source 接合傳完整 board_id/cell 並用 resolved zone。",
+   "status": "source_review_plus_policy_test",
+   "remaining_or_limit": "尚未直接端到端驗 explicit N + 無 spawn default + ActionSummonEnemies 明確位置之組合；目前由既有完整生成整合、新政策單測及接合 source 核對分段支持。"
+  },
+  {
+   "id": "C13",
+   "condition": "同份準備結果、detached getter無Node/runtime alias；直接入口forward",
+   "product_files": [
+    "game/scripts/combat/PreparedEncounter.gd",
+    "game/scripts/combat/CombatDirector.gd",
+    "game/scripts/combat/board/BoardSetup.gd",
+    "game/scripts/combat/board/BoardDeployment.gd"
+   ],
+   "test_files": [
+    "tests/prepared_encounter_probe.gd",
+    "tests/prepared_start_cases.gd",
+    "tests/multi_board_module_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：direct entry首波/actions/generation；artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：detached layout/policy mutations PASS；Smoke 20261021-211749-363bf9ef resolver 一次與雙向 alias PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C14",
+   "condition": "純準備/dry setup失敗不發初始事件、不重設stats/hand/status/rewards/energy",
+   "product_files": [
+    "game/scripts/ui/Combat.gd",
+    "game/scripts/combat/CombatDirector.gd",
+    "game/scripts/combat/board/BoardController.gd",
+    "game/scripts/combat/board/FieldController.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_start_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：invalid hero和valid-schema全blocked dry fail，nonempty status/reward/hand、stats/energy、通知計數保持PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C15",
+   "condition": "失敗清HUD/input/新module/timeline；map可修正後retry且不可skip",
+   "product_files": [
+    "game/scripts/ui/Combat.gd",
+    "game/scripts/ui/Map.gd",
+    "game/scripts/ui/MapLocation.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_start_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：failed HUD clear、不能鄰接skip、真button retry才visited PASS；最終 Dual 20261021-211623-fa793ae5：真選牌不扣費/入 queue/移牌，舊 consumable 取消選取/target/提示且 inventory 不變，修復重開正常解鎖。Director 統一 stop 委派自身 Scene，只清 valid/ready UI；獨立 reviewer PASS。",
+   "status": "verified",
+   "remaining_or_limit": "僅本次開始的停止/輸入邊界；旅行位置、事件抽取及進站存檔不回滾，run-level 地圖消耗品合法使用保留。"
+  },
+  {
+   "id": "C16",
+   "condition": "commit field事件保stack/zero duration操作語意；failed trial無remove",
+   "product_files": [
+    "game/scripts/combat/board/FieldController.gd",
+    "game/scripts/combat/board/BoardController.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_module_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：trial no events、created1→changed2 membership、zero created→removed、discard no events全PASS",
+   "status": "verified",
+   "remaining_or_limit": "REPLACE沿真create_field重放source核對，未新增獨立REPLACE斷言。"
+  },
+  {
+   "id": "C17",
+   "condition": "取消/clear使舊generation失效，不續舊field/wave/CTB",
+   "product_files": [
+    "game/scripts/combat/CombatDirector.gd",
+    "game/scripts/combat/UnitSpawner.gd",
+    "game/scripts/combat/board/FieldController.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_start_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：真field callback clear只1created且無後續wave/CTB PASS；修後 Dual 464 checks，combat_started 同 Node clear 真 callback 亦 PASS；token 在 publish 前 stage 保存，begin 核對，stop 清除。",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C18",
+   "condition": "排隊盤面牌卸載/同Node重設/重掛只退款一次；ordinary繼續",
+   "product_files": [
+    "game/scripts/combat/board/BoardCardAdapter.gd",
+    "game/autoload/HandManager.gd"
+   ],
+   "test_files": [
+    "tests/dual_board_adapter_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：same Node module generation、stale_board_context/board_module_required exact-once refund、ordinary block一次與空context全PASS",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C19",
+   "condition": "死亡preserve presentation與完整clear分開，退出恢復角色",
+   "product_files": [
+    "game/scripts/combat/board/BoardCombatModule.gd",
+    "game/scripts/ui/BoardCombatPresentation.gd",
+    "game/scripts/ui/BoardActorPresentation.gd"
+   ],
+   "test_files": [
+    "tests/dual_board_presentation_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：actual defeat、last board root、run exit pre-combat position/scale PASS；ResourceLifecycle 20261021-211758-664d7497，127 checks PASS，退出資源／native crash／ObjectDB 無新增。",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "C20",
+   "condition": "layout不改幾何/ID/anchor/faction；相同IDs可換rect並保view",
+   "product_files": [
+    "game/scripts/ui/BoardLayout.gd",
+    "game/scripts/ui/BoardCombatPresentation.gd",
+    "game/scripts/ui/BoardView.gd"
+   ],
+   "test_files": [
+    "tests/board_layout_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：真3 views、同ID改slot、重排保instances及occupancy、invalid slot整體拒絕PASS",
+   "status": "verified",
+   "remaining_or_limit": "view_position/compatibility_slots一二盤是legacy seam；explicit完整rect資料繞過該預設。"
+  },
+  {
+   "id": "C21",
+   "condition": "無不當盤數硬上限/畫面slots截斷內容；仍保每盤尺寸限制",
+   "product_files": [
+    "game/scripts/combat/board/BoardSetup.gd",
+    "game/scripts/combat/board/CombatBattlefield.gd",
+    "game/scripts/ui/BoardLayout.gd",
+    "game/scripts/combat/UnitSpawner.gd"
+   ],
+   "test_files": [
+    "tests/multi_board_module_cases.gd",
+    "tests/multi_board_start_cases.gd"
+   ],
+   "evidence": "artifacts/verification/20261021-210827-41b610a4/Board/board-result.json：7盤；artifacts/verification/20261021-211623-fa793ae5/DualBoard/dual-board-result.json：3敵1slot；source搜尋盤集合按keys全遍歷",
+   "status": "source_and_runtime_supported",
+   "remaining_or_limit": "僅CombatRulesData既有每盤格數安全限制；未量測任意大N效能，不宣稱無限容量。"
+  },
+  {
+   "id": "D01",
+   "condition": "helpers接既有suite且最終涵蓋所有受影響路徑",
+   "product_files": [
+    "tools/test_game.py",
+    "tests/framework_smoke.gd",
+    "tests/board_flow.gd",
+    "tests/dual_board_flow.gd"
+   ],
+   "test_files": [
+    "tests/prepared_schema_cases.gd",
+    "tests/multi_board_module_cases.gd",
+    "tests/multi_board_start_cases.gd"
+   ],
+   "evidence": "10_multi_board_encounters-verification.json：12 套 2166 checks / 18 測試階段 / 42 程序階段，全 PASS 且無 unexpected error、ObjectDB、shutdown resource、native crash。7 套最終 source/test hash 完全相符，5 套明列已核對窄 UI delta 與只由 Dual 呼叫的新 helper。",
+   "status": "verified",
+   "remaining_or_limit": "Board/Boardless/Wave/Field/Ctb 保留 stop UI 清理前證據，其明確差異與重用理由逐列保存，不宣稱全 12 套源碼 hash 一致。"
+  },
+  {
+   "id": "D02",
+   "condition": "同步現行契約/code map/coverage/analysis/plan狀態",
+   "product_files": [
+    "analysis/slay-the-robot/architecture/10_multi_board_encounters.md",
+    "wf/specs/board-module/encounter-contracts.md",
+    "wf/specs/board-module/encounter-lifecycle.md",
+    "wf/specs/board-module/encounter-format.md",
+    "analysis/slay-the-robot/architecture/10_multi_board_encounters.md"
+   ],
+   "test_files": [],
+   "evidence": "現行格式、責任／生命週期、code map、suite coverage、analysis 已同步；完成方案／計畫封存並保留現行模組導航。 wf-lint --strict 全項 0；boundary violations=0。",
+   "status": "verified",
+   "remaining_or_limit": ""
+  },
+  {
+   "id": "D03",
+   "condition": "來源補丁/upstream鎖/hash重建及可攜證據",
+   "product_files": [
+    "tools/upstream.json"
+   ],
+   "test_files": [],
+   "evidence": "b510dff 增量 patch SHA256 6d5ccae9de6ca648eba6434e5b02409dfa4c3181545acf84f2b2094598c7c42b，隔離重建 17 產品檔逐檔一致。",
+   "status": "verified",
+   "remaining_or_limit": "commit／push 結果由 git ref 與交付訊息記錄；本列證明可攜來源與補丁，不預填尚未產生的提交 SHA。"
+  },
+  {
+   "id": "D04",
+   "condition": "GUI/物理命中/畫面可讀性/全部內容/多幕/大N效能明列限制",
+   "product_files": [
+    ""
+   ],
+   "test_files": [],
+   "evidence": "使用者明禁GUI/桌面/鍵鼠/截圖；本review未runtime",
+   "status": "unverified_explicit_scope_limit",
+   "remaining_or_limit": "不把headless UI signal/scene assertions當人工畫面驗收；不因此另起玩法或部署框架。"
+  }
+ ]
+}

@@ -29,6 +29,37 @@ const BOARD_SIZE_DEFAULT: Vector2i = Vector2i(0, 0)
 @export var encounter_cell_texture_path: String = ""
 @export var encounter_background_texture_path: String = ""
 
+## Raw envelope is deliberately Variant: malformed scalar/null inputs must survive loading.
+## Local serialization handles it before SerializableData's typed Dictionary assignment.
+var encounter_board_setup: Variant = {}
+
+func get_serializable_property_names() -> Array[String]:
+	var names: Array[String] = super.get_serializable_property_names()
+	names.append("encounter_board_setup")
+	return names
+
+func get_serializable_properties(json_friendly: bool = true) -> Dictionary:
+	var properties: Dictionary = super.get_serializable_properties(json_friendly)
+	properties["encounter_board_setup"] = _copy_setup_value(encounter_board_setup)
+	return properties
+
+func set_serializable_properties(object_data: Dictionary, json_friendly: bool = true, patch_data: Dictionary = {}) -> void:
+	var remaining: Dictionary = object_data.duplicate()
+	if remaining.has("encounter_board_setup"):
+		var incoming: Variant = remaining.encounter_board_setup
+		if encounter_board_setup is Dictionary and incoming is Dictionary:
+			encounter_board_setup = patch_dictionary(encounter_board_setup.duplicate(true), incoming.duplicate(true), patch_data.get("encounter_board_setup", "overwrite"))
+		else:
+			encounter_board_setup = _copy_setup_value(incoming)
+		remaining.erase("encounter_board_setup")
+	super.set_serializable_properties(remaining, json_friendly, patch_data)
+
+static func _copy_setup_value(value: Variant) -> Variant:
+	return value.duplicate(true) if value is Array or value is Dictionary else value
+
+func has_legacy_board_overrides() -> bool:
+	return encounter_board_mode != -1 or encounter_board_size != BOARD_SIZE_DEFAULT or not encounter_boards.is_empty() or not encounter_deploy_cells.is_empty() or not encounter_spawn_zone_cells.is_empty() or not encounter_blocked_cells.is_empty() or not encounter_initial_fields.is_empty()
+
 func _get_native_properties() -> Dictionary:
 	return {
 		"encounter_board_size": Vector2i(),

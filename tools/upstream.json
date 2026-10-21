@@ -93,6 +93,12 @@
       "sha256": "507677f96702faf793ed400cea41a0757f250cc26aa22d062edd08b92fe02d05",
       "description": "Board setup/layout migration B: normalized geometry independent of legacy board mode and deployment; legacy-only faction placement policy; pure ID-to-rectangle layout and slot-aware views; explicit internal slot-free first-wave path preserves legacy positional default. Spatial rule validation no longer depends on legacy mode. No external zero/N schema. Includes all game source changes relative to 7b26416; applies after combat-preparation.patch.",
       "validation": "analysis/slay-the-robot/architecture/09_board_setup_layout.md"
+    },
+    {
+      "file": "tools/patches/per-encounter-board-sets.patch",
+      "sha256": "6d5ccae9de6ca648eba6434e5b02409dfa4c3181545acf84f2b2094598c7c42b",
+      "description": "Per-encounter explicit board sets migration C: raw versioned encounter envelope distinguishes legacy, zero and arbitrary positive sets; capability errors refuse explicit positive starts while legacy fallback remains. One scene request stages module resources before committed combat_started, preserves initial field event semantics, checks cancellation generations and leaves failed combat nodes retryable. Data-driven explicit placement and rectangles reuse normalized B geometry; no hardcoded board count. Includes all game source changes relative to b510dff; applies after board-setup-layout.patch.",
+      "validation": "analysis/slay-the-robot/architecture/10_multi_board_encounters.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

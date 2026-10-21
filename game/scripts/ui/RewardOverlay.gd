@@ -186,12 +186,9 @@ func _on_reward_clear_requested(reward_group: int):
 func _on_combat_started(event_object_id: String):
 	visible = false
 	# generate rewards if the event has them
-	var event_data: EventData = null
-	if event_object_id == "":
-		event_data = Global.get_player_event_data()
-	else:
-		event_data = Global.get_event_data(event_object_id)
-	
+	var director: CombatDirector = Global.get_combat_director()
+	var event_data: EventData = director.event if director != null else null
+
 	if event_data == null:
 		DebugLogger.log_error("No event with id of {0} found to populate rewards".format(event_object_id))
 		return

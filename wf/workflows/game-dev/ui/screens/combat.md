@@ -20,7 +20,7 @@
 
 ### 資料與進場
 
-Combat 收 map_location_selected，依 LocationData 類型決定戰鬥或隱藏戰鬥 HUD；COMBAT／MINIBOSS／BOSS 經 ActionGenerator.generate_combat_start 進既有流程。Combat._on_combat_started 先以 `_compose_board_module()` 組裝可選棋盤模組（兩個旗標都開且模組檔存在才 load），再把 EventData 交 CombatDirector.begin_combat(event)：經 EnemyContainer 生第 0 波、首次行動前處理、時間軸排序；主角行動時才播動畫、補能量與抽牌。**棋盤不一定存在**：Director 只經 CombatModule 介面呼叫模組；掛載時由 BoardCombatModule 建盤、放格，並由它擁有的 BoardCombatPresentation 顯示 BoardView；未掛載時沒有 BoardView 與格子，敵人照常排在 EnemyContainer，畫面與 cue 不得依賴格子節點（見 [board-module](../../mechanics/board-module.md)）。背景非空路徑依 Act→Location→Event 覆寫，Event 優先；空路徑不一定清前場景圖，需求若要空白須明定。
+Combat 收 map_location_selected，依 LocationData 類型決定戰鬥或隱藏 HUD；COMBAT／MINIBOSS／BOSS 經 ActionGenerator.generate_combat_start 的 ActionStartCombat 呼叫 Scene request。先由 PreparedEncounter 驗資料／能力、Director 暫存模組 setup，成功才發 `combat_started` 初始化原訂閱者並接同一個首波／CTB loop；不要直接 emit 該通知來要求開戰。失敗關閉戰鬥 HUD／輸入並允許重試，不能先清牌或排獎勵。**棋盤不一定存在**：合法 0 不掛模組，普通 EnemyContainer 與卡牌流程照常；正盤依明確設定組裝 BoardCombatPresentation／BoardView，UI 不得依賴格子必然存在（見 [board-module](../../mechanics/board-module.md)）。背景非空路徑依 Act→Location→Event 覆寫，Event 優先；空路徑不一定清前場景圖，需求若要空白須明定。
 
 HUD 的資料來源與刷新訊號、Card／Hand 的出牌與拒絕檢查、背景取消與右鍵差異集中在 [互動狀態](../interaction-states.md#戰鬥-hud-與出牌)；UI 不因動畫顯示或每 frame 重算就重複扣費、傷害、抽牌。選目標有兩條入口：**未掛棋盤**時 Enemy 發 enemy_clicked，Hand._on_enemy_clicked 以 [CardPlayAdapter](../../../../../game/scripts/combat/CardPlayAdapter.gd).selection_for_target(enemy) 出牌，這是普通出牌路徑；**已掛棋盤**時格子點擊經 BoardCardAdapter。改出牌路徑兩種模式都要驗，見 [validation 的棋盤開關](../../validation.md#棋盤開關兩種模式都要驗)。
 

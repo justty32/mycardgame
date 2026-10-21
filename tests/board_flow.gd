@@ -26,6 +26,7 @@ func _main() -> void:
 	var size_cases: RefCounted = load(get_script().resource_path.get_base_dir().path_join("board_size_cases.gd")).new()
 	size_cases.run(self)
 	load(get_script().resource_path.get_base_dir().path_join("board_setup_cases.gd")).new().run(self)
+	load(get_script().resource_path.get_base_dir().path_join("multi_board_module_cases.gd")).new().run(self)
 	var cases: RefCounted = load(get_script().resource_path.get_base_dir().path_join("board_cases.gd")).new()
 	var completed: bool = await cases.run(self)
 	_check(completed, "complete board scenario returned")

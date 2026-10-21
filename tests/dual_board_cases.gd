@@ -39,6 +39,7 @@ func _scenario() -> bool:
 	await waves.run(self)
 	await load(flow.get_script().resource_path.get_base_dir().path_join("prepared_start_cases.gd")).new().run(self)
 	await load(flow.get_script().resource_path.get_base_dir().path_join("board_spawn_policy_cases.gd")).new().run(self)
+	await load(flow.get_script().resource_path.get_base_dir().path_join("multi_board_start_cases.gd")).new().run(self)
 	return true
 
 func _play_board(card_id: String, board_id: String, cell: Vector2i) -> String:

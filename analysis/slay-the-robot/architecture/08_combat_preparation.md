@@ -1,6 +1,6 @@
 # 每場戰鬥準備：遷移 A
 
-[分析入口](../README.md)｜[架構與遷移計畫](../../../wf/plans/multi-board/README.md)｜[模組現行契約](../../../wf/specs/board-module/README.md)
+[分析入口](../README.md)｜[架構與遷移計畫](10_multi_board_encounters.md)｜[模組現行契約](../../../wf/specs/board-module/README.md)
 
 2026-10-21，基於 snapshot `2b3dec8`。本輪只集中開戰準備與資料所有權；每場明確 0／任意 N 盤的資料格式、部署政策與排版尚未實作。
 

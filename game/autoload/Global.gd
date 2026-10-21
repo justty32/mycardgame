@@ -600,7 +600,7 @@ func get_event_encounter_data(event_data: EventData, combat_rules: CombatRulesDa
 		var encounter_data: EncounterData = get_encounter_data(event_data.event_encounter_object_id)
 		if encounter_data != null:
 			return encounter_data
-		DebugLogger.log_error("Global: EncounterData \"{0}\" of event \"{1}\" not found; synthesizing".format([event_data.event_encounter_object_id, event_data.object_id]))
+		return null	# A named missing encounter is invalid, never a different synthesized fight.
 	return EncounterData.synthesize_from_event(event_data, combat_rules if combat_rules != null else get_combat_rules())
 #endregion
 

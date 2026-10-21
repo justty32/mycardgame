@@ -4,6 +4,8 @@ class_name BoardSetup
 
 var _definitions: Dictionary = {}
 var deployment: BoardDeployment = null
+var layout_slots: Dictionary[String, Rect2] = {}
+var explicit: bool = false
 var _validated: bool = false
 var error: String = ""
 var error_detail: String = ""
@@ -91,3 +93,64 @@ static func _invalid(code: String, detail: String) -> BoardSetup:
 	setup.error = code
 	setup.error_detail = detail
 	return setup
+
+## Versioned author input; omitted/empty envelope is exclusively the legacy path.
+static func from_explicit(raw: Dictionary, rules: CombatRulesData) -> BoardSetup:
+	if raw.get("version") != 1 or not raw.get("boards") is Array:
+		return _invalid("invalid_board_setup", "encounter_board_setup requires version 1 and boards array")
+	var definitions: Dictionary = {}
+	for entry: Variant in raw.boards:
+		if not entry is Dictionary or not entry.get("id") is String or entry.id == "" or definitions.has(entry.id):
+			return _invalid("invalid_board_id", "boards require unique nonempty string IDs")
+		definitions[entry.id] = entry.duplicate(true)
+	var result: BoardSetup = from_definitions(definitions, rules)
+	result.explicit = true
+	if not result.is_valid() or definitions.is_empty():
+		return result
+	for id: String in result.get_board_ids():
+		for field: Dictionary in result.get_config(id).initial_fields:
+			if not field.get("field_id", "") is String or field.get("field_id", "") == "":
+				return _invalid("invalid_board_definition_fields", "board %s requires field_id" % id)
+			var duration: Variant = field.get("duration", -2)
+			if not (duration is int or duration is float) or not is_finite(float(duration)) or float(duration) != floor(float(duration)):
+				return _invalid("invalid_board_definition_fields", "board %s field duration must be a whole number" % id)
+	var placement: Variant = raw.get("deployment", {})
+	if not placement is Dictionary:
+		return _invalid("invalid_board_deployment", "deployment must be an object")
+	var normalized_definitions: Dictionary = {}
+	for id: String in result.get_board_ids():
+		normalized_definitions[id] = result.get_config(id)
+	result.deployment = BoardDeployment.from_explicit(normalized_definitions, placement)
+	if result.deployment.error != "":
+		return _invalid(result.deployment.error, "deployment.hero requires a valid board_id and cell; spawn must be valid when supplied")
+	var presentation: Variant = raw.get("presentation", {})
+	if not presentation is Dictionary or not presentation.get("slots") is Array:
+		return _invalid("invalid_board_layout", "presentation.slots must specify every board rectangle")
+	for slot: Variant in presentation.slots:
+		if not slot is Dictionary or not slot.get("board_id") is String or not definitions.has(slot.board_id) or result.layout_slots.has(slot.board_id):
+			return _invalid("invalid_board_layout", "slots require unique known board_id")
+		var rect: Variant = slot.get("rect")
+		if not rect is Array or rect.size() != 4:
+			return _invalid("invalid_board_layout", "rect must be [x,y,width,height]")
+		for value: Variant in rect:
+			if not (value is int or value is float) or not is_finite(float(value)):
+				return _invalid("invalid_board_layout", "rect values must be finite numbers")
+		var rectangle := Rect2(float(rect[0]), float(rect[1]), float(rect[2]), float(rect[3]))
+		if not BoardLayout.valid_slot(rectangle):
+			return _invalid("invalid_board_layout", "rect width and height must be positive")
+		result.layout_slots[slot.board_id] = rectangle
+	if result.layout_slots.size() != definitions.size():
+		return _invalid("invalid_board_layout", "every board requires a presentation slot")
+	return result
+
+## Config-only copy; callers never receive mutable aliases to the prepared snapshot.
+func detached_copy() -> BoardSetup:
+	var copy := BoardSetup.new()
+	copy._definitions = _definitions.duplicate(true)
+	copy.layout_slots.assign(layout_slots)
+	copy.explicit = explicit
+	copy._validated = _validated
+	copy.error = error
+	copy.error_detail = error_detail
+	copy.deployment = deployment.detached_copy() if deployment != null else null
+	return copy

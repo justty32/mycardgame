@@ -16,6 +16,20 @@ func get_module_id() -> StringName:
 func setup(_director: CombatDirector, _encounter: EncounterData) -> bool:
 	return true
 
+## Stages validated module configuration without publishing gameplay effects.
+func setup_prepared(director: CombatDirector, encounter: EncounterData, _setup: Variant) -> bool:
+	return setup(director, encounter)
+
+func get_setup_generation() -> int:
+	return 0
+
+func get_setup_error() -> Dictionary:
+	return {"code": "module_setup_failed", "detail": "module could not stage the encounter"}
+
+## Publishes the successfully staged setup. All fallible checks precede this call.
+func commit_setup() -> void:
+	pass
+
 ## Releases per-combat resources; must be idempotent and re-entrant.
 func clear(_preserve_presentation: bool = false) -> void:
 	pass

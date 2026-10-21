@@ -1,5 +1,5 @@
 ## Owns the boards, field controllers and movement state of one combat.
-## Initial faction selects a home board; all subsequent queries use actual board identity.
+## Placement policy supplies initial positions; subsequent queries use actual board identity.
 extends RefCounted
 class_name BoardController
 
@@ -7,12 +7,19 @@ var rules: CombatRulesData
 var encounter: EncounterData
 var battlefield: CombatBattlefield
 var board_setup: BoardSetup
+var error: String = ""
+var error_detail: String = ""
+var _hero: BaseCombatant
+var _hero_location: Dictionary = {}
 var deployment: BoardDeployment
 var field_controllers: Dictionary[String, FieldController] = {}
 ## Legacy query seam: shared board in SINGLE, party board in DUAL.
 var board: BoardData:
 	get:
-		return battlefield.get_board(deployment.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
+		if battlefield == null or deployment == null:
+			return null
+		var id: String = deployment.hero_location(BaseCombatant.FACTIONS.PARTY).board_id
+		return battlefield.get_board(id)
 var field_controller: FieldController:
 	get:
 		return FieldController.for_board(board)
@@ -21,40 +28,72 @@ func _init(combat_rules: CombatRulesData) -> void:
 	rules = combat_rules
 
 func setup(encounter_data: EncounterData) -> bool:
+	if not setup_prepared(encounter_data, BoardSetup.from_legacy(encounter_data, rules)):
+		return false
+	commit_setup()
+	return true
+
+## Detached resources and pure placement queries only; no hero mutation or public events.
+func setup_prepared(encounter_data: EncounterData, prepared: BoardSetup) -> bool:
 	encounter = encounter_data
-	board_setup = BoardSetup.from_legacy(encounter, rules)
+	board_setup = prepared.detached_copy()
 	deployment = board_setup.deployment
 	battlefield = CombatBattlefield.new(board_setup, rules)
 	if not battlefield.valid:
-		DebugLogger.log_error("BoardController: %s: %s" % [battlefield.error, battlefield.error_detail])
-		return false
+		return _fail(battlefield.error, battlefield.error_detail)
+	if deployment == null or deployment.error != "":
+		return _fail("invalid_board_deployment", "positive boards require deployment")
 	var shared_opportunities: Dictionary = {}
 	for current: BoardData in battlefield.boards.values():
 		current.movement_state.used_opportunities = shared_opportunities
-		field_controllers[current.board_id] = FieldController.new(current)
+		var controller := FieldController.new(current)
+		controller.published = false
+		field_controllers[current.board_id] = controller
 		var config: Dictionary = board_setup.get_config(current.board_id)
-		var deploy: Array[Vector2i] = deployment.deploy_cells(current.board_id)
-		for cell: Vector2i in deploy:
+		for cell: Vector2i in deployment.deploy_cells(current.board_id):
 			if current.is_in_bounds(cell):
 				current.get_cell(cell).is_deploy_zone = true
-		var spawn: Array[Vector2i] = deployment.spawn_cells(current.board_id)
-		for cell: Vector2i in spawn:
+		for cell: Vector2i in deployment.spawn_cells(current.board_id):
 			if current.is_in_bounds(cell):
 				current.get_cell(cell).is_spawn_zone = true
 		for entry: Dictionary in config.initial_fields:
 			var data: FieldData = Global.get_field_data(str(entry.get("field_id", "")))
 			if data == null:
-				continue
+				if not board_setup.explicit:
+					continue
+				return _fail("invalid_initial_field", "board %s unknown field_id %s" % [current.board_id, entry.get("field_id", "")])
 			for cell: Vector2i in EncounterData.cells_from_json(entry.get("cells", [])):
-				field_controllers[current.board_id].create_field(data, cell, null, 0, int(entry.get("duration", -2)))
-	var hero: BaseCombatant = UnitRegistry.get_hero()
-	if hero != null:
-		var location: Dictionary = deployment.hero_location(hero.faction)
-		if not place_unit_nearest(hero, location.cell, location.board_id):
-			return false
+				controller.create_field(data, cell, null, 0, int(entry.get("duration", -2)))
+	_hero = UnitRegistry.get_hero()
+	if _hero != null:
+		_hero_location = deployment.hero_location(_hero.faction)
+		var current: BoardData = battlefield.get_board(_hero_location.board_id)
+		if current == null:
+			return _fail("invalid_hero_deployment", "hero destination board is missing")
+		var anchor: Vector2i = _hero_location.cell if current.can_stand(_hero, _hero_location.cell) else current.nearest_empty_anchor(_hero, _hero_location.cell)
+		if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
+			return _fail("hero_deployment_full", "hero footprint has no legal placement")
+		_hero_location.cell = anchor
 	return true
 
+func commit_setup() -> void:
+	if is_instance_valid(_hero) and not _hero_location.is_empty():
+		battlefield.get_board(_hero_location.board_id).place(_hero, _hero_location.cell)
+	_hero = null
+	_hero_location.clear()
+	for controller: FieldController in field_controllers.values():
+		controller.discard_trial_fields()
+	for controller: FieldController in field_controllers.values():
+		controller.publish_fields()
+
+func _fail(code: String, detail: String) -> bool:
+	error = code
+	error_detail = detail
+	return false
+
 func clear() -> void:
+	_hero = null
+	_hero_location.clear()
 	for controller: FieldController in field_controllers.values():
 		controller.clear()
 	field_controllers.clear()

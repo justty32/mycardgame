@@ -24,5 +24,6 @@ func flash_location() -> void:
 	animation_player.play("flash_map_location")
 
 func _on_button_up():
-	location_data.location_visited = true
+	if location_data.location_type not in [LocationData.LOCATION_TYPES.COMBAT, LocationData.LOCATION_TYPES.MINIBOSS, LocationData.LOCATION_TYPES.BOSS]:
+		location_data.location_visited = true
 	map_location_button_up.emit(self)

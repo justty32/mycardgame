@@ -100,7 +100,7 @@ signal rest_action_ended(rest_action_id: String) # a rest action has finished
 # actions on the combat timeline (CombatDirector). Legacy turn signals are kept with new meaning:
 # player_turn_* = the hero's action started (before energy/draw) / ended (after discard);
 # enemy_turn_* = one enemy's action started / ended. Prefer unit_action_* in new code.
-signal combat_started(event_id: String) # invokes combat when emitted. If empty string for event_id, will use the location's combat event
+signal combat_started(event_id: String) # Success notification after scene request/preparation/staging; not a request entry.
 signal combat_ended
 signal player_turn_started
 signal player_turn_ended

@@ -1,0 +1,308 @@
+{
+ "contract": "wf-table/1",
+ "source": "10_multi_board_encounters.md",
+ "extracted": "2026-10-21",
+ "description": "Derived from local results.json and runner logs; raw files remain under artifacts/verification/<run>. Exact manifest SHA, observed markers, final source comparison and bounded reuse reasons retained. No absolute host paths.",
+ "engine": "4.7.2.stable.mono.arch_linux.ed1daf0bf",
+ "source_base": "b510dff",
+ "patch_sha256": "6d5ccae9de6ca648eba6434e5b02409dfa4c3181545acf84f2b2094598c7c42b",
+ "columns": [
+  "suite",
+  "run",
+  "assertions",
+  "test_phases",
+  "process_phases",
+  "verdict",
+  "results_sha256",
+  "source_differences",
+  "test_hashes_match",
+  "test_differences",
+  "reuse_reason",
+  "markers"
+ ],
+ "rows": [
+  {
+   "suite": "Smoke",
+   "run": "20261021-211749-363bf9ef",
+   "assertions": 158,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "01608620b70a64889d0f12a88a6401076a9fa2aa47079471336bc3071ed0c63a",
+   "source_differences": [],
+   "test_hashes_match": true,
+   "test_differences": [],
+   "reuse_reason": "",
+   "markers": [
+    "SMOKE PASS: 158 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "DualBoard",
+   "run": "20261021-211623-fa793ae5",
+   "assertions": 464,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "a6fbf4f68d69c0e4eb722ad0de7aca9baa14a12febe7bf198b748ec16abc9cda",
+   "source_differences": [],
+   "test_hashes_match": true,
+   "test_differences": [],
+   "reuse_reason": "",
+   "markers": [
+    "DUAL_BOARD PASS: 464 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "Board",
+   "run": "20261021-210827-41b610a4",
+   "assertions": 168,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "d4428bdaa42d4a0e2d937d4498ba1bf491d78d02540d0c5ae8f68e6007546ba6",
+   "source_differences": [
+    {
+     "file": "game/scripts/combat/CombatDirector.gd",
+     "recorded_sha256": "55bf21063a3255dc919f150fc6f1048238fd53063e8fcbc9f7982c168762c4bd",
+     "current_sha256": "f55089b346238dd15876e0369f78da6905c1b11221ca7a1d61c24bf2e26cec19"
+    },
+    {
+     "file": "game/scripts/ui/Combat.gd",
+     "recorded_sha256": "f37e7b32fd521ebefb2555def450d9b6847fb9197e83dd89efdba532b593f20c",
+     "current_sha256": "af58d23e5c03dcadb1034b43c48bc5a00cba369f8e8d89e4013c6b78f823f912"
+    }
+   ],
+   "test_hashes_match": false,
+   "test_differences": [
+    {
+     "file": "tests/multi_board_start_cases.gd",
+     "recorded_sha256": "5bd1215bc4318b9f3a90a5a37505c20b05aae4a1c388803cd52b7128231651fb",
+     "current_sha256": "d7cfde1a916a81fb29b92be0f10416c2622fcf563cd7f6ed6c054aaf5bdd0cbd"
+    }
+   ],
+   "reuse_reason": "保留 token 修正後、最後 stop UI 清理前之證據。僅 Director._stop 委派 Scene.stop_combat_input 以及該 helper（valid/ready 自身 Hand/Consumables 清選取）有差；不變規則、幾何、政策、生成或時序。最終 Dual 驗真失敗選牌/消耗品/重開，ResourceLifecycle/結算/SaveLoad/BoardRemoved 驗新停止路徑；本列不宣稱 source hash 完全相同。測例 hash 的差異只有 multi_board_start_cases.gd，runner 全測例清單包含它，但僅 DualBoard 的 dual_board_cases 呼叫，新斷言由最終 Dual 執行。",
+   "markers": [
+    "BOARD PASS: 168 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "Boardless",
+   "run": "20261021-210938-925f0e5a",
+   "assertions": 286,
+   "test_phases": 4,
+   "process_phases": 6,
+   "verdict": "PASS",
+   "results_sha256": "f63076b378629f5d383aeb7798a40b8f0b2312abe29c9b329f70796c9f4c9d29",
+   "source_differences": [
+    {
+     "file": "game/scripts/combat/CombatDirector.gd",
+     "recorded_sha256": "55bf21063a3255dc919f150fc6f1048238fd53063e8fcbc9f7982c168762c4bd",
+     "current_sha256": "f55089b346238dd15876e0369f78da6905c1b11221ca7a1d61c24bf2e26cec19"
+    },
+    {
+     "file": "game/scripts/ui/Combat.gd",
+     "recorded_sha256": "f37e7b32fd521ebefb2555def450d9b6847fb9197e83dd89efdba532b593f20c",
+     "current_sha256": "af58d23e5c03dcadb1034b43c48bc5a00cba369f8e8d89e4013c6b78f823f912"
+    }
+   ],
+   "test_hashes_match": false,
+   "test_differences": [
+    {
+     "file": "tests/multi_board_start_cases.gd",
+     "recorded_sha256": "5bd1215bc4318b9f3a90a5a37505c20b05aae4a1c388803cd52b7128231651fb",
+     "current_sha256": "d7cfde1a916a81fb29b92be0f10416c2622fcf563cd7f6ed6c054aaf5bdd0cbd"
+    }
+   ],
+   "reuse_reason": "保留 token 修正後、最後 stop UI 清理前之證據。僅 Director._stop 委派 Scene.stop_combat_input 以及該 helper（valid/ready 自身 Hand/Consumables 清選取）有差；不變規則、幾何、政策、生成或時序。最終 Dual 驗真失敗選牌/消耗品/重開，ResourceLifecycle/結算/SaveLoad/BoardRemoved 驗新停止路徑；本列不宣稱 source hash 完全相同。測例 hash 的差異只有 multi_board_start_cases.gd，runner 全測例清單包含它，但僅 DualBoard 的 dual_board_cases 呼叫，新斷言由最終 Dual 執行。",
+   "markers": [
+    "BOARDLESS CHECKS: 159, failures: 0",
+    "BOARDLESS CHECKS: 28, failures: 0",
+    "BOARDLESS CHECKS: 36, failures: 0",
+    "BOARDLESS CHECKS: 63, failures: 0"
+   ]
+  },
+  {
+   "suite": "BoardRemoved",
+   "run": "20261021-212029-83ebef91",
+   "assertions": 186,
+   "test_phases": 2,
+   "process_phases": 4,
+   "verdict": "PASS",
+   "results_sha256": "7011182b23f01a549d87fac6a53985765bb6576d3669d3d3bc4bacc5a552fa63",
+   "source_differences": [],
+   "test_hashes_match": true,
+   "test_differences": [],
+   "reuse_reason": "",
+   "markers": [
+    "BOARDLESS CHECKS: 150, failures: 0",
+    "BOARDLESS CHECKS: 36, failures: 0"
+   ]
+  },
+  {
+   "suite": "Wave",
+   "run": "20261021-211016-85836f9f",
+   "assertions": 48,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "f4d5d3d1003c778b71734a6d8ffc4b65e5ca3a160a6f8fb76d39269a1aaacc6f",
+   "source_differences": [
+    {
+     "file": "game/scripts/combat/CombatDirector.gd",
+     "recorded_sha256": "55bf21063a3255dc919f150fc6f1048238fd53063e8fcbc9f7982c168762c4bd",
+     "current_sha256": "f55089b346238dd15876e0369f78da6905c1b11221ca7a1d61c24bf2e26cec19"
+    },
+    {
+     "file": "game/scripts/ui/Combat.gd",
+     "recorded_sha256": "f37e7b32fd521ebefb2555def450d9b6847fb9197e83dd89efdba532b593f20c",
+     "current_sha256": "af58d23e5c03dcadb1034b43c48bc5a00cba369f8e8d89e4013c6b78f823f912"
+    }
+   ],
+   "test_hashes_match": false,
+   "test_differences": [
+    {
+     "file": "tests/multi_board_start_cases.gd",
+     "recorded_sha256": "5bd1215bc4318b9f3a90a5a37505c20b05aae4a1c388803cd52b7128231651fb",
+     "current_sha256": "d7cfde1a916a81fb29b92be0f10416c2622fcf563cd7f6ed6c054aaf5bdd0cbd"
+    }
+   ],
+   "reuse_reason": "保留 token 修正後、最後 stop UI 清理前之證據。僅 Director._stop 委派 Scene.stop_combat_input 以及該 helper（valid/ready 自身 Hand/Consumables 清選取）有差；不變規則、幾何、政策、生成或時序。最終 Dual 驗真失敗選牌/消耗品/重開，ResourceLifecycle/結算/SaveLoad/BoardRemoved 驗新停止路徑；本列不宣稱 source hash 完全相同。測例 hash 的差異只有 multi_board_start_cases.gd，runner 全測例清單包含它，但僅 DualBoard 的 dual_board_cases 呼叫，新斷言由最終 Dual 執行。",
+   "markers": [
+    "WAVE PASS: 48 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "Field",
+   "run": "20261021-211057-8d6b5ad9",
+   "assertions": 376,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "09a3f1bff3ee65b64b8567fd865b32cd8305d8a6da80331eba57261b5d4c449a",
+   "source_differences": [
+    {
+     "file": "game/scripts/combat/CombatDirector.gd",
+     "recorded_sha256": "55bf21063a3255dc919f150fc6f1048238fd53063e8fcbc9f7982c168762c4bd",
+     "current_sha256": "f55089b346238dd15876e0369f78da6905c1b11221ca7a1d61c24bf2e26cec19"
+    },
+    {
+     "file": "game/scripts/ui/Combat.gd",
+     "recorded_sha256": "f37e7b32fd521ebefb2555def450d9b6847fb9197e83dd89efdba532b593f20c",
+     "current_sha256": "af58d23e5c03dcadb1034b43c48bc5a00cba369f8e8d89e4013c6b78f823f912"
+    }
+   ],
+   "test_hashes_match": false,
+   "test_differences": [
+    {
+     "file": "tests/multi_board_start_cases.gd",
+     "recorded_sha256": "5bd1215bc4318b9f3a90a5a37505c20b05aae4a1c388803cd52b7128231651fb",
+     "current_sha256": "d7cfde1a916a81fb29b92be0f10416c2622fcf563cd7f6ed6c054aaf5bdd0cbd"
+    }
+   ],
+   "reuse_reason": "保留 token 修正後、最後 stop UI 清理前之證據。僅 Director._stop 委派 Scene.stop_combat_input 以及該 helper（valid/ready 自身 Hand/Consumables 清選取）有差；不變規則、幾何、政策、生成或時序。最終 Dual 驗真失敗選牌/消耗品/重開，ResourceLifecycle/結算/SaveLoad/BoardRemoved 驗新停止路徑；本列不宣稱 source hash 完全相同。測例 hash 的差異只有 multi_board_start_cases.gd，runner 全測例清單包含它，但僅 DualBoard 的 dual_board_cases 呼叫，新斷言由最終 Dual 執行。",
+   "markers": [
+    "FIELD PASS: 376 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "ResourceLifecycle",
+   "run": "20261021-211758-664d7497",
+   "assertions": 127,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "9dd1626a9f09f420cb4b2e4c0075010ca13f252b2d6021d1f0f49cfd173e0bfa",
+   "source_differences": [],
+   "test_hashes_match": true,
+   "test_differences": [],
+   "reuse_reason": "",
+   "markers": [
+    "RESOURCE PASS: 127 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "Ctb",
+   "run": "20261021-211152-cefffa41",
+   "assertions": 53,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "63c5e7e43b76106659ad77dc8927e2e70f92c3953c22cc753d7ae693bf056d08",
+   "source_differences": [
+    {
+     "file": "game/scripts/combat/CombatDirector.gd",
+     "recorded_sha256": "55bf21063a3255dc919f150fc6f1048238fd53063e8fcbc9f7982c168762c4bd",
+     "current_sha256": "f55089b346238dd15876e0369f78da6905c1b11221ca7a1d61c24bf2e26cec19"
+    },
+    {
+     "file": "game/scripts/ui/Combat.gd",
+     "recorded_sha256": "f37e7b32fd521ebefb2555def450d9b6847fb9197e83dd89efdba532b593f20c",
+     "current_sha256": "af58d23e5c03dcadb1034b43c48bc5a00cba369f8e8d89e4013c6b78f823f912"
+    }
+   ],
+   "test_hashes_match": false,
+   "test_differences": [
+    {
+     "file": "tests/multi_board_start_cases.gd",
+     "recorded_sha256": "5bd1215bc4318b9f3a90a5a37505c20b05aae4a1c388803cd52b7128231651fb",
+     "current_sha256": "d7cfde1a916a81fb29b92be0f10416c2622fcf563cd7f6ed6c054aaf5bdd0cbd"
+    }
+   ],
+   "reuse_reason": "保留 token 修正後、最後 stop UI 清理前之證據。僅 Director._stop 委派 Scene.stop_combat_input 以及該 helper（valid/ready 自身 Hand/Consumables 清選取）有差；不變規則、幾何、政策、生成或時序。最終 Dual 驗真失敗選牌/消耗品/重開，ResourceLifecycle/結算/SaveLoad/BoardRemoved 驗新停止路徑；本列不宣稱 source hash 完全相同。測例 hash 的差異只有 multi_board_start_cases.gd，runner 全測例清單包含它，但僅 DualBoard 的 dual_board_cases 呼叫，新斷言由最終 Dual 執行。",
+   "markers": [
+    "CTB PASS: 53 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "SaveLoad",
+   "run": "20261021-211944-c8ce1c8d",
+   "assertions": 160,
+   "test_phases": 3,
+   "process_phases": 5,
+   "verdict": "PASS",
+   "results_sha256": "b749f439456dcb24d69ae443a4b9b83d708e67c785e8668da7faa8727317d773",
+   "source_differences": [],
+   "test_hashes_match": true,
+   "test_differences": [],
+   "reuse_reason": "",
+   "markers": [
+    "SAVELOAD PASS: phase=write checks=28 failures=0",
+    "SAVELOAD PASS: phase=read checks=59 failures=0",
+    "SAVELOAD PASS: phase=rejected checks=73 failures=0"
+   ]
+  },
+  {
+   "suite": "CombatVictory",
+   "run": "20261021-211818-a8feace2",
+   "assertions": 91,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "b0ee1d5149984870bac9d9c52e4de95624f23aef12dff45003cc68257aca218e",
+   "source_differences": [],
+   "test_hashes_match": true,
+   "test_differences": [],
+   "reuse_reason": "",
+   "markers": [
+    "COMBAT PASS: 91 checks, 0 failures"
+   ]
+  },
+  {
+   "suite": "CombatDefeat",
+   "run": "20261021-211853-7c4ad7fd",
+   "assertions": 49,
+   "test_phases": 1,
+   "process_phases": 3,
+   "verdict": "PASS",
+   "results_sha256": "002e3993c397a9b7f927066be65689915adcd186197aa424ce2b0b4c330f2779",
+   "source_differences": [],
+   "test_hashes_match": true,
+   "test_differences": [],
+   "reuse_reason": "",
+   "markers": [
+    "COMBAT PASS: 49 checks, 0 failures"
+   ]
+  }
+ ]
+}
