@@ -6,7 +6,7 @@
   "data_path"
  ],
  "rules_scope": "combat_rules_default 是唯一無 demo_ 前綴的物件；只在隔離 board_lab pack profile 覆蓋，不能加入基礎 mod_list。timeline_delay_scale=10、draw/hand=10、free_move=2、OPPORTUNITY_ATTACK；角色 max_energy=5 由 demo_character/demo_player 接線。",
- "natural_sequence": "entry enemy(1,2)：先 field enemy(1,3) 空格，再 cross_step 進1,3，免費走0,3再1,3驗OA每對一次，swap讓敵進場傷5，push至1,4並碰撞剩1格傷3，guard。下一行動pulse及近身strike。第二場直接跨盤swap驗身分不變。",
+ "natural_sequence": "entry enemy(2,2)：先 field enemy(2,3) 空格，再 cross_step 進2,3，免費走1,3再回2,3驗OA每對一次，swap讓敵進場傷5，guard；下回合 push 至2,4並碰撞剩1格傷3（座標以 tests/scenario_lessons.gd 為準）。下一行動pulse及近身strike。第二場直接跨盤swap驗身分不變。",
  "acquisition": "起手strike×3、guard×2、其他各1，共10；demo_card_pack明確列7ID，common2種/uncommon3種/rare2種，三種獎勵桶皆有牌。固定牌無升級。",
  "board_options": "特殊示範牌使用 card_values.board 的 range/shape/target_faction；demo_strike/demo_guard 不帶 board 選項，保留普通卡 route。舊 card_range/card_shape/card_target_faction 僅由 BoardCardOptions 相容讀取。",
  "stable_teaching_draw": "demo_swap 與 demo_pulse 的 card_first_shuffle_priority=1；正式包顯示 Top Deck，獎勵使牌組增至11張後仍先抽到第二場教學牌。",
@@ -29,7 +29,7 @@
    "role": "單體輸出基準；1 能量換 8 傷害。",
    "acceptance": "普通單體攻擊造成8傷；棋盤開啟或關閉皆可選敵出牌，不加空間射程限制。",
    "upgrade": "示範固定版本，無升級；獎勵可取得原版。",
-   "status": "靜態契約已核；自然流程headless待整合owner驗證，視覺與平衡未驗。"
+   "status": "靜態契約已核；自然流程 headless PASS（2026-10-20 兩次 PackScenario，見 verification.json）；視覺與平衡未驗。"
   },
   {
    "id": "demo_guard",
@@ -39,7 +39,7 @@
    "role": "犧牲一次打擊換取抵擋攻擊或借機傷害。",
    "acceptance": "普通自身格擋增加8；棋盤開啟或關閉皆可出牌，下次自身行動開始清除。",
    "upgrade": "示範固定版本，無升級；獎勵可取得原版。",
-   "status": "靜態契約已核；自然流程headless待整合owner驗證，視覺與平衡未驗。"
+   "status": "靜態契約已核；自然流程 headless PASS（2026-10-20 兩次 PackScenario，見 verification.json）；視覺與平衡未驗。"
   },
   {
    "id": "demo_cross_step",
@@ -49,7 +49,7 @@
    "role": "進入敵盤取得近身推擊方向；退回己盤仍須承擔離開控制區代價。",
    "acceptance": "實際board_id與anchor轉移；佔格拒絕；借機只傷離開者。",
    "upgrade": "示範固定版本，無升級；獎勵可取得原版。",
-   "status": "靜態契約已核；自然流程headless待整合owner驗證，視覺與平衡未驗。"
+   "status": "靜態契約已核；自然流程 headless PASS（2026-10-20 兩次 PackScenario，見 verification.json）；視覺與平衡未驗。"
   },
   {
    "id": "demo_swap",
@@ -59,7 +59,7 @@
    "role": "將敵人送進預先鋪好的場域，或把自己帶入敵盤。",
    "acceptance": "雙方原子交換；UID與陣營不變；敵人進場域受5傷。",
    "upgrade": "示範固定版本，無升級；獎勵可取得原版。",
-   "status": "靜態契約已核；自然流程headless待整合owner驗證，視覺與平衡未驗。"
+   "status": "靜態契約已核；自然流程 headless PASS（2026-10-20 兩次 PackScenario，見 verification.json）；視覺與平衡未驗。"
   },
   {
    "id": "demo_field",
@@ -69,7 +69,7 @@
    "role": "預先部署再換位或推敵入場；單獨出牌不立即造成傷害。",
    "acceptance": "空格上建立demo_hazard；換位進入傷5，停留行動傷2，300刻到期。",
    "upgrade": "示範固定版本，無升級；獎勵可取得原版。",
-   "status": "靜態契約已核；自然流程headless待整合owner驗證，視覺與平衡未驗。"
+   "status": "靜態契約已核；自然流程 headless PASS（2026-10-20 兩次 PackScenario，見 verification.json）；視覺與平衡未驗。"
   },
   {
    "id": "demo_push",
@@ -79,7 +79,7 @@
    "role": "改變敵人局部範圍位置，利用邊界或單位形成碰撞傷害。",
    "acceptance": "跨盤扣費前拒絕；同盤推2；邊界剩1格時造成3碰撞傷。",
    "upgrade": "示範固定版本，無升級；獎勵可取得原版。",
-   "status": "靜態契約已核；自然流程headless待整合owner驗證，視覺與平衡未驗。"
+   "status": "靜態契約已核；自然流程 headless PASS（2026-10-20 兩次 PackScenario，見 verification.json）；視覺與平衡未驗。"
   },
   {
    "id": "demo_pulse",
@@ -89,7 +89,7 @@
    "role": "單敵效率低於打擊，兩敵相鄰時用2能量換12總傷。",
    "acceptance": "目標盤十字局部傷害各6；不傷己方、不擴散至另一盤。",
    "upgrade": "示範固定版本，無升級；獎勵可取得原版。",
-   "status": "靜態契約已核；自然流程headless待整合owner驗證，視覺與平衡未驗。"
+   "status": "靜態契約已核；自然流程 headless PASS（2026-10-20 兩次 PackScenario，見 verification.json）；視覺與平衡未驗。"
   }
  ]
 }
