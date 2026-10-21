@@ -50,9 +50,11 @@ func run(c) -> void:
 	enemy_hp = enemy.get_combatant_health()
 	var enemy_block: int = enemy.get_block()
 	await EnemyIntentController.perform_intent(director, enemy)
-	c._check(enemy.keep_intent_next_action and enemy.get_combatant_health() == enemy_hp and enemy.get_block() == enemy_block, "NONE rejection retains the intent and skips reset/block/custom effects")
+	c._check(not enemy.keep_intent_next_action and enemy.get_combatant_health() == enemy_hp and enemy.get_block() == enemy_block, "NONE rejection does not retain the intent (no permanent stall) and skips reset/block/custom effects")
 	c._check(hero.get_combatant_health() == original_hp and hero.get_block() == original_block and c._idle(), "NONE rejection queues no ordinary attack or partial action payload")
 	c._check(director.board_module == null and director.battlefield == null and director.threat_preview == null, "NONE intent fixtures never construct a board, module or ThreatPreview")
+
+	await _rotation_after_rejection(c, director, enemy, hero, intent)
 
 	enemy.enemy_data = original_data
 	enemy.keep_intent_next_action = original_keep
@@ -65,3 +67,35 @@ func _refresh_incoming(c, hero: Player) -> void:
 	await c._wait(func(): return not hero._intent_is_updating, "previous lazy incoming update completes")
 	hero.update_incoming_damage_amount(true)
 	await c._wait(func(): return not hero._intent_is_updating, "fixture incoming update completes")
+
+## H1 regression: an enemy whose intent needs the board keeps acting with its ordinary intents.
+func _rotation_after_rejection(c, director: CombatDirector, enemy: Enemy, hero: Player, board_intent: EnemyIntentData) -> void:
+	var saved_hp: int = hero.get_combatant_health()
+	var saved_block: int = hero.get_block()
+	var ordinary := EnemyIntentData.new("boardless_fixture_ordinary")
+	ordinary.enemy_intent_attack_damage = 3
+	ordinary.enemy_intent_number_of_attacks = 1
+	ordinary.enemy_intent_target_rule = EnemyIntentData.TARGET_RULES.HERO
+	var board_id: String = "boardless_fixture_board_only"
+	board_intent.object_id = board_id
+	board_intent.enemy_intent_next_intent_weights = {ordinary.object_id: 1}
+	ordinary.enemy_intent_next_intent_weights = {board_id: 1}
+	enemy.enemy_data.enemy_intents.clear()
+	enemy.enemy_data.enemy_intents[board_id] = board_intent
+	enemy.enemy_data.enemy_intents[ordinary.object_id] = ordinary
+	enemy.enemy_data.enemy_intent_current_id = board_id
+	enemy.keep_intent_next_action = false
+	await EnemyIntentController.perform_intent(director, enemy)
+	enemy.decide_next_intent()
+	c._check(enemy.enemy_data.get_current_intent() == ordinary, "after a refused board-only intent the enemy rotates to its ordinary intent")
+	var before: int = hero.get_combatant_health() + hero.get_block()
+	await EnemyIntentController.perform_intent(director, enemy)
+	c._check(before - hero.get_combatant_health() - hero.get_block() == 3, "the rotated ordinary intent actually acts (enemy is not stalled)")
+	enemy.decide_next_intent()
+	c._check(enemy.enemy_data.get_current_intent() == ordinary, "decide_next_intent skips the board-only intent while no board module is mounted")
+	enemy.keep_intent_next_action = true
+	enemy.enemy_data.enemy_intent_current_id = board_id
+	enemy.decide_next_intent()
+	c._check(enemy.enemy_data.get_current_intent() == ordinary, "a kept board-only intent is not retained without the module")
+	Global.player_data.player_health = saved_hp
+	hero.set_block(saved_block)

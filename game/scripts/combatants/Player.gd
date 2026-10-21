@@ -167,15 +167,14 @@ func update_incoming_damage_amount(recalculate_enemy_intent: bool = true) -> voi
 		_intent_is_updating = false
 	
 	var incoming_damage_amount = 0 # totaled value
-	# in combat the board-aware ThreatPreview resolves targets, ranges and timing
+	# a mounted module (the board's ThreatPreview) may resolve targets, ranges and timing
 	var director: CombatDirector = Global.get_combat_director()
-	if director != null and director.is_running and director.threat_preview != null:
-		if recalculate_enemy_intent:
-			director.threat_preview.refresh()
-		incoming_damage_amount = director.threat_preview.incoming_damage_for(self)
-		incoming_damage_amount_text.text = str(incoming_damage_amount)
-		incoming_damage.visible = incoming_damage_amount > 0
-		return
+	if director != null and director.is_running and director.combat_module != null:
+		var module_amount: int = director.combat_module.incoming_damage_for(self, recalculate_enemy_intent)
+		if module_amount >= 0:
+			incoming_damage_amount_text.text = str(module_amount)
+			incoming_damage.visible = module_amount > 0
+			return
 	for enemy: Enemy in Global.get_alive_enemies():
 		var intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
 		var targets_self: bool = intent != null and intent.enemy_intent_target_rule == EnemyIntentData.TARGET_RULES.SELF
@@ -184,7 +183,7 @@ func update_incoming_damage_amount(recalculate_enemy_intent: bool = true) -> voi
 			enemy.intended_target = enemy if targets_self else self
 			enemy.update_enemy_intent()
 		
-		if not targets_self and EnemyIntentController.get_plain_intent_error(enemy, intent) == "":
+		if not targets_self and EnemyIntentController.get_intent_module_error(enemy, intent) == "":
 			incoming_damage_amount += enemy.enemy_intent_attack_damage * enemy.enemy_intent_number_of_attacks
 
 	incoming_damage_amount_text.text = str(incoming_damage_amount)

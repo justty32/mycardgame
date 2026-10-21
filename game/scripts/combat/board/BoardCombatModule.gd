@@ -1,7 +1,10 @@
-## Optional combat component, composed by Combat rather than by the CTB core.
-## An unmounted combat has no BoardController, FieldController or ThreatPreview.
-extends Node
+## Optional board module (CombatModule), composed by Combat rather than by the CTB core.
+## An unmounted combat has no BoardController, FieldController or ThreatPreview, and the core
+## never names any class of this folder: removing the module keeps ordinary combat working.
+extends CombatModule
 class_name BoardCombatModule
+
+const MODULE_ID: StringName = &"board"
 
 var director: CombatDirector = null
 var board_controller: BoardController = null
@@ -11,11 +14,39 @@ var presentation: BoardCombatPresentation = null
 var generation: int = 0
 ## Retained weakly after clear so a later tree exit can detach the old instance safely.
 var _director_ref: WeakRef = null
+## Spatial card policy; Combat exposes it as card_play_adapter while this module is mounted.
+var card_adapter: BoardCardAdapter = null
+var battlefield: CombatBattlefield:
+	get:
+		return board_controller.battlefield if board_controller != null else null
+## Legacy query seam: shared board in SINGLE, party board in DUAL.
+var board: BoardData:
+	get:
+		return board_controller.board if board_controller != null else null
+var field_controller: FieldController:
+	get:
+		return board_controller.field_controller if board_controller != null else null
+
+func _init() -> void:
+	card_adapter = BoardCardAdapter.new(self)
+
+func get_module_id() -> StringName:
+	return MODULE_ID
+
+func get_card_play_adapter() -> CardPlayAdapter:
+	return card_adapter
+
+## The director this module was last set up with (kept weakly across clear()).
+func attached_director() -> CombatDirector:
+	return _director_ref.get_ref() as CombatDirector if _director_ref != null else null
 
 func setup(combat_director: CombatDirector, encounter: EncounterData) -> bool:
 	clear()
 	director = combat_director
 	_director_ref = weakref(combat_director)
+	return _setup_resources(encounter)
+
+func _setup_resources(encounter: EncounterData) -> bool:
 	board_controller = BoardController.new(director.rules)
 	if not board_controller.setup(encounter):
 		clear()
@@ -67,7 +98,7 @@ func _exit_tree() -> void:
 	var attached_director: CombatDirector = _director_ref.get_ref() as CombatDirector if _director_ref != null else null
 	clear()
 	if is_instance_valid(attached_director):
-		attached_director.detach_board_module(self)
+		attached_director.detach_module(self)
 	_director_ref = null
 
 ## Admission of a regular summon. Missing board membership in mounted mode is not NONE.
@@ -101,7 +132,7 @@ func on_action_started(unit: BaseCombatant) -> void:
 	if fields != null:
 		fields.on_unit_action_started(unit)
 
-func advance_fields(previous_tick: int, current_tick: int) -> void:
+func on_clock_advanced(previous_tick: int, current_tick: int) -> void:
 	if board_controller != null:
 		board_controller.advance_fields(previous_tick, current_tick)
 
@@ -132,18 +163,75 @@ func _refresh_display() -> void:
 	if director != null:
 		director.refresh_threats()
 
+func handles_enemy_intents() -> bool:
+	return true
+
+func incoming_damage_for(hero: BaseCombatant, recalculate: bool) -> int:
+	if threat_preview == null or director == null or not director.is_running:
+		return -1
+	if recalculate:
+		threat_preview.refresh()
+	return threat_preview.incoming_damage_for(hero)
+
 func perform_enemy_intent(enemy: Enemy) -> void:
 	await BoardEnemyIntent.perform_intent(director, enemy)
 
 func resolve_action_targets(action: BaseAction, override: int, force_dead: bool) -> Array[BaseCombatant]:
 	return BoardActionTargets.resolve(action, override, force_dead)
 
-func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
-	return board_controller != null and board_controller.place_unit_nearest(unit, cell)
+#region Positions (CombatModule spatial hooks)
+func places_units() -> bool:
+	return board_controller != null and board_controller.battlefield != null
 
+func resolve_spawn_location(unit_entry: Dictionary) -> Dictionary:
+	var location: Dictionary = {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE}
+	if not places_units():
+		return location
+	var board_id: String = str(unit_entry.get("board_id", ""))
+	if board_id == "":
+		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
+	location.board_id = board_id
+	var current: BoardData = battlefield.get_board(board_id)
+	if current == null:
+		return location
+	var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
+	if not current.is_in_bounds(cell):
+		cell = board_controller.default_spawn_origin(board_id)
+	location.cell = cell
+	return location
+
+func has_zone(zone_id: String) -> bool:
+	return places_units() and battlefield.get_board(zone_id) != null
+
+func anchor_fits(zone_id: String, footprint: Vector2i, cell: Vector2i) -> bool:
+	var current: BoardData = battlefield.get_board(zone_id) if places_units() else null
+	return current != null and current.footprint_fits(footprint, cell)
+
+func nearest_free_anchor(zone_id: String, footprint: Vector2i, cell: Vector2i) -> Vector2i:
+	var current: BoardData = battlefield.get_board(zone_id) if places_units() else null
+	return current.nearest_empty_anchor_for_footprint(footprint, cell) if current != null else BaseCombatant.BOARD_ANCHOR_NONE
+
+func place_unit_at(unit: BaseCombatant, zone_id: String, anchor: Vector2i) -> bool:
+	var current: BoardData = battlefield.get_board(zone_id) if places_units() else null
+	return current != null and current.place(unit, anchor)
+
+func place_unit_nearest(unit: BaseCombatant, cell: Vector2i, zone_id: String = "") -> bool:
+	return board_controller != null and board_controller.place_unit_nearest(unit, cell, zone_id)
+#endregion
+
+#region Player movement (input gated by the core: CombatDirector.can_request_player_input)
+func _acting_party_unit() -> BaseCombatant:
+	if director == null or not director.can_request_player_input():
+		return null
+	return director.acting_unit
+
+## Cells the acting party unit can still move this action: free move points plus paid cells.
 func get_move_budget(unit: BaseCombatant) -> int:
 	return board_controller.get_move_budget(unit) if board_controller != null else 0
 
+## Player movement input (BoardView click on an empty cell): moves the acting party unit along the
+## previewed path, spending free move points first, then paid cells (+extra_move_delay_per_cell).
+## false = not the player's action, busy, or the cell is not reachable within the budget.
 func request_player_move(unit: BaseCombatant, cell: Vector2i, board_id: String = "") -> bool:
 	if board_controller == null or not is_instance_valid(unit) or unit.faction != BaseCombatant.FACTIONS.PARTY:
 		return false
@@ -151,13 +239,23 @@ func request_player_move(unit: BaseCombatant, cell: Vector2i, board_id: String =
 		return false
 	return board_controller.move_party_unit(unit, cell)
 
-func can_player_undo_move(unit: BaseCombatant) -> bool:
+## Input entry: only the acting party unit during its pending action.
+func request_acting_unit_move(cell: Vector2i, board_id: String = "") -> bool:
+	var unit: BaseCombatant = _acting_party_unit()
+	return unit != null and request_player_move(unit, cell, board_id)
+
+func can_player_undo_move(unit: BaseCombatant = null) -> bool:
+	if unit == null:
+		unit = _acting_party_unit()
 	if board_controller == null or not is_instance_valid(unit) or unit.faction != BaseCombatant.FACTIONS.PARTY:
 		return false
 	var current: BoardData = board_controller.get_board_for_unit(unit)
 	return current != null and current.can_undo_move(unit)
 
-func request_player_undo_move(unit: BaseCombatant) -> bool:
+func request_player_undo_move(unit: BaseCombatant = null) -> bool:
+	if unit == null:
+		unit = _acting_party_unit()
 	if not can_player_undo_move(unit):
 		return false
 	return board_controller.get_board_for_unit(unit).undo_move(unit)
+#endregion

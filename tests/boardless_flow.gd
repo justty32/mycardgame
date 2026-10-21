@@ -8,7 +8,7 @@ func _main() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--boardless-phase="): phase = argument.trim_prefix("--boardless-phase=")
 	output_directory = ProjectSettings.globalize_path("res://").simplify_path().trim_suffix("/").get_base_dir()
-	if not _check(phase in ["write", "read", "defeat", "scene_off"] and output_directory.replace("\\", "/").contains("/artifacts/"), "known isolated boardless phase"):
+	if not _check(phase in ["write", "read", "defeat", "scene_off", "removed"] and output_directory.replace("\\", "/").contains("/artifacts/"), "known isolated boardless phase"):
 		_finish()
 		return
 	global_data = root.get_node("Global")
@@ -19,7 +19,9 @@ func _main() -> void:
 	_connect_observers()
 	var fixture: RefCounted = load(get_script().resource_path.get_base_dir().path_join("boardless_fixture.gd")).new()
 	fixture.install("defeat" if phase == "defeat" else "victory")
-	if phase == "scene_off": global_data.get_combat_rules().board_enabled = true
+	# scene_off: rules enabled, scene opt-out. removed (BoardRemoved suite): rules and scene enabled,
+	# but the board module files are deleted from the isolated copy.
+	if phase in ["scene_off", "removed"]: global_data.get_combat_rules().board_enabled = true
 	var scene: PackedScene = load(ProjectSettings.get_setting("application/run/main_scene"))
 	game_root = scene.instantiate()
 	combat = game_root.get_node("RunScreen/Combat")

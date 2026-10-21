@@ -6,6 +6,7 @@ extends RefCounted
 const PATH_VALIDATOR: String = "res://scripts/validators/board/ValidatorPathExists.gd"
 
 func run(c) -> void:
+	await _natural_hand_card_in_mounted_mode(c)
 	_paid_minimal_path(c)
 	_validator_counts_steps(c)
 	await _player_path_matches_preview(c)
@@ -130,3 +131,23 @@ func _empty_field_boundaries_inline(c) -> void:
 	c._check(frames[0] < 30, "300 empty boundaries finish in %d frames (was >= 600)" % frames[0])
 	Global.remove_meta("field_test_trace")
 	await c.remove_fields()
+
+## Normal play path in mounted DUAL/board mode: a naturally drawn card, real fee, no test energy.
+func _natural_hand_card_in_mounted_mode(c) -> void:
+	if not await c._wait(c._player_ready, "hero action pending for natural card play"):
+		return
+	var card: Node = null
+	for candidate: Node in c.hand.card_data_to_hand_card.values():
+		if candidate.card_data.object_id == "card_block_basic":
+			card = candidate
+			break
+	if not c._check(card != null, "a naturally drawn Basic Block is in hand"):
+		return
+	var data: CardData = card.card_data
+	var cost: int = data.get_card_energy_cost(true, true)
+	var energy: int = Global.player_data.player_energy
+	var block: int = c.player.get_block()
+	c._check(card.can_play_card(null, false) and c.director.has_board_module(), "ordinary card stays playable while the board module is mounted")
+	card.card_selected.emit(card)
+	await c._wait(c._idle, "natural Basic Block resolves through Hand and the public queue")
+	c._check(Global.player_data.player_energy == energy - cost and c.player.get_block() > block and not HandManager.player_hand.has(data) and data.object_id in HandManager.player_discard.map(func(d): return d.object_id), "mounted mode: natural click pays the real fee, applies block and discards (no fixture injection)")

@@ -293,6 +293,15 @@ func generate_decorator_actions(card_data: CardData, card_decorator_id: String) 
 	ActionHandler.add_actions(actions, true)
 
 ## Generates an instant message of the player saying they don't have enough energy to play a card.
+## Instant player speech bubble (not queued), e.g. why a card cannot be played.
+func generate_player_speech_bubble(message_bbcode: String) -> void:
+	var player: Player = Global.get_player()
+	if player == null:
+		return
+	var action_data: Array[Dictionary] = [{Scripts.ACTION_TALK: {"message_bbcode": message_bbcode}}]
+	var generated_action: BaseAction = ActionGenerator.create_actions(player, null, [player], action_data, null)[0]
+	generated_action.perform_action()
+
 func generate_insufficient_energy_speech_bubble() -> void:
 	var player: Player = Global.get_player()
 	var action_data: Array[Dictionary] = [{Scripts.ACTION_TALK: {"message_bbcode": "I don't have enough energy!"}}]

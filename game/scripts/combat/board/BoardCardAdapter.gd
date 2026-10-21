@@ -1,60 +1,59 @@
-## Optional spatial card policy, installed by the combat scene even when disabled so
-## explicitly spatial content is rejected before payment rather than silently misplayed.
+## Spatial card policy supplied by the mounted BoardCombatModule (CombatModule.get_card_play_adapter).
+## Unmounted combat uses the core CardPlayAdapter, which refuses board content before fees through
+## CombatContentRequirements, so this class is never needed (or loaded) without the module.
 extends CardPlayAdapter
 class_name BoardCardAdapter
 
-var combat_ref: WeakRef
+var module_ref: WeakRef
 var input: BoardCardInput = null
 
-func _init(combat: Node = null) -> void:
-	combat_ref = weakref(combat) if combat != null else null
+func _init(module: Node = null) -> void:
+	module_ref = weakref(module) if module != null else null
+
+func _module() -> BoardCombatModule:
+	var module: Variant = module_ref.get_ref() if module_ref != null else null
+	return module as BoardCombatModule if is_instance_valid(module) else null
 
 func _battlefield() -> CombatBattlefield:
-	var combat: Node = combat_ref.get_ref() if combat_ref != null else null
-	if not is_instance_valid(combat):
-		return null
-	var director: CombatDirector = combat.get("combat_director")
-	return director.battlefield if director != null else null
+	var module: BoardCombatModule = _module()
+	return module.battlefield if module != null else null
 
 ## Old serialized defaults stay ordinary; explicit spatial metadata/actions opt in.
 static func uses_board(card: CardData, request_values: Dictionary = {}) -> bool:
-	if card == null:
-		return false
-	var context: Dictionary = card.card_values.duplicate()
-	context.merge(request_values, true)
-	return not BoardCardOptions.options(card).is_empty() or BoardCardOptions.range_of(card) != -1 or BoardCardOptions.shape_of(card) != 0 or BoardCardOptions.faction_of(card) != 0 or card.card_move_distance != 0 or BoardContentPolicy.requires_board(card.card_play_actions, context) or BoardContentPolicy.requires_board(card.card_play_validators, context) or BoardContentPolicy.requires_board(context, context)
+	return BoardContentPolicy.card_uses_board(card, request_values)
 
 func needs_selection(card: CardData) -> bool:
 	return BoardTargeting.card_needs_cell(card) if uses_board(card) else super.needs_selection(card)
 
 func prepare_request(request: CardPlayRequest, selection: Dictionary = {}) -> String:
-	super.prepare_request(request, selection)
+	var base_reason: String = super.prepare_request(request, selection)
+	if base_reason != "":
+		return base_reason
 	if not uses_board(request.card_data, request.card_values):
 		# Translate optional cell input back to the ordinary enemy-click contract.
 		# Empty/friendly cells cannot become a paid null-target play or self-attack.
 		if selection.get("cell", BaseCombatant.BOARD_ANCHOR_NONE) != BaseCombatant.BOARD_ANCHOR_NONE and request.card_data.card_requires_target:
 			var selected_board: BoardData = _selection_board(request, str(selection.get("id", "")))
 			if selected_board == null:
-				return _reject(request, "board_module_required")
+				return reject(request, "board_module_required")
 			var target: BaseCombatant = selected_board.get_unit_at(selection.cell)
 			if not target is Enemy or not target.is_alive() or target.faction != BaseCombatant.FACTIONS.ENEMY:
-				return _reject(request, "no_valid_target")
+				return reject(request, "no_valid_target")
 			request.selected_target = target
 		return ""
 	var battlefield: CombatBattlefield = _battlefield()
 	if battlefield == null:
-		return _reject(request, "board_module_required")
+		return reject(request, "board_module_required")
 	var acting: BaseCombatant = request.acting_unit if is_instance_valid(request.acting_unit) else UnitRegistry.get_hero()
 	request.acting_unit = acting
-	var cell: Vector2i = selection.get("cell", request.selected_cell)
-	var id: String = selection.get("id", request.selected_board_id)
+	var cell: Vector2i = selection.get("cell", BoardCardOptions.selected_cell(request))
+	var id: String = selection.get("id", BoardCardOptions.selected_board_id(request))
 	if id == "" and is_instance_valid(acting):
 		id = acting.board_id
 	var board: BoardData = battlefield.get_board(id)
 	if board == null:
-		return _reject(request, "invalid_board")
-	request.selected_cell = cell
-	request.selected_board_id = id
+		return reject(request, "invalid_board")
+	BoardCardOptions.set_selection(request, cell, id)
 	if cell != BaseCombatant.BOARD_ANCHOR_NONE:
 		match BoardCardOptions.faction_of(request.card_data):
 			BoardTargeting.TARGET_FACTIONS.EMPTY_CELL:
@@ -71,7 +70,7 @@ func prepare_request(request: CardPlayRequest, selection: Dictionary = {}) -> St
 	if reason == "" and BoardContentPolicy.requires_board(request.card_data.card_play_validators, request.card_values):
 		var action: BaseAction = ActionGenerator.create_actions(acting, request, [request.selected_target], [{Scripts.ACTION_CARD_PLAY: {}}], null)[0]
 		if not Global.validate(request.card_data.card_play_validators, request.card_data, action):
-			reason = _reject(request, BoardTargeting.REJECT_VALIDATORS)
+			reason = reject(request, BoardTargeting.REJECT_VALIDATORS)
 	return reason
 
 func _selection_board(request: CardPlayRequest, id: String) -> BoardData:
@@ -83,32 +82,28 @@ func _selection_board(request: CardPlayRequest, id: String) -> BoardData:
 		id = actor.board_id
 	return battlefield.get_board(id)
 
-func _reject(request: CardPlayRequest, reason: String) -> String:
-	request.card_values["board_rejection"] = reason
-	return reason
-
 func validate_request(request: CardPlayRequest) -> String:
-	if request == null or not uses_board(request.card_data, request.card_values):
-		return ""
+	var base_reason: String = super.validate_request(request)
+	if base_reason != "" or request == null or not uses_board(request.card_data, request.card_values):
+		return base_reason
 	if _battlefield() == null:
-		return _reject(request, "board_module_required")
+		return reject(request, "board_module_required")
 	var lifetime_error: String = _bind_or_check_lifetime(request)
 	if lifetime_error != "":
-		return _reject(request, lifetime_error)
+		return reject(request, lifetime_error)
 	var reason: String = _validate_geometry(request)
-	return _reject(request, reason) if reason != "" else ""
+	return reject(request, reason) if reason != "" else ""
 
 ## A queued request belongs to one module instance and one director generation.
 func _bind_or_check_lifetime(request: CardPlayRequest) -> String:
-	var combat: Node = combat_ref.get_ref() if combat_ref != null else null
-	var director: CombatDirector = combat.get("combat_director") if is_instance_valid(combat) else null
-	var module: Node = director.get("board_module") if director != null else null
-	if module == null:
+	var module: BoardCombatModule = _module()
+	var director: CombatDirector = module.attached_director() if module != null else null
+	if director == null or director.board_module != module:
 		return "board_module_required"
 	var context: Dictionary = request.module_contexts.get("board", {})
 	var identity: int = module.get_instance_id()
 	var generation: int = director.get_generation()
-	var module_generation: int = int(module.get("generation"))
+	var module_generation: int = module.generation
 	if context.has("module_instance_id") and (context.module_instance_id != identity or context.get("generation", -1) != generation or context.get("module_generation", -1) != module_generation):
 		return "stale_board_context"
 	context["module_instance_id"] = identity
@@ -124,8 +119,8 @@ func _validate_geometry(request: CardPlayRequest) -> String:
 	var acting: BaseCombatant = request.acting_unit if is_instance_valid(request.acting_unit) else UnitRegistry.get_hero()
 	if acting == null or battlefield.get_board_for_unit(acting) == null:
 		return "off_board"
-	var cell: Vector2i = request.selected_cell
-	var board_id: String = request.selected_board_id
+	var cell: Vector2i = BoardCardOptions.selected_cell(request)
+	var board_id: String = BoardCardOptions.selected_board_id(request)
 	if is_instance_valid(request.selected_target):
 		# A selected unit may have moved since the request was queued. Follow its actual position.
 		var current_board: BoardData = battlefield.get_board_for_unit(request.selected_target)
@@ -145,8 +140,7 @@ func _validate_geometry(request: CardPlayRequest) -> String:
 		return "off_board"
 	var reason: String = BoardTargeting.check_card_target(board, acting, request.card_data, cell, request.card_values)
 	if reason == "":
-		request.selected_board_id = board_id
-		request.selected_cell = cell
+		BoardCardOptions.set_selection(request, cell, board_id)
 		request.resolved_targets = BoardTargeting.resolve_targets(board, acting, cell, BoardCardOptions.shape_of(request.card_data), BoardCardOptions.faction_of(request.card_data), BoardCardOptions.range_of(request.card_data))
 	return reason
 
@@ -189,11 +183,3 @@ func unbind_hand() -> void:
 	if input != null:
 		input.unbind()
 	input = null
-
-func handle_cell_clicked(hand: Hand, id: String, cell: Vector2i) -> void:
-	if _battlefield() != null:
-		BoardCardInput.click(self, hand, id, cell)
-
-func handle_cell_hovered(hand: Hand, id: String, cell: Vector2i) -> void:
-	if _battlefield() != null:
-		BoardCardInput.hover(self, hand, id, cell)

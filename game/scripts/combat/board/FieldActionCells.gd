@@ -10,8 +10,8 @@ static func resolve_board(action: BaseAction, explicit_id: Variant = null) -> Bo
 		return null
 	if explicit_id != null:
 		return battlefield.get_board(str(explicit_id))
-	if action.card_play_request != null and action.card_play_request.selected_board_id != "":
-		return battlefield.get_board(action.card_play_request.selected_board_id)
+	if action.card_play_request != null and BoardCardOptions.selected_board_id(action.card_play_request) != "":
+		return battlefield.get_board(BoardCardOptions.selected_board_id(action.card_play_request))
 	if is_instance_valid(action.parent_combatant):
 		return battlefield.get_board_for_unit(action.parent_combatant)
 	return null
@@ -29,14 +29,14 @@ static func resolve(action: BaseAction, board: BoardData, value: Variant, shape_
 	if value is String:
 		if value == "PARENT_CELL" and is_instance_valid(parent) and board.has_unit(parent):
 			cells.append(parent.board_anchor)
-		elif value == "SELECTED_CELL" and request != null and (request.selected_board_id == "" or request.selected_board_id == board.board_id):
-			cells.append(request.selected_cell)
+		elif value == "SELECTED_CELL" and request != null and (BoardCardOptions.selected_board_id(request) == "" or BoardCardOptions.selected_board_id(request) == board.board_id):
+			cells.append(BoardCardOptions.selected_cell(request))
 	elif value is Vector2i or value is Vector2:
 		cells.append(Vector2i(value))
 	elif value is Array:
 		cells = EncounterData.cells_from_json(value)
 	elif value == null and shape_default and request != null:
-		var selected: Vector2i = request.selected_cell
+		var selected: Vector2i = BoardCardOptions.selected_cell(request)
 		if selected == BaseCombatant.BOARD_ANCHOR_NONE and is_instance_valid(request.selected_target):
 			selected = request.selected_target.board_anchor
 		var shape: int = BoardCardOptions.shape_of(request.card_data) if request.card_data != null else BoardTargeting.TARGET_SHAPES.SINGLE

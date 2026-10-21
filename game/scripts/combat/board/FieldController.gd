@@ -14,6 +14,10 @@ func _init(combat_board: BoardData) -> void:
 	_board_ref = weakref(combat_board)
 	combat_board.field_controller = weakref(self)
 
+## BaseAction execution scope: expanded field payloads die with this controller generation.
+func is_execution_scope_active(scope_generation: int) -> bool:
+	return active and generation == scope_generation
+
 static func for_board(current: BoardData) -> FieldController:
 	return current.field_controller.get_ref() if current != null and current.field_controller != null else null
 

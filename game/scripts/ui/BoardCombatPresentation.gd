@@ -4,7 +4,7 @@ class_name BoardCombatPresentation
 
 var director: CombatDirector = null
 var module: BoardCombatModule = null
-var combat: Variant = null
+var combat: Control = null
 var board_view: BoardView = null
 var board_views: Dictionary[String, BoardView] = {}
 var actor_presentation: BoardActorPresentation = null
@@ -30,8 +30,7 @@ func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
 	undo_move_button.visible = false
 	undo_move_button.button_up.connect(_on_undo_move_button_up)
 	combat.add_child(undo_move_button)
-	if combat.card_play_adapter != null:
-		combat.card_play_adapter.bind_hand(combat.hand)
+	module.card_adapter.bind_hand(combat.get_node("Hand") as Hand)
 	set_process(true)
 	sync_board_views()
 
@@ -59,7 +58,7 @@ func sync_board_views() -> void:
 		view.name = "BoardView_" + ids[index]
 		combat.add_child(view)
 		# Grid hit surfaces precede real actor subtrees in Control input tree order.
-		combat.move_child(view, combat.player.get_index())
+		combat.move_child(view, combat.get_node("Player").get_index())
 		view._resize(battlefield.get_board(ids[index]))
 		board_views[ids[index]] = view
 		if index == 0:
@@ -73,18 +72,18 @@ func _process(_delta: float) -> void:
 	if director.is_running:
 		sync_board_views()
 	undo_move_button.visible = director.is_running and director.rules != null and director.rules.move_undo_allowed
-	undo_move_button.disabled = not director.can_player_undo_move()
+	undo_move_button.disabled = module == null or not module.can_player_undo_move()
 
 func _on_undo_move_button_up() -> void:
-	if not _stopped and director != null:
-		director.request_player_undo_move()
+	if not _stopped and module != null:
+		module.request_player_undo_move()
 
 ## Runtime may stop on hero death before the death animation ends. Retain its final pose.
 func stop() -> void:
 	_stopped = true
 	set_process(false)
-	if is_instance_valid(combat) and combat.card_play_adapter != null:
-		combat.card_play_adapter.unbind_hand()
+	if module != null and module.card_adapter != null:
+		module.card_adapter.unbind_hand()
 	if is_instance_valid(undo_move_button):
 		undo_move_button.visible = false
 		undo_move_button.disabled = true
@@ -96,10 +95,7 @@ func stop() -> void:
 		actor_presentation.set_process(false)
 		# Director handles player_killed before actor signal subscribers. Snap dead actors
 		# to their already committed target before releasing them into the retired set.
-		for state: Dictionary in actor_presentation._actors.values():
-			var unit: Variant = state["unit"]
-			if is_instance_valid(unit) and not unit.is_alive():
-				actor_presentation._on_actor_killed(unit)
+		actor_presentation.snap_dead_actors()
 		actor_presentation.clear()
 
 func _on_display_ended() -> void:

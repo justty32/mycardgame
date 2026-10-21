@@ -33,7 +33,7 @@ func run(c) -> void:
 	# Recompose with the same scene API and rebuild geometry for following groups.
 	c.combat._compose_board_module()
 	var replacement: BoardCombatModule = c.combat.board_module
-	c.director.board_module = replacement
+	c.director.combat_module = replacement
 	c._check(replacement.setup(c.director, c.director.encounter), "replacement board module sets up")
 	_restore_positions(c, positions)
 	c._check(c.combat.card_play_adapter.validate_request(request) == "stale_board_context", "old request remains stale after a different module is mounted")
@@ -82,7 +82,7 @@ func _drain(c, queued: Dictionary, expected_reason: String) -> void:
 	HandManager.add_card_to_play_queue(ordinary, false, false)
 	await c._wait(c._idle, "stale spatial request refunds and ordinary guard completes")
 	var request: CardPlayRequest = queued.request
-	c._check(request.card_values.get("board_rejection", "") == expected_reason and Global.player_data.player_energy == 10 and HandManager.card_play_queue_reserved_energy_total == 0, "lifecycle rejection refunds reserved energy exactly once: " + expected_reason)
+	c._check(request.rejection_reason == expected_reason and Global.player_data.player_energy == 10 and HandManager.card_play_queue_reserved_energy_total == 0, "lifecycle rejection refunds reserved energy exactly once: " + expected_reason)
 	c._check(HandManager.player_hand.has(request.card_data) and c.player.get_block() == queued.block + 3, "rejected spatial card stays in hand while ordinary block executes once")
 	c._check(ordinary.module_contexts.is_empty(), "ordinary queued card never acquires board context")
 	HandManager.discard_cards(c._cards([request.card_data]), false)

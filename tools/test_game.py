@@ -54,13 +54,15 @@ IS_WINDOWS = os.name == "nt"
 WINDOWS_CREATION_FLAGS = 0x08000000 | 0x00000200
 
 SUITE_CHOICES = ("All", "Dictionary", "Smoke", "Combat", "SaveLoad", "ResourceLifecycle",
-                 "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "Boardless", "PackScenario")
-ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "Boardless", "SaveLoad")
+                 "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "Boardless", "BoardRemoved",
+                 "PackScenario")
+ALL_SUITES = ("ResourceLifecycle", "Dictionary", "Smoke", "CombatVictory", "CombatDefeat", "Ctb", "Board", "Wave", "Field", "DualBoard", "Boardless", "BoardRemoved", "SaveLoad")
 SUITE_SCRIPTS = {
     "ResourceLifecycle": "resource_lifecycle.gd",
     "Dictionary": "dictionary_regression.gd",
     "Smoke": "framework_smoke.gd",
     "Boardless": "boardless_flow.gd",
+    "BoardRemoved": "boardless_flow.gd",
     "CombatVictory": "combat_flow.gd",
     "CombatDefeat": "combat_flow.gd",
     "Ctb": "ctb_flow.gd",
@@ -100,7 +102,7 @@ SOURCE_HASH_PATHS = (
     "autoload/Global.gd",
     "scripts/ui/menus/NewRunMenu.gd",
     "scripts/combat/CombatDirector.gd",
-    "scripts/combat/BoardController.gd",
+    "scripts/combat/board/BoardController.gd",
     "scripts/combat/UnitSpawner.gd",
     "scripts/combat/CombatActionPhases.gd",
     "scripts/combat/board/CombatBattlefield.gd",
@@ -117,6 +119,30 @@ SOURCE_HASH_PATHS = (
     "scripts/ui/Hand.gd",
     "autoload/HandManager.gd",
     "scripts/actions/BaseAction.gd",
+    # optional-module boundary (core side and board module side)
+    "scripts/combat/CombatModule.gd",
+    "scripts/combat/CombatContentRequirements.gd",
+    "scripts/combat/CardPlayAdapter.gd",
+    "scripts/combat/controllers/EnemyIntentController.gd",
+    "scripts/combatants/Enemy.gd",
+    "scripts/ui/Combat.gd",
+    "scripts/ui/card/Card.gd",
+    "scripts/combat/board/BoardCombatModule.gd",
+    "scripts/combat/board/BoardCardAdapter.gd",
+    "scripts/combat/board/BoardCardInput.gd",
+    "scripts/combat/board/BoardEnemyIntent.gd",
+    "scripts/combat/board/BoardContentPolicy.gd",
+    "scripts/ui/BoardCombatPresentation.gd",
+)
+# The optional board module: BoardRemoved deletes exactly these from its isolated copy and proves
+# the core still imports and runs ordinary combat without them.
+BOARD_MODULE_PATHS = (
+    "scripts/combat/board",
+    "scripts/actions/board_actions",
+    "scripts/validators/board",
+    "scripts/ui/BoardView.gd",
+    "scripts/ui/BoardActorPresentation.gd",
+    "scripts/ui/BoardCombatPresentation.gd",
 )
 EXCLUDED_DIR_NAMES = frozenset({".git", ".godot", ".import", ".saves", ".screenshots", ".mono"})
 EXCLUDED_FILE_NAMES = frozenset({"profile.json", "user_settings.json"})
@@ -285,12 +311,53 @@ def accepted_engine_patterns(source_lock: dict, overrides: Optional[list[str]]) 
     return list(DEFAULT_ACCEPTED_ENGINE_PATTERNS), "runner default"
 
 
+_ELF_MAGIC = b"\x7fELF"
+_MACHO_MAGICS = (b"\xfe\xed\xfa\xce", b"\xfe\xed\xfa\xcf", b"\xce\xfa\xed\xfe", b"\xcf\xfa\xed\xfe",
+                 b"\xca\xfe\xba\xbe")
+
+
+def _file_magic(path: Path) -> bytes:
+    try:
+        with open(path, "rb") as handle:
+            return handle.read(4)
+    except OSError:
+        return b""
+
+
+def _is_windows_pe(path: Path) -> bool:
+    return _file_magic(path)[:2] == b"MZ"
+
+
 def _is_executable_file(path: Path) -> bool:
+    """A launchable engine binary for this platform, never an archive or a foreign binary.
+
+    Windows: a real PE .exe. Elsewhere the execute bit is not enough (drvfs on WSL marks every
+    file executable, including .zip archives and Windows .exe files): require an ELF / Mach-O
+    binary or a #! launcher script.
+    """
     if not path.is_file():
         return False
     if IS_WINDOWS:
-        return path.suffix.lower() == ".exe"
-    return os.access(path, os.X_OK)
+        return path.suffix.lower() == ".exe" and _is_windows_pe(path)
+    if not os.access(path, os.X_OK):
+        return False
+    magic = _file_magic(path)
+    return magic == _ELF_MAGIC or magic in _MACHO_MAGICS or magic[:2] == b"#!"
+
+
+def is_wsl() -> bool:
+    if IS_WINDOWS:
+        return False
+    try:
+        return "microsoft" in platform.uname().release.lower()
+    except Exception:  # noqa: BLE001 - best effort platform probe
+        return False
+
+
+WSL_ENGINE_HINT = ("Under WSL only Windows Godot builds are present: run the runner with the Windows Python "
+                   "(python.exe tools/test_game.py ...) or tools/test-game.ps1 so the console build gets "
+                   "CREATE_NO_WINDOW and APPDATA/LOCALAPPDATA/TEMP isolation. Linux python3 never launches a "
+                   "Windows .exe.")
 
 
 def _name_version_ok(name: str, patterns: list[str]) -> bool:
@@ -311,11 +378,14 @@ def discover_engine(project_root: Path, explicit: Optional[str], patterns: list[
         candidate = Path(explicit).expanduser()
         if not candidate.exists():
             raise RunnerError(f"--godot-path does not exist: {candidate}")
+        if not IS_WINDOWS and _is_windows_pe(candidate):
+            raise RunnerError(f"--godot-path is a Windows binary ({candidate}). " + WSL_ENGINE_HINT)
         discovery["method"] = "explicit"
         discovery["located"] = str(candidate)
         return candidate.resolve(), discovery
 
     tools_dir = project_root / ".tools"
+    foreign: list[Path] = []
     if tools_dir.is_dir():
         found: list[Path] = []
         for root, dirs, files in os.walk(tools_dir):
@@ -330,16 +400,20 @@ def discover_engine(project_root: Path, explicit: Optional[str], patterns: list[
                 if not lowered.startswith("godot"):
                     continue
                 if not _is_executable_file(full):
+                    if not IS_WINDOWS and lowered.endswith(".exe") and _is_windows_pe(full):
+                        foreign.append(full)
+                        discovery["candidates_considered"].append(f"{full} (Windows binary; not launched from this platform)")
                     continue
                 if not _name_version_ok(file_name, patterns):
                     discovery["candidates_considered"].append(f"{full} (version in name not accepted)")
                     continue
                 found.append(full)
         if found:
-            def rank(path: Path) -> tuple[int, int, str]:
+            def rank(path: Path) -> tuple[int, str]:
+                # Windows: the console build never opens a console/GUI window of its own.
                 name = path.name.lower()
                 console = 0 if (IS_WINDOWS and name.endswith("_console.exe")) else 1
-                return (console, 0 if IS_WINDOWS or ".exe" not in name else 1, str(path))
+                return (console, str(path))
             found.sort(key=rank)
             discovery["method"] = ".tools"
             discovery["located"] = str(found[0])
@@ -350,10 +424,15 @@ def discover_engine(project_root: Path, explicit: Optional[str], patterns: list[
     for name in path_names:
         located = shutil.which(name)
         discovery["candidates_considered"].append(f"PATH:{name} -> {located}")
+        if located and not IS_WINDOWS and not _is_executable_file(Path(located).resolve()):
+            discovery["candidates_considered"].append(f"PATH:{name} rejected (not a native executable)")
+            continue
         if located:
             discovery["method"] = "PATH"
             discovery["located"] = located
             return Path(located).resolve(), discovery
+    if is_wsl() or foreign:
+        raise RunnerError("No native Godot executable found. " + WSL_ENGINE_HINT)
     raise RunnerError(
         "No Godot executable found. Pass --godot-path, place an accepted Godot_v4.x build under .tools/, "
         "or expose godot / godot4 / godot-mono on PATH.")
@@ -695,6 +774,35 @@ def run_pack_scenario(runner: EngineRunner, directory: Path, isolated_game: Path
                       ["--headless", "--path", str(isolated_game), "--script", str(script_path)],
                       [f"--content-profile={content_profile}"], scenario["phases"],
                       phase_argument="scenario-phase", marker_prefix="PACK SCENARIO PASS: ", log_prefix="scenario")
+
+
+def remove_board_module(isolated_game: Path) -> list[str]:
+    """Delete the optional board module (and .uid siblings) from an isolated copy only."""
+    removed: list[str] = []
+    for relative in BOARD_MODULE_PATHS:
+        target = isolated_game / relative
+        if target.is_dir():
+            removed.extend(str(p.relative_to(isolated_game)).replace("\\", "/") for p in sorted(target.rglob("*")) if p.is_file())
+            shutil.rmtree(target)
+        elif target.is_file():
+            for path in (target, target.with_name(target.name + ".uid")):
+                if path.is_file():
+                    removed.append(str(path.relative_to(isolated_game)).replace("\\", "/"))
+                    path.unlink()
+        else:
+            raise RunnerError(f"Board module path missing before removal: {relative}")
+    return removed
+
+
+def source_tree_ledger(game_dir: Path) -> dict:
+    """sha256 over every copied source file (sorted 'path sha256' lines): a complete fingerprint."""
+    lines: list[str] = []
+    for path in sorted(p for p in game_dir.rglob("*") if p.is_file()):
+        relative = path.relative_to(game_dir).as_posix()
+        if relative.startswith(".godot/"):
+            continue
+        lines.append(f"{relative} {sha256_file(path)}")
+    return {"files": len(lines), "sha256": hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()}
 
 
 def run_script_phases(runner: EngineRunner, directory: Path, engine_args: list[str],
@@ -1134,9 +1242,14 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
             isolation["user_dirs"][selected] = copy_info["user_dir"]
             manifest.setdefault("copy_exclusions", {})[selected] = {
                 k: len(v) for k, v in copy_info["skipped"].items()}
+            if selected == "BoardRemoved":
+                manifest.setdefault("board_module_removed", {})[selected] = remove_board_module(isolated_game)
+            manifest.setdefault("source_tree", {})[selected] = source_tree_ledger(isolated_game)
             hashes = []
             for relative in SOURCE_HASH_PATHS:
                 target = isolated_game / relative
+                if selected == "BoardRemoved" and any(relative == m or relative.startswith(m + "/") for m in BOARD_MODULE_PATHS):
+                    continue
                 if not target.is_file():
                     raise RunnerError(f"Missing source hash target: {target}")
                 hashes.append({"path": relative, "sha256": sha256_file(target)})
@@ -1182,6 +1295,10 @@ def run(args: argparse.Namespace, echo: Callable[[str], None] = print) -> int:
                 run_script_phases(runner, directory, test_args, user_args,
                                   ("write", "read", "defeat", "scene_off"), phase_argument="boardless-phase",
                                   marker_prefix="BOARDLESS PASS: ", log_prefix="boardless")
+            elif selected == "BoardRemoved":
+                run_script_phases(runner, directory, test_args, user_args,
+                                  ("removed", "defeat"), phase_argument="boardless-phase",
+                                  marker_prefix="BOARDLESS PASS: ", log_prefix="board-removed")
             elif selected == "SaveLoad":
                 for phase in ("write", "read", "rejected"):
                     runner.invoke(f"save-{phase}", directory,

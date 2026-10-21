@@ -16,11 +16,11 @@ func run(c) -> void:
 	for shape: int in [BoardTargeting.TARGET_SHAPES.LINE, BoardTargeting.TARGET_SHAPES.LINE_PIERCE]:
 		var hp: int = c.enemy.get_combatant_health()
 		var result: String = await c._play_board("dual_shape_%d" % shape, "enemy", target.cell)
-		c._check(result != "" and result != "timeout" and Global.player_data.player_energy == 50 and c.enemy.get_combatant_health() == hp, "directional shape %d rejected before energy and damage" % shape)
+		c._check(result == "cross_board_direction_unsupported" and Global.player_data.player_energy == 50 and c.enemy.get_combatant_health() == hp, "directional shape %d rejected before energy and damage" % shape)
 	var before: BoardPosition = BoardPosition.from_unit(c.enemy)
-	c._check(await c._play_board("dual_push", "enemy", target.cell) != "" and Global.player_data.player_energy == 50 and BoardPosition.from_unit(c.enemy).equals(before), "cross-board directional push rejected before fee or displacement")
+	c._check(await c._play_board("dual_push", "enemy", target.cell) == "cross_board_direction_unsupported" and Global.player_data.player_energy == 50 and BoardPosition.from_unit(c.enemy).equals(before), "cross-board directional push rejected before fee or displacement")
 	for card_id: String in ["dual_nested_push", "dual_wrapper_pull"]:
-		c._check(await c._play_board(card_id, "enemy", target.cell) != "" and Global.player_data.player_energy == 50 and BoardPosition.from_unit(c.enemy).equals(before), "nested/aliased directional payload rejected before payment: " + card_id)
+		c._check(await c._play_board(card_id, "enemy", target.cell) == "cross_board_direction_unsupported" and Global.player_data.player_energy == 50 and BoardPosition.from_unit(c.enemy).equals(before), "nested/aliased directional payload rejected before payment: " + card_id)
 	var self_result: Dictionary = CrossBoardPolicy.resolve(c.battlefield, source, target, BoardTargeting.TARGET_SHAPES.SELF_AREA, 2)
 	c._check(self_result.valid and self_result.board_id == "party", "SELF_AREA stays on caster actual board")
 	var all_result: Dictionary = CrossBoardPolicy.resolve(c.battlefield, source, target, BoardTargeting.TARGET_SHAPES.ALL, 0)

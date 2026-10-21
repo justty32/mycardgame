@@ -89,7 +89,8 @@ func _spawn_enemy(enemy_object_id: String, container: Control = automatic_enemy_
 	enemy_data.randomize_health(true)
 	
 	# Board actors keep this parent for their entire lifetime, including transfers.
-	if CombatBattlefield.get_active() != null:
+	var director: CombatDirector = Global.get_combat_director()
+	if director != null and director.get_placement_module() != null:
 		container = board_actor_container
 	container.add_child(enemy)
 	enemy.init(enemy_data)

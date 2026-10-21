@@ -175,7 +175,7 @@ signal unit_board_moved(unit: BaseCombatant, from_board_id: StringName, from: Ve
 signal board_cell_clicked(board_id: StringName, cell: Vector2i)
 signal board_cell_hovered(board_id: StringName, cell: Vector2i)
 signal board_changed(board_id: StringName)
-signal field_changed(instance: FieldInstance)
-signal field_created(instance: FieldInstance)
-signal field_removed(instance: FieldInstance)
+signal field_changed(instance)	# a board-module FieldInstance; untyped so the core does not depend on the module
+signal field_created(instance)	# a board-module FieldInstance; untyped so the core does not depend on the module
+signal field_removed(instance)	# a board-module FieldInstance; untyped so the core does not depend on the module
 signal unit_left_zoc(mover: BaseCombatant, controller: BaseCombatant)

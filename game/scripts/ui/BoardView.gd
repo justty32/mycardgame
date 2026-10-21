@@ -172,7 +172,8 @@ func _draw_cells(cell_list: Array[Vector2i], color: Color) -> void:
 
 ## Reachable cells of the acting party unit: free (filled) and paid (hatched, "+N" extra ticks).
 func _draw_movement(board: BoardData, director: CombatDirector, unit: BaseCombatant) -> void:
-	var budget: int = director.get_move_budget(unit)
+	var module: Variant = director.board_module
+	var budget: int = module.get_move_budget(unit) if module != null else 0
 	if budget <= 0:
 		return
 	var reachable: Dictionary = movement_preview(board, unit)

@@ -81,8 +81,8 @@ func opportunity_actions_from_controllers(board: BoardData, unit: BaseCombatant,
 			continue
 		for child: BaseAction in ActionGenerator.create_actions(other, null, [unit], other.opportunity_actions, source):
 			# A field can cause the move, but the opportunity attack belongs to its controller.
-			child.field_owner_bound = true
-			child.field_owner_uid = other.unit_uid
+			child.owner_bound = true
+			child.owner_uid = other.unit_uid
 			result.append(child)
 	return result
 

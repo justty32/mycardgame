@@ -317,7 +317,7 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 	# Optional scene rules reject before reserving energy, including automated / duplicated plays.
 	var play_rejection: String = get_card_play_adapter().validate_request(card_play_request)
 	if play_rejection != "":
-		card_play_request.card_values["play_rejection"] = play_rejection
+		card_play_request.rejection_reason = play_rejection
 		return
 
 	# get intercepted card play results to determine energy costs
@@ -370,12 +370,13 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 		_perform_card_plays()
 
 ## Scene-supplied optional rules; fallback keeps ordinary card play independent of modules.
+var _core_card_play_adapter: CardPlayAdapter = CardPlayAdapter.new()
 func get_card_play_adapter() -> CardPlayAdapter:
 	if is_instance_valid(hand) and is_instance_valid(hand.combat):
 		var adapter: CardPlayAdapter = hand.combat.get("card_play_adapter")
 		if adapter != null:
 			return adapter
-	return CardPlayAdapter.new()
+	return _core_card_play_adapter
 
 ## Main looping/locking method for performing all cards in the card queue.
 ## WARNING: Do not invoke this anywhere other than add_card_to_play_queue()
@@ -397,7 +398,7 @@ func _perform_card_plays() -> void:
 		# Earlier queued effects may have changed the target or optional scene context.
 		var play_rejection: String = get_card_play_adapter().validate_request(card_play_request)
 		if play_rejection != "":
-			card_play_request.card_values["play_rejection"] = play_rejection
+			card_play_request.rejection_reason = play_rejection
 			Global.player_data.player_energy += max(card_energy_cost, 0)
 			hand.combat.update_combat_display()
 			continue

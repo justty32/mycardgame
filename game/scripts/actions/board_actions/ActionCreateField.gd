@@ -17,7 +17,7 @@ func perform_action() -> void:
 		var owner: BaseCombatant = parent_combatant if str(processor.get_shadowed_action_values("owner", "PARENT")) == "PARENT" else null
 		var director: CombatDirector = Global.get_combat_director()
 		var tick: int = director.current_tick if director != null else 0
-		if field_effective_tick >= 0:
-			tick = field_effective_tick
+		if effective_tick >= 0:
+			tick = effective_tick
 		for cell: Vector2i in cells:
 			controller.create_field(data, cell, owner, tick, int(processor.get_shadowed_action_values("duration_override", -2)))

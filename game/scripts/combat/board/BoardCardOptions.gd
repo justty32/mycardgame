@@ -17,3 +17,20 @@ static func shape_of(card: CardData) -> int:
 
 static func faction_of(card: CardData) -> int:
 	return int(options(card).get("target_faction", card.card_target_faction))
+
+## Board selection of a card play, stored in the request's "board" module context.
+static func selected_cell(request: CardPlayRequest) -> Vector2i:
+	if request == null:
+		return BaseCombatant.BOARD_ANCHOR_NONE
+	return request.module_contexts.get("board", {}).get("cell", BaseCombatant.BOARD_ANCHOR_NONE)
+
+static func selected_board_id(request: CardPlayRequest) -> String:
+	if request == null:
+		return ""
+	return str(request.module_contexts.get("board", {}).get("id", ""))
+
+static func set_selection(request: CardPlayRequest, cell: Vector2i, board_id: String) -> void:
+	var context: Dictionary = request.module_contexts.get("board", {})
+	context["cell"] = cell
+	context["id"] = board_id
+	request.module_contexts["board"] = context

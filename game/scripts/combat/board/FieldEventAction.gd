@@ -19,8 +19,8 @@ func _init(controller: FieldController, event_name: String, at_cell: Vector2i,
 		unit: BaseCombatant = null, field: FieldInstance = null,
 		passing: bool = false, ancestor: BaseAction = null) -> void:
 	_controller_ref = weakref(controller)
-	field_controller_ref = _controller_ref
-	field_controller_generation = controller.generation
+	execution_scope_ref = _controller_ref
+	execution_scope_generation = controller.generation
 	_unit_ref = weakref(unit) if is_instance_valid(unit) else null
 	generation = controller.generation
 	event = event_name
@@ -30,7 +30,7 @@ func _init(controller: FieldController, event_name: String, at_cell: Vector2i,
 	parent_action = ancestor
 	resolve_children_immediately = true
 	if ancestor != null:
-		field_effective_tick = ancestor.field_effective_tick
+		effective_tick = ancestor.effective_tick
 	if is_instance_valid(unit) and event in ["enter", "leave"]:
 		expected_board_id = unit.board_id
 		expected_anchor = unit.board_anchor
@@ -42,7 +42,7 @@ func perform_action() -> void:
 	if instance != null and (not controller.has_field(instance) or (scheduled_revision >= 0 and scheduled_revision != instance.revision)):
 		return
 	if scheduled_tick >= 0:
-		field_effective_tick = scheduled_tick
+		effective_tick = scheduled_tick
 	if event == "expire":
 		controller.remove_field(instance)
 		return
@@ -88,7 +88,7 @@ func perform_action() -> void:
 		controller.board.invalidate_undo(unit)
 		for stack: int in field.stacks:
 			for child: BaseAction in ActionGenerator.create_actions(field.get_owner(), null, [unit], payload, self):
-				child.field_owner_bound = true
-				child.field_owner_uid = field.owner_uid
+				child.owner_bound = true
+				child.owner_uid = field.owner_uid
 				actions.append(child)
 	ActionHandler.add_ordered_actions(actions)

@@ -10,8 +10,8 @@ class_name CombatActionPhases
 
 static func begin_party_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
 	HandManager.set_disable_hand(true)
-	if director.board_module != null:
-		director.board_module.on_action_reset(unit)
+	if director.combat_module != null:
+		director.combat_module.on_action_reset(unit)
 	if unit.is_hero():
 		StatsHandler.begin_hero_action()	# turn count = hero actions; before the overlay reads it
 	await play_combat_animation(director, CombatDirector.ANIMATION_ACTION_START)
@@ -29,8 +29,8 @@ static func begin_party_action(director: CombatDirector, unit: BaseCombatant, ge
 	if director.is_aborted(generation):
 		return
 	Signals.unit_action_started.emit(unit)
-	if director.board_module != null:
-		director.board_module.on_action_started(unit)
+	if director.combat_module != null:
+		director.combat_module.on_action_started(unit)
 	await director.wait_actions(generation)
 	if director.is_aborted(generation) or not unit.is_alive():
 		return
@@ -82,8 +82,8 @@ static func play_combat_animation(director: CombatDirector, animation_name: Stri
 	await animation_player.animation_finished
 
 static func begin_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
-	if director.board_module != null:
-		director.board_module.on_action_reset(unit)
+	if director.combat_module != null:
+		director.combat_module.on_action_reset(unit)
 	Signals.enemy_turn_started.emit()	# legacy signal: one enemy's action begins
 	# both legacy pairs fire for this enemy's own action (old data stays valid)
 	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
@@ -96,8 +96,8 @@ static func begin_enemy_action(director: CombatDirector, unit: BaseCombatant, ge
 	if director.is_aborted(generation):
 		return
 	Signals.unit_action_started.emit(unit)
-	if director.board_module != null:
-		director.board_module.on_action_started(unit)
+	if director.combat_module != null:
+		director.combat_module.on_action_started(unit)
 	await director.wait_actions(generation)
 
 static func end_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:

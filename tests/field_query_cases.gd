@@ -6,7 +6,7 @@ func run(c) -> void:
 	await c.create_field("field_probe_enter", [[3, 4]])
 	var request := CardPlayRequest.new()
 	request.acting_unit = c.player
-	request.selected_cell = Vector2i(3, 4)
+	BoardCardOptions.set_selection(request, Vector2i(3, 4), "")
 	var action := BaseAction.new()
 	action.init(c.player, request, [])
 	var validator := ValidatorCellHasField.new()

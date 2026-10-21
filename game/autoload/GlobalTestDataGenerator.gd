@@ -4680,8 +4680,8 @@ func add_test_board_content() -> void:
 	card_test_dash_strike.card_energy_cost = 1
 	card_test_dash_strike.card_action_delay = 100
 	card_test_dash_strike.card_range = 3
-	card_test_dash_strike.card_shape = BoardTargeting.TARGET_SHAPES.LINE
-	card_test_dash_strike.card_target_faction = BoardTargeting.TARGET_FACTIONS.OPPONENT
+	card_test_dash_strike.card_shape = 5	# BoardTargeting.TARGET_SHAPES.LINE (board-module enums as literals: no compile-time dependency)
+	card_test_dash_strike.card_target_faction = 0	# TARGET_FACTIONS.OPPONENT
 	card_test_dash_strike.card_values = {"damage": 6, "distance": 2, "stop_at_distance": 1}
 	card_test_dash_strike.card_play_validators = [{Scripts.VALIDATOR_IN_LINE: {}}]
 	card_test_dash_strike.card_play_actions = [
@@ -4689,7 +4689,7 @@ func add_test_board_content() -> void:
 			"validator_data": [{Scripts.VALIDATOR_DISTANCE: {"operator": "<=", "comparison_value": 1}}],
 			"passed_action_data": [{Scripts.ACTION_ATTACK_GENERATOR: {"time_delay": 0.0, "actions_on_lethal": []}}],
 		}},
-		{Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TOWARD, "reference": ActionMoveUnit.REFERENCE_SELECTED_TARGET}},
+		{Scripts.ACTION_MOVE_UNIT: {"mode": "TOWARD", "reference": "SELECTED_TARGET"}},
 	]
 	card_test_dash_strike.card_ai_hints = {"role": "damage", "value_key": "damage", "danger": 0}
 	Global.register_rod(card_test_dash_strike)
@@ -4705,11 +4705,11 @@ func add_test_board_content() -> void:
 	card_test_shove.card_appears_in_card_packs = false
 	card_test_shove.card_energy_cost = 1
 	card_test_shove.card_range = 1
-	card_test_shove.card_shape = BoardTargeting.TARGET_SHAPES.SINGLE
-	card_test_shove.card_target_faction = BoardTargeting.TARGET_FACTIONS.OPPONENT
+	card_test_shove.card_shape = 0	# TARGET_SHAPES.SINGLE
+	card_test_shove.card_target_faction = 0	# TARGET_FACTIONS.OPPONENT
 	card_test_shove.card_values = {"damage": 4, "distance": 2, "collision_damage_per_cell": 3}
 	card_test_shove.card_play_actions = [
-		{Scripts.ACTION_DISPLACE_UNIT: {"mode": ActionDisplaceUnit.MODE_PUSH}},
+		{Scripts.ACTION_DISPLACE_UNIT: {"mode": "PUSH"}},
 		{Scripts.ACTION_ATTACK_GENERATOR: {"time_delay": 0.0, "actions_on_lethal": []}},
 	]
 	card_test_shove.card_ai_hints = {"role": "displace", "value_key": "damage"}
@@ -4728,10 +4728,10 @@ func add_test_board_content() -> void:
 	card_test_blink.card_action_delay = 50
 	card_test_blink.card_requires_target = false
 	card_test_blink.card_range = 3
-	card_test_blink.card_shape = BoardTargeting.TARGET_SHAPES.SINGLE
-	card_test_blink.card_target_faction = BoardTargeting.TARGET_FACTIONS.EMPTY_CELL
+	card_test_blink.card_shape = 0	# TARGET_SHAPES.SINGLE
+	card_test_blink.card_target_faction = 4	# TARGET_FACTIONS.EMPTY_CELL
 	card_test_blink.card_play_validators = [{Scripts.VALIDATOR_CELL_FREE: {}}, {Scripts.VALIDATOR_PATH_EXISTS: {"teleport": true}}]
-	card_test_blink.card_play_actions = [{Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TELEPORT}}]
+	card_test_blink.card_play_actions = [{Scripts.ACTION_MOVE_UNIT: {"mode": "TELEPORT"}}]
 	card_test_blink.card_ai_hints = {"role": "move", "value": 2}
 	Global.register_rod(card_test_blink)
 	

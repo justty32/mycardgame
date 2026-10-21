@@ -130,6 +130,8 @@ func _scenario() -> bool:
 	_check(global_data.player_data.player_energy == 3, "turn one begins with three energy")
 	var board: RefCounted = combat.combat_director.board
 	_check(board != null and board.size == Vector2i(5, 5) and combat.combat_director.encounter.object_id.begins_with("encounter_synthesized_"), "legacy event without an encounter id synthesizes a default 5x5 board encounter")
+	var battlefield: RefCounted = combat.combat_director.battlefield
+	_check(combat.combat_director.has_board_module() and battlefield != null and battlefield.boards.size() == 2 and battlefield.boards.has("party") and battlefield.boards.has("enemy") and player.board_id == "party" and enemy.board_id == "enemy", "natural combat runs in the default mounted DUAL mode (party and enemy boards)")
 	_check(player.board_anchor == Vector2i(2, 4) and enemy.board_anchor == Vector2i(2, 0) and player.move_points == 0, "synthesized encounter: hero on the south deploy cell, enemy on the north row, no free movement under the default rules")
 	_check(counts.hero_action_started == 1 and counts.hero_action_ended == 0 and player.action_count == 1, "turn one emits unit_action_started(hero) once and no unit_action_ended")
 	_check(enemy.faction == 1 and enemy.unit_uid != "" and root.get_node("UnitRegistry").get_unit(enemy.unit_uid) == enemy, "fixture enemy registers as an ENEMY-faction unit")

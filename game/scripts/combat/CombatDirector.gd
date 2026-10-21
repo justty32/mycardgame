@@ -1,12 +1,13 @@
 ## Runs one combat as an action timeline (CTB): pops the unit with the smallest next_action_tick,
 ## performs its action (player input or enemy intent) and re-queues it after a delay scaled by its
 ## speed (CombatRulesData). Replaces the AnimationPlayer-driven turn alternation of Combat.gd;
-## Combat.gd keeps the HUD and composes the optional BoardCombatModule. UnitSpawner
+## Combat.gd keeps the HUD and composes an optional CombatModule (e.g. the board). UnitSpawner
 ## spawns wave units / summons through the EnemyContainer unit layer and WaveController runs the wave
 ## flow (wave_started / wave_cleared, next-wave scheduling, victory when the last wave is cleared,
 ## which ends the combat through Combat.end_combat); CombatActionPhases holds the
 ## fixed begin / end phases of an action and CombatStartActions the combat-start actions; enemy
-## intents run in EnemyIntentController, delegating spatial behavior only when a board module exists.
+## intents run in EnemyIntentController, delegating only when a mounted module handles intents.
+## The core never names a module class: modules attach through the CombatModule hooks.
 ## Child of RunScreen/Combat. Signals: player_turn_* = the hero's action (pre-draw / post-discard),
 ## enemy_turn_* = one enemy's action, unit_action_started/ended for every unit, combat_tick_advanced,
 ## timeline_changed. With equal speeds and the default rules the order equals the old turn flow.
@@ -26,36 +27,41 @@ var rules: CombatRulesData = null
 var acting_unit: BaseCombatant = null
 var current_tick: int = 0
 var is_running: bool = false
-## Optional scene-composed component; compatibility getters expose its current resources.
-var _board_module: BoardCombatModule = null
-var board_module: BoardCombatModule:
+## Optional scene-composed component (CombatModule); null for an ordinary combat.
+var _module: CombatModule = null
+var combat_module: CombatModule:
 	get:
-		if not is_instance_valid(_board_module) or _board_module.is_queued_for_deletion() or not _board_module.is_inside_tree():
+		if not is_instance_valid(_module) or _module.is_queued_for_deletion() or not _module.is_inside_tree():
 			return null
-		return _board_module
+		return _module
 	set(value):
-		_board_module = value
-var board_controller: BoardController:
-	get:
-		return board_module.board_controller if board_module != null else null
+		_module = value
 var unit_spawner: UnitSpawner = null
-var battlefield: CombatBattlefield:
-	get:
-		return board_controller.battlefield if board_controller != null else null
-var field_controller: FieldController:
-	get:
-		return board_controller.field_controller if board_controller != null else null
 ## Wave progression of the current / last combat (kept after the combat stops for the victory check).
 var waves: WaveController = null
-## Board of the current combat (null outside combat) and the encounter it was built from.
-var board: BoardData:
-	get:
-		return board_controller.board if board_controller != null else null
-## Encounter and waves exist independently of the optional spatial component.
+## Encounter and waves exist independently of any optional module.
 var encounter: EncounterData = null
-var threat_preview: ThreatPreview:
+
+## Compatibility forwards (untyped, no module class dependency): the mounted board module and
+## its current resources, or null. Board-specific work belongs to the module itself.
+var board_module:
 	get:
-		return board_module.threat_preview if board_module != null else null
+		return get_module(&"board")
+var board_controller:
+	get:
+		return _module_property(&"board", &"board_controller")
+var battlefield:
+	get:
+		return _module_property(&"board", &"battlefield")
+var field_controller:
+	get:
+		return _module_property(&"board", &"field_controller")
+var board:
+	get:
+		return _module_property(&"board", &"board")
+var threat_preview:
+	get:
+		return _module_property(&"board", &"threat_preview")
 
 var _generation: int = 0	# invalidates suspended loops when combat/run ends
 var _waiting_for_player: bool = false
@@ -78,14 +84,39 @@ func _ready() -> void:
 	tree_exiting.connect(_stop)
 
 #region Public queries
+## The mounted module with this id, or null.
+func get_module(module_id: StringName) -> CombatModule:
+	var module: CombatModule = combat_module
+	return module if module != null and module.get_module_id() == module_id else null
+
+func has_module(module_id: StringName) -> bool:
+	return get_module(module_id) != null
+
 func has_board_module() -> bool:
-	return board_module != null
+	return has_module(&"board")
+
+## Ids of the mounted modules (content requirements are checked against these).
+func get_mounted_module_ids() -> Array[StringName]:
+	var ids: Array[StringName] = []
+	var module: CombatModule = combat_module
+	if module != null:
+		ids.append(module.get_module_id())
+	return ids
+
+## Mounted module that places units (spawning, summons), or null.
+func get_placement_module() -> CombatModule:
+	var module: CombatModule = combat_module
+	return module if module != null and module.places_units() else null
+
+func _module_property(module_id: StringName, property: StringName) -> Variant:
+	var module: CombatModule = get_module(module_id)
+	return module.get(property) if module != null else null
 
 ## Module exit may arrive after another module was composed. Detach only that exact instance.
-## Ordinary CTB and queued non-spatial work continue after a board component is unmounted.
-func detach_board_module(component: BoardCombatModule) -> void:
-	if is_instance_valid(_board_module) and _board_module == component:
-		_board_module = null
+## Ordinary CTB and queued non-module work continue after a component is unmounted.
+func detach_module(component: CombatModule) -> void:
+	if is_instance_valid(_module) and _module == component:
+		_module = null
 
 func has_living_opponents() -> bool:
 	return not Global.get_alive_enemies().is_empty()
@@ -136,8 +167,8 @@ func begin_combat(event_data: EventData = null) -> void:
 		event_data = Global.get_player_event_data()
 	encounter = Global.get_event_encounter_data(event_data)
 	# The scene composition owns the optional component; the core never creates it.
-	board_module = get_parent().get("board_module") as BoardCombatModule
-	if board_module != null and not board_module.setup(self, encounter):
+	combat_module = get_parent().get("combat_module") as CombatModule
+	if combat_module != null and not combat_module.setup(self, encounter):
 		_stop()
 		return
 	unit_spawner = UnitSpawner.new(self)
@@ -155,9 +186,9 @@ func begin_combat(event_data: EventData = null) -> void:
 	for enemy: Enemy in Global.get_alive_enemies():
 		enemy.decide_next_intent()
 	is_running = true
-	if board_module != null:
+	if combat_module != null:
 		for unit: BaseCombatant in UnitRegistry.get_all_units():
-			board_module.on_unit_spawned(unit)
+			combat_module.on_unit_spawned(unit)
 	refresh_threats()
 	Signals.timeline_changed.emit()
 	waves.enter_wave(0)
@@ -175,12 +206,12 @@ func _stop(preserve_presentation: bool = false) -> void:
 	_generation += 1
 	is_running = false
 	acting_unit = null
-	var component: BoardCombatModule = board_module
+	var component: CombatModule = combat_module
 	if component == null and is_instance_valid(get_parent()):
-		component = get_parent().get("board_module") as BoardCombatModule
+		component = get_parent().get("combat_module") as CombatModule
 	if component != null:
 		component.clear(preserve_presentation)
-	board_module = null
+	combat_module = null
 	unit_spawner = null
 	reset_end_action()
 	_cards_played_this_action.clear()
@@ -222,7 +253,7 @@ func _admit_spawned_unit(unit: BaseCombatant, generation: int) -> void:
 		return
 	if not unit.is_alive():
 		return
-	if board_module != null and not board_module.prepare_spawned_unit(unit):
+	if combat_module != null and not combat_module.prepare_spawned_unit(unit):
 		return
 	_admit(unit, current_tick + timeline.wait_for(rules.default_action_delay, unit.speed))
 
@@ -238,25 +269,26 @@ func _admit(unit: BaseCombatant, next_tick: int) -> void:
 	unit.last_action_tick = current_tick
 	unit.next_action_tick = next_tick
 	timeline.push(unit)
-	if board_module != null:
-		board_module.on_unit_spawned(unit)
+	if combat_module != null:
+		combat_module.on_unit_spawned(unit)
 	if unit is Enemy:
 		(unit as Enemy).decide_next_intent()
 	refresh_threats()
 	Signals.timeline_changed.emit()
 
 func _on_unit_removed(unit: BaseCombatant) -> void:
-	if board_module != null:
-		board_module.on_unit_removed(unit)
+	if combat_module != null:
+		combat_module.on_unit_removed(unit)
 	if timeline != null and timeline.has(unit):
 		timeline.remove(unit)
 		Signals.timeline_changed.emit()
 
-## Dead enemies leave the board (their node stays until the death animation / combat end).
+## Dead enemies leave the module's positions (their node stays until the death animation /
+## combat end); on_unit_removed refreshes module threats, the hero display is refreshed here.
 func _on_enemy_killed(enemy: Enemy) -> void:
-	if board_module != null:
-		board_module.on_unit_removed(enemy)
-	refresh_threats()
+	if combat_module != null:
+		combat_module.on_unit_removed(enemy)
+	_refresh_hero_incoming_damage()
 	if is_running and waves != null:
 		waves.queue_check()
 
@@ -265,12 +297,17 @@ func _on_enemy_death_animation_finished(_enemy: Enemy) -> void:
 	if waves != null:
 		waves.on_death_animation_finished()
 
-## Re-resolves enemy intents (ThreatPreview) and the hero's incoming damage display.
+## Re-resolves module threat previews and the hero's incoming damage display.
 func refresh_threats() -> void:
 	if not is_running:
 		return
-	if board_module != null:
-		board_module.refresh_threats()
+	if combat_module != null:
+		combat_module.refresh_threats()
+	_refresh_hero_incoming_damage()
+
+func _refresh_hero_incoming_damage() -> void:
+	if not is_running:
+		return
 	var hero: Player = UnitRegistry.get_hero() as Player
 	if hero != null:
 		hero.update_incoming_damage_amount(false)
@@ -352,8 +389,8 @@ func _advance_clock(tick: int, generation: int) -> void:
 	current_tick = tick
 	timeline.current_tick = tick
 	Signals.combat_tick_advanced.emit(previous_tick, tick)
-	if board_module != null:
-		board_module.advance_fields(previous_tick, tick)
+	if combat_module != null:
+		combat_module.on_clock_advanced(previous_tick, tick)
 	for unit: BaseCombatant in UnitRegistry.get_all_units():
 		if unit.is_alive():
 			unit.perform_tick_status_effects(previous_tick, tick)
@@ -397,8 +434,8 @@ func _compute_action_delay(unit: BaseCombatant) -> int:
 func _on_card_played(card_play_request: CardPlayRequest) -> void:
 	if is_running and card_play_request.card_data != null:
 		_cards_played_this_action.append(card_play_request.card_data)
-		if board_module != null:
-			board_module.on_card_played(acting_unit)
+		if combat_module != null:
+			combat_module.on_card_played(acting_unit)
 #endregion
 
 #region Party (hero) action
@@ -449,45 +486,22 @@ func perform_enemy_intent(enemy: Enemy) -> void:
 	await EnemyIntentController.perform_intent(self, enemy)
 
 func resolve_module_action_targets(action: BaseAction, override: int, force_dead: bool) -> Array[BaseCombatant]:
-	if board_module != null:
-		return board_module.resolve_action_targets(action, override, force_dead)
+	if combat_module != null:
+		return combat_module.resolve_action_targets(action, override, force_dead)
 	return []
 #endregion
 
-#region Board and spawning (delegated to BoardController / UnitSpawner)
-## Places a unit at cell, or the nearest empty anchor (NEAREST_EMPTY). false = the board is full.
-func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
-	return board_module != null and board_module.place_unit_nearest(unit, cell)
-
-## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
-## the nearest empty cell; it enters the timeline as if it had just acted.
+#region Spawning and input gating
+## Spawns an enemy mid-combat at a module position (ActionSummonEnemies with spawn cells): placed at
+## cell or the nearest free anchor; it enters the timeline as if it had just acted. null without a
+## placement module, unit layer or free anchor.
 func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i, board_id: String = "") -> Enemy:
 	if unit_spawner == null:
 		return null
 	return unit_spawner.spawn_enemy_at_cell(enemy_object_id, cell, board_id)
 
-## Cells the acting party unit can still move this action: free move points plus paid cells.
-func get_move_budget(unit: BaseCombatant) -> int:
-	return board_module.get_move_budget(unit) if board_module != null else 0
-
-## Player movement input (BoardView click on an empty cell): moves the acting party unit along the
-## shortest path, spending free move points first, then paid cells (+extra_move_delay_per_cell each).
-## false = not the player's action, busy, or the cell is not reachable within the budget.
-func request_player_move(cell: Vector2i, board_id: String = "") -> bool:
-	if board_module == null or not _can_request_player_input():
-		return false
-	return board_module.request_player_move(acting_unit, cell, board_id)
-
-func can_player_undo_move() -> bool:
-	return board_module != null and _can_request_player_input() and board_module.can_player_undo_move(acting_unit)
-
-func request_player_undo_move() -> bool:
-	if not can_player_undo_move():
-		return false
-	return board_module.request_player_undo_move(acting_unit)
-
-## Core input gating is shared by optional combat controls.
-func _can_request_player_input() -> bool:
+## Core input gating shared by optional module controls (e.g. board movement and undo).
+func can_request_player_input() -> bool:
 	if not is_running or not is_instance_valid(acting_unit) or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
 		return false
 	if not _waiting_for_player or _end_action_request != null:

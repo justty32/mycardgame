@@ -1,6 +1,7 @@
 ## Unit spawning of one combat, owned by CombatDirector: spawns encounter wave units through the
-## combat's unit layer (EnemyContainer), optionally placing them on a mounted board, and spawns
-## board summons (ActionSummonEnemies with spawn cells). NONE retains ordinary enemy layout.
+## combat's unit layer (EnemyContainer), optionally placing them through a mounted placement
+## module (CombatModule.places_units, e.g. the board: zone id + anchor cell), and spawns positional
+## summons (ActionSummonEnemies with spawn cells). Without one, ordinary enemy layout is kept.
 ## A RefCounted created per combat.
 ## Wave 0 spawns when combat starts (units act at enter delay + stagger * index + spawn delay).
 ## Later waves are scheduled by WaveController: a wave-start entry at the wave's start tick and one
@@ -58,14 +59,16 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
 		if enemy_object_id == "":
 			index += 1
 			continue
-		var board_id: String = _entry_board_id(unit_entry)
-		var cell: Vector2i = _entry_cell(unit_entry)
+		var location: Dictionary = _entry_location(unit_entry)
+		var board_id: String = location.board_id
+		var cell: Vector2i = location.cell
 		var tick: int = _entry_tick(wave, 0, index, unit_entry)
 		var entry: Dictionary = _unit_entry(0, tick, enemy_object_id, cell, board_id)
 		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
 		if enemy == null:
 			break	# positional events stop when their slots run out (legacy)
-		if not director.has_board_module():
+		var placement: CombatModule = director.get_placement_module()
+		if placement == null:
 			if tick > 0:
 				spawn_delays[enemy.unit_uid] = tick
 			index += 1
@@ -75,8 +78,7 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
 			_discard(enemy)
 			index += 1
 			continue
-		var board: BoardData = _board(board_id)
-		if board == null or not board.place(enemy, anchor):
+		if not placement.place_unit_at(enemy, board_id, anchor):
 			_discard(enemy)
 			if wave.wave_spawn_policy == EncounterWaveData.SPAWN_POLICIES.FAIL_SKIP or not _retry(entry, wave):
 				_skip(entry, "placement failed")
@@ -101,7 +103,8 @@ func schedule_wave(wave_index: int, start_tick: int) -> void:
 	for unit_entry: Dictionary in wave.wave_units:
 		var enemy_object_id: String = _pick_enemy(unit_entry)
 		if enemy_object_id != "":
-			_insert(_unit_entry(wave_index, start_tick + max(0, wave.wave_stagger_ticks) * index + max(0, int(unit_entry.get("spawn_delay_ticks", 0))), enemy_object_id, _entry_cell(unit_entry), _entry_board_id(unit_entry)))
+			var location: Dictionary = _entry_location(unit_entry)
+			_insert(_unit_entry(wave_index, start_tick + max(0, wave.wave_stagger_ticks) * index + max(0, int(unit_entry.get("spawn_delay_ticks", 0))), enemy_object_id, location.cell, location.board_id))
 		index += 1
 
 func has_pending() -> bool:
@@ -128,7 +131,8 @@ func enter_due(tick: int) -> void:
 			_enter_unit(entry)
 
 func _enter_unit(entry: Dictionary) -> void:
-	if not director.has_board_module():
+	var placement: CombatModule = director.get_placement_module()
+	if placement == null:
 		_enter_unpositioned_unit(entry)
 		return
 	var wave: EncounterWaveData = director.encounter.encounter_waves[entry["wave"]]
@@ -136,20 +140,19 @@ func _enter_unit(entry: Dictionary) -> void:
 	var anchor: Vector2i = _placement_anchor(entry, wave, footprint)
 	if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
 		return
-	var board: BoardData = _board(entry["board_id"])
 	var unit_layer: Node = get_unit_layer()
 	var enemy: Enemy = unit_layer.spawn_board_enemy(entry["enemy_object_id"]) if unit_layer != null else null
 	if enemy == null:
 		_skip(entry, "no unit layer")
 		return
-	if board == null or not board.place(enemy, anchor):
+	if not placement.place_unit_at(enemy, entry["board_id"], anchor):
 		_discard(enemy)
 		if wave.wave_spawn_policy == EncounterWaveData.SPAWN_POLICIES.FAIL_SKIP or not _retry(entry, wave):
 			_skip(entry, "placement failed")
 		return
 	director.admit_wave_unit(enemy)
 
-## NONE retains wave timing and unit registration without inventing board coordinates.
+## Without a placement module: wave timing and unit registration, no invented coordinates.
 func _enter_unpositioned_unit(entry: Dictionary) -> void:
 	var unit_layer: Node = get_unit_layer()
 	var enemy: Enemy = unit_layer.spawn_board_enemy(entry["enemy_object_id"]) if unit_layer != null else null
@@ -158,15 +161,16 @@ func _enter_unpositioned_unit(entry: Dictionary) -> void:
 		return
 	director.admit_wave_unit(enemy)
 
-## Both initial and later waves use the same local retry policy. Never spill into another board.
+## Both initial and later waves use the same local retry policy. Never spill into another zone.
 func _placement_anchor(entry: Dictionary, wave: EncounterWaveData, footprint: Vector2i) -> Vector2i:
-	var board: BoardData = _board(entry["board_id"])
-	if board == null:
+	var placement: CombatModule = director.get_placement_module()
+	var zone: String = entry["board_id"]
+	if placement == null or not placement.has_zone(zone):
 		_skip(entry, "unknown board")
 		return BaseCombatant.BOARD_ANCHOR_NONE
 	var cell: Vector2i = entry["cell"]
 	var anchor: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
-	if board.footprint_fits(footprint, cell):
+	if placement.anchor_fits(zone, footprint, cell):
 		anchor = cell
 	else:
 		match wave.wave_spawn_policy:
@@ -176,7 +180,7 @@ func _placement_anchor(entry: Dictionary, wave: EncounterWaveData, footprint: Ve
 			EncounterWaveData.SPAWN_POLICIES.WAIT_UNTIL_FREE:
 				if _retry(entry, wave):
 					return BaseCombatant.BOARD_ANCHOR_NONE
-		anchor = board.nearest_empty_anchor_for_footprint(footprint, cell)
+		anchor = placement.nearest_free_anchor(zone, footprint, cell)
 		if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
 			# full board: wait like WAIT_UNTIL_FREE (NEAREST_EMPTY), else give up
 			if wave.wave_spawn_policy != EncounterWaveData.SPAWN_POLICIES.NEAREST_EMPTY or not _retry(entry, wave):
@@ -210,7 +214,7 @@ func _insert(entry: Dictionary) -> void:
 	pending.insert(position, entry)
 
 func _unit_entry(wave_index: int, tick: int, enemy_object_id: String, cell: Vector2i, board_id: String = "") -> Dictionary:
-	return {"kind": KIND_UNIT, "tick": tick, "wave": wave_index, "enemy_object_id": enemy_object_id, "board_id": _entry_board_id({"board_id": board_id}), "cell": cell, "retries": 0}
+	return {"kind": KIND_UNIT, "tick": tick, "wave": wave_index, "enemy_object_id": enemy_object_id, "board_id": board_id, "cell": cell, "retries": 0}
 
 ## First action tick of a wave-0 unit: enter delay + stagger * index + spawn delay.
 func _entry_tick(wave: EncounterWaveData, start_tick: int, index: int, unit_entry: Dictionary) -> int:
@@ -224,29 +228,13 @@ func _pick_enemy(unit_entry: Dictionary) -> String:
 	var rng_enemy_spawning: RandomNumberGenerator = Global.player_data.get_player_rng("rng_enemy_spawning")
 	return Random.get_weighted_selection(rng_enemy_spawning, weights)
 
-## Entry cell, or the default spawn origin when missing / off the board.
-func _entry_cell(unit_entry: Dictionary) -> Vector2i:
-	if not director.has_board_module():
-		return BaseCombatant.BOARD_ANCHOR_NONE
-	var board_id: String = _entry_board_id(unit_entry)
-	var board: BoardData = _board(board_id)
-	if board == null:
-		return BaseCombatant.BOARD_ANCHOR_NONE
-	var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
-	if not board.is_in_bounds(cell):
-		cell = director.board_controller.default_spawn_origin(board_id)
-	return cell
-
-func _entry_board_id(unit_entry: Dictionary) -> String:
-	if not director.has_board_module():
-		return ""
-	var board_id: String = str(unit_entry.get("board_id", ""))
-	if board_id == "" and director.battlefield != null:
-		return director.battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
-	return board_id
-
-func _board(board_id: String) -> BoardData:
-	return director.battlefield.get_board(board_id) if director.battlefield != null else null
+## Entry zone and cell from the placement module (default zone / spawn origin when missing or
+## off the board); no position without one.
+func _entry_location(unit_entry: Dictionary) -> Dictionary:
+	var placement: CombatModule = director.get_placement_module()
+	if placement == null:
+		return {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE}
+	return placement.resolve_spawn_location(unit_entry)
 
 func _footprint_of(enemy_object_id: String) -> Vector2i:
 	var enemy_data: EnemyData = Global.get_enemy_data(enemy_object_id)
@@ -255,15 +243,18 @@ func _footprint_of(enemy_object_id: String) -> Vector2i:
 	return Vector2i(max(1, enemy_data.enemy_footprint.x), max(1, enemy_data.enemy_footprint.y))
 #endregion
 
-## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
-## the nearest empty cell. null = no unit layer / board, or the board is full.
+## Spawns an enemy mid-combat at a module position (ActionSummonEnemies with spawn cells): placed
+## at cell or the nearest free anchor. null = no unit layer / placement module, or no free anchor.
 func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i, board_id: String = "") -> Enemy:
 	var unit_layer: Node = get_unit_layer()
-	var board_controller: BoardController = director.board_controller
-	if unit_layer == null or board_controller == null or _board(_entry_board_id({"board_id": board_id})) == null:
+	var placement: CombatModule = director.get_placement_module()
+	if unit_layer == null or placement == null:
+		return null
+	var zone: String = str(placement.resolve_spawn_location({"board_id": board_id}).board_id)
+	if not placement.has_zone(zone):
 		return null
 	var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id)
-	if enemy != null and not board_controller.place_unit_nearest(enemy, cell, board_id):
+	if enemy != null and not placement.place_unit_nearest(enemy, cell, board_id):
 		_discard(enemy)
 		return null
 	return enemy

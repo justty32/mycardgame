@@ -57,14 +57,14 @@ func _displace(board: BoardData, unit: BaseCombatant, processor: ActionIntercept
 	if mode == MODE_TO_CELL:
 		if distance <= resistance or bool(processor.get_shadowed_action_values("teleport_blocked", false)):
 			return
-		if processor.get_shadowed_action_values("target_board_id", null) == null and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and card_play_request.selected_board_id != "" and card_play_request.selected_board_id != board.board_id:
+		if processor.get_shadowed_action_values("target_board_id", null) == null and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and BoardCardOptions.selected_board_id(card_play_request) != "" and BoardCardOptions.selected_board_id(card_play_request) != board.board_id:
 			return
 		var cell: Vector2i = EncounterData.cell_from_json(processor.get_shadowed_action_values("target_cell", null))
 		if cell == BaseCombatant.BOARD_ANCHOR_NONE and card_play_request != null:
-			cell = card_play_request.selected_cell
+			cell = BoardCardOptions.selected_cell(card_play_request)
 		var target_board_id: String = str(processor.get_shadowed_action_values("target_board_id", board.board_id))
 		if target_board_id == "SELECTED" and card_play_request != null:
-			target_board_id = card_play_request.selected_board_id
+			target_board_id = BoardCardOptions.selected_board_id(card_play_request)
 		if target_board_id != board.board_id:
 			BoardTransferAction.move_unit(self, unit, target_board_id, cell, true, ignore_zoc)
 		elif cell != from and board.can_teleport(unit, cell):

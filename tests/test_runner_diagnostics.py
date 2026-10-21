@@ -520,7 +520,8 @@ def main() -> None:
         engine_dir.mkdir(parents=True)
         for name in ("Godot_v4.6-stable_win64_console.exe", "Godot_v4.7.2-stable_win64.exe",
                      "Godot_v4.7.2-stable_win64_console.exe"):
-            (engine_dir / name).write_bytes(b"synthetic discovery fixture; never executed")
+            (engine_dir / name).write_bytes(b"MZ synthetic discovery fixture; never executed")
+        (engine_dir / "Godot_v4.7.2-stable_win64.exe.zip").write_bytes(b"PK synthetic archive; never executed")
         selected, discovery = runner.discover_engine(discovery_root, None, runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS)
         assert_that(selected.name == "Godot_v4.7.2-stable_win64_console.exe" and discovery["method"] == ".tools",
                     "Windows .tools discovery selects the accepted console build over GUI and old-version names")
@@ -528,6 +529,35 @@ def main() -> None:
         selected, discovery = runner.discover_engine(discovery_root, str(explicit), runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS)
         assert_that(selected == explicit.resolve() and discovery["method"] == "explicit",
                     "an explicit engine path overrides .tools preference without executing the fixture")
+    else:
+        # drvfs (WSL) marks every file executable: archives and Windows binaries must never be chosen.
+        discovery_root = RUN_ROOT / "engine-discovery-posix"
+        engine_dir = discovery_root / ".tools" / "godot-4.7"
+        engine_dir.mkdir(parents=True)
+        fixtures = {"Godot_v4.7.2-stable_win64.exe.zip": b"PK\x03\x04 archive",
+                    "Godot_v4.7.2-stable_win64.exe": b"MZ windows gui",
+                    "Godot_v4.7.2-stable_win64_console.exe": b"MZ windows console"}
+        for name, content in fixtures.items():
+            (engine_dir / name).write_bytes(content)
+            (engine_dir / name).chmod(0o755)
+        try:
+            runner.discover_engine(discovery_root, None, runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS)
+            refused = ""
+        except runner.RunnerError as error:
+            refused = str(error)
+        assert_that("python.exe" in refused, "POSIX/WSL discovery never selects a .zip or Windows .exe and names the Windows-Python entry")
+        try:
+            runner.discover_engine(discovery_root, str(engine_dir / "Godot_v4.7.2-stable_win64.exe"), runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS)
+            explicit_refused = False
+        except runner.RunnerError:
+            explicit_refused = True
+        assert_that(explicit_refused, "an explicit Windows binary is refused outside Windows (no un-isolated GUI launch)")
+        native = engine_dir / "Godot_v4.7.2-stable_linux.x86_64"
+        native.write_bytes(b"\x7fELF synthetic")
+        native.chmod(0o755)
+        selected, discovery = runner.discover_engine(discovery_root, None, runner.DEFAULT_ACCEPTED_ENGINE_PATTERNS)
+        assert_that(selected == native.resolve() and discovery["method"] == ".tools",
+                    "POSIX .tools discovery selects the native ELF build")
     for bad_args in (["--force-failure", "--suite", "All"], ["--timeout-seconds", "5"], ["--suite", "Nope"]):
         try:
             runner.parse_args(bad_args)

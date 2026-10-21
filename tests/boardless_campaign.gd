@@ -7,6 +7,7 @@ func run(c) -> bool:
 		"defeat":
 			if not await c.new_run() or not await c.visit_fixture(): return false
 			return await c._defeat_flow()
+		"removed": return await _removed(c)
 		"scene_off":
 			var waves: RefCounted = load(get_script().resource_path.get_base_dir().path_join("boardless_wave_cases.gd")).new()
 			waves.install()
@@ -15,6 +16,22 @@ func run(c) -> bool:
 			if not await c._play("card_attack_basic", true) or not await c._play("card_block_basic", false): return false
 			return await waves.run(c)
 	return false
+
+## BoardRemoved suite: the module's files do not exist, rules and scene still ask for it.
+func _removed(c) -> bool:
+	var module_script: String = c.combat.BOARD_MODULE_SCRIPT
+	c._check(not ResourceLoader.exists(module_script) and not ResourceLoader.exists("res://scripts/combat/board/BoardData.gd") and not ResourceLoader.exists("res://scripts/ui/BoardView.gd"), "board module files are absent from this build")
+	c._check(Global.get_combat_rules().board_enabled and c.combat.board_module_enabled, "rules and scene request the board, so only file absence keeps it unmounted")
+	if not await c.new_run() or not await c.visit_fixture(): return false
+	var cards: RefCounted = load(get_script().resource_path.get_base_dir().path_join("boardless_card_cases.gd")).new()
+	if not await cards.run(c): return false
+	var intents: RefCounted = load(get_script().resource_path.get_base_dir().path_join("boardless_intent_cases.gd")).new()
+	await intents.run(c)
+	var hero_action: int = c.counts.hero_action_started
+	c.combat.end_turn_button.button_up.emit()
+	if not await c._wait(func(): return c._player_ready() and c.counts.hero_action_started > hero_action, "removed-module enemy executes its ordinary intent"): return false
+	c._check(c.counts.enemy_action_started > 0, "ordinary enemy acts in the core-only build")
+	return await c.win_combat()
 
 func _write(c) -> bool:
 	if not c._check(not FileLoader.has_save_file(), "boardless write begins without checkpoint"): return false

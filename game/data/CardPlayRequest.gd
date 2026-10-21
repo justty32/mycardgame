@@ -17,21 +17,9 @@ var module_contexts: Dictionary = {}
 ## Generic actor/targets also support non-spatial combat modules.
 var acting_unit: BaseCombatant = null
 var resolved_targets: Array[BaseCombatant] = []
-## Compatibility accessors: storage only; the card core does not interpret these values.
-var selected_cell: Vector2i:
-	get:
-		return module_contexts.get("board", {}).get("cell", Vector2i(-1, -1))
-	set(value):
-		if not module_contexts.has("board"):
-			module_contexts["board"] = {}
-		module_contexts["board"]["cell"] = value
-var selected_board_id: String:
-	get:
-		return module_contexts.get("board", {}).get("id", "")
-	set(value):
-		if not module_contexts.has("board"):
-			module_contexts["board"] = {}
-		module_contexts["board"]["id"] = value
+## Why the scene's CardPlayAdapter refused this play ("" = accepted). Diagnostic only; never
+## part of card_values, which feed BaseAction.get_action_value.
+var rejection_reason: String = ""
 
 
 ## Where the card being played came from. This will almost always be HandManager.HAND_PILE, but can be

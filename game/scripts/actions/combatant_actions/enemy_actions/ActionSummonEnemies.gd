@@ -1,9 +1,11 @@
 ## Summons random enemies in given ememy slots
 ## NOTE: This only works if the current EventData's event_enemy_placement_is_automatic flag
 ## is false and positions are defined.
-## Combat framework Phase 2: with "spawn_cells" ([[x, y], ...]) the enemies are summoned on the board
-## at those cells instead (occupied cell -> nearest empty cell, NEAREST_EMPTY), independent of slots.
-## Slot summons are also placed on the board (nearest empty cell to the spawn zone).
+## Combat framework Phase 2: with "spawn_cells" ([[x, y], ...]) and a mounted placement module (the
+## board) the enemies are summoned at those cells instead (occupied cell -> nearest empty cell),
+## independent of slots. Slot summons are also placed by the module (nearest empty cell to the
+## spawn zone). Without the module, spawn_slots still work; a cells-only summon is board content
+## (CombatContentRequirements) and is refused / skipped before it can silently do nothing.
 extends BaseAction
 
 func perform_action() -> void:
@@ -22,7 +24,7 @@ func perform_action() -> void:
 			return
 		var spawn_cells: Array[Vector2i] = EncounterData.cells_from_json(action_interceptor_processor.get_shadowed_action_values("spawn_cells", []))
 		var director: CombatDirector = Global.get_combat_director()
-		if not spawn_cells.is_empty() and director != null and director.board != null:
+		if not spawn_cells.is_empty() and director != null and director.get_placement_module() != null:
 			_summon_on_board(director, spawn_cells, number_of_spawns, random_enemy_object_ids, str(action_interceptor_processor.get_shadowed_action_values("board_id", "")))
 			continue
 

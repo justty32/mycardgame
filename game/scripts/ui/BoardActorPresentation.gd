@@ -37,6 +37,13 @@ func _on_actor_killed(unit: BaseCombatant) -> void:
 		_stop_tween(unit.unit_uid)
 		unit.global_position = _actors[unit.unit_uid]["target"]
 
+## Presentation stop on hero death: dead actors keep their committed board target.
+func snap_dead_actors() -> void:
+	for state: Dictionary in _actors.values():
+		var unit: Variant = state["unit"]
+		if is_instance_valid(unit) and not unit.is_alive():
+			_on_actor_killed(unit)
+
 func _process(_delta: float) -> void:
 	var signature: String = _layout_signature()
 	if _sync_dirty or signature != _sync_signature:

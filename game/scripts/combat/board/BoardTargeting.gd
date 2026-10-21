@@ -220,15 +220,15 @@ static func context_unit(board: BoardData, action: BaseAction, parent: BaseComba
 ## The explicitly selected board, otherwise the parent's actual board.
 static func context_board(action: BaseAction, parent: BaseCombatant) -> BoardData:
 	var battlefield: CombatBattlefield = CombatBattlefield.get_active()
-	if action != null and action.card_play_request != null and action.card_play_request.selected_board_id != "" and battlefield != null:
-		return battlefield.get_board(action.card_play_request.selected_board_id)
+	if action != null and action.card_play_request != null and BoardCardOptions.selected_board_id(action.card_play_request) != "" and battlefield != null:
+		return battlefield.get_board(BoardCardOptions.selected_board_id(action.card_play_request))
 	return BoardData.get_for_unit(parent)
 
 ## A validator cell value: "SELECTED_CELL" (BOARD_ANCHOR_NONE if unknown) or [x, y].
 static func context_cell(action: BaseAction, value: Variant) -> Vector2i:
 	if value is String and value == "SELECTED_CELL":
 		if action != null and action.card_play_request != null:
-			return action.card_play_request.selected_cell
+			return BoardCardOptions.selected_cell(action.card_play_request)
 		return BaseCombatant.BOARD_ANCHOR_NONE
 	return EncounterData.cell_from_json(value)
 #endregion

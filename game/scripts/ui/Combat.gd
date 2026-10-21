@@ -21,21 +21,35 @@ extends Control
 @onready var enemy_container = $EnemyContainer
 @onready var combat_director: CombatDirector = $CombatDirector
 @onready var timeline_bar: Control = $TimelineBar
+## Scene-level mount switch of the optional board module (also needs CombatRulesData.board_enabled).
 @export var board_module_enabled: bool = true
-var board_module: BoardCombatModule = null
-var card_play_adapter: CardPlayAdapter = null
-var board_view: BoardView:
+## Optional board module script; composed only when the file exists, so the core runs without it.
+const BOARD_MODULE_SCRIPT: String = "res://scripts/combat/board/BoardCombatModule.gd"
+## The composed optional module (a CombatModule), or null for an ordinary combat.
+var combat_module: CombatModule = null
+## Core card policy used whenever no module supplies one.
+var _core_card_play_adapter: CardPlayAdapter = CardPlayAdapter.new()
+var card_play_adapter: CardPlayAdapter:
 	get:
-		return board_module.presentation.board_view if _has_board_presentation() else null
-var board_views: Dictionary[String, BoardView]:
+		var supplied: CardPlayAdapter = combat_module.get_card_play_adapter() if is_instance_valid(combat_module) else null
+		return supplied if supplied != null else _core_card_play_adapter
+## Compatibility forwards (untyped; no module class dependency).
+var board_module:
 	get:
-		return board_module.presentation.board_views if _has_board_presentation() else {}
-var actor_presentation: BoardActorPresentation:
+		return combat_module if is_instance_valid(combat_module) and combat_module.get_module_id() == &"board" else null
+var board_view:
 	get:
-		return board_module.presentation.actor_presentation if _has_board_presentation() else null
-var undo_move_button: Button:
+		return _presentation_property(&"board_view")
+var board_views:
 	get:
-		return board_module.presentation.undo_move_button if _has_board_presentation() else null
+		var views: Variant = _presentation_property(&"board_views")
+		return views if views != null else {}
+var actor_presentation:
+	get:
+		return _presentation_property(&"actor_presentation")
+var undo_move_button:
+	get:
+		return _presentation_property(&"undo_move_button")
 
 @onready var player = $Player
 @onready var hand = $Hand
@@ -49,7 +63,6 @@ var undo_move_button: Button:
 var _combat_ending: bool = false	# end_combat() runs once per combat
 
 func _ready():
-	card_play_adapter = BoardCardAdapter.new(self)
 	_compose_board_module()
 	Signals.player_money_changed.connect(_on_player_money_changed)
 	Signals.player_health_changed.connect(_on_player_health_changed)
@@ -221,7 +234,8 @@ func _on_combat_started(event_id: String):
 	set_combat_display_visibility(true)
 	update_combat_display()
 
-	# the director builds the board, spawns the encounter's units and runs the action timeline
+	# compose / drop the optional module, then the director sets it up, spawns the encounter's
+	# units and runs the action timeline
 	_compose_board_module()
 	combat_director.begin_combat(current_event)
 	timeline_bar.visible = true
@@ -278,30 +292,37 @@ func end_combat() -> void:
 
 	Signals.combat_ended.emit()
 
-## Scene composition owns the optional board feature; core combat only sees its interface.
+## Scene composition owns the optional board feature; core combat only sees CombatModule.
+## Loaded by path when present, so deleting the module's files leaves ordinary combat intact.
 func _compose_board_module() -> void:
-	var enabled: bool = board_module_enabled and Global.get_combat_rules().board_enabled
-	if enabled and not is_instance_valid(board_module):
-		board_module = BoardCombatModule.new()
-		board_module.name = "BoardCombatModule"
-		add_child(board_module)
-	elif not enabled and is_instance_valid(board_module):
-		board_module.clear()
-		board_module.queue_free()
-		board_module = null
+	var enabled: bool = board_module_enabled and Global.get_combat_rules().board_enabled and ResourceLoader.exists(BOARD_MODULE_SCRIPT)
+	if enabled and not is_instance_valid(combat_module):
+		var script: Script = load(BOARD_MODULE_SCRIPT) as Script
+		combat_module = script.new() as CombatModule if script != null else null
+		if combat_module != null:
+			combat_module.name = "BoardCombatModule"
+			add_child(combat_module)
+	elif not enabled and is_instance_valid(combat_module):
+		combat_module.clear()
+		combat_module.queue_free()
+		combat_module = null
 
-func _has_board_presentation() -> bool:
-	return is_instance_valid(board_module) and is_instance_valid(board_module.presentation)
+func _presentation_property(property: StringName) -> Variant:
+	if not is_instance_valid(combat_module):
+		return null
+	var presentation: Variant = combat_module.get(&"presentation")
+	return presentation.get(property) if is_instance_valid(presentation) else null
 
 ## Compatibility query; board UI work belongs to the optional module's presentation.
 func sync_board_views() -> void:
-	if _has_board_presentation():
-		board_module.presentation.sync_board_views()
+	var presentation: Variant = combat_module.get(&"presentation") if is_instance_valid(combat_module) else null
+	if is_instance_valid(presentation):
+		presentation.sync_board_views()
 
 func _exit_tree() -> void:
-	if card_play_adapter != null:
-		card_play_adapter.unbind_hand()
-	card_play_adapter = null
-	if is_instance_valid(board_module):
-		board_module.clear()
-	board_module = null
+	if is_instance_valid(combat_module):
+		var adapter: CardPlayAdapter = combat_module.get_card_play_adapter()
+		if adapter != null:
+			adapter.unbind_hand()
+		combat_module.clear()
+	combat_module = null

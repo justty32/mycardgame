@@ -156,6 +156,12 @@ func can_play_card(selected_enemy: Enemy = null, display_player_messages: bool =
 	if not card_is_playable:
 		return false
 	
+	# content needing an unmounted optional combat module (e.g. board-only cards) is unplayable
+	if HandManager.get_card_play_adapter().get_availability_error(card_data) != "":
+		if display_player_messages:
+			ActionGenerator.generate_player_speech_bubble("I can't use that here!")
+		return false
+	
 	# check energy
 	if Global.player_data.player_energy < card_energy_cost:
 		if display_player_messages:

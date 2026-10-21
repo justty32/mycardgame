@@ -189,13 +189,20 @@ func cycle_enemy_intent():
 
 ## Decides and displays the intent for the enemy's next action. Called by CombatDirector when the
 ## enemy enters the timeline (combat start / spawn) and after each of its actions.
+## Intents needing an unmounted combat module are skipped (bounded by the intent count), so such
+## an enemy keeps acting with its ordinary intents instead of stalling on a refused one.
 func decide_next_intent() -> void:
 	if keep_intent_next_action:
 		keep_intent_next_action = false
-		update_enemy_intent()
-		Signals.enemy_intent_changed.emit()
-		return
+		if EnemyIntentController.get_intent_module_error(self, enemy_data.get_current_intent()) == "":
+			update_enemy_intent()
+			Signals.enemy_intent_changed.emit()
+			return
 	cycle_enemy_intent()
+	for _attempt: int in max(1, enemy_data.enemy_intents.size()):
+		if EnemyIntentController.get_intent_module_error(self, enemy_data.get_current_intent()) == "":
+			return
+		cycle_enemy_intent()
 
 ## Stores the board plan of the current intent (ThreatPreview.refresh()).
 func apply_intent_plan(plan: Dictionary) -> void:

@@ -56,7 +56,7 @@ func _play(c, id: String, board_id: String, cell: Vector2i, empty: bool) -> void
 	var first: CardPlayRequest = seen[0]
 	var duplicate: CardPlayRequest = seen[1]
 	c._check(not first.is_duplicate_play and duplicate.is_duplicate_play and first.acting_unit == c.player and duplicate.acting_unit == first.acting_unit, "duplicate inherits actual actor identity: " + id)
-	c._check(first.selected_board_id == board_id and duplicate.selected_board_id == board_id and first.selected_cell == cell and duplicate.selected_cell == cell and (not empty or duplicate.selected_target == null), "duplicate inherits board and cell even without selected unit: " + id)
+	c._check(BoardCardOptions.selected_board_id(first) == board_id and BoardCardOptions.selected_board_id(duplicate) == board_id and BoardCardOptions.selected_cell(first) == cell and BoardCardOptions.selected_cell(duplicate) == cell and (not empty or duplicate.selected_target == null), "duplicate inherits board and cell even without selected unit: " + id)
 	var a: Dictionary = first.module_contexts.get("board", {})
 	var b: Dictionary = duplicate.module_contexts.get("board", {})
 	c._check(not a.is_empty() and a == b and a.has("module_instance_id") and a.has("module_generation") and a.has("generation"), "duplicate keeps module instance module generation and Director generation: " + id)

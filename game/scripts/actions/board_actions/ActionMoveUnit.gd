@@ -2,7 +2,7 @@
 ## unless values give a target_override. Values:
 ##   mode: "TO_CELL" (default) | "TOWARD" | "AWAY" | "TELEPORT"
 ##   distance: max cells (-1 = unlimited; status interceptors may set 0 = rooted)
-##   target_cell: [x, y] / Vector2i (TO_CELL, TELEPORT); default card_play_request.selected_cell
+##   target_cell: [x, y] / Vector2i (TO_CELL, TELEPORT); default the card play's selected cell (BoardCardOptions.selected_cell)
 ##   reference: "SELECTED_TARGET" (default) | "PARENT" | "NEAREST_OPPONENT" | "HERO" (TOWARD / AWAY)
 ##   stop_at_distance: TOWARD stops once this close to the reference (default 1)
 ##   consumes_move_points: spend free move points, then paid cells (+extra_move_delay_per_cell each)
@@ -42,10 +42,10 @@ func _move_unit(board: BoardData, unit: BaseCombatant, processor: ActionIntercep
 	if teleport and bool(processor.get_shadowed_action_values("teleport_blocked", false)):
 		return
 	var target_board_id: String = str(processor.get_shadowed_action_values("target_board_id", ""))
-	if target_board_id == "" and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and card_play_request.selected_board_id != "" and card_play_request.selected_board_id != board.board_id and (teleport or mode == MODE_TO_CELL):
+	if target_board_id == "" and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and BoardCardOptions.selected_board_id(card_play_request) != "" and BoardCardOptions.selected_board_id(card_play_request) != board.board_id and (teleport or mode == MODE_TO_CELL):
 		return
 	if target_board_id == "SELECTED" and card_play_request != null:
-		target_board_id = card_play_request.selected_board_id
+		target_board_id = BoardCardOptions.selected_board_id(card_play_request)
 	if target_board_id != "" and target_board_id != board.board_id:
 		# An explicit teleport/direct placement authorizes crossing. Ordinary paths never do.
 		if teleport:
@@ -94,7 +94,7 @@ func _move_unit(board: BoardData, unit: BaseCombatant, processor: ActionIntercep
 func _get_target_cell(processor: ActionInterceptorProcessor) -> Vector2i:
 	var cell: Vector2i = EncounterData.cell_from_json(processor.get_shadowed_action_values("target_cell", null))
 	if cell == BaseCombatant.BOARD_ANCHOR_NONE and card_play_request != null:
-		cell = card_play_request.selected_cell
+		cell = BoardCardOptions.selected_cell(card_play_request)
 	return cell
 
 func _get_reference_unit(board: BoardData, unit: BaseCombatant, processor: ActionInterceptorProcessor) -> BaseCombatant:

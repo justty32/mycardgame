@@ -30,13 +30,16 @@ var action_tags: Array[String] = []
 var parent_action: BaseAction = null
 ## Ordered reactions finish their generated children before the next movement/event step.
 var resolve_children_immediately: bool = false
-## Field payloads re-resolve their owner at execution, including generated children.
-var field_owner_bound: bool = false
-var field_owner_uid: String = ""
-var field_controller_ref: WeakRef = null
-var field_controller_generation: int = -1
-## Logical field-event time, distinct from the already committed CTB endpoint.
-var field_effective_tick: int = -1
+## Deferred payloads (e.g. module field effects) re-resolve their owner at execution by unit uid,
+## including generated children.
+var owner_bound: bool = false
+var owner_uid: String = ""
+## Optional cancellation scope: an object with is_execution_scope_active(generation) -> bool.
+## A teardown (module clear) invalidates every already expanded action of that scope.
+var execution_scope_ref: WeakRef = null
+var execution_scope_generation: int = -1
+## Logical event time, distinct from the already committed CTB endpoint (-1 = none).
+var effective_tick: int = -1
 
 signal action_async_finished	# allows for async callbacks
 
@@ -78,20 +81,20 @@ func init(_parent_combatant: BaseCombatant = null, _card_play_request: CardPlayR
 func inherit_execution_context(source: BaseAction) -> void:
 	if source == null:
 		return
-	field_owner_bound = source.field_owner_bound
-	field_owner_uid = source.field_owner_uid
-	field_controller_ref = source.field_controller_ref
-	field_controller_generation = source.field_controller_generation
-	field_effective_tick = source.field_effective_tick
+	owner_bound = source.owner_bound
+	owner_uid = source.owner_uid
+	execution_scope_ref = source.execution_scope_ref
+	execution_scope_generation = source.execution_scope_generation
+	effective_tick = source.effective_tick
 
-## false invalidates an already expanded field subtree after combat teardown.
+## false invalidates an already expanded scoped subtree after its scope was torn down.
 func prepare_execution() -> bool:
-	if field_controller_ref != null:
-		var controller: FieldController = field_controller_ref.get_ref()
-		if controller == null or not controller.active or controller.generation != field_controller_generation:
+	if execution_scope_ref != null:
+		var scope: Object = execution_scope_ref.get_ref()
+		if scope == null or not scope.call(&"is_execution_scope_active", execution_scope_generation):
 			return false
-	if field_owner_bound:
-		var owner: BaseCombatant = UnitRegistry.get_unit(field_owner_uid)
+	if owner_bound:
+		var owner: BaseCombatant = UnitRegistry.get_unit(owner_uid)
 		parent_combatant = owner if is_instance_valid(owner) and owner.is_alive() else null
 	elif not is_instance_valid(parent_combatant):
 		parent_combatant = null

@@ -60,9 +60,15 @@ func _reject_spatial(c, original: CardData) -> void:
 		var energy: int = Global.player_data.player_energy
 		var hp: int = c.enemy.get_combatant_health()
 		var count: int = c.counts.played
+		# Normal hand path: the card is greyed out (not playable) and a click neither selects nor queues it.
+		var hand_card: Node = c.hand.card_data_to_hand_card.get(data)
+		c._check(hand_card != null and not hand_card.can_play_card(null, false), "board-only card is unplayable (greyed) without the module: " + variant)
+		hand_card.card_selected.emit(hand_card)
+		await c.process_frame
+		c._check(c.hand.current_selected_card == null and HandManager.card_play_queue.is_empty() and Global.player_data.player_energy == energy, "clicking an unavailable board card neither selects nor queues it: " + variant)
 		HandManager.add_card_to_play_queue(request)
 		await c.process_frame
-		c._check(request.card_values.get("play_rejection", "") == "board_module_required", "disabled module rejects spatial card before execution: " + variant)
+		c._check(request.rejection_reason == "board_module_required" and not request.card_values.has("play_rejection"), "disabled module rejects spatial card before execution (reason on the request, not card_values): " + variant)
 		c._check(Global.player_data.player_energy == energy and HandManager.player_hand.has(data) and HandManager.card_play_queue.is_empty() and c.enemy.get_combatant_health() == hp and c.counts.played == count, "disabled spatial rejection preserves fee pile target and queue: " + variant)
 		HandManager.move_card_to_pile(data, HandManager.HAND_PILE, HandManager.BANISH_PILE, HandManager.PILE_INSERTION_STRATEGIES.TOP, HandManager.get_hand_limit(), false, true)
 		await c.process_frame
