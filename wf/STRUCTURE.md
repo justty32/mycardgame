@@ -17,8 +17,10 @@
 2. **檔名語意**：**README**＝初入一個資料夾先讀的入口／導引；**INDEX**＝描述該資料夾頂層結構的索引。小資料夾兩者合一，大了才分出獨立 INDEX。
 3. **durable 知識歸層**：每份長期知識歸到它所屬的那個工作流／那一層，**絕不往上堆**——AGENTS.md 因此永遠很薄。
 4. **活狀態只列 open**：進度記 `SESSION-LOG.md`、等使用者的記 `WAIT_USER.md`，**完成即刪**；「改了什麼」交給 git log，「為什麼這樣選」記 `workflows/decisions.md`。兩者膨脹就分別拆 `session_logs/`／`wait-user/`，hub 只留導航表。
-5. **三種內容分家**：`analysis/` 記框架的已核實事實，`games/<game>/design/` 記各款遊戲的設計決定與任務 spec／plan，`wf/` 記 agent 怎麼做事；例外是**框架級**（題材中立）spec／plan 放 `wf/specs/`、`wf/plans/`（[decisions](workflows/decisions.md) 第 17 列）。同一件事不跨兩處重述。
+5. **三種內容分家**：`analysis/` 記框架的已核實事實，`games/<game>/design/` 記各款遊戲的設計決定與任務 spec／plan，`wf/` 記 agent 怎麼做事；同一件事不跨兩處重述。
 6. **鐵律極少而 always-on**：3–5 條任何時刻都適用的規矩常駐 AGENTS.md，其餘一切按需取用。
+
+第 5 條的例外：**框架級**（題材中立）spec／plan 放 `wf/specs/`、`wf/plans/`（[decisions](workflows/decisions.md) 第 17 列）。
 
 ## 結構整理原則（膨脹即拆 / 雜亂即分類）
 
@@ -62,11 +64,12 @@
 
 ## archive 規則
 
-- 過時 / 被取代的文檔搬進**所屬工作流**（spec／plan 則為其所屬的 `specs/`、`plans/`）的 `archive/`（共享的進 `common/archive/`），**不刪**：保留脈絡、不在維護鏈。`archive/` 下不加日期子層；同名檔以原所在子資料夾名區分。
-- 檔名保留原名；檔頭第一行加 `> 封存 YYYY-MM-DD，由 <取代它的路徑> 取代`（沒有取代者就寫原因；路徑寫成從 repo 根起算的純文字，不用多層 `../`）。
+- 過時 / 被取代的文檔搬進**所屬工作流**（spec／plan 則為其所屬的 `specs/`、`plans/`）的 `archive/`（共享的進 `common/archive/`），**不刪**：保留脈絡、不在維護鏈。
+- 檔名保留原名；檔頭第一行加 `> 封存 YYYY-MM-DD，由 <取代它的路徑> 取代`（沒有取代者就寫原因）。
 - **指向被封存檔的連結從活文件拿掉**（改純文字或刪句），**當它不存在**；不改指到 `archive/` 路徑。
 - `archive/` 內**只有 `README.md` 索引**（可省略；一列一檔：檔名、封存日期、取代者或原因；**只准追加列**），是唯一可以連進 `archive/` 的地方；不套大小門檻、不維護內部連結。
-- 工作流若依協議用 `done/`／`superseded/` 分層（如 dispatch 的 handoff），同樣視為封存、不套門檻、lint 不下鑽；放信的 `inbox/`（含 `done/`）是寄件原文、比照處理（`workflows/inbox/` 是工作流文件，照掃）。
+
+`archive/` 下不加日期子層，同名檔以原所在子資料夾名區分；檔頭的取代者路徑寫成從 repo 根起算的純文字，不用多層 `../`。kernel 的 dispatch `done/`／`superseded/` 與信件 `inbox/` 協議本專案未導入；若導入，比照封存處理、lint 不下鑽。
 
 ## 資料檔慣例
 

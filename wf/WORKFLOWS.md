@@ -54,5 +54,4 @@
 | 在等誰 | 記哪裡 |
 |--------|--------|
 | 等**使用者**做 / 驗證 / 決定 | [WAIT_USER.md](WAIT_USER.md) |
-| 等**同 repo 另一個 session / fork** | [SESSION-LOG.md](SESSION-LOG.md) 一行 open |
-| 等**別資料夾的 agent** | 信件軸（multi-agent 包，本 repo 未導入）；改用 SESSION-LOG 一行 open|
+| 等**另一個 session / fork / agent** | [SESSION-LOG.md](SESSION-LOG.md) 一行 open（跨資料夾信件軸未導入） |
