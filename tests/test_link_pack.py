@@ -174,7 +174,7 @@ def main() -> int:
                         PROJECT_ROOT / "tools/test_game.py", RUN_ROOT / "test.log")}
     report = {"passed": result.wasSuccessful(), "tests": result.testsRun,
               "failures": len(result.failures), "errors": len(result.errors),
-              "skipped": result.skipped, "platform": platform.platform(),
+              "skipped": [[test.id(), reason] for test, reason in result.skipped], "platform": platform.platform(),
               "python": sys.version, "hashes": hashes,
               "scope": "Synthetic fixtures only; no Godot or GUI; fixtures retained."}
     (RUN_ROOT / "results.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
