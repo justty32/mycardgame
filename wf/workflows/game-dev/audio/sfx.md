@@ -1,13 +1,13 @@
 # sfx — 一次性音效、語意接線與變體
 
-[聲音子流程](README.md)｜[混音與驗證](mixing.md)｜[核實分析](../../../../analysis/slay-the-robot/design/audio.md)
+[聲音子流程](../audio.md)｜[混音與驗證](mixing.md)｜[核實分析](../../../../analysis/slay-the-robot/design/audio.md)
 
 **何時用**：出牌／攻擊／命中／拒絕、按鈕與角色選擇等短音。
 **何時不用**：音樂與循環環境音交 [music](music.md)；玩法結果由機制流程決定。
 
 ## Done when
 
-素材／來源紀錄及事件接線檔存在；任務證據記每一情境的預期／實際播放次數、停止與變體策略。接入測試有本次 `AUDIO:` 斷言與 suite 完成標記，未執行時明列缺口，不以載入通過代替語意驗證。
+素材／來源紀錄及事件接線檔存在；任務證據記每一情境的預期／實際播放次數、停止與變體策略。接入測試有對應的 `AUDIO:` 斷言與 suite 完成標記，未執行時明列缺口，不以載入通過代替語意驗證。
 
 ## 流程
 
@@ -17,7 +17,7 @@
 
 攻擊風聲與扣血命中分開。[ActionAttack](../../../../game/scripts/actions/combatant_actions/ActionAttack.gd) 在 `target.damage()` 前播 `audio_path`，不能保證扣血；[ActionAttackGenerator](../../../../game/scripts/actions/combatant_actions/ActionAttackGenerator.gd) 又追加 ACTION_PLAY_SOUND，並把同 path 傳給 Attack，已有雙播來源。新需求先選唯一接點並補計數回歸，不能直接填 path 宣稱一擊一次。多段／多目標明定「每卡、每段、每受傷目標」哪一種；死亡目標略過、merge_attacks 改成一次攻擊也要驗。
 
-實際扣血可觀察 `combatant_damaged`，完全吸收不能只觀察 `combatant_blocked`：Player／Enemy 在 block > damage 才發 blocked；block == damage 發 block_broken，然後返回零傷害。若需求是「任何零扣血格擋一次」，要結合結果或建立有明確語意的新事件，避免破盾與命中重複。死亡、格擋、命中優先級及同 frame 聚合屬本次音效政策，現框架沒有通用仲裁。
+實際扣血可觀察 `combatant_damaged`，完全吸收不能只觀察 `combatant_blocked`：Player／Enemy 在 block > damage 才發 blocked；block == damage 發 block_broken，然後返回零傷害。若需求是「任何零扣血格擋一次」，要結合結果或建立有明確語意的新事件，避免破盾與命中重複。死亡、格擋、命中優先級及同 frame 聚合屬該任務的音效政策，現框架沒有通用仲裁。
 
 拒絕讀 [Hand](../../../../game/scripts/ui/Hand.gd) 的 `_on_card_selected()`（禁用、不可出、已排隊）及 HandManager（能量不足、死亡目標退款）。目前沒有統一拒絕 signal。先區分手動輸入失敗、取消選取與系統取消；由單一控制器回報原因並播放一次，不能把 `can_play_card()` 的每次查詢／顯示更新當拒絕音。保留視覺原因提示。
 
@@ -25,7 +25,7 @@
 
 ### 製作與接線
 
-按 README 保存來源與母檔。先做一個可辨識基準短音，再做同一語意的變體；比較起音、尾音、峰值及連續重播疲勞。記 pitch／gain 允許範圍、相鄰不重複、冷卻時間與同時發聲上限；這些是待實作政策，現有池沒有上限。若採隨機變體，用獨立呈現 RNG，不能消耗抽牌／傷害 RNG；可測試 seed、可重播序列與聽感自然度是不同證據。
+按 [audio 入口](../audio.md#來源與製作共同契約) 保存來源與母檔。先做一個可辨識基準短音，再做同一語意的變體；比較起音、尾音、峰值及連續重播疲勞。記 pitch／gain 允許範圍、相鄰不重複、冷卻時間與同時發聲上限；這些是待實作政策，現有池沒有上限。若採隨機變體，用獨立呈現 RNG，不能消耗抽牌／傷害 RNG；可測試 seed、可重播序列與聽感自然度是不同證據。
 
 最短資料接線為 ACTION_PLAY_SOUND 的 `audio_path` 與 `audio_path_is_absolute`，或 `ActionGenerator.generate_sound_action(path, false)`；後者立即 perform，不走佇列等待。ActionPlaySound 強制不循環，實際呼叫 `play_ui_sound()`，其 process_mode 為 ALWAYS。若暫停時音效應停止，要選一般 sound pool 或調整政策；不能因名稱含 Sound 就推定使用 PAUSABLE pool。
 
@@ -39,4 +39,4 @@
 
 ## 交接
 
-交 [mixing](mixing.md) 驗 bus、設定與池，並把跨媒體同步所用的同一事件／時點交動畫及 VFX owner。聽感爆音、遮蔽、延遲與疲勞尚未驗時明列；當前不播放聲音。
+交 [mixing](mixing.md) 驗 bus、設定與池，並把跨媒體同步所用的同一事件／時點交動畫及 VFX owner。聽感爆音、遮蔽、延遲與疲勞尚未驗時明列。

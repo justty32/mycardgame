@@ -1,6 +1,6 @@
 # dialogue-cues — 頭像、文字、選項與分支的聲音流程
 
-[聲音場景入口](README.md)｜[對話 UI](../ui/screens/dialogue.md)｜[場景編排](../art-assets/scene-choreography.md)
+[聲音場景入口](../audio.md)｜[對話 UI](../ui/screens/dialogue.md)｜[場景編排](../art-assets/motion/README.md)
 
 **何時用**：為一個有圖像、文字、選項與分支的對話場景建立整組聲音與取消行為。
 **何時不用**：只換事件插圖回美術流程；未要求配音時，不擅自增加角色語音或逐字系統。
@@ -13,9 +13,9 @@
 
 ### 先組聲包並對準現有資料
 
-聲包可包含事件進場短音、可選環境循環、閱讀期間的稀疏文字音或語音、選項確認／拒絕、分支轉場及結束短音。語音與文字音預設互斥，除非 brief 有理由；圖像切換不必額外發聲。逐項記時長、尾音、可跳過、重播、音量、變體／冷卻及有無 loop，沿 README 保存來源和素材規格。語音另記語言、speaker／line ID、字幕全文及音檔對應，不靠檔名猜台詞。
+聲包可包含事件進場短音、可選環境循環、閱讀期間的稀疏文字音或語音、選項確認／拒絕、分支轉場及結束短音。語音與文字音預設互斥，除非 brief 有理由；圖像切換不必額外發聲。逐項記時長、尾音、可跳過、重播、音量、變體／冷卻及有無 loop，沿 [audio 入口](../audio.md#來源與製作共同契約) 保存來源和素材規格。語音另記語言、speaker／line ID、字幕全文及音檔對應，不靠檔名猜台詞。
 
-目前 [DialogueOverlay](../../../../game/scripts/ui/DialogueOverlay.gd) 讀 DialogueData／DialogueStateData，直接 `parse_bbcode()` 顯示名稱與 prompt，圖像是 state 的 dialogue texture，不是已建立的 speaker portrait 系統。**沒有逐字顯示、語音播放、字元到達或台詞完成事件**；新增這些須同時改 UI state／資料 schema／音訊 owner 與測試，不能只填不存在的 audio 欄位。若本次只做既有能力，閱讀階段可以保持無聲。
+目前 [DialogueOverlay](../../../../game/scripts/ui/DialogueOverlay.gd) 讀 DialogueData／DialogueStateData，直接 `parse_bbcode()` 顯示名稱與 prompt，圖像是 state 的 dialogue texture，不是已建立的 speaker portrait 系統。**沒有逐字顯示、語音播放、字元到達或台詞完成事件**；新增這些須同時改 UI state／資料 schema／音訊 owner 與測試，不能只填不存在的 audio 欄位。若只做既有能力，閱讀階段可以保持無聲。
 
 ### 進入、閱讀與分支的 owner
 

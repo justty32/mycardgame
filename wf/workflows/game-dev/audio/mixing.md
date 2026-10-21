@@ -1,13 +1,13 @@
 # mixing — bus、設定、播放池與無聲驗證
 
-[聲音子流程](README.md)｜[資源生命週期](../resource-lifecycle.md)｜[測試規則](../../testing.md)
+[聲音子流程](../audio.md)｜[資源生命週期](../resource-lifecycle.md)｜[測試規則](../../testing.md)
 
 **何時用**：調音量／靜音／bus、併發與回收，或要把聲音接線變成可執行背景驗證。
 **何時不用**：音色或循環製作回 sfx／music；未取得播放授權時不做聽音驗收。
 
 ## Done when
 
-交付檔有 bus／設定／池的預期與斷言日誌；實際執行命令、隔離位置、driver 或替身證據、完成標記及禁止錯誤檢查結果存在。只有靜態或替身證據時如實標記；文件任務完成局部檢查即可，不為測試啟動引擎。
+交付檔有 bus／設定／池的預期與斷言日誌；實際執行命令、隔離位置、driver 或替身證據、完成標記及禁止錯誤檢查結果存在。只有靜態或替身證據時如實標記；只改文件時，文件 lint 通過（見 [testing](../../testing.md)）即可。
 
 ## 流程
 
@@ -19,7 +19,7 @@ SoundManager 音量 setter 接線性 0–1，轉 dB 寫 bus；`play_music_at_vol
 
 設定路徑為 Global ready → FileLoader.load_user_settings（只反序列化）→ SettingsMenu.populate_menu 可能經 slider signal 套量 → slider 即時套量 →離開 menu 保存。冷啟動不開設定頁目前缺少統一套用。修復應由單一 apply 函式供啟動及設定頁使用，先讀值再套 bus；不要靠 populate 副作用。驗 0／中間值／1，保存後全新程序冷啟動不開設定頁，確認三值與兩 bus 相符；現有 SaveLoad suite 是 run 存讀，不代表 settings 已驗。
 
-失焦設定只控制 Master 臨時 mute；focus in 無條件 unmute。若加入持久手動 mute，要分開使用者 mute 與臨時失焦狀態並合成有效值。禁止操作真實焦點；隔離測試直接呼叫 notification handler 只能證明 handler，不證明 OS 事件抵達。
+失焦設定只控制 Master 臨時 mute；focus in 無條件 unmute。若加入持久手動 mute，要分開使用者 mute 與臨時失焦狀態並合成有效值。隔離測試直接呼叫 notification handler 只能證明 handler，不證明 OS 事件抵達。
 
 ### 再定併發與回收
 
@@ -42,7 +42,7 @@ wave 只驗 WAV 檔頭；MP3／OGG 需另核實可用離線解析器，不能用
 
 ### 可接入的最小 loader probe（尚未執行範本）
 
-有實作授權時，在 [bootstrap](../content/bootstrap.md) 的候選副本方式新增 `tests/audio_loader_probe.gd`；以下只載入既有 WAV，不呼叫 SoundManager，也不證明播放／聽感。這個範本仍需在允許背景 Godot 後才執行，本輪不建 helper、不跑引擎。
+有實作授權時，在 [bootstrap](../content/bootstrap.md) 的候選副本方式新增 `tests/audio_loader_probe.gd`；以下只載入既有 WAV，不呼叫 SoundManager，也不證明播放／聽感。這個範本與 helper 都尚未建立、也尚未執行。
 
 ```gdscript
 extends RefCounted
@@ -71,11 +71,11 @@ func check_loaded(file_loader: Node) -> Dictionary:
         _check(audio_results[label], label)
 ```
 
-保留原 tab 縮排及 SMOKE PASS；缺檔負例應另設受控情境，不能讓預期 error 污染正式綠測。runner 複製 tests 頂層 `.gd`，但不自動呼叫 helper；只有檔案沒有接入就零覆蓋。正式接入後命令為 `python3 tools/test_game.py --suite Smoke`；候選 runner 與 user:// 隔離照 bootstrap。檢查本次五個 `PASS: AUDIO:`、SMOKE PASS、results.json 完成／PASS 與禁止錯誤，不只 exit 0。不要執行不存在的 `--suite Audio`。
+保留原 tab 縮排及 SMOKE PASS；缺檔負例應另設受控情境，不能讓預期 error 污染正式綠測。runner 複製 tests 頂層 `.gd`，但不自動呼叫 helper；只有檔案沒有接入就零覆蓋。正式接入後命令為 `python3 tools/test_game.py --suite Smoke`；候選 runner 與 user:// 隔離照 bootstrap。檢查這五個 `PASS: AUDIO:`、SMOKE PASS、results.json 完成／PASS 與禁止錯誤，不只 exit 0。不要執行不存在的 `--suite Audio`。
 
 ### 播放、bus 與池的後續橋接
 
-現有 runner 明列 headless，未顯式 audio driver。執行任何可能播放的 fixture 前，先唯讀查實際引擎與啟動能力，再在獲准的背景程序核實 Dummy driver 名稱／可用性與 AudioServer.get_driver_name()；不能把 headless 當本次已取得無聲證據。必要 runner 改動須涵蓋 import 與 test 階段，避免先啟動後才在腳本靜音。
+現有 runner 明列 headless，未顯式 audio driver。執行任何可能播放的 fixture 前，先唯讀查實際引擎與啟動能力，再在獲准的背景程序核實 Dummy driver 名稱／可用性與 AudioServer.get_driver_name()；不能把 headless 當成已取得無聲證據。必要 runner 改動須涵蓋 import 與 test 階段，避免先啟動後才在腳本靜音。
 
 替身策略須在任何觸發前攔截播放出口，記錄呼叫與參數；僅在播放後設音量 0 不是隔離。現框架沒有可直接切換的全域 mock 開關，新增 seam 或候選腳本替換要獨立設計並斷言確實生效。替身可驗事件及切曲參數，不能驗真實 bus、解碼、tween／pool。Dummy 可驗邏輯狀態，也不能證明聽感。
 
@@ -83,4 +83,4 @@ func check_loaded(file_loader: Node) -> Dictionary:
 
 ## 交接
 
-聽感驗收須另有授權：同場景疊加、低／中／高音量、長循環、接縫、爆音、遮蔽、延遲與疲勞。當前只記未驗，不播放。完成後同步核實分析與驗證選擇；一般未完工程交 agent，純文件變更只做文件檢查。
+聽感驗收須另有授權：同場景疊加、低／中／高音量、長循環、接縫、爆音、遮蔽、延遲與疲勞。未取得授權前只記未驗，不播放。完成後同步核實分析與驗證選擇；一般未完工程交 agent。

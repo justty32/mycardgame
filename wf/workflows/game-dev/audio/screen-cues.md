@@ -1,19 +1,19 @@
 # screen-cues — 獎勵、地圖、休息與選單聲包
 
-[聲音場景入口](README.md)｜[完整場景交付](../scene-pack.md)｜[UI 場景入口](../ui/screens/README.md)
+[聲音場景入口](../audio.md)｜[完整場景交付](../scene-pack.md)｜[UI 場景入口](../ui/screens/README.md)
 
 **何時用**：為非戰鬥畫面交付完整進入、互動、結果與離開聲音流程。
 **何時不用**：對話與商店各走 [dialogue-cues](dialogue-cues.md)、[shop-cues](shop-cues.md)；單一短音加工走 sfx。
 
 ## Done when
 
-本次畫面的組合聲包、事件 owner、停止與視覺替代紀錄存在；以下適用情境已接 helper 並有 cue 次數／順序與遊戲狀態斷言。未實作的播放或 UI 事件明列，文件冷讀不代替 runtime 通過。
+該畫面的組合聲包、事件 owner、停止與視覺替代紀錄存在；以下適用情境已接 helper 並有 cue 次數／順序與遊戲狀態斷言。未實作的播放或 UI 事件明列，文件冷讀不代替 runtime 通過。
 
 ## 流程
 
 ### 共同交付方式
 
-每個畫面先選進場／瀏覽、接受／拒絕、結果、退出短音及可選循環層；可以明定靜音。每項記長度／延遲／尾音、一次或 loop、變體、冷卻、併發與中斷政策，沿 README 的來源／格式，沿 music 的切曲 owner。以下是實際場景組合與接點，不是已存在的 cue API。
+每個畫面先選進場／瀏覽、接受／拒絕、結果、退出短音及可選循環層；可以明定靜音。每項記長度／延遲／尾音、一次或 loop、變體、冷卻、併發與中斷政策，沿 [audio 入口](../audio.md#來源與製作共同契約) 的來源／格式，沿 music 的切曲 owner。以下是實際場景組合與接點，不是已存在的 cue API。
 
 頁面 generation＋業務 request 是去重與取消的範圍；初始化、populate、重繪不等於使用者新操作。選單短音可用 UI pool，但該池 ALWAYS，隱藏頁面不會自動停止。離場、run 切換、死亡及離樹撤銷 pending cue，循環／長台詞另持有 handle 停止，詳 mixing。
 
@@ -49,7 +49,7 @@ BaseRewardButton 點下排 action 後 queue_free，不代表結果已套用。�
 
 聲包包含暫停進入、恢復、返回標題／放棄確認與音量預覽（後者需明確要求）。以 game_paused/game_unpaused 的已接受狀態為 owner；PauseButton pressed 不保證可暫停，PauseOverlay 返回會先 unpause 再 end_run，需避免恢復音與退出音連播。暫停是否壓低／暫停戰鬥曲與環境在 brief 明定，插件未提供完整 ducking。
 
-設定頁修改 slider 已直接套 bus，不能每個 value_changed 播一次預覽；如要預覽用明確操作或受控節流且不繞過當前音量／mute。視覺顯示數值、靜音與保存狀態；離頁取消預覽長音，保存／冷啟動另按 mixing。fixture 驗暫停、恢復、放棄、音量 0、快速拖值與重開；當前不得操作真實視窗焦點。
+設定頁修改 slider 已直接套 bus，不能每個 value_changed 播一次預覽；如要預覽用明確操作或受控節流且不繞過當前音量／mute。視覺顯示數值、靜音與保存狀態；離頁取消預覽長音，保存／冷啟動另按 mixing。fixture 驗暫停、恢復、放棄、音量 0、快速拖值與重開。
 
 ### 結算與返回標題
 
@@ -59,4 +59,4 @@ BaseRewardButton 點下排 action 後 queue_free，不代表結果已套用。�
 
 ## 交接
 
-各 fixture 依 [mixing](mixing.md) 先核實無聲策略，接既有 Smoke／Combat 的 `_check()`、等待與結果日誌；沒有 Screen／Audio suite，新增 helper 也不會自動執行。素材及 [UI 動畫](../art-assets/ui-motion.md) 共用場景 generation 與接受／完成／取消語意，聽感、實際輸入及成品載入另列未驗。
+各 fixture 依 [mixing](mixing.md) 先核實無聲策略，接既有 Smoke／Combat 的 `_check()`、等待與結果日誌；沒有 Screen／Audio suite，新增 helper 也不會自動執行。素材及 [UI 動畫](../art-assets/motion/README.md) 共用場景 generation 與接受／完成／取消語意，聽感、實際輸入及成品載入另列未驗。
