@@ -8,7 +8,7 @@
 
 ## 冷啟動
 
-使用者於 2026-10-20 重申各 agent 開工前先通讀 wf 核心規矩，簡單工作與雜活可免。核心入口為 [根入口 AGENTS.md](../../AGENTS.md)、[派發器](../WORKFLOWS.md)、[使用者邊界](common/user.md)、目標工作流入口檔（見派發器），外加下述 SESSION-LOG／WAIT_USER 檢查；相關規矩依下一段補讀。操作邊界與檔案所有權仍須傳遞。同一任務已讀過且未變動的內容可沿用。
+使用者於 2026-10-20 重申各 agent 開工前先通讀 wf 核心規矩，簡單工作與雜活可免。核心入口為 根入口 AGENTS.md、[派發器](../WORKFLOWS.md)、[使用者邊界](common/user.md)、目標工作流入口檔（見派發器），外加下述 SESSION-LOG／WAIT_USER 檢查；相關規矩依下一段補讀。操作邊界與檔案所有權仍須傳遞。同一任務已讀過且未變動的內容可沿用。
 
 其餘按情境再讀：整理工作流讀 [STRUCTURE](../STRUCTURE.md)、[專案地圖](../INDEX.md)、[PROJECT](../PROJECT.md)；新開工作流讀 [模板](TEMPLATE.workflow.md)；碰原始碼前讀 [慣例](common/conventions.md)、[code map](common/code-map.md)、[dev-env](dev-env.md)；碰資料檔讀 [資料檔契約](common/data-files.md)；收尾回寫讀 [經驗回寫](learning.md)；其餘規矩見 [common 入口](common/README.md)。
 
@@ -48,7 +48,7 @@ cat tools/upstream.json
 
 要驗證本套文件能否支援第一次接手，依 [接手子流程](agent-session/README.md) 的冷接手演練，以無對話歷史的 agent 重走具體任務。能找到文件不代表能開始實作，須交出檔案／資料接點、第一步、驗證命令與未決條件；演練結果與真正遊戲測試分開記錄。
 
-SESSION-LOG 用一句話指向當前工作；複雜任務需要詳細交接時才在 wf/workflows/feature-dev/ 下建立該任務筆記。記錄已完成與尚未完成、修改者／檔案歸屬、已跑指令及結果、保留中的程序／測試副本、下一個可執行步驟。不把全部對話倒入記錄。
+SESSION-LOG 用一句話指向當前工作；複雜任務需要詳細交接時才建立任務 plan（落點見 [planning](planning.md)）。記錄已完成與尚未完成、修改者／檔案歸屬、已跑指令及結果、保留中的程序／測試副本、下一個可執行步驟。不把全部對話倒入記錄。
 
 只有必須由使用者操作的工作放 WAIT_USER；一般待 agent 開發的項目不丟給使用者。已確認長期行為寫入分析或工作流；可重複經驗交 [learning](learning.md)。
 

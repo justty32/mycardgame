@@ -20,7 +20,7 @@
 
 ### 資料與進場
 
-Combat 收 map_location_selected，依 LocationData 類型決定戰鬥或隱藏戰鬥 HUD；COMBAT／MINIBOSS／BOSS 經 ActionGenerator.generate_combat_start 進既有流程。Combat._on_combat_started 把 EventData 交 CombatDirector.begin_combat(event)：建棋盤（EncounterData 或合成）、經 EnemyContainer 生第 0 波並放格、首次行動前處理、時間軸排序；BoardView（左上自繪格子）在 Director 執行中顯示，主角行動時才播動畫、補能量與抽牌。背景非空路徑依 Act→Location→Event 覆寫，Event 優先；空路徑不一定清前場景圖，需求若要空白須明定。
+Combat 收 map_location_selected，依 LocationData 類型決定戰鬥或隱藏戰鬥 HUD；COMBAT／MINIBOSS／BOSS 經 ActionGenerator.generate_combat_start 進既有流程。Combat._on_combat_started 先組裝可選棋盤模組，再把 EventData 交 CombatDirector.begin_combat(event)：經 EnemyContainer 生第 0 波、首次行動前處理、時間軸排序；主角行動時才播動畫、補能量與抽牌。**棋盤不一定存在**：Director 只在場景掛了 board_module 時由模組建盤、放格並顯示 BoardView；未掛載時沒有 BoardView 與格子，敵人照常排在 EnemyContainer，畫面與 cue 不得依賴格子節點（見 [board-module](../../mechanics/board-module.md)）。<!-- TODO(程式 agent)：棋盤模組化完成後核對組裝入口名稱與 BoardView 擁有者 -->背景非空路徑依 Act→Location→Event 覆寫，Event 優先；空路徑不一定清前場景圖，需求若要空白須明定。
 
 玩家與敵人數值來自 mutable data／combatant；HUD 讀 Global.player_data／HandManager，意圖在 Enemy.Visible/Intent，狀態在 BaseCombatant.Visible/StatusContainer。每次 action 刷新與訊號鏈見互動狀態；UI 不因動畫顯示或每 frame 重算就重複扣費、傷害、抽牌。
 

@@ -6,7 +6,21 @@
 
 從專案根使用 [隔離 runner](../../../tools/test_game.py)，例如 `python3 tools/test_game.py --suite Smoke`；先隔離匯入，再查 exit、完成標記及錯誤。[Smoke](../../../tests/framework_smoke.gd) 涵蓋主場景／選單、資料解析、Array／Dictionary patch 與 example_mod 載入／script takeover，沒有出牌或存讀往返。戰鬥與存讀由 Combat／SaveLoad 驗證；最新狀態見 [05 報告](../../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。
 
-本次使用者限制為檔案修改與不開視窗的背景檢查，禁止 UI／桌面操作、截圖、焦點切換、GUI 啟動及干預既有程序；適用邊界見 testing。歷史主選單 capture 只證明該次 viewport 渲染，不證明按鈕互動，也不是本次可重跑的步驟。headless 場景斷言不涵蓋 GPU 或視窗呈現；需要這些證據的部分明列尚未驗證。
+操作邊界見 [user.md](../common/user.md#桌面與程序邊界)：可跑 headless，不做 GUI。歷史主選單 capture 只證明該次 viewport 渲染，不證明按鈕互動，也不是可重跑的步驟。headless 場景斷言不涵蓋 GPU 或視窗呈現；需要這些證據的部分明列尚未驗證。
+
+## 棋盤開關：兩種模式都要驗
+
+棋盤是戰鬥場景的可選模組（[board-module](mechanics/board-module.md)）。凡改到卡牌、敵人、戰鬥流程、Action 或 UI 出牌路徑，都要同時驗**真正未掛棋盤**與**已掛雙盤**兩種模式；單棋盤不能代替未掛載（使用者要求，見 [user.md](../common/user.md#agent-的持續責任)）。
+
+```bash
+python3 tools/test_game.py --suite Boardless   # 未掛棋盤：普通出牌／意圖／波次／勝敗，盤面專屬效果費用前拒絕
+python3 tools/test_game.py --suite DualBoard   # 雙盤 A：跨盤移動／交換、方向型拒絕、本體站格
+python3 tools/test_game.py --suite Board       # 動到單盤幾何、移動、射程時加跑
+python3 tools/test_game.py --suite Field       # 動到場域格／控制區時加跑
+```
+
+- **新增推敵卡**（如 `ActionDisplaceUnit` `mode:"PUSH"`）：DualBoard 驗同盤推動與跨盤方向型拒絕；Boardless 驗該卡在未掛載時費用前拒絕、能量與牌堆不變。
+- **新增敵人**：Boardless 驗普通意圖（NONE 路徑）可打完一場；DualBoard 驗移動意圖與射程。只靠其中一個 suite 通過不算完成。
 
 ## 按變更選驗收
 

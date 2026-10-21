@@ -1,4 +1,4 @@
-> 封存 2026-10-20，由 ../../../../../../../../analysis/slay-the-robot/design/dual-board/README.md 取代
+> 封存 2026-10-20，由 analysis/slay-the-robot/design/dual-board/README.md 取代
 
 # plan：戰鬥框架 Phase 2b 場域格與控制區
 

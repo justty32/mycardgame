@@ -5,7 +5,7 @@
 建立一包可被 agent 套用到原專案的獨立 patch，交給沒有聊天上下文的接手者套用與驗證。
 
 **何時用**：修改需跨 repo 交付、原專案無法直接推送，或要交給冷啟動 agent 套用。
-**何時不用**：能在同一 repo 直接改碼、跑測試、commit → [feature-dev](feature-dev/README.md)；只交付設計方案 → [planning](planning.md)；原專案有正常 PR 流程且會直接開 PR → 使用該 repo 的既有流程。
+**何時不用**：能在同一 repo 直接改碼、跑測試、commit → [game-dev](game-dev/README.md)（遊戲）或 [feature-dev](feature-dev/README.md)（tools／wf）；只交付設計方案 → [planning](planning.md)；原專案有正常 PR 流程且會直接開 PR → 使用該 repo 的既有流程。
 
 ## Done when
 
@@ -85,5 +85,5 @@
 
 ## 交接
 
-- 套用後仍能在同一 repo 內繼續修改與驗證 → [feature-dev](feature-dev/README.md)。
+- 套用後仍能在同一 repo 內繼續修改與驗證 → [game-dev](game-dev/README.md) 或 [feature-dev](feature-dev/README.md)。
 - 發現結構理解不足 → [analysis](analysis.md)；只剩方案缺口 → [planning](planning.md)。

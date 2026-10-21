@@ -32,7 +32,7 @@
 
 雙盤／移動意圖另讀 [棋盤意圖核實](../../../analysis/slay-the-robot/design/board-intents.md)。先指定來源與目標的實際 `board_id`，經 BoardTargeting.geometry → CrossBoardPolicy 查詢，不用 faction 推盤，也不把跨盤 A 當零距離。方向型跨盤效果在費用前拒絕，測例須包含 SINGLE 卡內巢狀推拉、request 值覆寫、全域／隨機目標、拒絕時費用與位置不變；只有 UI 拒絕不涵蓋自動／複製出牌。
 
-先驗模組 on/off 邊界：NONE 的普通攻擊、格擋、custom 與音效須保留；NEAREST／FARTHEST 沿 hero，SELF 不計入 hero 來傷。明確棋盤 payload 用 BoardContentPolicy 在排隊前整體拒絕，純 helper 與來傷預覽共用，不能部分執行。有模組但單位缺盤身分必須拒絕，不得退回 NONE。本輪拆分先有靜態契約；新增回歸結果另依整合報告。
+先驗模組 on/off 邊界（`--suite Boardless` 加 `--suite DualBoard`，見 [validation](validation.md#棋盤開關兩種模式都要驗)）：NONE 的普通攻擊、格擋、custom 與音效須保留；NEAREST／FARTHEST 沿 hero，SELF 不計入 hero 來傷。明確棋盤 payload 用 BoardContentPolicy 在排隊前整體拒絕，純 helper 與來傷預覽共用，不能部分執行。有模組但單位缺盤身分必須拒絕，不得退回 NONE。本輪拆分先有靜態契約；新增回歸結果另依整合報告。
 
 移動意圖至少對照預覽與真正 controller 的落點、命中與次序，覆蓋 move_after、rooted、禁閃現格、CHARGE 穿越去重及中途死亡／退出。NEAREST／FARTHEST 只比較同盤距離，無同盤候選按 uid；跨盤 ComputeBoardValue 卡整體拒絕。新自訂 payload 的估值未被標準預覽涵蓋時，另補實作與回歸，不能用數值 0 表示已模擬。此流程來自 2026-10-20 靜態接線核對；實測結果依該輪整合報告。
 

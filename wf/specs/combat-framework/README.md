@@ -1,8 +1,8 @@
-# spec：隊伍制 CTB 戰棋戰鬥框架（Slay-The-Robot 框架通用能力）
+# spec：隊伍制 CTB 戰鬥框架（棋盤為可選模組；Slay-The-Robot 框架通用能力）
 
 [INDEX](../../INDEX.md)｜[planning](../../workflows/planning.md)
 
-狀態：草案，第 6 節開放問題已由使用者 2026-10-19 決定（見 [09-risks-decisions.md](09-risks-decisions.md)）。Phase 0、Phase 1（CTB + 單一主角）、Phase 2（棋盤 + 移動 + 範圍／形狀卡）、Phase 3（波次）已於 2026-10-19 實作，驗收見 [Phase 0 plan](../../plans/combat-framework/phase-0.md)、[Phase 1 plan](../../plans/combat-framework/phase-1.md)、[Phase 2 plan](../../plans/combat-framework/phase-2.md)、[Phase 3 plan](../../plans/combat-framework/phase-3.md)；與原文的偏差以「修訂」標在 phases.json 與各節；Phase 2b、Phase 4 起尚未動工；2026-10-19 併入「移動規則增補」（11–16 檔，已併進 phases.json 第 2 列與新增的 Phase 2b 列、10-pack-requirements；題材回饋的待補清單見 09-risks-decisions.md）。題材中立——所有題材名詞、數值與角色皆由內容包（JSON mod）提供；本 spec 只定義框架的資料類別、迴圈、訊號、介面與分階段計畫。
+狀態：草案，第 6 節開放問題已由使用者 2026-10-19 決定（見 [09-risks-decisions.md](09-risks-decisions.md)）。Phase 0、Phase 1（CTB + 單一主角）、Phase 2（棋盤 + 移動 + 範圍／形狀卡）、Phase 3（波次）已於 2026-10-19 實作，驗收見 [Phase 0 plan](../../plans/combat-framework/phase-0.md)、[Phase 1 plan](../../plans/combat-framework/phase-1.md)、[Phase 2 plan](../../plans/combat-framework/phase-2.md)、[Phase 3 plan](../../plans/combat-framework/phase-3.md)；與原文的偏差以「修訂」標在 phases.json 與各節；Phase 2b（場域格與控制區）已於 9ced42f 實作（suite `Field`，驗收記錄已封存，現況見下方雙盤契約）；Phase 4 起尚未動工；2026-10-19 併入「移動規則增補」（11–16 檔，已併進 phases.json 第 2 列與新增的 Phase 2b 列、10-pack-requirements；題材回饋的待補清單見 09-risks-decisions.md）。題材中立——所有題材名詞、數值與角色皆由內容包（JSON mod）提供；本 spec 只定義框架的資料類別、迴圈、訊號、介面與分階段計畫。
 需求來源：使用者 2026-10-19 決定（見 01 的目標表）；題材概念目錄只當需求樣本，不進本 spec。
 落點（已決，使用者 2026-10-19）：框架級 spec／plan 放 `wf/specs/`、`wf/plans/`，題材級放 `games/<game>/design/`；題材樹只放「需求與驗收」一頁連回本 spec。每階段開工時在 `wf/plans/` 開同名 plan 記錄實際驗收。
 程式碼引用格式 `檔案:行`，以 2026-10-19 工作樹為準（`tests/framework_smoke.gd`、`tools/test_game.py`、`tests/test_runner_diagnostics.py` 當時正由另一 agent 修改，本 spec 不碰）。原文的節號（§1–§7）保留在各檔標題，正文內的 §3.4 之類交叉引用照節號找檔。
@@ -38,6 +38,8 @@
 - 戰前部署：先用遭遇資料的預設格，不做部署 UI。
 - 落點：`wf/specs/`、`wf/plans/`。
 
-## 2026-10-20 雙盤擴充
+## 方向更新：雙盤 A 與可選棋盤模組（取代 G4 原文）
 
-使用者後續選定的雙棋盤 A、特殊跨盤移動／交換、方向型限制及角色本體站格見 [雙盤契約](../../../analysis/slay-the-robot/design/dual-board/README.md)。本目錄保留原單盤設計脈絡；涉及位置身分、選格與跨盤事件時以新契約為準，實際接線／回歸見 [驗證矩陣](../../../analysis/slay-the-robot/design/dual-board/verification.json)，不是以 Phase 2b 八條摘要取代完整需求。
+**本 spec 的單盤描述已部分過時**：G4「雙方同一張棋盤」已被兩項決定取代（[decisions.json](../../workflows/decisions.json) 第 18、21 列）——(1) 棋盤是戰鬥場景可選掛載的模組，未掛載時普通抽牌、費用、出牌、結算照常，棋盤專屬效果費用前拒絕；(2) 掛載時採雙盤 A。新工作須同時驗未掛棋盤（`--suite Boardless`）與雙盤（`--suite DualBoard`），見 [validation](../../workflows/game-dev/validation.md#棋盤開關兩種模式都要驗)。模組操作見 [board-module](../../workflows/game-dev/mechanics/board-module.md)。
+
+使用者選定的雙棋盤 A、特殊跨盤移動／交換、方向型限制及角色本體站格見 [雙盤契約](../../../analysis/slay-the-robot/design/dual-board/README.md)（暫放 analysis/，正式落點應為 `wf/specs/dual-board/`，待搬，見 decisions 第 22 列）。本目錄保留原單盤設計脈絡；涉及位置身分、選格與跨盤事件時以新契約為準，實際接線／回歸見 [驗證矩陣](../../../analysis/slay-the-robot/design/dual-board/verification.json)，不是以 Phase 2b 八條摘要取代完整需求。

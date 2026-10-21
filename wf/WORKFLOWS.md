@@ -17,7 +17,7 @@
 | 把可重複經驗變成工作流、更新開發慣例 | [learning](workflows/learning.md) |
 | commit／push、snapshot、來源補丁與發布證據 | [版本控制](workflows/version-control.md) |
 
-遊戲需求先用 game-dev 分類，再接下方 feature-dev 的共同流程；不必逐篇讀取全部工作流。
+遊戲需求（含修遊戲 bug）一律走 game-dev，其流程節已含共同迴圈；下方 feature-dev 只用於 tools／wf 類非遊戲工作。不必逐篇讀取全部工作流。
 
 ### 開發 flavor
 
@@ -25,7 +25,7 @@
 
 | 觸發（你說…）| 工作流 | 入口檔（先讀這個）|
 |--------------|--------|-------------------|
-| 「開發 / 修改某個功能」「**修 bug**」 | **feature-dev** | [workflows/feature-dev/README.md](workflows/feature-dev/README.md) |
+| 「開發 / 修改 tools／wf 的功能」「修 tools／wf 的 bug」（遊戲的走 game-dev） | **feature-dev** | [workflows/feature-dev/README.md](workflows/feature-dev/README.md) |
 | 「跑測試 / 驗證」「這樣改有沒有壞」 | **testing** | [workflows/testing.md](workflows/testing.md) |
 | 「重構 / 拆檔 / 整理結構」（行為不變）| **refactor** | [workflows/refactor/README.md](workflows/refactor/README.md) |
 | 「搬檔案 / 改目錄名 / 拆 repo」 | **refactor**（搬移專章）| [workflows/refactor/moving-things.md](workflows/refactor/moving-things.md) |
@@ -34,7 +34,7 @@
 | 「做一包 patch 給別的專案 / 別的 agent 套」 | **patch** | [workflows/patch.md](workflows/patch.md) |
 | 「環境怎麼裝」「fresh clone 後要做什麼」「指令是什麼」 | **dev-env** | [workflows/dev-env.md](workflows/dev-env.md) |
 
-**analysis** ＝初次接觸陌生專案、要建立可延續的分析產物；**investigation** ＝回答一個窄問題。**patch** ＝跨 repo、原專案無 git 或不能直接 push、要交給冷啟動 agent 套用時才用；同一個 repo 內能改能測就走 feature-dev。
+**analysis** ＝初次接觸陌生專案、要建立可延續的分析產物；**investigation** ＝回答一個窄問題。**patch** ＝跨 repo、原專案無 git 或不能直接 push、要交給冷啟動 agent 套用時才用；同一個 repo 內能改能測就走 game-dev（遊戲）或 feature-dev（tools／wf）。
 <!-- wf-insert:WORKFLOWS -->
 
 ### kernel 內建

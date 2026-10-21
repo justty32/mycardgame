@@ -21,6 +21,8 @@
 
 Hand 通過 disabled、right-click、can_play_card 與重複佇列檢查後，直接送出或選目標；HandManager 再核能量並先扣／保留能量、更新 HUD。排入佇列不等於開始執行，失效目標會退款。
 
+選目標、驗證與執行資料由場景提供的 [CardPlayAdapter](../../../game/scripts/combat/CardPlayAdapter.gd) 決定：未掛棋盤時是基底 adapter（點敵人選目標）；掛棋盤時是 [BoardCardAdapter](../../../game/scripts/combat/board/BoardCardAdapter.gd)（選格、跨盤、盤面專屬效果在費用前拒絕）。adapter 不扣費也不入列，演出事件要在兩種模式下都有觸發點，不能只掛在 BoardView 或格子節點上。
+
 `_play_card()` 移卡到 limbo 後發 `Signals.card_play_started`；完成 action 為 [ActionCardPlayEnd](../../../game/scripts/actions/card_actions/card_play_actions/ActionCardPlayEnd.gd) 的 `card_played`。後者仍在 action 處理中，目的牌堆移動在 HandManager 等待 actions_ended 之後；不要把 card_played 說成卡已入棄牌堆。若成功音選開始／完成信號，便不再從 CardButton 及 card_play_actions 重複播放。
 
 `add_actions()` 預設每項推 stack、後項先執行；enqueue 的 current queue 才是 FIFO。HandManager 將完成 action 放在陣列前端，因而最後執行。新增 presentation action 要寫實際執行序，不能只按 JSON 由上往下閱讀。

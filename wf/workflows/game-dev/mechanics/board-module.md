@@ -34,7 +34,7 @@
 
 ## 驗證與交付
 
-依 [testing](../../testing.md) 與 [validation](../validation.md) 交由單一 runtime owner 串行執行隔離 headless。先用普通攻擊／防禦卡證明 NONE 可玩，再驗關閉狀態下的移動、場域、範圍選格牌明確拒絕；檢查能量、保留總額、牌堆及 action 數，不能只看錯誤字串。
+依 [testing](../../testing.md) 與 [validation 的棋盤開關](../validation.md#棋盤開關兩種模式都要驗) 交由單一 runtime owner 串行執行隔離 headless（至少 `--suite Boardless` 與 `--suite DualBoard`）。先用普通攻擊／防禦卡證明 NONE 可玩，再驗關閉狀態下的移動、場域、範圍選格牌明確拒絕；檢查能量、保留總額、牌堆及 action 數，不能只看錯誤字串。
 
 覆蓋掛載到下一場 NONE、NONE 到掛載、死亡後重開、後續 wave、存讀續玩。若宣稱支援真正卸載，增加「排隊後卸載 → 出隊拒絕且只退一次 → 普通牌仍可打 → 重掛後舊請求仍拒絕」；模組 instance、模組 generation 與 Director generation 都要在證據中可辨識，並驗同一個 Node 重新使用時舊請求仍失效。既有 Board／DualBoard／Field／Wave 回歸用來排除拆分造成的語義改變，不能取代 NONE 專項。
 

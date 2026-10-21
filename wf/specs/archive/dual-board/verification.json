@@ -3,7 +3,7 @@
  "source": "README.md",
  "extracted": "2026-10-20",
  "archived": "2026-10-20",
- "replaced_by": "../../../../../../../analysis/slay-the-robot/design/dual-board/verification.json",
+ "replaced_by": "analysis/slay-the-robot/design/dual-board/verification.json",
  "columns": [
   "id",
   "scope",

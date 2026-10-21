@@ -1,4 +1,4 @@
-> 封存 2026-10-20，由 ../../../../../../../analysis/slay-the-robot/design/dual-board/README.md 取代
+> 封存 2026-10-20，由 analysis/slay-the-robot/design/dual-board/README.md 取代
 
 # 雙棋盤 A：契約與 C 演進邊界
 

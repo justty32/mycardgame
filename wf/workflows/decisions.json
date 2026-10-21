@@ -134,6 +134,12 @@
    "decision": "棋盤採戰鬥場景可選掛載模組；普通抽牌、費用、出牌、結算不讀棋盤規則，棋盤 targeting/preflight/preview/位置與舊欄位相容轉譯由 adapter 承擔。示範包保留雙盤 A 與顯式棋盤效果。",
    "rejected_and_why": "拒絕在 Hand／HandManager／Global 繼續加棋盤特判，也不以單棋盤冒充未掛載模式；不建立大型 plugin／DI 系統。既有整合需實際搬責任並以普通卡與真正 boardless 戰鬥回歸。",
    "premise": "2026-10-20 使用者於中性示範包工作中明示；正常卡牌機制維持原義，模組不存在時棋盤專屬效果費用前明確拒絕。原雙棋盤與 Phase 2b 功能須守住。"
+  },
+  {
+   "date": "2026-10-21",
+   "decision": "框架級設計契約（雙盤 A、棋盤模組、棋盤意圖）的正式落點是 wf/specs/<topic>/（第 17 列）；目前位於 analysis/slay-the-robot/design/ 的 dual-board/、board-module.md、board-intents.md 視為待搬，wf 側先以連結指向現址並註明",
+   "rejected_and_why": "不讓 analysis/ 長期承載設計契約：第 7 列已否決（analysis 只記已核實事實）；不由文件整理 agent 直接搬：該目錄屬程式 agent 所有，搬移需同步程式側引用",
+   "premise": "程式 agent 釋出 analysis/slay-the-robot/design/ 所有權時，搬回 wf/specs/dual-board/ 等並改所有引用；若改判此類契約屬已核實事實，則改寫第 7 列"
   }
  ]
 }

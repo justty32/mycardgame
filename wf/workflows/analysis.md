@@ -5,7 +5,7 @@
 用於初次接觸外部 repo、開源專案、舊系統或大型資料夾時，建立可延續、可搬移、可被後續 patch／planning 使用的分析產物。
 
 **何時用**：初次接觸陌生專案，需要建立可供後續工作延續的架構與能力分析。
-**何時不用**：只回答一個窄問題 → [investigation](investigation.md)；只是閱讀論文／規格／文章 → research 包（若有導入）；已在目標 repo 內實作功能 → [feature-dev](feature-dev/README.md)。
+**何時不用**：只回答一個窄問題 → [investigation](investigation.md)；只是閱讀論文／規格／文章 → research 包（若有導入）；已在目標 repo 內實作功能 → [game-dev](game-dev/README.md) 或 [feature-dev](feature-dev/README.md)。
 
 ## Done when
 

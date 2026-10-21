@@ -5,7 +5,7 @@
 只改結構、不改行為。方法在 [STRUCTURE](../../STRUCTURE.md)，本檔只管流程。
 
 **何時用**：STRUCTURE 門檻超標（單檔過大、資料夾雜亂），或使用者要求整理。
-**何時不用**：順手改了行為 → [feature-dev](../feature-dev/README.md)；還沒搞懂現況 → [investigation](../investigation.md)。
+**何時不用**：順手改了行為 → [game-dev](../game-dev/README.md) 或 [feature-dev](../feature-dev/README.md)；還沒搞懂現況 → [investigation](../investigation.md)。
 
 ## Done when
 
@@ -27,4 +27,4 @@
 
 ## 交接
 
-- 結構就位後要加功能 → [feature-dev](../feature-dev/README.md)；為什麼這樣拆 → [decisions](../decisions.md)。
+- 結構就位後要加功能 → [game-dev](../game-dev/README.md) 或 [feature-dev](../feature-dev/README.md)；為什麼這樣拆 → [decisions](../decisions.md)。

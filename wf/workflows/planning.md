@@ -20,7 +20,7 @@
 | **idea** | 要不要做？ | 下方「想法」表 |
 | **roadmap** | 會做，何時？ | 下方「roadmap」表 |
 | **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放該題材樹的 `games/<game>/design/specs/`、`games/<game>/design/plans/`；框架級放 `wf/specs/`、`wf/plans/`（見下節）。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
-| **執行** | — | 開發：feature-dev；非開發：未導入 |
+| **執行** | — | 遊戲：game-dev；tools／wf：feature-dev；非開發：未導入 |
 
 ## 任務規格與 plan 落點
 
@@ -30,7 +30,7 @@
 - plan（步驟、驗證、實際驗收記錄）：`games/<game>/design/plans/YYYY-MM-DD-<slug>.md`，與 spec 同名。
 - 框架級 spec：`wf/specs/<topic>/README.md` 為入口，依 lint 大小拆成多檔（大表走資料檔）；plan：`wf/plans/<topic>/`，按階段一檔記錄實際驗收。框架 spec 不放 `games/`，題材樹只放需求與驗收一頁連回框架 spec。
 - 小改不開 spec／plan：任務記錄寫在 commit 訊息與交付回報。
-- 目錄在第一份出現時建立；動工完成移 `games/<game>/design/archive/`。題材樹導航由根 AGENTS.md 路由。
+- 目錄在第一份出現時建立；動工完成移 `games/<game>/design/archive/`（框架級移 `wf/specs/archive/`、`wf/plans/archive/`）。題材樹導航由根 AGENTS.md 路由。
 
 ## 遊戲規劃
 
@@ -63,7 +63,7 @@
 | 事項 | 何時 / 順序 | 前提 |
 |------|------------|---------|
 | 定義各款遊戲的原創玩法與最小可玩內容 | 各題材的進度與順序記在該題材樹的 wf/ roadmap | 決定核心玩法，再依 game-flow 建立新局、選擇、戰鬥／非戰鬥、結算與續玩的最小閉環 |
-| 框架戰鬥系統（隊伍制 CTB 戰棋） | Phase 0–3 已完成（2026-10-19）；下一步 Phase 2b，再 Phase 4–6，見 [spec](../specs/combat-framework/README.md) | 題材中立；需求樣本來自各題材樹 |
+| 框架戰鬥系統（隊伍制 CTB；棋盤為可選模組，掛載時雙盤 A） | Phase 0–3、2b 已完成；下一步 Phase 4–6，見 [spec](../specs/combat-framework/README.md) | 題材中立；需求樣本來自各題材樹 |
 | 第二款原創題材（異能戰鬥卡牌遊戲） | 使用者 2026-10-19 表示要做，尚未建樹；開始時用 `tools/new_pack.py` 建樹並走「遊戲規劃」提問 | 與現有題材共用框架，題材間互不連結 |
 
 框架已匯入、修復 Dictionary 與資源生命週期並建立流程回歸，見 [當前驗證](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。上表仍屬後續玩法方向，基準測試通過不代表原創內容已完成；落地順序見 [整體遊戲流程](game-dev/game-flow.md)。

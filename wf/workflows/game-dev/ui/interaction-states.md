@@ -16,7 +16,7 @@
 
 EndTurnButton 發 end_action_requested，CombatDirector 經 CombatEndAction 等卡牌與 actions，再播結束動畫；主角抽牌後才啟用。Hand disabled、actions_being_performed 與 card_play_queue 是不同狀態；別假設所有 action 期間都禁止排隊出牌。敵人意圖在 Enemy 的 `Visible/Intent`、血條／格擋／狀態在 BaseCombatant；動這些顯示要同查其更新方法，不從頂端 HealthLabel 複製。
 
-[Card.gd](../../../../game/scripts/ui/card/Card.gd) 的 CardButton.gui_input 在 left_click／right_click **釋放**時發 card_selected／card_right_clicked；[Hand.gd](../../../../game/scripts/ui/Hand.gd) 訂閱後，先拒絕 disabled、右鍵執行中、can_play_card 失敗、同牌已在 queue 的出牌。無目標卡直接建 CardPlayRequest 入列；需目標卡存 current_selected_card，顯示 SelectTargetLabel。BoardView 的 cell_clicked 讓 Hand 建 request（未選牌則移動）；enemy_hovered（離開時為 null）要求卡面重算預覽。
+[Card.gd](../../../../game/scripts/ui/card/Card.gd) 的 CardButton.gui_input 在 left_click／right_click **釋放**時發 card_selected／card_right_clicked；[Hand.gd](../../../../game/scripts/ui/Hand.gd) 訂閱後，先拒絕 disabled、右鍵執行中、can_play_card 失敗、同牌已在 queue 的出牌。無目標卡直接建 CardPlayRequest 入列；需目標卡存 current_selected_card，顯示 SelectTargetLabel。選目標有兩條入口，都經場景的 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd)：**未掛棋盤**時 Enemy 發 enemy_clicked，Hand._on_enemy_clicked 以 adapter.selection_for_target(enemy) 出牌，這是普通出牌路徑，不能拿掉；**已掛棋盤**時 BoardView 的格子點擊經 adapter.handle_cell_clicked 交 BoardCardAdapter 建 request（未選牌則移動），基底 adapter 對格子點擊不做事。enemy_hovered（離開時為 null）要求卡面重算預覽。
 
 背景 BackgroundButton.button_up 清 current_selected_card 並隱藏提示；右鍵也先取消目標，但之後可能執行 card_right_click_actions，不能把右鍵視為純取消。disable_hand(true) 會清目標；combat／run ended 會清手牌並隱藏提示。新增目標規則時驗「選牌後目標失效」及送出前重新驗證，不能把舊選取當成永久合法。既有 Card 流程不是拖放 API。
 

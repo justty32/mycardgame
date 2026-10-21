@@ -10,23 +10,23 @@
 - V3 `python3 tools/test_game.py --suite Smoke`；階段 1 起另跑 `--suite All`
 - V4 該階段新增的 headless 測試（接進 `tools/test_game.py` 的 suite 清單；在另一 agent 的 runner 改動 commit 後再動 runner，避免衝突）
 
-agent 分級：雜活＝sonnet、普通＝opus、需思考＝fable（依 user.md）。所有 fixture 只用框架測試資料（`character_red`、`enemy_1`、`card_attack_basic`…），禁止題材 id 進 `game/`、`tests/`。
+agent 分級依 [user.md](../../workflows/common/user.md) 現行指定（普通派 opus、簡單工作與雜活派 sonnet）；phases.json 的 agent 欄已依此改寫。所有 fixture 只用框架測試資料（`character_red`、`enemy_1`、`card_attack_basic`…），禁止題材 id 進 `game/`、`tests/`。
 
 各階段的改動、規模、風險、Done when、agent 已抽到 [phases.json](phases.json)（8 列，每列一個階段；含 2b）。欄位：phase、title、playable、changes、size、risk、done_when、agent。下列標題只列階段名稱與可玩狀態。
 
-### Phase 0：基礎重構——combatant 抽象化、單位註冊表、規則物件（可玩：與現在完全相同）
+### Phase 0：基礎重構——combatant 抽象化、單位註冊表、規則物件（可玩：與現在完全相同；**已完成**）
 
 
-### Phase 1：CTB + 單一主角（可玩：一名主角 vs 多敵，依速度排隊）
+### Phase 1：CTB + 單一主角（可玩：一名主角 vs 多敵，依速度排隊；**已完成**）
 
 
-### Phase 2：棋盤 + 移動 + 範圍／形狀卡（可玩：主角在 5×5 移動並用射程卡）
+### Phase 2：棋盤 + 移動 + 範圍／形狀卡（可玩：主角在 5×5 移動並用射程卡；**已完成**；後由雙盤 A 與可選模組延伸，見 [README](README.md#方向更新雙盤-a-與可選棋盤模組取代-g4-原文)）
 
 
-### Phase 2b：場域格與控制區（可玩：戰鬥中場域與控制區可觸發；移動增補，見 [16-movement-phasing.md](16-movement-phasing.md)，排在 Phase 3 之後）
+### Phase 2b：場域格與控制區（可玩：戰鬥中場域與控制區可觸發；移動增補，見 [16-movement-phasing.md](16-movement-phasing.md)，排在 Phase 3 之後；**已完成**，9ced42f，suite `Field`）
 
 
-### Phase 3：波次（可玩：一場遭遇兩波）
+### Phase 3：波次（可玩：一場遭遇兩波；**已完成**）
 
 
 ### Phase 4：多主角資料模型 + AI 隊員戰鬥行動（可玩：主角 + 2 名 AI 隊員）

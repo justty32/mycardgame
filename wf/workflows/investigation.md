@@ -5,7 +5,7 @@
 只讀不改，查清楚「這怎麼運作／可不可行」，產出可歸檔的筆記。
 
 **何時用**：看懂外部系統或別人的碼、評估可行性、查 bug 成因。
-**何時不用**：已知道怎麼改 → [feature-dev](feature-dev/README.md)；只搬結構 → [refactor](refactor/README.md)。
+**何時不用**：已知道怎麼改 → [game-dev](game-dev/README.md)（遊戲）或 [feature-dev](feature-dev/README.md)（tools／wf）；只搬結構 → [refactor](refactor/README.md)。
 
 ## Done when
 
@@ -31,4 +31,4 @@
 
 ## 交接
 
-- 要動手 → [feature-dev](feature-dev/README.md)；同一坑第二次 → [common/gotchas](common/gotchas.md)。
+- 要動手 → [game-dev](game-dev/README.md) 或 [feature-dev](feature-dev/README.md)；同一坑第二次 → [common/gotchas](common/gotchas.md)。

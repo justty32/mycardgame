@@ -31,7 +31,7 @@
    "size": "~900 行新增、~400 行刪除；18 檔 + Root.tscn",
    "risk": "中高：AnimationPlayer 驅動的 `start_turn/end_turn` 動畫（`Combat.gd:482-574`）要改成 Director 播放再 await；`combat_flow.gd` 訊號計數需改；資源生命週期（Director 的 await 在 combat_ended／run_ended 後要能取消，沿 `ActionHandler._action_generation` 的世代做法）",
    "done_when": "新 `tests/ctb_flow.gd`（suite `Ctb`）：fixture 兩個敵人速度 20 與 5、主角 10，斷言前 8 筆行動順序與刻數、`combat_tick_advanced` 遞增、`EVERY_N_TICKS` 狀態觸發次數、格擋在行動開始清空、`turn_count` = 主角行動數；`combat_flow.gd` 改用新訊號後仍驗 14 傷害消 10 格擋等數值；`--suite All` 綠；`ResourceLifecycle` 綠（Director 退出無 leak）；**修訂 2026-10-19（實作 Phase 1）**：`tests/ctb_flow.gd`＋`tests/ctb_fixture.gd`（suite `Ctb`，標記 `CTB PASS:`，排入 `All` 的 CombatDefeat 與 SaveLoad 之間；`tools/test-game.ps1` ValidateSet 加 `Ctb`）53 checks：seed 20261019、主角速度 10、敵人 fast 20／slow 5，前 8 筆 = fast@0、hero@0、slow@0、fast@500、fast@1000、hero@1000、fast@1500、fast@2000，`combat_tick_advanced` 0→500→1000→1500→2000，500 刻 `EVERY_N_TICKS` 狀態 10→8（刻 1000）→6（刻 2000），格擋 10→9→主角第二次行動開始歸 0，`turn_count` 2 = 主角 action_count（fast 3 次，之後 5 次），`is_player_turn` 只在主角行動中，TimelineBar 可見、TurnOverlay「Tick 1000 - Action 2」，中途 free 場景後無殘留 Director；`combat_flow.gd` 另斷言勝利路徑敵人 `unit_action_started/ended` 各 1 次且 End Turn 後刻 1000、敗北路徑致命敵人行動只 started 不 ended 且 Director 已停，舊數值契約（抽 5、能量 3、14 傷害消 10 格擋＋4 HP、`turn_count == 2`）不變；`python3 tools/test_game.py --suite All` 全綠（ResourceLifecycle 127、Dictionary 47、Smoke 82、CombatVictory 87、CombatDefeat 46、Ctb 53、SaveLoad write 28／read 56／rejected 73），pack 側寫 Smoke 60 checks、runner 合成測試 136、boundary lint 測試 19、new_pack 14 全過，boundary lint violations 0；TimelineBar 位置、TurnOverlay 文字、End Turn 啟用時機與動畫觀感需使用者實機確認；實際驗收見 wf/plans/combat-framework/phase-1.md",
-   "agent": "需思考（fable）寫 Director/Timeline 與訊號遷移；雜活（sonnet）改 artifacts/decorator/TurnOverlay 等機械替換"
+   "agent": "普通（opus）寫 Director/Timeline 與訊號遷移；雜活（sonnet）改 artifacts/decorator/TurnOverlay 等機械替換"
   },
   {
    "phase": "2",
@@ -41,7 +41,7 @@
    "size": "~1200 行；20 檔 + Root.tscn；移動增補：原 ~1200 行 → ~1700 行；20 檔 → 27 檔。",
    "risk": "高：目標選擇 UI 流程改動最大；大型單位佔格與距離定義要先固定；`example_mod` 的卡沒有 range（-1 = 不檢查）必須仍可玩；移動增補：付費移動把延遲「相加」而非取 max，需在 `_compute_action_delay` 單點處理並在 ctb_flow 補一個斷言；`ActionDisplaceUnit` 必須在單位 `tree_exiting`／倒下後安全（targets 已不在棋盤則跳過）。",
    "done_when": "新 `tests/board_flow.gd`（suite `Board`）：7×5 遭遇、主角移動 1 格後距離正確、`card_range=1` 對距離 2 的目標被拒、CROSS 形狀命中 3 單位、LINE_PIERCE 穿透、2×2 敵人佔 4 格且任一格都可選、敵人 APPROACH 後命中、`ThreatPreview` 數值等於實際受傷；`Smoke` 驗 legacy 事件（無 encounter id）自動合成；`--suite All` 綠；移動增補（`tests/board_flow.gd`，suite `Board`，fixture 7×5、主角在 (3,4)）：\n1. 行動開始 `move_points == 1`；點擊距離 1 空格 → `unit_moved` 一次、`move_points == 0`、`cells_moved_this_action == 1`。\n2. 付費移動 2 格後 `action_extra_delay == 40`，行動結束 `next_action_tick` 比只出一張 100 延遲牌多 40 刻。\n3. 障礙格 (3,2) 與 (2,3)、(4,3) 封住時 `reachable_cells` 不含 (3,2) 後方格；敵人站 (3,3) 時路徑繞行（`find_path` 長度 ≥ 3）。\n4. `card_test_dash_strike`：對同列距離 3 的敵人出牌 → 主角停在相鄰格並造成 6 傷害；對非同行同列目標 `ValidatorInLine` 拒絕。\n5. `card_test_shove` 推距離 2：敵人在 (3,3) 推向北 → 到 (3,1)，`displaced_cells == 2`、無碰撞傷害；敵人在 (3,1) 推 → 不動、`collided == true`、受 `3 × 2 = 6` 碰撞傷害；(3,2) 後方 (3,1) 有另一敵人 → 推 0 格、兩者各受 3（`collision_damage_to_blocker` 設 3 的 fixture 變體）。\n6. 2×2 敵人（既有案例）`ActionDisplaceUnit` 不動（`displace_max_footprint_area 1`），`is_immovable` 敵人同樣不動；`status_rooted` 的主角 `card_test_blink` 被 Validator 拒絕。\n7. `SWAP` 與 (3,3) 的 NEUTRAL 測試單位交換後兩者 anchor 互換、`unit_moved` 兩次；`PULL_ADJACENT` 把 (3,0) 的敵人拉到 (3,3)。\n8. `card_test_blink` 對被佔格拒絕、對距離 3 空格成功、距離 4 被 `card_range` 拒絕。\n9. `enemy_test_archer`（KEEP_RANGE 3）主角走到距離 2 後其 `planned_move_cell` 距離為 3，行動後實際位置一致且命中；`enemy_test_charger` 與主角同列距離 4、`move_range 3` → 行動後相鄰並命中；不同列時退化 APPROACH。\n10. `ThreatPreview` 數值在敵人預計移動後與實際受傷相等（既有案例延伸到 KEEP_RANGE／CHARGE）。\n11. `ActionSummonEnemies` 指定格被佔 → 生成在最近空格（距離 1，y 小者優先）。\n12. `ValidatorDistance >= 3` 的測試牌在距離 2 時 `card_is_playable` 為 false、glow 關閉；`ActionComputeBoardValue` 後 `card_values.distance` 等於 `BoardData.distance`。\n13. legacy 事件（無 encounter id）合成後主角仍可不移動直接出 `card_attack_basic`（免費移動 0 的框架預設路徑）。\n**修訂 2026-10-19（實作 Phase 2）**：第 2 條「多 40 刻」改為延遲 +40（速度 10 下 = 400 刻，下次行動 1400 vs 1000）；第 5 條撞牆案例改為敵人在邊緣 (3,0)、主角在 (3,1)（原寫法超出射程 1），「兩者各受 3」用距離 1 的變體卡；第 6 條定身時閃現在選牌階段即不可打（ValidatorPathExists 移動力檢查）；第 13 條由 CombatVictory（combat_flow.gd）斷言；「付費延遲相加」的斷言放 Board 第 2 條而非 ctb_flow；實際：suite `Board`（tests/board_flow.gd＋board_cases.gd＋board_fixture.gd，88 checks，標記 `BOARD PASS:`，All 中排在 Ctb 與 SaveLoad 之間），`--suite All` 全綠（Smoke 88、CombatVictory 89、CombatDefeat 48、Ctb 53、Board 88、其餘不變），pack 側寫 Smoke 66、合成測試 138；BoardView 觀感與滑鼠操作需使用者實機確認；實際驗收見 wf/plans/combat-framework/phase-2.md",
-   "agent": "需思考（fable）：BoardTargeting／意圖解析／Hand 目標流程；普通（opus）：BoardView/BoardCell UI；雜活：資料欄位與 SCHEMA；移動增補：需思考（fable）：`reachable_cells`／`IntentResolver`／`ActionDisplaceUnit` 碰撞規則；普通（opus）：BoardView 預覽與幽靈；雜活（sonnet）：欄位、Validator、測試資料。"
+   "agent": "普通（opus）：BoardTargeting／意圖解析／Hand 目標流程；普通（opus）：BoardView/BoardCell UI；雜活：資料欄位與 SCHEMA；移動增補：普通（opus）：`reachable_cells`／`IntentResolver`／`ActionDisplaceUnit` 碰撞規則；普通（opus）：BoardView 預覽與幽靈；雜活（sonnet）：欄位、Validator、測試資料。"
   },
   {
    "phase": "3",
@@ -61,7 +61,7 @@
    "size": "~~500 行、8 檔",
    "risk": "純新增，掛在既有 tick／移動訊號上",
    "done_when": "`tests/field_flow.gd`（suite `Field`）——建立 300 刻場域、進入觸發一次、停留在行動開始觸發、過期移除、`field_blocks_movement` 阻擋尋路、`EXTRA_MOVE_COST` 讓可達格集合縮小、`OPPORTUNITY_ATTACK` 對離開者造成 preview 相同傷害、強制位移不觸發控制區但觸發場域進入。",
-   "agent": "（原文未列；整合時沿用同類分工）需思考（fable）：場域觸發時點與控制區；雜活（sonnet）：欄位與測試資料"
+   "agent": "（原文未列；整合時沿用同類分工）普通（opus）：場域觸發時點與控制區；雜活（sonnet）：欄位與測試資料"
   },
   {
    "phase": "4",
@@ -71,7 +71,7 @@
    "size": "~1300 行；25 檔",
    "risk": "高：proxy 期間雙真相；`register_artifact_interceptors` 掛錯單位會讓遺物對隊員失效或重複觸發；AI 用 preview 攔截估值時攔截器必須尊重 `preview_mode`（既有慣例，`BaseAction.gd:221-224`）",
    "done_when": "新 `tests/party_flow.gd`（suite `Party`）：fixture 隊伍 3 人（主角 PLAYER、兩名 AI 用框架測試 `ai_profile_test_aggressive`／`_defensive`），斷言各自牌堆獨立（主角出牌不影響隊員手牌）、各自能量、AI 隊員在自己的行動中發出 `ai_plan_decided` 且至少打出一張牌、攻擊型靠近敵人、防禦型對 HP<50% 主角出格擋、一名隊員倒下後主角仍可行動且戰後依 policy 回 1 HP；新 `tests/party_data_regression.gd`：主角 proxy 讀寫 == `player_party[0]`；`--suite All` 綠",
-   "agent": "需思考（fable）：資料模型/ proxy / AI 規劃器；普通（opus）：PartyUnit 與 UI；雜活：欄位、測試資料"
+   "agent": "普通（opus）：資料模型/ proxy / AI 規劃器；普通（opus）：PartyUnit 與 UI；雜活：欄位、測試資料"
   },
   {
    "phase": "5",

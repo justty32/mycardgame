@@ -1,4 +1,4 @@
-> 封存 2026-10-20，由 ../../../../../../../analysis/slay-the-robot/design/dual-board/presentation.md 取代
+> 封存 2026-10-20，由 analysis/slay-the-robot/design/dual-board/presentation.md 取代
 
 # 雙棋盤呈現：角色本體站在格上
 
