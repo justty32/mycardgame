@@ -1,7 +1,7 @@
 {
  "contract": "wf-table/1",
  "source": "README.md",
- "extracted": "2026-10-20",
+ "extracted": "2026-10-21",
  "link_columns": [
   "published_path"
  ],
@@ -23,37 +23,37 @@
  "rows": [
   {
    "id": "standalone-results.json",
-   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/results.json",
+   "raw_artifact": "artifacts/verification/20261021-143637-e0f42c7c/results.json",
    "published_path": "standalone-results.json",
-   "raw_sha256": "113d00cabcbfa16ba2d26257e85590bea7a53cfa4a1754aaf3172d920c1caedc",
-   "published_sha256": "dd46789b1bb4d99c12c9b8bf7467fa9782714f94a7039281d222efb71bf7dc88",
-   "raw_bytes": 37217,
-   "published_bytes": 36726,
+   "raw_sha256": "d23f867fb70ff4033e20972880da1dbd22dd4cf3d531b96ab33d739868dd3ee4",
+   "published_sha256": "113e01f31bcf45aa7eea74c5f3588308284df6a74342960f0371c82f6a5a9e14",
+   "raw_bytes": 40323,
+   "published_bytes": 39760,
    "transformation": "JSON UTF-8 LF; path-prefix-redaction"
   },
   {
    "id": "prepared-results.json",
-   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/results.json",
+   "raw_artifact": "artifacts/verification/20261021-143831-172dc82b/results.json",
    "published_path": "prepared-results.json",
-   "raw_sha256": "ece7f54fcd8dcca4ac36bd603c2879e80e2558d097a00b436809ea24fd12a26b",
-   "published_sha256": "526ed30e0a3e69374a2a17d2f979303681562c18578420bb9abfb571180a46d9",
-   "raw_bytes": 276294,
-   "published_bytes": 35569,
+   "raw_sha256": "0cbb02885f1914fa6e7f36fd8660315288f389aac53355fbf609e3c2f0e9d34c",
+   "published_sha256": "5e9a0c10783ec59a090d9c2a28a5a1b9f921195a6724f1780893e44401dc34c3",
+   "raw_bytes": 279817,
+   "published_bytes": 38538,
    "transformation": "explicit summary; only embedded preparation source/output ledgers condensed; runtime phases retained; JSON UTF-8 LF; path-prefix-redaction"
   },
   {
    "id": "prepare-summary.json",
-   "raw_artifact": "artifacts/playable/1aa7d00bb8534aff9ef57ec9068aca85/manifest.json",
+   "raw_artifact": "artifacts/playable/72c4ad489f644f309215061ad2e819eb/manifest.json",
    "published_path": "prepare-summary.json",
-   "raw_sha256": "204db408084c6c8a07937ba0583a777c683329b64006f2c4867640b87c3fb383",
-   "published_sha256": "0b0b5a3f7b7ac532084f01f4d670100ee13b9971fc0a1f1b8468f45e55a96e04",
-   "raw_bytes": 243636,
+   "raw_sha256": "4cd917b71cbdfecc7c8a8419cb4e47259b3a1aeda9c5ffd444a1f49839431263",
+   "published_sha256": "014e1b622adb5cd602d2caf0768188b86f9a7e31c6c1c91d816d2098c5017c67",
+   "raw_bytes": 244114,
    "published_bytes": 5134,
    "transformation": "explicit summary; full framework ledgers replaced by count and canonical digest; installed pack hashes retained; JSON UTF-8 LF; path-prefix-redaction"
   },
   {
    "id": "standalone-PackScenario-scenario-write.log",
-   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/PackScenario/scenario-write.log",
+   "raw_artifact": "artifacts/verification/20261021-143637-e0f42c7c/PackScenario/scenario-write.log",
    "published_path": "standalone/PackScenario/scenario-write.log",
    "raw_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
    "published_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
@@ -63,7 +63,7 @@
   },
   {
    "id": "standalone-PackScenario-scenario-read.log",
-   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/PackScenario/scenario-read.log",
+   "raw_artifact": "artifacts/verification/20261021-143637-e0f42c7c/PackScenario/scenario-read.log",
    "published_path": "standalone/PackScenario/scenario-read.log",
    "raw_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
    "published_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
@@ -73,7 +73,7 @@
   },
   {
    "id": "standalone-PackScenario-scenario-defeat.log",
-   "raw_artifact": "artifacts/verification/20261020-114335-3af4365d/PackScenario/scenario-defeat.log",
+   "raw_artifact": "artifacts/verification/20261021-143637-e0f42c7c/PackScenario/scenario-defeat.log",
    "published_path": "standalone/PackScenario/scenario-defeat.log",
    "raw_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
    "published_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
@@ -83,7 +83,7 @@
   },
   {
    "id": "prepared-PackScenario-scenario-write.log",
-   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-write.log",
+   "raw_artifact": "artifacts/verification/20261021-143831-172dc82b/PackScenario/scenario-write.log",
    "published_path": "standalone/PackScenario/scenario-write.log",
    "raw_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
    "published_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
@@ -94,7 +94,7 @@
   },
   {
    "id": "prepared-PackScenario-scenario-read.log",
-   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-read.log",
+   "raw_artifact": "artifacts/verification/20261021-143831-172dc82b/PackScenario/scenario-read.log",
    "published_path": "standalone/PackScenario/scenario-read.log",
    "raw_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
    "published_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
@@ -105,7 +105,7 @@
   },
   {
    "id": "prepared-PackScenario-scenario-defeat.log",
-   "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-defeat.log",
+   "raw_artifact": "artifacts/verification/20261021-143831-172dc82b/PackScenario/scenario-defeat.log",
    "published_path": "standalone/PackScenario/scenario-defeat.log",
    "raw_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
    "published_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",

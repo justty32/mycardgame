@@ -12,7 +12,7 @@ func run(c, enemy: BaseCombatant) -> bool:
 	var discard_before: Array = HandManager.player_discard.duplicate()
 	card.card_selected.emit(card)
 	for selected: Dictionary in [{"id": "enemy", "cell": Vector2i(0, 0)}, {"id": c.player.board_id, "cell": c.player.board_anchor}]:
-		var accepted: bool = c.hand.attempt_play_selected_card_at_cell(selected.cell, null, selected.id)
+		var accepted: bool = c.hand.attempt_play_selected_card({"target": null, "cell": selected.cell, "id": selected.id})
 		await c.process_frame
 		c.check(not accepted and c.hand.last_target_rejection == "no_valid_target" and c.hand.current_selected_card == card, "ordinary Strike rejects empty/friendly board cell while retaining selection")
 		c.check(HandManager.card_play_queue.is_empty() and HandManager.player_hand == hand_before and HandManager.player_draw == draw_before and HandManager.player_discard == discard_before and Global.player_data.player_energy == energy and enemy.get_combatant_health() == hp and c.played == played, "ordinary invalid board selection preserves fee piles target and queue")
@@ -20,7 +20,7 @@ func run(c, enemy: BaseCombatant) -> bool:
 	var on_started: Callable = func(request):
 		if request.card_data == data: observed["board_context"] = request.module_contexts.has("board")
 	Signals.card_play_started.connect(on_started)
-	var accepted: bool = c.hand.attempt_play_selected_card_at_cell(enemy.board_anchor, enemy, enemy.board_id)
+	var accepted: bool = c.hand.attempt_play_selected_card({"target": enemy, "cell": enemy.board_anchor, "id": enemy.board_id})
 	var completed: bool = await c.wait_for(func(): return c.played > played and c.idle(), "ordinary Strike accepts enemy cell and completes")
 	Signals.card_play_started.disconnect(on_started)
 	c.check(accepted and completed and hp - enemy.get_combatant_health() == 8 and Global.player_data.player_energy == energy - 1, "ordinary Strike enemy-cell selection deals authored eight damage for one energy")

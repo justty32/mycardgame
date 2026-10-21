@@ -1,9 +1,9 @@
 {
   "suite": "PackScenario",
-  "run_id": "20261020-114738-1a266209",
-  "source_game": "{PROJECT_ROOT}\\artifacts\\playable\\1aa7d00bb8534aff9ef57ec9068aca85\\game",
+  "run_id": "20261021-143831-172dc82b",
+  "source_game": "{PROJECT_ROOT}\\artifacts\\playable\\72c4ad489f644f309215061ad2e819eb\\game",
   "upstream_commit": "4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d",
-  "source_lock_sha256": "DB6CD0E797ED2EF6B04907016A435CEF7A1675D131C7FE2398BA8188933AF0AC",
+  "source_lock_sha256": "3F16599C78C67B5872A4D77DAE861F0ACAA631DD256E3F27E0D2E696E523769D",
   "checkout": {
     "layout": "isolated_source_snapshot",
     "repository_root": null,
@@ -75,23 +75,23 @@
       },
       {
         "path": "scripts/combat/CombatDirector.gd",
-        "sha256": "EB35E08CBEB4CEAFF67DF13B198F382834BD3D2B281868D38062E0A1F2E993FC"
+        "sha256": "3027FBD1F0B91B4E58E512DD4FE8B6E9232F968830069F3D07CD946CDF8B1D91"
       },
       {
-        "path": "scripts/combat/BoardController.gd",
-        "sha256": "CA9375273CFE00CDE09230B66D8AF47832A36F35C361658B12C7538061950A70"
+        "path": "scripts/combat/board/BoardController.gd",
+        "sha256": "84356B7131618A993308D8EB6274FE07636933EC7ABEE91AA3ECA382110E43ED"
       },
       {
         "path": "scripts/combat/UnitSpawner.gd",
-        "sha256": "890F1AA572D47C2C98C436C17CDE73615C3195280BD4388A74FE6E9A0ED9C79A"
+        "sha256": "8158BA7C2592490DE4F3061273CBD5CD77BC1773E5534A18A672DC247CBE5F3E"
       },
       {
         "path": "scripts/combat/CombatActionPhases.gd",
-        "sha256": "46CE108D8922C0BF21B0787D3C27F2360CF7E21873E123009701222DFEF7F181"
+        "sha256": "ABD345816F392987FCFA89BF5873EE3484484A5998AA94C2FEE80CE2CC6BC54F"
       },
       {
         "path": "scripts/combat/board/CombatBattlefield.gd",
-        "sha256": "189334732B05FB02C0E5532B116101F2DDEB1BB1962A8B7CE11D73F3934E879C"
+        "sha256": "B0F607A54A187BBDB83F7BE1091A668B241688B013B2BA7970A6A030682333C4"
       },
       {
         "path": "scripts/combat/board/BoardPosition.gd",
@@ -103,23 +103,23 @@
       },
       {
         "path": "scripts/combat/board/BoardData.gd",
-        "sha256": "6B31AC0D3C997CD1E02E376D3E6AE4B852EF2C011BE85C3BF6E33CFE82C05F89"
+        "sha256": "778D0F8F30FFCA31D3DB5A55084DF38E8091441CB5716A6F5668F0EB2DC0033E"
       },
       {
         "path": "scripts/combat/board/BoardPathfinding.gd",
-        "sha256": "12C91CE25865A252250DFEA1078303740980CBCD8712655D924FFC49228AAD85"
+        "sha256": "5C611ECBC9941BEA04476190D1C332DF49BFFF4396589E8764FD6A906CEB2377"
       },
       {
         "path": "scripts/combat/board/BoardMovementState.gd",
-        "sha256": "A1B9098F076780E7F837C7EADD36FAFC8FB0D84574A5453632344B5F9BE59CA2"
+        "sha256": "89A4CABBBD4DB5355C58B978A109E6173AB145FC963D22DF43F5EE2BE466A8A8"
       },
       {
         "path": "scripts/combat/board/FieldController.gd",
-        "sha256": "E8429B28944AC424BC035F9F172FD6B49DE31C8D7A4A898977FB829957C03E03"
+        "sha256": "7525BB035D2F139E3AD49661994F630ABFCADD9F44809C1A9854D999B5865228"
       },
       {
         "path": "scripts/combat/board/FieldEventAction.gd",
-        "sha256": "E4D56CE9E41310524AA24CF61D6B9795910DAD00B0B05720CE29E8DDADE2C243"
+        "sha256": "C3E54B9F7AAD84E96FC3CD0286AEB1496531888C6CC627D33AD9168DE7BF3181"
       },
       {
         "path": "scripts/combat/board/FieldPreview.gd",
@@ -127,23 +127,75 @@
       },
       {
         "path": "scripts/ui/BoardActorPresentation.gd",
-        "sha256": "CDC799F9219138BCEDE89BA4211E99A7C37B624F6AF3B46A376437BE4FA845F5"
+        "sha256": "B4E408EE029BB03007353C4BBBBE074631429570B312ABD33642E09D7BC71E5F"
       },
       {
         "path": "scripts/ui/BoardView.gd",
-        "sha256": "953F48235B85230B59496C3F7DB1E0F3BBFF6B901F4298461BAD1861F8914750"
+        "sha256": "0E650F490F319924D4B4F67F18737DDB763F948BBA6FF3F2103A85B289CD78ED"
       },
       {
         "path": "scripts/ui/Hand.gd",
-        "sha256": "E296418C1AB7B88732533C7DBB4A92A2009932DCACB4A3228EA618E71C197108"
+        "sha256": "3C150CB89BE2BFD6AC3688D3B96F93807CF0859FA68BA7C11F2D8D2ED06CF4AF"
       },
       {
         "path": "autoload/HandManager.gd",
-        "sha256": "F95BC5CB9C3411E5826F5D00F39422BDB5B8BDCB4D291E80E36F1C6DB06894C1"
+        "sha256": "BC2222389821425FD288B6A70BE7B47D00B3C146A842FDE3D9160E4BE167D291"
       },
       {
         "path": "scripts/actions/BaseAction.gd",
-        "sha256": "3DFA4AFFF87B319202E3CDB47C03C93CE400D425186FC5B83487927443739ED8"
+        "sha256": "14455383B0C13CD5AF04DF23D8A384A16F6B0A1B5F6C09A4B5CC03C7FBEE84E8"
+      },
+      {
+        "path": "scripts/combat/CombatModule.gd",
+        "sha256": "C52FE3840810F5C283DE42CC1CA3C2F2C5C2B28750110B426CF731FB5F11FA85"
+      },
+      {
+        "path": "scripts/combat/CombatContentRequirements.gd",
+        "sha256": "94F9AD7A61359B2B487001EDBF149D4664F422C318F3195830AC3FB12A13F5A6"
+      },
+      {
+        "path": "scripts/combat/CardPlayAdapter.gd",
+        "sha256": "D0EEED96A2AE93D116FD8B61A54B012EB4F48FB4CF37D8678CFDD7003FE792EE"
+      },
+      {
+        "path": "scripts/combat/controllers/EnemyIntentController.gd",
+        "sha256": "35ED2318F07C5EB954E14426D95528C7B1ADEA15885553F10AA9DF9E59067A07"
+      },
+      {
+        "path": "scripts/combatants/Enemy.gd",
+        "sha256": "C41535A8D033AAC4041BB582B6F881B64D2B4C2A1239FCD99D5DCA50AE677D3A"
+      },
+      {
+        "path": "scripts/ui/Combat.gd",
+        "sha256": "BCF738BDCE4BDCB6DD77A89B004185FCF926B72F1FCF470F10CCA7DB73E6BE56"
+      },
+      {
+        "path": "scripts/ui/card/Card.gd",
+        "sha256": "F8592214E2E67EB49081746FACC190EF84A9500BAE002C0410AF21EF33AC67CA"
+      },
+      {
+        "path": "scripts/combat/board/BoardCombatModule.gd",
+        "sha256": "68A1061B711988F5677801448381B31A1AAEE38E5A6E27A0863BCEDD75F100FA"
+      },
+      {
+        "path": "scripts/combat/board/BoardCardAdapter.gd",
+        "sha256": "08B8504D4162F0F705B52B4B5F12679698839E77B2DE40833FE2051B6C597D7D"
+      },
+      {
+        "path": "scripts/combat/board/BoardCardInput.gd",
+        "sha256": "C9C34C1A7E3228AF158C0E26573E06C83B6E86E18B462322E0D923ED22651BE7"
+      },
+      {
+        "path": "scripts/combat/board/BoardEnemyIntent.gd",
+        "sha256": "19E1B3486ED89ED41C0C1F445A4BFD44D5517339146F7078F0DCB9DCC5B5D0D5"
+      },
+      {
+        "path": "scripts/combat/board/BoardContentPolicy.gd",
+        "sha256": "21E3887ECFF07B5B6D928F0C353BE3BB72DBFEBF34D9CFA453529B5E1582C4B9"
+      },
+      {
+        "path": "scripts/ui/BoardCombatPresentation.gd",
+        "sha256": "DC60411333E57B62FB323DAAB41AD1098CFCC0B30EC64DB0B257C97C58DD36CD"
       }
     ]
   },
@@ -163,11 +215,11 @@
       },
       {
         "path": "boardless_campaign.gd",
-        "sha256": "0D49BABDEF986EE71BA97EF855DDC166A9A95F9EC81299B0DC8F9639C7D7F030"
+        "sha256": "5FB170AB473ACE0F5B89F0E6F184E3F644DAE88A76BE9481499D7CF24682C36D"
       },
       {
         "path": "boardless_card_cases.gd",
-        "sha256": "EBF977435D3E2EDFFE95F77CBEBD78F35BA50E32DF1E9FDAFF3569644292BB75"
+        "sha256": "EF5E3474240468C31489794AC13EF77E63DC862B390294B6213CE6DC60A6A0E1"
       },
       {
         "path": "boardless_delay.gd",
@@ -179,11 +231,11 @@
       },
       {
         "path": "boardless_flow.gd",
-        "sha256": "92A2539B7E9760643EEB1824C1DAB8D93B5A83C6332F4312D8748AC55197D14C"
+        "sha256": "CBC3C99258EA2D46838ACE8D52911100D90B8DCBE9732CB90A6AA3D7908811D0"
       },
       {
         "path": "boardless_intent_cases.gd",
-        "sha256": "E2BAC4BC8CD3CC2E80335F22A7A8A9B2157A1B0DD406697E4DA7FB3783C412E0"
+        "sha256": "F7CA9A051E96E5ACAB493E1AD999835E380CDEB9F17C777A2CDC40437E6D0DA9"
       },
       {
         "path": "boardless_wave_cases.gd",
@@ -195,7 +247,7 @@
       },
       {
         "path": "combat_flow.gd",
-        "sha256": "E2E583444FDC0B0524ED3DAC081260B885DBD7E9B646EED0B27BFD9DA95B6223"
+        "sha256": "B627864E78A88B98941E173F09E95BB4E09A85C52EB8AD457D273A7F808DBE4E"
       },
       {
         "path": "ctb_fixture.gd",
@@ -211,7 +263,7 @@
       },
       {
         "path": "dual_board_adapter_cases.gd",
-        "sha256": "A049B3196D2D95E1A29AD04E02A3E9CD51F01ED323BED40D025F3A4AE34E348F"
+        "sha256": "9C8669AC045D433DC6AC8E1A11A1AAF0DDC152B3500D2288A0CA6397497DE27A"
       },
       {
         "path": "dual_board_atomic_cases.gd",
@@ -227,7 +279,7 @@
       },
       {
         "path": "dual_board_duplicate_cases.gd",
-        "sha256": "66E7A13F3FA1B10BABC1A5FBA51E95421D4991ABAA9C1BF30198996C94519560"
+        "sha256": "1D3AAF76FD123AE3769BE210A52233CE0797F3DD2095FAF79A04124E0BF78324"
       },
       {
         "path": "dual_board_failing_board.gd",
@@ -255,7 +307,7 @@
       },
       {
         "path": "dual_board_policy_cases.gd",
-        "sha256": "8C6DC8473456874B75961D3DED6063588456B65E2D3055591789FCBFD644095A"
+        "sha256": "BDD092C91B35A4D75FADF74B724FFFDF5BBE6007BF24D6E37ECB9B2D7FE9CF5E"
       },
       {
         "path": "dual_board_presentation_cases.gd",
@@ -275,7 +327,7 @@
       },
       {
         "path": "field_cases.gd",
-        "sha256": "8C05DD13232AB0796F424A0A619828D7C65FE516B184ACC9F497669943832F23"
+        "sha256": "FD705CE295EAF60FFA31EC0A56C001A47EE9D41D2FC3183414D13619B8987D50"
       },
       {
         "path": "field_clock_cases.gd",
@@ -311,7 +363,7 @@
       },
       {
         "path": "field_query_cases.gd",
-        "sha256": "611417363940512F2F608E5F15EB6EA5DBA8E40D7BE4BF05D4340377D7B6F2BE"
+        "sha256": "00829813CB45BDE77EAF4C4AACCA994D05FBA22E69EC0A37983A8968A85C665A"
       },
       {
         "path": "field_reaction_cases.gd",
@@ -354,6 +406,10 @@
         "sha256": "48481F0A73E2388E126562BE4057A948A44CAA0C854CD425FF2A17D750CFB064"
       },
       {
+        "path": "review_regression_cases.gd",
+        "sha256": "A9422897C5ADF3ED3DD338905C186FC177D82F564E6035F8AA604BB6D677B4E5"
+      },
+      {
         "path": "run_start_preflight_probe.gd",
         "sha256": "D53BED7BF1765F4FF29057323381AB26DE388BC03C4CAF0F8876F444EE587F6A"
       },
@@ -384,12 +440,12 @@
   "results": [
     {
       "name": "version",
-      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b",
       "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
-      "launched_pid": 32672,
+      "launched_pid": 20456,
       "launched_pid_kind": "console_wrapper",
-      "started_utc": "2026-10-20T03:47:38.449485Z",
-      "ended_utc": "2026-10-20T03:47:38.515828Z",
+      "started_utc": "2026-10-21T06:38:31.922499Z",
+      "ended_utc": "2026-10-21T06:38:31.983905Z",
       "status": "passed",
       "exit_code": 0,
       "exit_code_hex": "0x00000000",
@@ -405,7 +461,7 @@
       "command_arguments": [
         "--headless",
         "--log-file",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\version.log",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\version.log",
         "--version"
       ],
       "engine_version": "4.7.2.stable.mono.official.ed1daf0bf",
@@ -415,12 +471,12 @@
     },
     {
       "name": "import",
-      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario",
       "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
-      "launched_pid": 16368,
+      "launched_pid": 24968,
       "launched_pid_kind": "console_wrapper",
-      "started_utc": "2026-10-20T03:47:47.695295Z",
-      "ended_utc": "2026-10-20T03:48:05.316884Z",
+      "started_utc": "2026-10-21T06:38:39.248226Z",
+      "ended_utc": "2026-10-21T06:38:48.379624Z",
       "status": "passed",
       "exit_code": 0,
       "exit_code_hex": "0x00000000",
@@ -432,13 +488,13 @@
       "cold_cache_uid_requires_recheck": false,
       "log_write_preflight": "passed",
       "shutdown_resources": [],
-      "seconds": 17.63,
+      "seconds": 9.14,
       "command_arguments": [
         "--log-file",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\import.log",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\import.log",
         "--headless",
         "--path",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\game",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\game",
         "--editor",
         "--import"
       ],
@@ -447,12 +503,12 @@
     },
     {
       "name": "scenario-write",
-      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario",
       "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
-      "launched_pid": 20028,
+      "launched_pid": 35480,
       "launched_pid_kind": "console_wrapper",
-      "started_utc": "2026-10-20T03:48:05.334670Z",
-      "ended_utc": "2026-10-20T03:48:18.047629Z",
+      "started_utc": "2026-10-21T06:38:48.406068Z",
+      "ended_utc": "2026-10-21T06:38:58.786753Z",
       "status": "passed",
       "exit_code": 0,
       "exit_code_hex": "0x00000000",
@@ -464,15 +520,15 @@
       "cold_cache_uid_requires_recheck": false,
       "log_write_preflight": "passed",
       "shutdown_resources": [],
-      "seconds": 12.72,
+      "seconds": 10.4,
       "command_arguments": [
         "--log-file",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\scenario-write.log",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\scenario-write.log",
         "--headless",
         "--path",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\game",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\game",
         "--script",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\game\\pack_tests\\scenario.gd",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\game\\pack_tests\\scenario.gd",
         "--",
         "--content-profile=pack",
         "--scenario-phase=write"
@@ -483,12 +539,12 @@
     },
     {
       "name": "scenario-read",
-      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario",
       "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
-      "launched_pid": 33188,
+      "launched_pid": 33036,
       "launched_pid_kind": "console_wrapper",
-      "started_utc": "2026-10-20T03:48:18.060146Z",
-      "ended_utc": "2026-10-20T03:48:32.339853Z",
+      "started_utc": "2026-10-21T06:38:58.803750Z",
+      "ended_utc": "2026-10-21T06:39:10.873172Z",
       "status": "passed",
       "exit_code": 0,
       "exit_code_hex": "0x00000000",
@@ -500,15 +556,15 @@
       "cold_cache_uid_requires_recheck": false,
       "log_write_preflight": "passed",
       "shutdown_resources": [],
-      "seconds": 14.29,
+      "seconds": 12.08,
       "command_arguments": [
         "--log-file",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\scenario-read.log",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\scenario-read.log",
         "--headless",
         "--path",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\game",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\game",
         "--script",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\game\\pack_tests\\scenario.gd",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\game\\pack_tests\\scenario.gd",
         "--",
         "--content-profile=pack",
         "--scenario-phase=read"
@@ -519,12 +575,12 @@
     },
     {
       "name": "scenario-defeat",
-      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario",
+      "directory": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario",
       "executable": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
-      "launched_pid": 26416,
+      "launched_pid": 6916,
       "launched_pid_kind": "console_wrapper",
-      "started_utc": "2026-10-20T03:48:32.350964Z",
-      "ended_utc": "2026-10-20T03:49:46.538911Z",
+      "started_utc": "2026-10-21T06:39:10.890627Z",
+      "ended_utc": "2026-10-21T06:40:22.393472Z",
       "status": "passed",
       "exit_code": 0,
       "exit_code_hex": "0x00000000",
@@ -536,15 +592,15 @@
       "cold_cache_uid_requires_recheck": false,
       "log_write_preflight": "passed",
       "shutdown_resources": [],
-      "seconds": 74.19,
+      "seconds": 71.51,
       "command_arguments": [
         "--log-file",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\scenario-defeat.log",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\scenario-defeat.log",
         "--headless",
         "--path",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\game",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\game",
         "--script",
-        "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\PackScenario\\game\\pack_tests\\scenario.gd",
+        "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\PackScenario\\game\\pack_tests\\scenario.gd",
         "--",
         "--content-profile=pack",
         "--scenario-phase=defeat"
@@ -562,9 +618,16 @@
     "os": "nt"
   },
   "engine_discovery": {
-    "method": "explicit",
+    "method": ".tools",
     "located": "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
-    "candidates_considered": []
+    "candidates_considered": [
+      "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64.exe (version in name not accepted)",
+      "{PROJECT_ROOT}\\.tools\\godot-4.6\\Godot_v4.6-stable_win64_console.exe (version in name not accepted)",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64_console.exe",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7\\Godot_v4.7.2-stable_win64_console.exe",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7-mono\\Godot_v4.7.2-stable_mono_win64\\Godot_v4.7.2-stable_mono_win64.exe",
+      "{PROJECT_ROOT}\\.tools\\godot-4.7\\Godot_v4.7.2-stable_win64.exe"
+    ]
   },
   "engine_policy": {
     "accepted_version_patterns": [
@@ -576,18 +639,18 @@
   "isolation": {
     "removed": [],
     "overrides": {
-      "APPDATA": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\appdata\\Roaming",
-      "LOCALAPPDATA": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\appdata\\Local",
-      "TEMP": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\appdata\\Temp",
-      "TMP": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\appdata\\Temp"
+      "APPDATA": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\appdata\\Roaming",
+      "LOCALAPPDATA": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\appdata\\Local",
+      "TEMP": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\appdata\\Temp",
+      "TMP": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\appdata\\Temp"
     },
-    "user_data_root": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\appdata\\Roaming",
+    "user_data_root": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\appdata\\Roaming",
     "appdata_isolated": true,
     "user_dirs": {
-      "PackScenario": "{PROJECT_ROOT}\\artifacts\\verification\\20261020-114738-1a266209\\appdata\\Roaming\\mycardgame-tests\\20261020-114738-1a266209\\PackScenario"
+      "PackScenario": "{PROJECT_ROOT}\\artifacts\\verification\\20261021-143831-172dc82b\\appdata\\Roaming\\mycardgame-tests\\20261021-143831-172dc82b\\PackScenario"
     }
   },
-  "timeout_seconds": 300,
+  "timeout_seconds": 180,
   "force_failure": false,
   "exit_code_semantics": "win32_status",
   "content_profile": "pack",
@@ -665,7 +728,7 @@
       },
       {
         "path": "scenario_input_cases.gd",
-        "sha256": "0FD50080BF9F8189D7F4D72B9294255CC6BB183B6AC53D0F7121B2AF98498B9F",
+        "sha256": "B42508809D4B202F189FF7A29EE293876FEC4D1B6ECBA1F321417FF554C6B6FA",
         "source": "{PROJECT_ROOT}\\examples\\board-lab\\tests\\scenario_input_cases.gd"
       },
       {
@@ -708,7 +771,7 @@
       },
       {
         "path": "scenario_input_cases.gd",
-        "sha256": "0FD50080BF9F8189D7F4D72B9294255CC6BB183B6AC53D0F7121B2AF98498B9F"
+        "sha256": "B42508809D4B202F189FF7A29EE293876FEC4D1B6ECBA1F321417FF554C6B6FA"
       },
       {
         "path": "scenario_lessons.gd",
@@ -723,17 +786,17 @@
   "prepared_source": {
     "format": "playable-copy/1",
     "status": "prepared",
-    "created_at": "2026-10-20T03:23:49.778245Z",
-    "project": "{PROJECT_ROOT}\\artifacts\\playable\\1aa7d00bb8534aff9ef57ec9068aca85\\game\\project.godot",
+    "created_at": "2026-10-21T06:31:55.027311Z",
+    "project": "{PROJECT_ROOT}\\artifacts\\playable\\72c4ad489f644f309215061ad2e819eb\\game\\project.godot",
     "source_game": "{PROJECT_ROOT}\\game",
     "content_profile": "pack",
-    "source_lock_sha256": "DB6CD0E797ED2EF6B04907016A435CEF7A1675D131C7FE2398BA8188933AF0AC",
+    "source_lock_sha256": "3F16599C78C67B5872A4D77DAE861F0ACAA631DD256E3F27E0D2E696E523769D",
     "engine_started": false,
-    "user_directory_name": "mycardgame-playable-1aa7d00bb8534aff9ef57ec9068aca85",
-    "output_file_count": 984,
-    "output_ledger_sha256": "8fc534d2872e15a6847a5fa511748f20266b26644d87e544d1ebd665a8ef3cb5",
-    "source_file_count": 944,
-    "source_ledger_sha256": "f94a4653a778e2fc6347b412596a553bdbee03ffe579b8e86888735c4c2a15b3",
+    "user_directory_name": "mycardgame-playable-72c4ad489f644f309215061ad2e819eb",
+    "output_file_count": 986,
+    "output_ledger_sha256": "23250566bf4b6f4505ad52b3d70951d81fcf2d313f54b909b9f88302ac5214cc",
+    "source_file_count": 946,
+    "source_ledger_sha256": "f72811f04515808b827d18f4596a07907c79f6785289cb9bab92d0fa6a46c924",
     "packs": [
       {
         "name": "board_lab",
@@ -782,8 +845,8 @@
       }
     ],
     "ledger_policy": "Complete raw framework ledgers remain local; hashes refer to sorted lowercase SHA-256 mappings.",
-    "manifest_sha256": "204DB408084C6C8A07937BA0583A777C683329B64006F2C4867640B87C3FB383",
-    "manifest_path": "{PROJECT_ROOT}\\artifacts\\playable\\1aa7d00bb8534aff9ef57ec9068aca85\\manifest.json",
+    "manifest_sha256": "4CD917B71CBDFECC7C8A8419CB4E47259B3A1AEDA9C5FFD444A1F49839431263",
+    "manifest_path": "{PROJECT_ROOT}\\artifacts\\playable\\72c4ad489f644f309215061ad2e819eb\\manifest.json",
     "matches_supplied_prepare_manifest": true,
     "packs_match_standalone_run": true,
     "framework_matches_reconstruction": true
@@ -795,6 +858,12 @@
       "dirs": 0,
       "files": 0,
       "links": 0
+    }
+  },
+  "source_tree": {
+    "PackScenario": {
+      "files": 986,
+      "sha256": "ed46e00aaddec5b118726c3526084a648523b0f3400b4cb6cf67afe2418e2523"
     }
   },
   "known_shutdown_issues": false,

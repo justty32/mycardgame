@@ -2755,7 +2755,7 @@ index bf7d2962d3c51e6fa2fdddf9b8372cee08b48acd..14ca818c6d555f1818f0281c464945a7
  	container.add_child(enemy)
  	enemy.init(enemy_data)
 diff --git a/scripts/ui/Hand.gd b/scripts/ui/Hand.gd
-index 9f89b5bb13d3dfb0b7dc4333067c05549e5ea224..3df7b8dac192eb1780606171ceba8f4a72751bb2 100644
+index 9f89b5bb13d3dfb0b7dc4333067c05549e5ea224..5132fe60791afa7de8f89917e8fd18d8f0c99db1 100644
 --- a/scripts/ui/Hand.gd
 +++ b/scripts/ui/Hand.gd
 @@ -31,9 +31,8 @@ var current_card_pick_action: ActionBasePickCards = null	# an action currently r
@@ -2778,7 +2778,7 @@ index 9f89b5bb13d3dfb0b7dc4333067c05549e5ea224..3df7b8dac192eb1780606171ceba8f4a
  		if HandManager.get_card_play_adapter().needs_selection(card.card_data):
  			current_selected_card = card
  			_prompt_target(card)
-@@ -263,19 +262,7 @@ func _on_enemy_clicked(enemy: Enemy):
+@@ -263,22 +262,6 @@ func _on_enemy_clicked(enemy: Enemy):
  	if current_selected_card != null:
  		attempt_play_selected_card(HandManager.get_card_play_adapter().selection_for_target(enemy))
  
@@ -2795,11 +2795,13 @@ index 9f89b5bb13d3dfb0b7dc4333067c05549e5ea224..3df7b8dac192eb1780606171ceba8f4a
 -func _on_board_cell_hovered(id: String, cell: Vector2i) -> void:
 -	HandManager.get_card_play_adapter().handle_cell_hovered(self, id, cell)
 -
-+## Deprecated compatibility wrapper (examples/board-lab tests); use attempt_play_selected_card.
- func attempt_play_selected_card_at_cell(cell: Vector2i, clicked_unit: BaseCombatant = null, target_board_id: String = "") -> bool:
- 	return attempt_play_selected_card({"target": clicked_unit, "cell": cell, "id": target_board_id})
- 
-@@ -299,8 +286,15 @@ func attempt_play_selected_card(selection: Dictionary) -> bool:
+-func attempt_play_selected_card_at_cell(cell: Vector2i, clicked_unit: BaseCombatant = null, target_board_id: String = "") -> bool:
+-	return attempt_play_selected_card({"target": clicked_unit, "cell": cell, "id": target_board_id})
+-
+ ## Selection stays active on rejection. Fees and queueing remain HandManager's responsibility.
+ func attempt_play_selected_card(selection: Dictionary) -> bool:
+ 	if current_selected_card == null:
+@@ -299,8 +282,15 @@ func attempt_play_selected_card(selection: Dictionary) -> bool:
  	current_selected_card = null
  	return true
  
@@ -2817,7 +2819,7 @@ index 9f89b5bb13d3dfb0b7dc4333067c05549e5ea224..3df7b8dac192eb1780606171ceba8f4a
  
  func _get_acting_unit() -> BaseCombatant:
  	var director: CombatDirector = Global.get_combat_director()
-@@ -316,7 +310,6 @@ func _prompt_target(_card: Card):
+@@ -316,7 +306,6 @@ func _prompt_target(_card: Card):
  	select_target_label.visible = true
  
  func _unprompt_target():

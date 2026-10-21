@@ -262,10 +262,6 @@ func _on_enemy_clicked(enemy: Enemy):
 	if current_selected_card != null:
 		attempt_play_selected_card(HandManager.get_card_play_adapter().selection_for_target(enemy))
 
-## Deprecated compatibility wrapper (examples/board-lab tests); use attempt_play_selected_card.
-func attempt_play_selected_card_at_cell(cell: Vector2i, clicked_unit: BaseCombatant = null, target_board_id: String = "") -> bool:
-	return attempt_play_selected_card({"target": clicked_unit, "cell": cell, "id": target_board_id})
-
 ## Selection stays active on rejection. Fees and queueing remain HandManager's responsibility.
 func attempt_play_selected_card(selection: Dictionary) -> bool:
 	if current_selected_card == null:
