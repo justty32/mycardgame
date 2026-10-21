@@ -23,6 +23,7 @@ const COLOR_THREAT: Color = Color(1.0, 0.3, 0.3, 0.35)
 
 var board_id: String = "shared"
 var panel_position: Vector2 = PANEL_POSITION
+var slot_size: Vector2 = PANEL_MAX_SIZE
 var hovered_enemy: Enemy = null
 var _preview_board_id: String = ""
 var _preview_cell: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
@@ -79,16 +80,25 @@ func _process(_delta: float) -> void:
 			_last_selected_card = selected
 			queue_redraw()
 
-## Square cells as large as fit PANEL_MAX_SIZE (capped at CELL_SIZE_MAX) for any board size.
-static func compute_layout(board_size: Vector2i) -> Dictionary:
+## Square cells fitted to the supplied screen slot; default preserves existing callers.
+static func compute_layout(board_size: Vector2i, available_size: Vector2 = PANEL_MAX_SIZE) -> Dictionary:
 	var cells: Vector2 = Vector2(max(1, board_size.x), max(1, board_size.y))
-	var fitted: float = minf(CELL_SIZE_MAX, minf(PANEL_MAX_SIZE.x / cells.x, PANEL_MAX_SIZE.y / cells.y))
+	var fitted: float = minf(CELL_SIZE_MAX, maxf(0.0, minf(available_size.x / cells.x, available_size.y / cells.y)))
 	return {"cell_size": fitted, "size": cells * fitted}
+
+## Apply presentation geometry without touching board identity, membership or anchors.
+func set_layout_slot(slot: Rect2, board: BoardData) -> void:
+	if not BoardLayout.valid_slot(slot):
+		return
+	slot_size = slot.size
+	_resize(board)
+	panel_position = BoardLayout.centered_position(slot, size)
+	position = panel_position
 
 func _resize(board: BoardData, force_redraw: bool = false) -> void:
 	if board == null:
 		return
-	var layout: Dictionary = compute_layout(board.size)
+	var layout: Dictionary = compute_layout(board.size, slot_size)
 	var new_cell_size: float = layout.cell_size
 	var new_size: Vector2 = layout.size
 	if not force_redraw and is_equal_approx(new_cell_size, cell_size) and new_size.is_equal_approx(size):

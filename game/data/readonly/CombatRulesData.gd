@@ -100,6 +100,10 @@ func _get_native_properties() -> Dictionary:
 func validate_configuration() -> String:
 	if board_mode not in [BOARD_MODES.SINGLE, BOARD_MODES.DUAL]:
 		return "unknown_board_mode"
+	return validate_spatial_configuration()
+
+## Spatial rules shared by normalized worlds; legacy mode belongs to the input adapter.
+func validate_spatial_configuration() -> String:
 	if cross_board_policy_version != 1:
 		return "unsupported_cross_board_policy_version"
 	if cross_board_policy != "SELECT_TARGET_CELL":

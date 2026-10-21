@@ -10,30 +10,27 @@ const BOARD_ENEMY: String = "enemy"
 
 var boards: Dictionary[String, BoardData] = {}
 var rules: CombatRulesData = null
-var encounter: EncounterData = null
+var setup: BoardSetup = null
 var valid: bool = false
 var error: String = ""
-## Author-facing explanation of error (encounter, board, offending value and allowed range).
 var error_detail: String = ""
-var board_mode: int = CombatRulesData.BOARD_MODES.DUAL
 
-func _init(encounter_data: EncounterData = null, combat_rules: CombatRulesData = null) -> void:
+## Encounter input is a compatibility forwarding seam; runtime passes normalized BoardSetup.
+func _init(source: Variant = null, combat_rules: CombatRulesData = null) -> void:
 	rules = combat_rules if combat_rules != null else CombatRulesData.new()
-	encounter = encounter_data if encounter_data != null else EncounterData.new()
-	error = rules.validate_configuration()
-	if error != "":
-		error_detail = "CombatRulesData \"%s\": %s (board sizes %s, default %s, ceiling %s)" % [rules.object_id, error, rules.describe_board_size_limits(), rules.default_board_size, CombatRulesData.BOARD_SIZE_CEILING]
+	setup = source if source is BoardSetup else BoardSetup.from_legacy(source if source is EncounterData else EncounterData.new(), rules)
+	error = setup.error
+	error_detail = setup.error_detail
+	if not setup.is_valid():
+		if error == "":
+			error = "unprepared_board_setup"
+			error_detail = "BoardSetup must be created by a validated factory"
 		return
-	var checked: Dictionary = encounter.validate_configuration_detail(rules)
-	error = checked.code
-	error_detail = checked.detail
-	if error != "":
-		return
-	board_mode = encounter.get_board_mode(rules)
-	for id: String in encounter.get_board_ids(rules):
-		var board := BoardData.new(encounter.get_size_for_board(id, rules), rules)
+	for id: String in setup.get_board_ids():
+		var config: Dictionary = setup.get_config(id)
+		var board := BoardData.new(config.size, rules)
 		board.board_id = id
-		for cell: Vector2i in EncounterData.cells_from_json(encounter.get_board_config(id).blocked_cells):
+		for cell: Vector2i in EncounterData.cells_from_json(config.blocked_cells):
 			board.set_blocked(cell)
 		boards[id] = board
 	valid = true
@@ -59,11 +56,9 @@ func get_units() -> Array[BaseCombatant]:
 				returned.append(unit)
 	return returned
 
-## Initial deployment only. Never use faction to locate a unit that already exists.
+## Legacy query forwarding only. Deployment policy is independent of geometry.
 func default_board_id(faction: int) -> String:
-	if board_mode == CombatRulesData.BOARD_MODES.SINGLE:
-		return BOARD_SHARED
-	return BOARD_PARTY if faction == BaseCombatant.FACTIONS.PARTY else BOARD_ENEMY
+	return setup.deployment.default_board_id(faction) if setup != null and setup.deployment != null else ""
 
 func get_position(unit: BaseCombatant) -> BoardPosition:
 	return BoardPosition.from_unit(unit) if get_board_for_unit(unit) != null else BoardPosition.new()

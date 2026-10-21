@@ -25,6 +25,8 @@
 
 UI 是 [BoardView.gd](../../../../game/scripts/ui/BoardView.gd)，由模組的 [BoardCombatPresentation](../../../../game/scripts/ui/BoardCombatPresentation.gd) 管理格子、角色映射與 Undo。Hand／HandManager 只使用 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd) 通用 hooks（未掛模組時缺模組的牌變灰並費用前拒絕，原因在 `request.rejection_reason`）；掛載時模組提供的 [BoardCardAdapter](../../../../game/scripts/combat/board/BoardCardAdapter.gd) 與 BoardCardInput 接棋盤目標、預檢、點格與舊欄位轉譯。生成仍經 [EnemyContainer.gd](../../../../game/scripts/ui/EnemyContainer.gd)。
 
+盤集合、部署政策與畫面矩形的獨立接點，見 [盤定義 code map](board-setup.md)。
+
 ## 測試
 
 Smoke 呼叫 [unit_registry_probe.gd](../../../../tests/unit_registry_probe.gd)，驗合成遭遇與純棋盤查詢。suite Ctb 跑 [ctb_flow.gd](../../../../tests/ctb_flow.gd) 加 [ctb_fixture.gd](../../../../tests/ctb_fixture.gd)。suite Wave 跑 [wave_flow.gd](../../../../tests/wave_flow.gd)，情境在 [wave_cases.gd](../../../../tests/wave_cases.gd)，fixture 在 [wave_fixture.gd](../../../../tests/wave_fixture.gd)。suite Board 跑 [board_flow.gd](../../../../tests/board_flow.gd)，情境在 [board_cases.gd](../../../../tests/board_cases.gd)，fixture 在 [board_fixture.gd](../../../../tests/board_fixture.gd)；每場棋盤大小與版面數值在 [board_size_cases.gd](../../../../tests/board_size_cases.gd)。

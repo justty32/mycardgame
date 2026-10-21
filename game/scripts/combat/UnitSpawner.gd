@@ -46,7 +46,7 @@ func clear() -> void:
 #region Wave 0 (combat start)
 ## Spawns wave 0 of the encounter: weighted picks in order with rng_enemy_spawning (like the legacy
 ## spawner), in the event's placement mode, placed on their cell by the wave's spawn policy.
-func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
+func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event_slots: bool = true) -> void:
 	spawn_delays.clear()
 	var unit_layer: Node = get_unit_layer()
 	if unit_layer == null or encounter.encounter_waves.is_empty():
@@ -64,10 +64,12 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
 		var cell: Vector2i = location.cell
 		var tick: int = _entry_tick(wave, 0, index, unit_entry)
 		var entry: Dictionary = _unit_entry(0, tick, enemy_object_id, cell, board_id)
-		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
+		var placement: CombatModule = director.get_placement_module()
+		# Explicit internal opt-in: legacy callers retain event-slot truncation.
+		var board_entry: bool = placement != null and not use_event_slots
+		var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id) if board_entry else unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
 		if enemy == null:
 			break	# positional events stop when their slots run out (legacy)
-		var placement: CombatModule = director.get_placement_module()
 		if placement == null:
 			if tick > 0:
 				spawn_delays[enemy.unit_uid] = tick

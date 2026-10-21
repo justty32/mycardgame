@@ -1,0 +1,99 @@
+{
+ "contract": "wf-table/1",
+ "source": "09_board_setup_layout.md",
+ "extracted": "2026-10-21",
+ "description": "Derived portable summary, not raw logs. All final product/test hashes compared with each source manifest. Original runs retained locally under artifacts/verification.",
+ "engine_version": "4.7.2.stable.mono.arch_linux.ed1daf0bf",
+ "columns": [
+  "suite",
+  "run",
+  "assertions",
+  "test_phases",
+  "process_phases",
+  "verdict",
+  "results_sha256",
+  "markers"
+ ],
+ "rows": [
+  {
+   "suite": "Board",
+   "run": "20261021-201800-eb5530e6",
+   "assertions": "145",
+   "test_phases": "1",
+   "process_phases": "3",
+   "verdict": "PASS",
+   "results_sha256": "37b750108eb0876126faedd181129b230ae628144544632bc69f7bb68678e5bd",
+   "markers": "BOARD PASS: 145 checks, 0 failures"
+  },
+  {
+   "suite": "DualBoard",
+   "run": "20261021-201821-9f46e3de",
+   "assertions": "421",
+   "test_phases": "1",
+   "process_phases": "3",
+   "verdict": "PASS",
+   "results_sha256": "8cbe5708d0fd236cf7346d1cc76736d79d5dddf60d0232cc8d046c7e4e834df7",
+   "markers": "DUAL_BOARD PASS: 421 checks, 0 failures"
+  },
+  {
+   "suite": "Smoke",
+   "run": "20261021-201847-404ead2b",
+   "assertions": "139",
+   "test_phases": "1",
+   "process_phases": "3",
+   "verdict": "PASS",
+   "results_sha256": "cfb0ec727c5f4c8e8c28b4917012b6964a7ac8301ec44321ad18c823677d12ed",
+   "markers": "SMOKE PASS: 139 checks, 0 failures"
+  },
+  {
+   "suite": "Boardless",
+   "run": "20261021-201904-932ee067",
+   "assertions": "286",
+   "test_phases": "4",
+   "process_phases": "6",
+   "verdict": "PASS",
+   "results_sha256": "c9fd46ac4708d703cd7ff617909c422bf1a32f9fe2c3cd92b65d391fb9e40d57",
+   "markers": "BOARDLESS CHECKS: 159, failures: 0\nBOARDLESS PASS: write\nBOARDLESS CHECKS: 28, failures: 0\nBOARDLESS PASS: read\nBOARDLESS CHECKS: 36, failures: 0\nBOARDLESS PASS: defeat\nBOARDLESS CHECKS: 63, failures: 0\nBOARDLESS PASS: scene_off"
+  },
+  {
+   "suite": "BoardRemoved",
+   "run": "20261021-201941-310719ee",
+   "assertions": "169",
+   "test_phases": "2",
+   "process_phases": "4",
+   "verdict": "PASS",
+   "results_sha256": "303c765b423469a2b63d378f0dcba4209760c21c8100e8a80674cc9543a99ff2",
+   "markers": "BOARDLESS CHECKS: 133, failures: 0\nBOARDLESS PASS: removed\nBOARDLESS CHECKS: 36, failures: 0\nBOARDLESS PASS: defeat"
+  },
+  {
+   "suite": "Wave",
+   "run": "20261021-202011-dc541d32",
+   "assertions": "48",
+   "test_phases": "1",
+   "process_phases": "3",
+   "verdict": "PASS",
+   "results_sha256": "454df90fa076d0e62b393d3d2e9579668503665954b7d5902ae28d0898a95843",
+   "markers": "WAVE PASS: 48 checks, 0 failures"
+  },
+  {
+   "suite": "Field",
+   "run": "20261021-202027-8eb485eb",
+   "assertions": "376",
+   "test_phases": "1",
+   "process_phases": "3",
+   "verdict": "PASS",
+   "results_sha256": "5685b4d2ffc772e0368fbf0e8943a040ee33a17cb1d2d25fb36b7681e8c47dac",
+   "markers": "FIELD PASS: 376 checks, 0 failures"
+  },
+  {
+   "suite": "ResourceLifecycle",
+   "run": "20261021-202105-1d9d4484",
+   "assertions": "127",
+   "test_phases": "1",
+   "process_phases": "3",
+   "verdict": "PASS",
+   "results_sha256": "3d5d7375874a7bed8f5a0f86d039dd04c83b7a803022438de6589d4eb1e7f456",
+   "markers": "RESOURCE PASS: 127 checks, 0 failures"
+  }
+ ]
+}

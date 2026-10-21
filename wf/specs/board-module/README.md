@@ -8,6 +8,8 @@
 
 本節描述現有程式。2026-10-21 已決定盤數由每場 Encounter 決定（含 0 盤）；目前遷移 A 已集中每場準備與裝配資料，但尚未接上新盤數 schema。缺口基準見 [盤數調查](../../notes/investigations/2026-10-21-multi-board-feasibility.md)，後續依 [解耦架構](../multi-board/README.md) 漸進遷移，不能把目前旗標開關當作 0~N 已完成。
 
+遷移 B 的 [盤定義、部署與排版](../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md) 已分責：Battlefield 消費正規化集合，舊 mode 由 BoardSetup 相容轉譯，部署政策與畫面矩形各有獨立入口。正式內容仍走舊格式，內部任意 ID／矩形與不受畫面槽限制的生成專項不等於 C 已完成。
+
 Combat 開戰時先建立 PreparedEncounter，再裝配並交 Director；`_ready` 不預掛載。Director 保存唯一 active prepared，場景相容重掛只讀它，停止後無參數裝配不復活舊場。規則／Event／Encounter 使用獨立資料快照；普通卡規則與 Director 共用當場值，下場準備另讀配置來源，詳見 [核實分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。
 
 ```mermaid

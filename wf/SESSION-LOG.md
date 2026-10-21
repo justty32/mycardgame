@@ -11,7 +11,7 @@
 
 ## 最新進度
 
-- [game-dev] 每場 0~N 盤遷移 A 已完成：單次準備與唯一 active 快照，獨立 review／8 套件 1465 項通過；下一步 B 分離盤定義、部署與排版，C 的新盤數格式仍未實作 → [遷移計畫](plans/multi-board/README.md)
+- [game-dev] A／B 已完成並驗證；下一步 C 接新格式的明確空集合／任意正盤、能力錯誤與開場失敗清理，不先定部署玩法，0~N 目標尚未完成 → [遷移計畫](plans/multi-board/README.md)
 
 ## 各工作流 session-log
 

@@ -12,14 +12,15 @@ var undo_move_button: Button = null
 var _view_board_ids: Array = []
 var _stopped: bool = true
 
-## Top-left of each board's slot (BoardView.PANEL_MAX_SIZE): two slots side by side, one centred slot.
-const DUAL_SLOT_ORIGINS: Array[Vector2] = [Vector2(70, 170), Vector2(640, 170)]
-const SINGLE_SLOT_ORIGIN: Vector2 = Vector2(360, 170)
+## Optional explicit slots for internal callers; no serialized N-board policy is introduced.
+var layout_slots: Dictionary[String, Rect2] = {}
+var layout_error: String = ""
 
-## Board view position: the board of view_size is centred inside its slot, so any size stays in it.
+## Compatibility forwarding for callers that still ask for an indexed one/two-board position.
 static func view_position(index: int, count: int, view_size: Vector2) -> Vector2:
-	var origin: Vector2 = DUAL_SLOT_ORIGINS[clampi(index, 0, DUAL_SLOT_ORIGINS.size() - 1)] if count > 1 else SINGLE_SLOT_ORIGIN
-	return origin + ((BoardView.PANEL_MAX_SIZE - view_size) * 0.5).floor()
+	var ids: Array = ["single"] if count == 1 else ["left", "right"]
+	var slots: Dictionary[String, Rect2] = BoardLayout.compatibility_slots(ids)
+	return BoardLayout.centered_position(slots[ids[clampi(index, 0, ids.size() - 1)]], view_size)
 
 func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
 	director = value
@@ -44,36 +45,49 @@ func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
 	sync_board_views()
 
 ## Rebuild grid surfaces only; actual actor parents/registry identities remain stable.
-func sync_board_views() -> void:
+func sync_board_views() -> bool:
 	if _stopped or director == null:
-		return
+		return false
 	var battlefield: CombatBattlefield = director.battlefield
 	if battlefield == null:
-		return
+		return false
 	var ids: Array = battlefield.boards.keys()
-	if ids == _view_board_ids:
-		return
-	_view_board_ids = ids.duplicate()
-	actor_presentation.clear()
-	for old_view: BoardView in board_views.values():
-		old_view.queue_free()
-	board_views.clear()
-	board_view = null
+	var slots: Dictionary[String, Rect2] = layout_slots
+	if slots.is_empty():
+		slots = BoardLayout.compatibility_slots(ids)
+	# A missing presentation policy must not silently truncate or overlap a board collection.
+	layout_error = ""
+	for id: String in ids:
+		if not slots.has(id) or not BoardLayout.valid_slot(slots[id]):
+			layout_error = "invalid_layout_slot:" + id
+			return false
+	var changed: bool = ids != _view_board_ids
+	if changed:
+		_view_board_ids = ids.duplicate()
+		# Reordering existing IDs retains their surfaces and actor mapping.
+		for old_id: String in board_views.keys():
+			if not ids.has(old_id):
+				board_views[old_id].queue_free()
+				board_views.erase(old_id)
+		board_view = null
 	for index: int in ids.size():
-		var view := BoardView.new()
-		view.board_id = ids[index]
-		view.panel_position = view_position(index, ids.size(), BoardView.compute_layout(battlefield.get_board(ids[index]).size).size)
-		view.position = view.panel_position
-		view.name = "BoardView_" + ids[index]
-		combat.add_child(view)
-		# Grid hit surfaces precede real actor subtrees in Control input tree order.
-		combat.move_child(view, combat.get_node("Player").get_index())
-		view._resize(battlefield.get_board(ids[index]))
-		board_views[ids[index]] = view
+		var id: String = ids[index]
+		var view: BoardView = board_views.get(id)
+		if view == null:
+			view = BoardView.new()
+			view.board_id = id
+			view.name = "BoardView_" + id
+			combat.add_child(view)
+			# Grid hit surfaces precede real actor subtrees in Control input tree order.
+			combat.move_child(view, combat.get_node("Player").get_index())
+			board_views[id] = view
+		view.set_layout_slot(slots[id], battlefield.get_board(id))
 		if index == 0:
 			board_view = view
 	actor_presentation.views = board_views
-	actor_presentation.sync_positions(false)
+	if changed:
+		actor_presentation.sync_positions(false)
+	return true
 
 func _process(_delta: float) -> void:
 	if _stopped or director == null:
@@ -126,6 +140,7 @@ func clear() -> void:
 	board_views.clear()
 	board_view = null
 	_view_board_ids.clear()
+	layout_slots.clear()
 	if is_instance_valid(undo_move_button):
 		undo_move_button.queue_free()
 	undo_move_button = null

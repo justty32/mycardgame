@@ -30,6 +30,7 @@ func _scenario() -> bool:
 	_check(director.has_living_opponents() and not director.is_combat_over(), "enemy on other board still prevents victory")
 	var presentation: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join("dual_board_presentation_cases.gd")).new()
 	await presentation.run(self)
+	await load(flow.get_script().resource_path.get_base_dir().path_join("board_layout_cases.gd")).new().run_presentation(self)
 	for script: String in ["dual_board_policy_cases.gd", "dual_board_transfer_cases.gd", "dual_board_field_cases.gd", "dual_board_clock_equivalence_cases.gd", "dual_board_intent_reaction_cases.gd", "dual_board_lifetime_cases.gd", "dual_board_atomic_cases.gd", "dual_board_duplicate_cases.gd", "dual_board_adapter_cases.gd"]:
 		var group: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join(script)).new()
 		await group.run(self)
@@ -37,6 +38,7 @@ func _scenario() -> bool:
 	var waves: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join("dual_board_wave_cases.gd")).new()
 	await waves.run(self)
 	await load(flow.get_script().resource_path.get_base_dir().path_join("prepared_start_cases.gd")).new().run(self)
+	await load(flow.get_script().resource_path.get_base_dir().path_join("board_spawn_policy_cases.gd")).new().run(self)
 	return true
 
 func _play_board(card_id: String, board_id: String, cell: Vector2i) -> String:

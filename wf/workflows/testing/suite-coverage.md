@@ -36,6 +36,8 @@ Smoke 呼叫 [prepared_encounter_probe.gd](../../../tests/prepared_encounter_pro
 
 開場前先跑純物件的 [board_size_cases.gd](../../../tests/board_size_cases.gd)：每場棋盤大小（預設 5×5 不變、3×3、8×6、不對稱雙盤）、規則上下限、錯誤代碼與說明，以及 BoardView 版面數值；不含實際畫面。
 
+[board_setup_cases.gd](../../../tests/board_setup_cases.gd) 核對任意 ID 定義、驗證與來源隔離；[board_layout_cases.gd](../../../tests/board_layout_cases.gd) 的純物件部分驗顯式矩形映射及槽尺寸。幾何集合不要求敵我目的盤，部署政策另驗；這些是內部接點，不是新序列化格式。
+
 ## Wave
 
 入口 [wave_flow.gd](../../../tests/wave_flow.gd)，cases [wave_cases.gd](../../../tests/wave_cases.gd)，fixture [wave_fixture.gd](../../../tests/wave_fixture.gd)，標記 `WAVE PASS:`。驗三波遭遇：wave_started／wave_cleared 的刻數；波與波之間的格擋牌不被短路；登場延遲與錯開；WAIT_UNTIL_FREE 重試後改用最近空格；FAIL_SKIP 跳過；雜兵不擋清波；每波 wave_on_cleared_actions 加錢；最後一波清空才 combat_ended。
@@ -48,10 +50,12 @@ Board／Wave 既有的單盤案例以顯式 SINGLE 保持距離契約。棋盤�
 
 兩者各自的 assertions 與實際執行結果見 [雙盤驗收表](../../specs/dual-board/verification.json)。工程仍在整合時，不能拿舊的 All 結果代替新增 suite。
 
+DualBoard 另呼叫 board_layout_cases 的實場部分，驗三個任意 ID、同 ID 改槽及重排不改 membership；[board_spawn_policy_cases.gd](../../../tests/board_spawn_policy_cases.gd) 驗首波內部不受畫面槽限制的生成，以及舊顯式 Encounter 的 positional 截斷預設。B 結果另見 [盤定義分析](../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)，不取代 C 的真實 0→正盤→0 開場驗收。
+
 ## Boardless
 
 入口 [boardless_flow.gd](../../../tests/boardless_flow.gd)。四個程序共用同一隔離副本，以 `--boardless-phase=write/read/defeat/scene_off` 分別驗關閉棋盤時的戰鬥、存讀、死亡，以及場景開關。每個階段都要求整行 `BOARDLESS PASS: <phase>`，任一失敗即停止。棋盤相關改動須與 DualBoard 一起跑，見 [validation](../game-dev/validation.md#棋盤開關兩種模式都要驗)。
 
 ## BoardRemoved
 
-與 Boardless 共用 [boardless_flow.gd](../../../tests/boardless_flow.gd)，但 runner 先在隔離副本**刪除棋盤模組檔**（`scripts/combat/board/`、`scripts/actions/board_actions/`、`scripts/validators/board/`、`scripts/ui/Board{View,ActorPresentation,CombatPresentation}.gd`，清單以 runner 的 `BOARD_MODULE_PATHS` 為準），再以 `--boardless-phase=removed／defeat` 兩階段驗：import 無錯，規則與場景都要求棋盤時仍以普通戰鬥完成出牌、意圖輪替與勝敗。它證明核心不依賴棋盤類別；動到 CombatModule 介面、核心與模組邊界時必跑。標記同為 `BOARDLESS PASS: <phase>`。
+與 Boardless 共用 [boardless_flow.gd](../../../tests/boardless_flow.gd)，但 runner 先在隔離副本**刪除棋盤模組檔**（`scripts/combat/board/`、`scripts/actions/board_actions/`、`scripts/validators/board/`、`scripts/ui/Board{View,ActorPresentation,CombatPresentation,Layout}.gd`，清單以 runner 的 `BOARD_MODULE_PATHS` 為準），再以 `--boardless-phase=removed／defeat` 兩階段驗：import 無錯，規則與場景都要求棋盤時仍以普通戰鬥完成出牌、意圖輪替與勝敗。它證明核心不依賴棋盤類別；動到 CombatModule 介面、核心與模組邊界時必跑。標記同為 `BOARDLESS PASS: <phase>`。

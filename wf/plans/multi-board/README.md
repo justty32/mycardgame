@@ -2,7 +2,7 @@
 
 [架構草案](../../specs/multi-board/README.md)｜[planning](../../workflows/planning.md)｜[遊戲驗收](../../workflows/game-dev/validation.md)
 
-狀態：2026-10-21 規劃先於 `2b3dec8` 交付，持續工作已完成 A；B／C 尚未動工。使用者要求先把結構規劃乾淨；本計畫不是部署玩法的定案。開工依 game-dev，先在 SESSION-LOG 記實際範圍，再分配檔案唯一 owner 與單一背景 runtime owner。上游身份看 tools/upstream.json，A 的外層基準為 `2b3dec8`。
+狀態：2026-10-21 規劃先於 `2b3dec8` 交付，持續工作已完成 A／B；C 尚未實作。使用者要求先把結構規劃乾淨；本計畫不是部署玩法的定案。開工依 game-dev，先在 SESSION-LOG 記實際範圍，再分配檔案唯一 owner 與單一背景 runtime owner。上游身份看 tools/upstream.json，A／B 的外層基準分別為 `2b3dec8`／`7b26416`。
 
 ## A．集中每場準備，保持既有行為
 
@@ -18,6 +18,8 @@
 
 完成條件：runtime 不依 SINGLE／DUAL enum 建盤；相容轉譯仍保持舊結果。部署政策測試只產位置要求，幾何負責可放性，生成 owner 不變；新棋盤生成數量不受 EnemyContainer 的畫面 slot 限制，舊 positional event 相容測例不變；layout 重排不改 ID／anchor／faction。先保留舊 helper/getter 的必要轉送與測試，再依引用消除，不能批次刪除相容面。
 
+2026-10-21 已完成：BoardSetup 幾何集合、獨立 BoardDeployment、空間／舊 mode 驗證分流、BoardLayout 與 View 槽尺寸。新首波路徑由內部明確參數和實場 fixture 驗證，所有舊內容仍保留 positional 預設；C 才把新格式接到該路徑。任意三盤及變更矩形不定義產品 N 排法。獨立靜態 review PASS，8 套 1711 checks／0 failures，來源／測例 hash 與補丁重建一致；證據及限制見 [分析](../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)。
+
 ## C．接明確空集合與任意正盤集合
 
 在內部結構穩定後才定外部序列化契約：必須區分未指定與明確空集合，並保留舊 `encounter_boards={}` 的覆寫語意；欄位/版本選擇是工程工作，不要求使用者選名字。正盤 fixture 顯式設定位置政策，驗 1、2、3 與更多盤及順序改變；這些數字是測試樣本，不能成為產品上限。0 走真正無模組，不能只讓 `get_board_ids()` 回空陣列。
@@ -30,7 +32,7 @@
 
 程式修改後同步 board-module 現行契約、code map、suite coverage、受影響 analysis 與來源補丁／upstream 鎖。補丁按明確來源基準產生並檢查順序／hash；未改遊戲的本輪不產生空補丁。測試副本留 artifacts，必要證據才依版本控制流程取可攜副本。
 
-所有階段完成後依 STRUCTURE 封存 plan；目前僅 A 完成，保留 B／C open，不將 0~N 目標標完成。GUI、所有內容包、多幕通關與大規模效能未經實測都另列限制。
+所有階段完成後依 STRUCTURE 封存 plan；目前 A／B 完成，保留 C open，不將 0~N 目標標完成。GUI、所有內容包、多幕通關與大規模效能未經實測都另列限制。
 
 ## 初次規劃驗收（2b3dec8）
 

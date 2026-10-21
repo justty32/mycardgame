@@ -9,7 +9,7 @@ const SELECT_TARGET_CELL: String = "SELECT_TARGET_CELL"
 static func resolve(battlefield: CombatBattlefield, source: BoardPosition, target: BoardPosition, shape: int, max_range: int = -1, footprint: Vector2i = Vector2i.ONE, movement: String = "") -> Dictionary:
 	if battlefield == null or not battlefield.valid:
 		return _rejected("invalid_battlefield")
-	var configuration_error: String = battlefield.rules.validate_configuration()
+	var configuration_error: String = battlefield.rules.validate_spatial_configuration()
 	if configuration_error != "":
 		return _rejected(configuration_error)
 	if source == null or target == null:

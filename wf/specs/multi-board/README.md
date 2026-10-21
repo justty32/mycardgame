@@ -2,7 +2,7 @@
 
 [棋盤模組現況](../board-module/README.md)｜[現況調查](../../notes/investigations/2026-10-21-multi-board-feasibility.md)｜[遷移計畫](../../plans/multi-board/README.md)
 
-狀態：2026-10-21 架構先行規劃；其後遷移 A 已完成每場準備與資料所有權，B／C 尚未實作。使用者確認目標為每場 0~N 盤，要求乾淨解耦，不先定死部署玩法。本草案不把調查 M1、陣營主場、盤數上限或排版提案升為產品決策。調查基準為 `7eba093`，A 實作基準為 `2b3dec8`；現況與證據見 [準備分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。
+狀態：2026-10-21 架構先行規劃；其後遷移 A／B 已完成每場準備及內部盤定義、部署與排版分離，C 尚未實作。使用者確認目標為每場 0~N 盤，要求乾淨解耦，不先定死部署玩法。本草案不把調查 M1、陣營主場、盤數上限或排版提案升為產品決策。調查基準為 `7eba093`，A／B 實作基準分別為 `2b3dec8`／`7b26416`；證據見 [準備分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)及[盤定義分析](../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)。
 
 ## 方案
 
@@ -48,4 +48,4 @@ flowchart TD
 
 ## 驗收邊界
 
-`2b3dec8` 的初次交付只含架構與分階段計畫、獨立靜態審查及文件 lint；其後 A 已有隔離 headless 證據，見 [遷移計畫](../../plans/multi-board/README.md)。B／C 仍待實作，導航可走或 A 通過不等於 0~N 已可玩。
+`2b3dec8` 的初次交付只含架構與分階段計畫、獨立靜態審查及文件 lint；其後 A／B 已有隔離 headless 證據，見 [遷移計畫](../../plans/multi-board/README.md)。C 仍待實作，內部任意盤集合與 slot-free 生成專項通過不等於 0~N 已可玩。

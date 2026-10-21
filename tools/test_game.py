@@ -99,6 +99,8 @@ SOURCE_HASH_PATHS = (
     "scripts/ui/Map.gd",
     "autoload/FileLoader.gd",
     "data/SerializableData.gd",
+    "data/readonly/CombatRulesData.gd",
+    "data/readonly/EncounterData.gd",
     "autoload/Global.gd",
     "scripts/ui/menus/NewRunMenu.gd",
     "scripts/combat/CombatDirector.gd",
@@ -108,6 +110,8 @@ SOURCE_HASH_PATHS = (
     "scripts/combat/UnitSpawner.gd",
     "scripts/combat/CombatActionPhases.gd",
     "scripts/combat/board/CombatBattlefield.gd",
+    "scripts/combat/board/BoardSetup.gd",
+    "scripts/combat/board/BoardDeployment.gd",
     "scripts/combat/board/BoardPosition.gd",
     "scripts/combat/board/CrossBoardPolicy.gd",
     "scripts/combat/board/BoardData.gd",
@@ -135,6 +139,7 @@ SOURCE_HASH_PATHS = (
     "scripts/combat/board/BoardEnemyIntent.gd",
     "scripts/combat/board/BoardContentPolicy.gd",
     "scripts/ui/BoardCombatPresentation.gd",
+    "scripts/ui/BoardLayout.gd",
 )
 # The optional board module: BoardRemoved deletes exactly these from its isolated copy and proves
 # the core still imports and runs ordinary combat without them.
@@ -145,6 +150,7 @@ BOARD_MODULE_PATHS = (
     "scripts/ui/BoardView.gd",
     "scripts/ui/BoardActorPresentation.gd",
     "scripts/ui/BoardCombatPresentation.gd",
+    "scripts/ui/BoardLayout.gd",
 )
 EXCLUDED_DIR_NAMES = frozenset({".git", ".godot", ".import", ".saves", ".screenshots", ".mono"})
 EXCLUDED_FILE_NAMES = frozenset({"profile.json", "user_settings.json"})

@@ -6,11 +6,13 @@ class_name BoardController
 var rules: CombatRulesData
 var encounter: EncounterData
 var battlefield: CombatBattlefield
+var board_setup: BoardSetup
+var deployment: BoardDeployment
 var field_controllers: Dictionary[String, FieldController] = {}
 ## Legacy query seam: shared board in SINGLE, party board in DUAL.
 var board: BoardData:
 	get:
-		return battlefield.get_board(battlefield.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
+		return battlefield.get_board(deployment.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
 var field_controller: FieldController:
 	get:
 		return FieldController.for_board(board)
@@ -20,7 +22,9 @@ func _init(combat_rules: CombatRulesData) -> void:
 
 func setup(encounter_data: EncounterData) -> bool:
 	encounter = encounter_data
-	battlefield = CombatBattlefield.new(encounter, rules)
+	board_setup = BoardSetup.from_legacy(encounter, rules)
+	deployment = board_setup.deployment
+	battlefield = CombatBattlefield.new(board_setup, rules)
 	if not battlefield.valid:
 		DebugLogger.log_error("BoardController: %s: %s" % [battlefield.error, battlefield.error_detail])
 		return false
@@ -28,18 +32,12 @@ func setup(encounter_data: EncounterData) -> bool:
 	for current: BoardData in battlefield.boards.values():
 		current.movement_state.used_opportunities = shared_opportunities
 		field_controllers[current.board_id] = FieldController.new(current)
-		var config: Dictionary = encounter.get_board_config(current.board_id)
-		var deploy: Array[Vector2i] = EncounterData.cells_from_json(config.deploy_cells)
-		if deploy.is_empty():
-			deploy = default_deploy_cells(current.board_id)
+		var config: Dictionary = board_setup.get_config(current.board_id)
+		var deploy: Array[Vector2i] = deployment.deploy_cells(current.board_id)
 		for cell: Vector2i in deploy:
 			if current.is_in_bounds(cell):
 				current.get_cell(cell).is_deploy_zone = true
-		var spawn: Array[Vector2i] = EncounterData.cells_from_json(config.spawn_zone_cells)
-		if spawn.is_empty():
-			for y: int in min(2, current.size.y):
-				for x: int in current.size.x:
-					spawn.append(Vector2i(x, y))
+		var spawn: Array[Vector2i] = deployment.spawn_cells(current.board_id)
 		for cell: Vector2i in spawn:
 			if current.is_in_bounds(cell):
 				current.get_cell(cell).is_spawn_zone = true
@@ -51,11 +49,8 @@ func setup(encounter_data: EncounterData) -> bool:
 				field_controllers[current.board_id].create_field(data, cell, null, 0, int(entry.get("duration", -2)))
 	var hero: BaseCombatant = UnitRegistry.get_hero()
 	if hero != null:
-		var home: String = battlefield.default_board_id(hero.faction)
-		var deploy: Array[Vector2i] = EncounterData.cells_from_json(encounter.get_board_config(home).deploy_cells)
-		if deploy.is_empty():
-			deploy = default_deploy_cells(home)
-		if not place_unit_nearest(hero, deploy[0], home):
+		var location: Dictionary = deployment.hero_location(hero.faction)
+		if not place_unit_nearest(hero, location.cell, location.board_id):
 			return false
 	return true
 
@@ -64,6 +59,8 @@ func clear() -> void:
 		controller.clear()
 	field_controllers.clear()
 	battlefield = null
+	board_setup = null
+	deployment = null
 	encounter = null
 
 func get_board_for_unit(unit: BaseCombatant) -> BoardData:
@@ -75,22 +72,14 @@ func get_spawn_board(unit: BaseCombatant, board_id: String = "") -> BoardData:
 	if board_id != "":
 		return battlefield.get_board(board_id)
 	var existing: BoardData = get_board_for_unit(unit)
-	return existing if existing != null else battlefield.get_board(battlefield.default_board_id(unit.faction))
+	return existing if existing != null else battlefield.get_board(deployment.default_board_id(unit.faction))
 
 func default_deploy_cells(board_id: String = "") -> Array[Vector2i]:
-	var current: BoardData = board if board_id == "" else battlefield.get_board(board_id)
-	var cells: Array[Vector2i] = [Vector2i(int(current.size.x / 2), current.size.y - 1)]
-	for y: int in range(current.size.y - 1, max(-1, current.size.y - 3), -1):
-		for x: int in current.size.x:
-			if not cells.has(Vector2i(x, y)):
-				cells.append(Vector2i(x, y))
-	return cells
+	var id: String = deployment.default_board_id(BaseCombatant.FACTIONS.PARTY) if board_id == "" else board_id
+	return deployment.default_deploy_cells(id)
 
 func default_spawn_origin(board_id: String = "") -> Vector2i:
-	if board_id == "":
-		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
-	var current: BoardData = battlefield.get_board(board_id)
-	return Vector2i(int(current.size.x / 2), 0) if current != null else BaseCombatant.BOARD_ANCHOR_NONE
+	return deployment.spawn_origin(board_id)
 
 func place_unit_nearest(unit: BaseCombatant, cell: Vector2i, board_id: String = "") -> bool:
 	var current: BoardData = get_spawn_board(unit, board_id)

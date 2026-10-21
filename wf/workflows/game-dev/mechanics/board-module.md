@@ -14,6 +14,8 @@
 
 讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd)、[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)、[BoardCombatModule.gd](../../../../game/scripts/combat/board/BoardCombatModule.gd)，確認場景 `board_module_enabled` 與 rules `board_enabled` 的實際值（兩者都開才掛載，見 [架構分析的裝配與責任](../../../specs/board-module/README.md#裝配與責任)）。不要把 SINGLE、隱藏 BoardView、空棋盤或零移動點當作關閉功能。
 
+盤定義、部署與呈現的接點見 [遷移 B 分析](../../../../analysis/slay-the-robot/architecture/09_board_setup_layout.md)：新增幾何消費 BoardSetup 集合，舊 mode 只在相容轉譯解讀；部署政策只產位置，BoardLayout 只產畫面矩形。不能把 party／enemy 或畫面槽數重新塞回通用盤定義。首波 `use_event_slots` 是內部相容選項，舊內容預設不變，外部新盤數格式選路留 C；改呼叫時同時核對顯式 Encounter 的 positional 相容測例。
+
 先定義改動是在開局前切換內容設定，還是要支援戰鬥中真正卸載 Node。後者必須涵蓋排隊請求、await 恢復、舊實例延遲 exit 與新實例身份；不要在未完成相關驗收前把「可選掛載」擴稱成任意時刻熱切換。
 
 場景負責組裝元件：Combat 只在兩個旗標都開且 `BOARD_MODULE_SCRIPT` 檔案存在時以路徑 load BoardCombatModule。Director 保留普通 CTB、Encounter、waves 與行動流程，只經核心 [CombatModule](../../../../game/scripts/combat/CombatModule.gd) 介面的 hooks（setup／clear、單位進出、行動開始、時鐘、出牌、目標解析、敵人意圖、威脅、放置）呼叫模組，不引用任何棋盤類別；缺模組內容由 [CombatContentRequirements](../../../../game/scripts/combat/CombatContentRequirements.gd) 以資料標記判定。棋盤幾何、場域、移動、undo、盤面威脅與呈現歸模組。核心的 `board_*` 查詢只是無型別相容轉送，未掛載回 null；不能讓核心在缺模組時偷偷 new 棋盤來補洞，也不能在核心新增棋盤類別引用（會讓 BoardRemoved 失敗）。新需求先加在 CombatModule hooks，不為單一棋盤元件建立通用 plugin 系統。完整介面與刻意保留的殘留耦合見 [架構分析](../../../specs/board-module/README.md)。

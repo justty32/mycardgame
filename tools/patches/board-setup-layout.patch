@@ -1,0 +1,617 @@
+diff --git a/data/readonly/CombatRulesData.gd b/data/readonly/CombatRulesData.gd
+index 4ca18ddc8539bb08fe9f0678ce681ce15bafabe3..0a4b5f4b15b085cf6ec7dbabe6c04516d9195b55 100644
+--- a/data/readonly/CombatRulesData.gd
++++ b/data/readonly/CombatRulesData.gd
+@@ -100,6 +100,10 @@ func _get_native_properties() -> Dictionary:
+ func validate_configuration() -> String:
+ 	if board_mode not in [BOARD_MODES.SINGLE, BOARD_MODES.DUAL]:
+ 		return "unknown_board_mode"
++	return validate_spatial_configuration()
++
++## Spatial rules shared by normalized worlds; legacy mode belongs to the input adapter.
++func validate_spatial_configuration() -> String:
+ 	if cross_board_policy_version != 1:
+ 		return "unsupported_cross_board_policy_version"
+ 	if cross_board_policy != "SELECT_TARGET_CELL":
+diff --git a/scripts/combat/UnitSpawner.gd b/scripts/combat/UnitSpawner.gd
+index a13a1be806178b7d5dbf8ff9642773ab4bea007c..e01c1334aa861ef43dcba2efe77fbfbdb6b9e783 100644
+--- a/scripts/combat/UnitSpawner.gd
++++ b/scripts/combat/UnitSpawner.gd
+@@ -46,7 +46,7 @@ func clear() -> void:
+ #region Wave 0 (combat start)
+ ## Spawns wave 0 of the encounter: weighted picks in order with rng_enemy_spawning (like the legacy
+ ## spawner), in the event's placement mode, placed on their cell by the wave's spawn policy.
+-func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
++func spawn_first_wave(event_data: EventData, encounter: EncounterData, use_event_slots: bool = true) -> void:
+ 	spawn_delays.clear()
+ 	var unit_layer: Node = get_unit_layer()
+ 	if unit_layer == null or encounter.encounter_waves.is_empty():
+@@ -64,10 +64,12 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
+ 		var cell: Vector2i = location.cell
+ 		var tick: int = _entry_tick(wave, 0, index, unit_entry)
+ 		var entry: Dictionary = _unit_entry(0, tick, enemy_object_id, cell, board_id)
+-		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
++		var placement: CombatModule = director.get_placement_module()
++		# Explicit internal opt-in: legacy callers retain event-slot truncation.
++		var board_entry: bool = placement != null and not use_event_slots
++		var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id) if board_entry else unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
+ 		if enemy == null:
+ 			break	# positional events stop when their slots run out (legacy)
+-		var placement: CombatModule = director.get_placement_module()
+ 		if placement == null:
+ 			if tick > 0:
+ 				spawn_delays[enemy.unit_uid] = tick
+diff --git a/scripts/combat/board/BoardCombatModule.gd b/scripts/combat/board/BoardCombatModule.gd
+index c384624adf0f166f3b608d835b90f0213c256653..293c7314d8c274427a5b237b1f5d414366b8b77f 100644
+--- a/scripts/combat/board/BoardCombatModule.gd
++++ b/scripts/combat/board/BoardCombatModule.gd
+@@ -187,18 +187,7 @@ func resolve_spawn_location(unit_entry: Dictionary) -> Dictionary:
+ 	var location: Dictionary = {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE}
+ 	if not places_units():
+ 		return location
+-	var board_id: String = str(unit_entry.get("board_id", ""))
+-	if board_id == "":
+-		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
+-	location.board_id = board_id
+-	var current: BoardData = battlefield.get_board(board_id)
+-	if current == null:
+-		return location
+-	var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
+-	if not current.is_in_bounds(cell):
+-		cell = board_controller.default_spawn_origin(board_id)
+-	location.cell = cell
+-	return location
++	return board_controller.deployment.resolve_spawn_location(unit_entry)
+ 
+ func has_zone(zone_id: String) -> bool:
+ 	return places_units() and battlefield.get_board(zone_id) != null
+diff --git a/scripts/combat/board/BoardController.gd b/scripts/combat/board/BoardController.gd
+index 3958d5c22c7d2531781cd38b530ee5141134214e..78b7eaae902050fcc5cafca8a256c7a007389292 100644
+--- a/scripts/combat/board/BoardController.gd
++++ b/scripts/combat/board/BoardController.gd
+@@ -6,11 +6,13 @@ class_name BoardController
+ var rules: CombatRulesData
+ var encounter: EncounterData
+ var battlefield: CombatBattlefield
++var board_setup: BoardSetup
++var deployment: BoardDeployment
+ var field_controllers: Dictionary[String, FieldController] = {}
+ ## Legacy query seam: shared board in SINGLE, party board in DUAL.
+ var board: BoardData:
+ 	get:
+-		return battlefield.get_board(battlefield.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
++		return battlefield.get_board(deployment.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
+ var field_controller: FieldController:
+ 	get:
+ 		return FieldController.for_board(board)
+@@ -20,7 +22,9 @@ func _init(combat_rules: CombatRulesData) -> void:
+ 
+ func setup(encounter_data: EncounterData) -> bool:
+ 	encounter = encounter_data
+-	battlefield = CombatBattlefield.new(encounter, rules)
++	board_setup = BoardSetup.from_legacy(encounter, rules)
++	deployment = board_setup.deployment
++	battlefield = CombatBattlefield.new(board_setup, rules)
+ 	if not battlefield.valid:
+ 		DebugLogger.log_error("BoardController: %s: %s" % [battlefield.error, battlefield.error_detail])
+ 		return false
+@@ -28,18 +32,12 @@ func setup(encounter_data: EncounterData) -> bool:
+ 	for current: BoardData in battlefield.boards.values():
+ 		current.movement_state.used_opportunities = shared_opportunities
+ 		field_controllers[current.board_id] = FieldController.new(current)
+-		var config: Dictionary = encounter.get_board_config(current.board_id)
+-		var deploy: Array[Vector2i] = EncounterData.cells_from_json(config.deploy_cells)
+-		if deploy.is_empty():
+-			deploy = default_deploy_cells(current.board_id)
++		var config: Dictionary = board_setup.get_config(current.board_id)
++		var deploy: Array[Vector2i] = deployment.deploy_cells(current.board_id)
+ 		for cell: Vector2i in deploy:
+ 			if current.is_in_bounds(cell):
+ 				current.get_cell(cell).is_deploy_zone = true
+-		var spawn: Array[Vector2i] = EncounterData.cells_from_json(config.spawn_zone_cells)
+-		if spawn.is_empty():
+-			for y: int in min(2, current.size.y):
+-				for x: int in current.size.x:
+-					spawn.append(Vector2i(x, y))
++		var spawn: Array[Vector2i] = deployment.spawn_cells(current.board_id)
+ 		for cell: Vector2i in spawn:
+ 			if current.is_in_bounds(cell):
+ 				current.get_cell(cell).is_spawn_zone = true
+@@ -51,11 +49,8 @@ func setup(encounter_data: EncounterData) -> bool:
+ 				field_controllers[current.board_id].create_field(data, cell, null, 0, int(entry.get("duration", -2)))
+ 	var hero: BaseCombatant = UnitRegistry.get_hero()
+ 	if hero != null:
+-		var home: String = battlefield.default_board_id(hero.faction)
+-		var deploy: Array[Vector2i] = EncounterData.cells_from_json(encounter.get_board_config(home).deploy_cells)
+-		if deploy.is_empty():
+-			deploy = default_deploy_cells(home)
+-		if not place_unit_nearest(hero, deploy[0], home):
++		var location: Dictionary = deployment.hero_location(hero.faction)
++		if not place_unit_nearest(hero, location.cell, location.board_id):
+ 			return false
+ 	return true
+ 
+@@ -64,6 +59,8 @@ func clear() -> void:
+ 		controller.clear()
+ 	field_controllers.clear()
+ 	battlefield = null
++	board_setup = null
++	deployment = null
+ 	encounter = null
+ 
+ func get_board_for_unit(unit: BaseCombatant) -> BoardData:
+@@ -75,22 +72,14 @@ func get_spawn_board(unit: BaseCombatant, board_id: String = "") -> BoardData:
+ 	if board_id != "":
+ 		return battlefield.get_board(board_id)
+ 	var existing: BoardData = get_board_for_unit(unit)
+-	return existing if existing != null else battlefield.get_board(battlefield.default_board_id(unit.faction))
++	return existing if existing != null else battlefield.get_board(deployment.default_board_id(unit.faction))
+ 
+ func default_deploy_cells(board_id: String = "") -> Array[Vector2i]:
+-	var current: BoardData = board if board_id == "" else battlefield.get_board(board_id)
+-	var cells: Array[Vector2i] = [Vector2i(int(current.size.x / 2), current.size.y - 1)]
+-	for y: int in range(current.size.y - 1, max(-1, current.size.y - 3), -1):
+-		for x: int in current.size.x:
+-			if not cells.has(Vector2i(x, y)):
+-				cells.append(Vector2i(x, y))
+-	return cells
++	var id: String = deployment.default_board_id(BaseCombatant.FACTIONS.PARTY) if board_id == "" else board_id
++	return deployment.default_deploy_cells(id)
+ 
+ func default_spawn_origin(board_id: String = "") -> Vector2i:
+-	if board_id == "":
+-		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
+-	var current: BoardData = battlefield.get_board(board_id)
+-	return Vector2i(int(current.size.x / 2), 0) if current != null else BaseCombatant.BOARD_ANCHOR_NONE
++	return deployment.spawn_origin(board_id)
+ 
+ func place_unit_nearest(unit: BaseCombatant, cell: Vector2i, board_id: String = "") -> bool:
+ 	var current: BoardData = get_spawn_board(unit, board_id)
+diff --git a/scripts/combat/board/BoardDeployment.gd b/scripts/combat/board/BoardDeployment.gd
+new file mode 100644
+index 0000000000000000000000000000000000000000..887510d324fe430e3a56e05f56a9bbbd19fa7e12
+--- /dev/null
++++ b/scripts/combat/board/BoardDeployment.gd
+@@ -0,0 +1,77 @@
++## Pure placement policy. Produces positions/candidates; never creates units or mutates occupancy.
++extends RefCounted
++class_name BoardDeployment
++
++var _definitions: Dictionary = {}
++var error: String = ""
++var _party_id: String = ""
++var _enemy_id: String = ""
++
++func _init(definitions: Dictionary = {}, party_id: String = "", enemy_id: String = "") -> void:
++	if not definitions.has(party_id) or not definitions.has(enemy_id):
++		error = "invalid_deployment_board"
++		return
++	for id: String in definitions:
++		var config: Dictionary = definitions[id]
++		_definitions[id] = {"size": config.size, "deploy_cells": config.get("deploy_cells", []).duplicate(true), "spawn_zone_cells": config.get("spawn_zone_cells", []).duplicate(true)}
++	_party_id = party_id
++	_enemy_id = enemy_id
++
++func default_board_id(faction: int) -> String:
++	return _party_id if faction == BaseCombatant.FACTIONS.PARTY else _enemy_id
++
++func deploy_cells(id: String) -> Array[Vector2i]:
++	var config: Dictionary = _definitions.get(id, {})
++	if config.is_empty():
++		return []
++	var cells: Array[Vector2i] = EncounterData.cells_from_json(config.deploy_cells)
++	return cells if not cells.is_empty() else default_deploy_cells(id)
++
++func default_deploy_cells(id: String) -> Array[Vector2i]:
++	if not _definitions.has(id):
++		return []
++	var size: Vector2i = _definitions[id].size
++	var cells: Array[Vector2i] = [Vector2i(int(size.x / 2), size.y - 1)]
++	for y: int in range(size.y - 1, max(-1, size.y - 3), -1):
++		for x: int in size.x:
++			if not cells.has(Vector2i(x, y)):
++				cells.append(Vector2i(x, y))
++	return cells
++
++func spawn_cells(id: String) -> Array[Vector2i]:
++	var config: Dictionary = _definitions.get(id, {})
++	if config.is_empty():
++		return []
++	var cells: Array[Vector2i] = EncounterData.cells_from_json(config.spawn_zone_cells)
++	if cells.is_empty():
++		var size: Vector2i = config.size
++		for y: int in min(2, size.y):
++			for x: int in size.x:
++				cells.append(Vector2i(x, y))
++	return cells
++
++func spawn_origin(id: String = "") -> Vector2i:
++	if id == "":
++		id = _enemy_id
++	if not _definitions.has(id):
++		return BaseCombatant.BOARD_ANCHOR_NONE
++	var size: Vector2i = _definitions[id].size
++	return Vector2i(int(size.x / 2), 0)
++
++func hero_location(faction: int) -> Dictionary:
++	var id: String = default_board_id(faction)
++	var cells: Array[Vector2i] = deploy_cells(id)
++	return {"board_id": id, "cell": cells[0] if not cells.is_empty() else BaseCombatant.BOARD_ANCHOR_NONE}
++
++func resolve_spawn_location(entry: Dictionary, faction: int = BaseCombatant.FACTIONS.ENEMY) -> Dictionary:
++	var id: String = str(entry.get("board_id", ""))
++	if id == "":
++		id = default_board_id(faction)
++	var cell: Vector2i = EncounterData.cell_from_json(entry.get("cell", null))
++	var config: Dictionary = _definitions.get(id, {})
++	if config.is_empty():
++		return {"board_id": id, "cell": BaseCombatant.BOARD_ANCHOR_NONE}
++	var size: Vector2i = config.size
++	if cell.x < 0 or cell.y < 0 or cell.x >= size.x or cell.y >= size.y:
++		cell = spawn_origin(id)
++	return {"board_id": id, "cell": cell}
+diff --git a/scripts/combat/board/BoardSetup.gd b/scripts/combat/board/BoardSetup.gd
+new file mode 100644
+index 0000000000000000000000000000000000000000..f0504c4917919ee6435972b7003131eea67edbed
+--- /dev/null
++++ b/scripts/combat/board/BoardSetup.gd
+@@ -0,0 +1,93 @@
++## Detached, normalized board definitions. Runtime geometry never interprets legacy modes.
++extends RefCounted
++class_name BoardSetup
++
++var _definitions: Dictionary = {}
++var deployment: BoardDeployment = null
++var _validated: bool = false
++var error: String = ""
++var error_detail: String = ""
++
++func is_valid() -> bool:
++	return _validated and error == ""
++
++func get_config(id: String) -> Dictionary:
++	return _definitions.get(id, {}).duplicate(true)
++
++func get_board_ids() -> Array[String]:
++	var ids: Array[String] = []
++	ids.assign(_definitions.keys())
++	return ids
++
++static func from_legacy(encounter: EncounterData, rules: CombatRulesData) -> BoardSetup:
++	var setup := BoardSetup.new()
++	setup.error = rules.validate_configuration()
++	if setup.error != "":
++		setup.error_detail = "CombatRulesData \"%s\": %s (board sizes %s, default %s, ceiling %s)" % [rules.object_id, setup.error, rules.describe_board_size_limits(), rules.default_board_size, CombatRulesData.BOARD_SIZE_CEILING]
++		return setup
++	var checked: Dictionary = encounter.validate_configuration_detail(rules)
++	setup.error = checked.code
++	setup.error_detail = checked.detail
++	if setup.error != "":
++		return setup
++	for id: String in encounter.get_board_ids(rules):
++		var config: Dictionary = encounter.get_board_config(id).duplicate(true)
++		config.size = encounter.get_size_for_board(id, rules)
++		setup._definitions[id] = config
++	var single: bool = encounter.get_board_mode(rules) == CombatRulesData.BOARD_MODES.SINGLE
++	var normalized: BoardSetup = from_definitions(setup._definitions, rules)
++	if normalized.is_valid():
++		normalized.deployment = BoardDeployment.new(normalized._definitions, "shared" if single else "party", "shared" if single else "enemy")
++	return normalized
++
++## Internal geometry input, not a serialized encounter format. No deployment policy is required.
++static func from_definitions(definitions: Dictionary, rules: CombatRulesData) -> BoardSetup:
++	var setup := BoardSetup.new()
++	setup.error = rules.validate_spatial_configuration()
++	if setup.error != "":
++		setup.error_detail = setup.error
++		return setup
++	for id: Variant in definitions:
++		if not id is String or id == "" or not definitions[id] is Dictionary:
++			return _invalid("invalid_board_definition", "board IDs must be nonempty strings and definitions objects")
++		var config: Dictionary = definitions[id].duplicate(true)
++		var raw_size: Variant = config.get("size", null)
++		if not EncounterData._valid_cell(raw_size) or not EncounterData._whole_cell(raw_size):
++			return _invalid("invalid_board_definition_size", "board %s size must be two whole numbers" % id)
++		var size: Vector2i = EncounterData.cell_from_json(raw_size)
++		if not rules.is_board_size_allowed(size):
++			return _invalid("invalid_board_definition_size", "board %s size %s is outside %s" % [id, size, rules.describe_board_size_limits()])
++		config.size = size
++		for key: String in ["blocked_cells", "deploy_cells", "spawn_zone_cells"]:
++			var cells: Variant = config.get(key, [])
++			if not cells is Array:
++				return _invalid("invalid_board_definition_cells", "board %s %s must be an array" % [id, key])
++			for value: Variant in cells:
++				if not _valid_cell(value, size):
++					return _invalid("invalid_board_definition_cells", "board %s %s has invalid cell %s" % [id, key, value])
++			config[key] = cells
++		var fields: Variant = config.get("initial_fields", [])
++		if not fields is Array:
++			return _invalid("invalid_board_definition_fields", "board %s initial_fields must be an array" % id)
++		for field: Variant in fields:
++			if not field is Dictionary or not field.get("cells", []) is Array:
++				return _invalid("invalid_board_definition_fields", "board %s invalid initial field" % id)
++			for value: Variant in field.get("cells", []):
++				if not _valid_cell(value, size):
++					return _invalid("invalid_board_definition_fields", "board %s invalid field cell %s" % [id, value])
++		config.initial_fields = fields
++		setup._definitions[id] = config
++	setup._validated = true
++	return setup
++
++static func _valid_cell(value: Variant, size: Vector2i) -> bool:
++	if not EncounterData._valid_cell(value) or not EncounterData._whole_cell(value):
++		return false
++	var cell: Vector2i = EncounterData.cell_from_json(value)
++	return cell.x >= 0 and cell.y >= 0 and cell.x < size.x and cell.y < size.y
++
++static func _invalid(code: String, detail: String) -> BoardSetup:
++	var setup := BoardSetup.new()
++	setup.error = code
++	setup.error_detail = detail
++	return setup
+diff --git a/scripts/combat/board/CombatBattlefield.gd b/scripts/combat/board/CombatBattlefield.gd
+index 5bdd2929e7c9534b935699ada23082b450ddca55..d4463539b37738027e417e25220670a9ca2c0f10 100644
+--- a/scripts/combat/board/CombatBattlefield.gd
++++ b/scripts/combat/board/CombatBattlefield.gd
+@@ -10,30 +10,27 @@ const BOARD_ENEMY: String = "enemy"
+ 
+ var boards: Dictionary[String, BoardData] = {}
+ var rules: CombatRulesData = null
+-var encounter: EncounterData = null
++var setup: BoardSetup = null
+ var valid: bool = false
+ var error: String = ""
+-## Author-facing explanation of error (encounter, board, offending value and allowed range).
+ var error_detail: String = ""
+-var board_mode: int = CombatRulesData.BOARD_MODES.DUAL
+ 
+-func _init(encounter_data: EncounterData = null, combat_rules: CombatRulesData = null) -> void:
++## Encounter input is a compatibility forwarding seam; runtime passes normalized BoardSetup.
++func _init(source: Variant = null, combat_rules: CombatRulesData = null) -> void:
+ 	rules = combat_rules if combat_rules != null else CombatRulesData.new()
+-	encounter = encounter_data if encounter_data != null else EncounterData.new()
+-	error = rules.validate_configuration()
+-	if error != "":
+-		error_detail = "CombatRulesData \"%s\": %s (board sizes %s, default %s, ceiling %s)" % [rules.object_id, error, rules.describe_board_size_limits(), rules.default_board_size, CombatRulesData.BOARD_SIZE_CEILING]
++	setup = source if source is BoardSetup else BoardSetup.from_legacy(source if source is EncounterData else EncounterData.new(), rules)
++	error = setup.error
++	error_detail = setup.error_detail
++	if not setup.is_valid():
++		if error == "":
++			error = "unprepared_board_setup"
++			error_detail = "BoardSetup must be created by a validated factory"
+ 		return
+-	var checked: Dictionary = encounter.validate_configuration_detail(rules)
+-	error = checked.code
+-	error_detail = checked.detail
+-	if error != "":
+-		return
+-	board_mode = encounter.get_board_mode(rules)
+-	for id: String in encounter.get_board_ids(rules):
+-		var board := BoardData.new(encounter.get_size_for_board(id, rules), rules)
++	for id: String in setup.get_board_ids():
++		var config: Dictionary = setup.get_config(id)
++		var board := BoardData.new(config.size, rules)
+ 		board.board_id = id
+-		for cell: Vector2i in EncounterData.cells_from_json(encounter.get_board_config(id).blocked_cells):
++		for cell: Vector2i in EncounterData.cells_from_json(config.blocked_cells):
+ 			board.set_blocked(cell)
+ 		boards[id] = board
+ 	valid = true
+@@ -59,11 +56,9 @@ func get_units() -> Array[BaseCombatant]:
+ 				returned.append(unit)
+ 	return returned
+ 
+-## Initial deployment only. Never use faction to locate a unit that already exists.
++## Legacy query forwarding only. Deployment policy is independent of geometry.
+ func default_board_id(faction: int) -> String:
+-	if board_mode == CombatRulesData.BOARD_MODES.SINGLE:
+-		return BOARD_SHARED
+-	return BOARD_PARTY if faction == BaseCombatant.FACTIONS.PARTY else BOARD_ENEMY
++	return setup.deployment.default_board_id(faction) if setup != null and setup.deployment != null else ""
+ 
+ func get_position(unit: BaseCombatant) -> BoardPosition:
+ 	return BoardPosition.from_unit(unit) if get_board_for_unit(unit) != null else BoardPosition.new()
+diff --git a/scripts/combat/board/CrossBoardPolicy.gd b/scripts/combat/board/CrossBoardPolicy.gd
+index 0a942091291de933e636c4cb8cc3da8ba37c07ad..91249e1623b5d70a953423a54628ee5be1eebe3f 100644
+--- a/scripts/combat/board/CrossBoardPolicy.gd
++++ b/scripts/combat/board/CrossBoardPolicy.gd
+@@ -9,7 +9,7 @@ const SELECT_TARGET_CELL: String = "SELECT_TARGET_CELL"
+ static func resolve(battlefield: CombatBattlefield, source: BoardPosition, target: BoardPosition, shape: int, max_range: int = -1, footprint: Vector2i = Vector2i.ONE, movement: String = "") -> Dictionary:
+ 	if battlefield == null or not battlefield.valid:
+ 		return _rejected("invalid_battlefield")
+-	var configuration_error: String = battlefield.rules.validate_configuration()
++	var configuration_error: String = battlefield.rules.validate_spatial_configuration()
+ 	if configuration_error != "":
+ 		return _rejected(configuration_error)
+ 	if source == null or target == null:
+diff --git a/scripts/ui/BoardCombatPresentation.gd b/scripts/ui/BoardCombatPresentation.gd
+index ebff5521b25d2cec5f31a3df874b52c1dc40c88e..14971977bd450b3dcb7e9ec4bdd74bde17b18b8b 100644
+--- a/scripts/ui/BoardCombatPresentation.gd
++++ b/scripts/ui/BoardCombatPresentation.gd
+@@ -12,14 +12,15 @@ var undo_move_button: Button = null
+ var _view_board_ids: Array = []
+ var _stopped: bool = true
+ 
+-## Top-left of each board's slot (BoardView.PANEL_MAX_SIZE): two slots side by side, one centred slot.
+-const DUAL_SLOT_ORIGINS: Array[Vector2] = [Vector2(70, 170), Vector2(640, 170)]
+-const SINGLE_SLOT_ORIGIN: Vector2 = Vector2(360, 170)
++## Optional explicit slots for internal callers; no serialized N-board policy is introduced.
++var layout_slots: Dictionary[String, Rect2] = {}
++var layout_error: String = ""
+ 
+-## Board view position: the board of view_size is centred inside its slot, so any size stays in it.
++## Compatibility forwarding for callers that still ask for an indexed one/two-board position.
+ static func view_position(index: int, count: int, view_size: Vector2) -> Vector2:
+-	var origin: Vector2 = DUAL_SLOT_ORIGINS[clampi(index, 0, DUAL_SLOT_ORIGINS.size() - 1)] if count > 1 else SINGLE_SLOT_ORIGIN
+-	return origin + ((BoardView.PANEL_MAX_SIZE - view_size) * 0.5).floor()
++	var ids: Array = ["single"] if count == 1 else ["left", "right"]
++	var slots: Dictionary[String, Rect2] = BoardLayout.compatibility_slots(ids)
++	return BoardLayout.centered_position(slots[ids[clampi(index, 0, ids.size() - 1)]], view_size)
+ 
+ func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
+ 	director = value
+@@ -44,36 +45,49 @@ func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
+ 	sync_board_views()
+ 
+ ## Rebuild grid surfaces only; actual actor parents/registry identities remain stable.
+-func sync_board_views() -> void:
++func sync_board_views() -> bool:
+ 	if _stopped or director == null:
+-		return
++		return false
+ 	var battlefield: CombatBattlefield = director.battlefield
+ 	if battlefield == null:
+-		return
++		return false
+ 	var ids: Array = battlefield.boards.keys()
+-	if ids == _view_board_ids:
+-		return
+-	_view_board_ids = ids.duplicate()
+-	actor_presentation.clear()
+-	for old_view: BoardView in board_views.values():
+-		old_view.queue_free()
+-	board_views.clear()
+-	board_view = null
++	var slots: Dictionary[String, Rect2] = layout_slots
++	if slots.is_empty():
++		slots = BoardLayout.compatibility_slots(ids)
++	# A missing presentation policy must not silently truncate or overlap a board collection.
++	layout_error = ""
++	for id: String in ids:
++		if not slots.has(id) or not BoardLayout.valid_slot(slots[id]):
++			layout_error = "invalid_layout_slot:" + id
++			return false
++	var changed: bool = ids != _view_board_ids
++	if changed:
++		_view_board_ids = ids.duplicate()
++		# Reordering existing IDs retains their surfaces and actor mapping.
++		for old_id: String in board_views.keys():
++			if not ids.has(old_id):
++				board_views[old_id].queue_free()
++				board_views.erase(old_id)
++		board_view = null
+ 	for index: int in ids.size():
+-		var view := BoardView.new()
+-		view.board_id = ids[index]
+-		view.panel_position = view_position(index, ids.size(), BoardView.compute_layout(battlefield.get_board(ids[index]).size).size)
+-		view.position = view.panel_position
+-		view.name = "BoardView_" + ids[index]
+-		combat.add_child(view)
+-		# Grid hit surfaces precede real actor subtrees in Control input tree order.
+-		combat.move_child(view, combat.get_node("Player").get_index())
+-		view._resize(battlefield.get_board(ids[index]))
+-		board_views[ids[index]] = view
++		var id: String = ids[index]
++		var view: BoardView = board_views.get(id)
++		if view == null:
++			view = BoardView.new()
++			view.board_id = id
++			view.name = "BoardView_" + id
++			combat.add_child(view)
++			# Grid hit surfaces precede real actor subtrees in Control input tree order.
++			combat.move_child(view, combat.get_node("Player").get_index())
++			board_views[id] = view
++		view.set_layout_slot(slots[id], battlefield.get_board(id))
+ 		if index == 0:
+ 			board_view = view
+ 	actor_presentation.views = board_views
+-	actor_presentation.sync_positions(false)
++	if changed:
++		actor_presentation.sync_positions(false)
++	return true
+ 
+ func _process(_delta: float) -> void:
+ 	if _stopped or director == null:
+@@ -126,6 +140,7 @@ func clear() -> void:
+ 	board_views.clear()
+ 	board_view = null
+ 	_view_board_ids.clear()
++	layout_slots.clear()
+ 	if is_instance_valid(undo_move_button):
+ 		undo_move_button.queue_free()
+ 	undo_move_button = null
+diff --git a/scripts/ui/BoardLayout.gd b/scripts/ui/BoardLayout.gd
+new file mode 100644
+index 0000000000000000000000000000000000000000..db3234619dfe3831ca29076c29377f6112db1503
+--- /dev/null
++++ b/scripts/ui/BoardLayout.gd
+@@ -0,0 +1,36 @@
++## Pure screen-space mapping. Rectangles never describe gameplay adjacency or deployment.
++extends RefCounted
++class_name BoardLayout
++
++const SLOT_SIZE: Vector2 = Vector2(460, 280)
++const SINGLE_ORIGIN: Vector2 = Vector2(360, 170)
++const DUAL_ORIGINS: Array[Vector2] = [Vector2(70, 170), Vector2(640, 170)]
++
++## Caller-supplied rectangles support any count without choosing a product layout policy.
++## Reject incomplete mappings rather than silently dropping boards or sharing the last slot.
++static func map_slots(ids: Array, rects: Array[Rect2]) -> Dictionary[String, Rect2]:
++	var result: Dictionary[String, Rect2] = {}
++	if ids.size() != rects.size():
++		return result
++	for index: int in ids.size():
++		var id: String = str(ids[index])
++		if id.is_empty() or result.has(id) or not valid_slot(rects[index]):
++			return {}
++		result[id] = rects[index]
++	return result
++
++## Existing one/two-board composition only; higher counts require explicit rectangles.
++static func compatibility_slots(ids: Array) -> Dictionary[String, Rect2]:
++	var rects: Array[Rect2] = []
++	if ids.size() > 2:
++		return {}
++	for index: int in ids.size():
++		var origin: Vector2 = SINGLE_ORIGIN if ids.size() == 1 else DUAL_ORIGINS[index]
++		rects.append(Rect2(origin, SLOT_SIZE))
++	return map_slots(ids, rects)
++
++static func centered_position(slot: Rect2, view_size: Vector2) -> Vector2:
++	return slot.position + ((slot.size - view_size) * 0.5).floor()
++
++static func valid_slot(slot: Rect2) -> bool:
++	return slot.position.is_finite() and slot.size.is_finite() and slot.size.x > 0 and slot.size.y > 0
+diff --git a/scripts/ui/BoardView.gd b/scripts/ui/BoardView.gd
+index d59f20828ade01a26e005c95d10fbd3c49b7abd1..29a80e67e0765d0d5d79d92e766ad1e0850a8c84 100644
+--- a/scripts/ui/BoardView.gd
++++ b/scripts/ui/BoardView.gd
+@@ -23,6 +23,7 @@ const COLOR_THREAT: Color = Color(1.0, 0.3, 0.3, 0.35)
+ 
+ var board_id: String = "shared"
+ var panel_position: Vector2 = PANEL_POSITION
++var slot_size: Vector2 = PANEL_MAX_SIZE
+ var hovered_enemy: Enemy = null
+ var _preview_board_id: String = ""
+ var _preview_cell: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
+@@ -79,16 +80,25 @@ func _process(_delta: float) -> void:
+ 			_last_selected_card = selected
+ 			queue_redraw()
+ 
+-## Square cells as large as fit PANEL_MAX_SIZE (capped at CELL_SIZE_MAX) for any board size.
+-static func compute_layout(board_size: Vector2i) -> Dictionary:
++## Square cells fitted to the supplied screen slot; default preserves existing callers.
++static func compute_layout(board_size: Vector2i, available_size: Vector2 = PANEL_MAX_SIZE) -> Dictionary:
+ 	var cells: Vector2 = Vector2(max(1, board_size.x), max(1, board_size.y))
+-	var fitted: float = minf(CELL_SIZE_MAX, minf(PANEL_MAX_SIZE.x / cells.x, PANEL_MAX_SIZE.y / cells.y))
++	var fitted: float = minf(CELL_SIZE_MAX, maxf(0.0, minf(available_size.x / cells.x, available_size.y / cells.y)))
+ 	return {"cell_size": fitted, "size": cells * fitted}
+ 
++## Apply presentation geometry without touching board identity, membership or anchors.
++func set_layout_slot(slot: Rect2, board: BoardData) -> void:
++	if not BoardLayout.valid_slot(slot):
++		return
++	slot_size = slot.size
++	_resize(board)
++	panel_position = BoardLayout.centered_position(slot, size)
++	position = panel_position
++
+ func _resize(board: BoardData, force_redraw: bool = false) -> void:
+ 	if board == null:
+ 		return
+-	var layout: Dictionary = compute_layout(board.size)
++	var layout: Dictionary = compute_layout(board.size, slot_size)
+ 	var new_cell_size: float = layout.cell_size
+ 	var new_size: Vector2 = layout.size
+ 	if not force_redraw and is_equal_approx(new_cell_size, cell_size) and new_size.is_equal_approx(size):

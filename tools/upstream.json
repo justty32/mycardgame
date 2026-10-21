@@ -87,6 +87,12 @@
       "sha256": "62b91863976e55540f836c3e54961e9e3c7c499cc41aa73e112283ab3301381f",
       "description": "Per-combat preparation migration A: PreparedEncounter snapshots Event/Rules/Encounter once; Combat composes after preparation rather than _ready, Director consumes the same preparation and owns its active lifetime. Global separates configured and active rules, synthesis consumes prepared rules, and initial combat actions use the explicit prepared event. Preserves existing SINGLE/DUAL and board-disabled/removed behavior; does not add per-encounter zero/N board schema. Includes all game source changes relative to 2b3dec8; applies after board-size-per-encounter.patch.",
       "validation": "analysis/slay-the-robot/architecture/08_combat_preparation.md"
+    },
+    {
+      "file": "tools/patches/board-setup-layout.patch",
+      "sha256": "507677f96702faf793ed400cea41a0757f250cc26aa22d062edd08b92fe02d05",
+      "description": "Board setup/layout migration B: normalized geometry independent of legacy board mode and deployment; legacy-only faction placement policy; pure ID-to-rectangle layout and slot-aware views; explicit internal slot-free first-wave path preserves legacy positional default. Spatial rule validation no longer depends on legacy mode. No external zero/N schema. Includes all game source changes relative to 7b26416; applies after combat-preparation.patch.",
+      "validation": "analysis/slay-the-robot/architecture/09_board_setup_layout.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

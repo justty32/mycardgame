@@ -187,18 +187,7 @@ func resolve_spawn_location(unit_entry: Dictionary) -> Dictionary:
 	var location: Dictionary = {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE}
 	if not places_units():
 		return location
-	var board_id: String = str(unit_entry.get("board_id", ""))
-	if board_id == "":
-		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
-	location.board_id = board_id
-	var current: BoardData = battlefield.get_board(board_id)
-	if current == null:
-		return location
-	var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
-	if not current.is_in_bounds(cell):
-		cell = board_controller.default_spawn_origin(board_id)
-	location.cell = cell
-	return location
+	return board_controller.deployment.resolve_spawn_location(unit_entry)
 
 func has_zone(zone_id: String) -> bool:
 	return places_units() and battlefield.get_board(zone_id) != null

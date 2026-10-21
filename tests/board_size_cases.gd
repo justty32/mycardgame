@@ -13,6 +13,7 @@ func run(flow) -> void:
 	_invalid_sizes()
 	_cells_out_of_bounds()
 	_layout()
+	load(get_script().resource_path.get_base_dir().path_join("board_layout_cases.gd")).new().run(c)
 
 func _rules(mode: int = CombatRulesData.BOARD_MODES.DUAL) -> CombatRulesData:
 	var rules := CombatRulesData.new()

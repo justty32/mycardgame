@@ -25,6 +25,7 @@ func _main() -> void:
 	print("BOUNDARY: one board combat with declared data fixtures; UI handler/signals, not mouse coordinates; test-only placement through BoardData.move; the combat is left unfinished and the scene freed.")
 	var size_cases: RefCounted = load(get_script().resource_path.get_base_dir().path_join("board_size_cases.gd")).new()
 	size_cases.run(self)
+	load(get_script().resource_path.get_base_dir().path_join("board_setup_cases.gd")).new().run(self)
 	var cases: RefCounted = load(get_script().resource_path.get_base_dir().path_join("board_cases.gd")).new()
 	var completed: bool = await cases.run(self)
 	_check(completed, "complete board scenario returned")
