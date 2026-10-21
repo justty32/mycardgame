@@ -2,7 +2,7 @@
 
 [機制修改](mechanics.md)｜[驗收分流](validation.md)｜[資源調查紀錄](../../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)
 
-**何時用**：新增暫存 processor、跨 frame 持有行動、非同步快取、signal callback 或回指參照，或退出時出現 ObjectDB／resource 保留。**何時不用**：單純數值調整不改所有權；未定位的原生 crash 另依 [native-crash](native-crash.md)，不能先假定是 leak 造成。
+**何時用**：新增暫存 processor、跨 frame 持有行動、非同步快取、signal callback 或回指參照，或退出時出現 ObjectDB／resource 保留。**何時不用**：單純數值調整不改所有權；未定位的原生 crash 另依 [原生崩潰調查筆記](../../notes/investigations/godot-native-crash.md)，不能先假定是 leak 造成。
 
 ## Done when
 

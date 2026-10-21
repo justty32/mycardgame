@@ -30,7 +30,7 @@
 
 本專案工具：[prepare_pack.py](../../../tools/prepare_pack.py) 產生不改個人資料的隔離可玩副本；[test_game.py](../../../tools/test_game.py) 為跨平台隔離回歸與流程驗證 runner（Python 3.10+），[test-game.ps1](../../../tools/test-game.ps1) 是 Windows 薄包裝；[game.ps1](../../../tools/game.ps1) 為 Windows 專用的舊 Run／Import／Smoke 入口；[upstream.json](../../../tools/upstream.json) 固定來源、引擎政策（基準 4.7.x）與本地修復。[link_pack.py](../../../tools/link_pack.py) 把題材內容包 link 進 game/external/mods/ 供編輯器載入，用法見 [題材內容包](../game-dev/content/pack.md)。
 
-程序診斷：[test_game.py](../../../tools/test_game.py) 保存退出碼、原生崩潰標記與逐階段結果；[test_runner_diagnostics.py](../../../tests/test_runner_diagnostics.py) 以假引擎驗 runner，不啟動 Godot；[test_link_pack.py](../../../tests/test_link_pack.py) 驗換行／BOM 還原與 Windows junction 隔離及 unlink。事故判讀見 [native-crash](../game-dev/native-crash.md)；執行前守 [使用者操作邊界](user.md)。
+程序診斷：[test_game.py](../../../tools/test_game.py) 保存退出碼、原生崩潰標記與逐階段結果；[test_runner_diagnostics.py](../../../tests/test_runner_diagnostics.py) 以假引擎驗 runner，不啟動 Godot；[test_link_pack.py](../../../tests/test_link_pack.py) 驗換行／BOM 還原與 Windows junction 隔離及 unlink。事故判讀見 [native-crash](../../notes/investigations/godot-native-crash.md)；執行前守 [使用者操作邊界](user.md)。
 
 資源生命週期：[ActionInterceptorProcessor.gd](../../../game/scripts/action_interceptors/ActionInterceptorProcessor.gd)、[BaseAsyncAction.gd](../../../game/scripts/actions/BaseAsyncAction.gd)、[ActionHandler.gd](../../../game/autoload/ActionHandler.gd) 管理攔截器與等待／取消；Root／Map 離樹與選單型別也在清理範圍。專項入口為 [resource_lifecycle.gd](../../../tests/resource_lifecycle.gd)，實測與檔案責任見 [清理報告](../../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。
 

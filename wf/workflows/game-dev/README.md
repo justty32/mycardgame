@@ -51,7 +51,7 @@
 
 - 任務記錄列出需求對應的改動檔與實際驗收結果：有 plan 時寫在 `games/<game>/design/plans/` 該檔的驗證段，小改寫在 commit 訊息與交付回報（落點見 [planning](../planning.md#任務規格與-plan-落點)）。
 - validation 選出的命令回傳符合預期，新增行為有針對性證據；未驗部分明列。
-- 受影響的 code-map／教學／工作流已同步，strict lint 回傳 0。
+- 受影響的 code-map／教學／工作流已同步；文件 lint 通過（見 [testing](../testing.md#文件檢查修改後必跑)）。
 - 已完成的 SESSION-LOG 條目移除；真正待使用者操作者才留 WAIT_USER。
 
 ## 交接

@@ -6,7 +6,7 @@
 
 ## Done when
 
-設計檔存在，寫明節點種類、選項與門檻、成本／收益、取消／離開／死亡、下一節點及存讀政策。資料 ID 可解析且從路線到達；專項斷言驗合法與拒絕路徑、只執行一次、資源差值、返回與續玩。未執行的 runtime、視覺及輸入驗收明列，文件 strict lint 回傳 0。
+設計檔存在，寫明節點種類、選項與門檻、成本／收益、取消／離開／死亡、下一節點及存讀政策。資料 ID 可解析且從路線到達；專項斷言驗合法與拒絕路徑、只執行一次、資源差值、返回與續玩。未執行的 runtime、視覺及輸入驗收明列；文件 lint 通過（見 [testing](../../testing.md#文件檢查修改後必跑)）。
 
 ## 流程
 
@@ -40,7 +40,7 @@ DialogueData 保存嵌入的 states/options 字典與 initial state ID；State �
 
 EVENT 正常結束由 Map 返回地圖；REST Continue 與 SHOP／Reward Continue 的轉幕處理不同。非戰鬥放幕尾須依 map-act 補機制／專項，不直接套用 Boss 出口。位置訪問先 autosave 再互動；dialogue state、休息次數與已開箱狀態沒有完整互動快照。設計保存策略時驗當前位置重新進入、下一位置存讀及重複收益，詳見核實來源。
 
-現有 Smoke／Combat／SaveLoad 是框架基準，沒有 NonCombat suite。從 [combat_flow](../../../../tests/combat_flow.gd) 重用隔離場景／等待 action／真實 handler 模式，由 runner owner 接入新專項後才記命令。至少驗每個選項的門檻前／正好門檻、未選項無副作用、結束與死亡；設施按上述資源及次數斷言。執行只用 [背景驗證](../validation.md)，不得開窗或把直接呼叫 action 當路線驗收。
+現有 Smoke／Combat／SaveLoad 是框架基準，沒有 NonCombat suite。從 [combat_flow](../../../../tests/combat_flow.gd) 重用隔離場景／等待 action／真實 handler 模式，由 runner owner 接入新專項後才記命令。至少驗每個選項的門檻前／正好門檻、未選項無副作用、結束與死亡；設施按上述資源及次數斷言。執行方式依 [validation](../validation.md)；不把直接呼叫 action 當路線驗收。
 
 ## 交接
 

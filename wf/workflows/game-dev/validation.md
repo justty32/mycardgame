@@ -1,6 +1,6 @@
 # 遊戲開發驗證
 
-[測試入口](../testing.md)｜[原生崩潰調查](native-crash.md)｜[已建立的啟動證據](../../../analysis/slay-the-robot/architecture/03_startup_validation.md)｜[架構](../../../analysis/slay-the-robot/architecture/01_overview.md)
+[測試入口](../testing.md)｜[原生崩潰調查](../../notes/investigations/godot-native-crash.md)｜[已建立的啟動證據](../../../analysis/slay-the-robot/architecture/03_startup_validation.md)｜[架構](../../../analysis/slay-the-robot/architecture/01_overview.md)
 
 ## 現有基準與命令
 
@@ -30,13 +30,13 @@ python3 tools/test_game.py --suite Field       # 動到場域格／控制區時�
 
 **所有權、回指、async cache 或資源清理**：跑 `--suite ResourceLifecycle` 並依 [resource-lifecycle](resource-lifecycle.md) 補新增路徑；驗正常、拒絕、預覽及取消，核對受影響完整流程的退出日誌。測試強制 free 產品物件、只減少資源數或放寬白名單，不能當成修復證據。
 
-**UI、場景、資源**：背景檢查可驗資源匯入、場景載入／實例化及 handler／signal 狀態；影響共享主選單或載入流程時加 Smoke。完整驗收還需要目標畫面渲染與適用輸入證據，本次受授權邊界限制，不執行截圖或桌面互動，不把未驗部分寫成通過。後續在有效授權範圍內補驗文字、遮擋、導覽與輸入命中；舊主選單圖不能代表其他畫面。
+**UI、場景、資源**：背景檢查可驗資源匯入、場景載入／實例化及 handler／signal 狀態；影響共享主選單或載入流程時加 Smoke。完整驗收還需要目標畫面渲染與適用輸入證據；需要 GUI 的部分未執行時標為未驗，不寫成通過。取得 GUI 授權後再補驗文字、遮擋、導覽與輸入命中；舊主選單圖不能代表其他畫面。
 
 **存檔、讀檔、設定與遷移**：必跑 Smoke，另以隔離 fixture 做寫入→讀回的語意比較，驗證牌組、升級、seed／RNG 與流程狀態等受影響欄位。依契約驗缺檔、壞檔或舊版本遷移。只比較 JSON 文字相同不足以證明可續玩；續玩變更應載入後執行下一步。
 
-**上游或 Godot 升級**：在獨立工作副本固定新版本，依 [來源記錄](../../../tools/upstream.json) 核對來源，重做隔離 Import、Smoke 及受影響功能驗證；渲染與成品測試仍依有效授權範圍執行。比較新舊日誌與資料格式，不把新錯誤歸入舊基準。若改發行／匯出設定，另驗成品及 external 資料可用；編輯器啟動不涵蓋成品。
+**上游或 Godot 升級**：在獨立工作副本固定新版本，依 [來源記錄](../../../tools/upstream.json) 核對來源，重做隔離 Import、Smoke 及受影響功能驗證；渲染與成品測試需要 GUI 時，未執行者標為未驗。比較新舊日誌與資料格式，不把新錯誤歸入舊基準。若改發行／匯出設定，另驗成品及 external 資料可用；編輯器啟動不涵蓋成品。
 
-**文件或工作流**：依 [testing](../testing.md) 執行 strict lint；純文件改動不必重跑遊戲。測試報告寫清實際版本、命令、結果與未覆蓋範圍，不將待執行檢查寫成已通過。
+**文件或工作流**：依 [testing](../testing.md#文件檢查修改後必跑) 跑文件 lint；純文件改動不必重跑遊戲。測試報告寫清實際版本、命令、結果與未覆蓋範圍，不將待執行檢查寫成已通過。
 
 ## Dictionary 回歸契約
 

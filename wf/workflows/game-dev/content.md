@@ -1,12 +1,29 @@
 # content — 卡牌與內容擴充
 
-[遊戲開發入口](README.md)｜[子流程目錄](content/README.md)｜[驗收分流](validation.md)｜[testing](../testing.md)
+[遊戲開發入口](README.md)｜[驗收分流](validation.md)｜[testing](../testing.md)
 
-**何時用**：新增／調整卡牌、敵人、角色、遺物、事件，以及它們的卡包、事件池與 mod 資料。**何時不用**：需要新行為原語時接 [mechanics](mechanics.md)；只改畫面接 [ui](ui.md)；單純查證先走 investigation。
+**何時用**：新增／調整卡牌、敵人、角色、遺物、事件，以及它們的卡包、事件池與 mod 資料。
+
+**何時不用**：需要新行為原語時接 [mechanics](mechanics.md)；只改畫面接 [ui](ui.md)；單純查證先走 investigation；卡牌定位與平衡先走 [卡牌設計](card-design.md)／[評量](card-evaluation.md)。
 
 ## Done when
 
 新 ID 可由實際載入流程取得，且從指定角色／獎勵／事件入口確實可到達；數值、行為與使用者需求一致。既有內容不因補丁遺失必要欄位；受影響的存檔與內容池有明確相容結果。相關驗收有命令、輸出或互動證據，文件與 code map 已同步。
+
+## 子流程
+
+本入口處理既有資料調整、ID 接線、補丁及相容性；需要完整操作鏈的具體任務放在 `content/` 子流程，避免把細節堆進共同入口。
+
+<!-- wf-nav -->
+| 子流程 | 負責範圍 |
+|---|---|
+| [第一個 mod](content/bootstrap.md) | 從空目錄建立 mod、候選副本、JSON 登記 |
+| [第一個 mod：probe 與命令](content/bootstrap-probe.md) | Smoke helper 接線、執行命令與交付範圍；載入通過不證明出牌效果或存讀 |
+| [題材內容包](content/pack.md) | `games/<game>/pack/` 以 runner `--pack` 隔離載入、題材 probe 與 PackScenario |
+| [編輯器載入與邊界檢查](content/pack-tools.md) | 本機 link 內容包、boundary lint 規則 |
+| [可玩副本](content/playable-copy.md) | 交付可手動遊玩的隔離副本；中性實例見 [棋盤示範包](../../../examples/board-lab/README.md) |
+
+包的完整新局／戰鬥／存讀流程由 PackScenario 驗證，不以載入 probe 代替；教學成功也不能代替產品需求的真實取得入口與專項驗收。
 
 ## 先讀來源
 
@@ -40,4 +57,4 @@
 
 由 agent 依 [validation](validation.md) 選擇本次檢查：新增資料先斷言 ID／引用可解析，再進指定入口觀察結果；卡牌測目標和資源變化，敵人測意圖與回合，事件測到達與離開，角色測新局配置，遺物測觸發與結束。只有涉及存檔／池的變更才擴及相應往返／抽樣驗證；不要以跑全套無關檢查替代核心效果驗收。
 
-新增檔案或責任邊界同步 [code-map](../common/code-map.md)；新的資料契約、擴充限制或反例同步 [教學](../../../analysis/slay-the-robot/tutorial/verification.md) 與相關分析。保留命令、失敗修復及未驗證範圍，最後執行文件 strict lint。
+新增檔案或責任邊界同步 [code-map](../common/code-map.md)；新的資料契約、擴充限制或反例同步 [教學](../../../analysis/slay-the-robot/tutorial/verification.md) 與相關分析。保留命令、失敗修復及未驗證範圍，最後跑文件 lint（見 [testing](../testing.md#文件檢查修改後必跑)）。

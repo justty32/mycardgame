@@ -1,6 +1,6 @@
 # game-flow — 整局流程與最小可玩版本
 
-[遊戲開發](README.md)｜[子流程目錄](game-flow/README.md)｜[規劃](../planning.md)｜[流程核實](../../../analysis/slay-the-robot/design/game-flow.md)
+[遊戲開發](README.md)｜[規劃](../planning.md)｜[流程核實](../../../analysis/slay-the-robot/design/game-flow.md)
 
 將主選單、角色選擇、新局、地圖與節點、跨幕、勝敗、續玩及重開接成可驗證的一局；先決定玩家看到的流程，再分配內容、機制與 UI 工作。
 
@@ -10,7 +10,19 @@
 
 ## Done when
 
-任務 spec（`games/<game>/design/specs/`）存在，寫明採用的狀態、轉移入口、權威資料、完成／拒絕條件、存檔政策與最小內容範圍；開發順序與各步驗收寫在對應 plan（`games/<game>/design/plans/`）。實作任務另有新局至結算／再開及適用中斷恢復的測試輸出，命令回傳預期結果；只規劃時標為未實作、未執行。受影響分析同步，文件 strict lint 回傳 0。
+任務 spec（`games/<game>/design/specs/`）存在，寫明採用的狀態、轉移入口、權威資料、完成／拒絕條件、存檔政策與最小內容範圍；開發順序與各步驗收寫在對應 plan（`games/<game>/design/plans/`）。實作任務另有新局至結算／再開及適用中斷恢復的測試輸出，命令回傳預期結果；只規劃時標為未實作、未執行。受影響分析同步，文件 lint 通過（見 [testing](../testing.md#文件檢查修改後必跑)）。
+
+## 子流程
+
+先在本入口定義玩家旅程與狀態責任，再依需求落到開發順序或持久化政策。這些流程支援原創版本規劃，不替使用者決定題材或玩法。
+
+<!-- wf-nav -->
+| 子流程 | 負責範圍 |
+|---|---|
+| [最小可玩版本](game-flow/vertical-slice.md) | 從產品契約、起局與最少內容到結算、再開的開發順序 |
+| [存讀與局外進度](game-flow/persistence.md) | checkpoint、續玩、退出／放棄、結算與 profile 的政策和驗收 |
+
+單一節點內容交關卡流程；整個 run 的出口與存讀邊界由本層共同核對。既有單場測試只作基準，完整版本需依各子篇補齊實際轉移的證據。
 
 ## 流程
 
@@ -38,4 +50,4 @@
 
 ## 交接
 
-流程契約交 [content](content.md) 接角色／內容、level-design 接地圖／節點、mechanics 接規則／存檔、ui 接畫面／輸入。行為真相與缺口更新核實筆記；測試命令由 [testing](../testing.md) 管理，不自行宣稱已有新 suite。使用者目前禁止 UI／桌面／截圖與 GUI；背景接線證據不替代呈現和實際輸入驗收。
+流程契約交 [content](content.md) 接角色／內容、level-design 接地圖／節點、mechanics 接規則／存檔、ui 接畫面／輸入。行為真相與缺口更新核實筆記；測試命令由 [testing](../testing.md) 管理，不自行宣稱已有新 suite。背景接線證據不替代呈現和實際輸入驗收；需要 GUI 的部分未執行時明列。

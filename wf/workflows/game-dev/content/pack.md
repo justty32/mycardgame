@@ -1,14 +1,16 @@
 # 題材內容包：隔離載入、probe 與邊界
 
-[內容子流程](README.md)｜[內容入口](../content.md)｜[驗證](../../testing.md)
+[內容入口](../content.md)｜[驗證](../../testing.md)
 
-**何時用**：某款遊戲的內容以獨立 mod 包放在 `games/<game>/pack/`，驗載入與實際遊戲流程。框架本體修改照 game-dev；從零試教學 mod → [第一個 mod](bootstrap.md)。
+**何時用**：某款遊戲的內容（卡牌、角色、敵人、素材、少量覆寫腳本）以獨立 mod 包放在其題材樹 `games/<game>/pack/`，要驗它能被框架載入、並跑實際遊戲流程。
+
+**何時不用**：改框架本體或框架範例內容 → 照一般 game-dev 流程與既有 suite；從零試教學 mod → [第一個 mod](bootstrap.md)。
 
 ## Done when
 
 `python3 tools/test_game.py --suite Smoke --pack games/<game>/pack --pack-tests games/<game>/tests` exit 0，輸出含該題材 probe 的 `PASS:` 斷言與 `PACK PROBE DONE:`；不帶 `--pack` 的框架 Smoke 仍 exit 0。
 
-交付可玩流程時，再跑 `--suite PackScenario --content-profile pack --pack DIR --pack-tests DIR`；依 [scenario 契約](../../testing/suites.md#packscenario) 宣告跨程序階段與真實行為斷言，每階段均通過。載入 probe 不代替流程驗收。結果矩陣放在 tests 目錄外，避免填入 PASS 後改變已驗輸入 hash（2026-10-20，[案例](../../../../examples/board-lab/README.md)）。
+交付可玩流程時，再跑 `--suite PackScenario --content-profile pack --pack DIR --pack-tests DIR`；依 [scenario 契約](../../testing/suites.md#packscenario) 宣告跨程序階段與真實行為斷言，每階段均通過。載入 probe 不代替流程驗收。結果矩陣放在 tests 目錄外，避免填入 PASS 後改變已驗輸入 hash（[案例](../../../../examples/board-lab/README.md)）。
 
 驗 [可玩副本](playable-copy.md) 時，以 `--source-game <prepared>/game` 代替 `--pack` 並指定 pack profile；runner 須通過 prepare manifest 身分、完整輸出／安裝包 hash 與設定核對，再驗複製快照。任意來源不能豁免，來源副本有新增／變動的非排除內容就重新準備。
 
@@ -53,16 +55,11 @@ pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容
 
 ## 編輯器載入（本機）
 
-`python3 tools/link_pack.py games/<game>/pack` 建 `game/external/mods/<name>` symlink（POSIX 為相對路徑；Windows 先試 symlink、再退 `mklink /J` junction）。2026-10-20 Windows 11／Python 3.13 已用隔離 fixture 驗真實 junction、空白路徑、unlink 保留 target 與 runner 排除；Python 3.10／3.11 的 junction 辨識以 reparse tag 退路，已在 3.13 模擬缺 API 驗證。該路徑由 .gitignore 的 `/game/external/mods/*`（只放行 example_mod）蓋住。加 `--enable` 會在追蹤中的 `mod_list.json` 插一行，**不得 commit**；`--unlink` 移除 link 並逐位元組還原該行，保留 LF／CRLF／BOM。回歸入口 `python3 tests/test_link_pack.py`。runner 複製時略過 link，並從隔離副本的 mod_list 拿掉被 link 的 mod；要測該包一律用 `--pack`。拒絕取代或刪除真實 mod 資料夾。
+以 symlink／junction 讓本機編輯器載入內容包的工具與限制，見 [編輯器載入與邊界檢查](pack-tools.md#編輯器載入本機)；runner 驗包一律用 `--pack`。
 
 ## 邊界檢查
 
-`python3 tools/boundary_lint.py`（合成測試 `python3 tests/test_boundary_lint.py`）與文件 lint 一起跑，`violations=0` 才通過：
-
-- R1：框架目錄（game/ tools/ tests/ analysis/ wf/ .claude/）不寫具體題材樹路徑，只用 `games/<game>/` 佔位；連入題材樹的路由只放根目錄檔。
-- R2：一棵題材樹不引用另一棵（路徑字樣或相對連結）。
-- R3：`games/<game>/wf/forbidden-terms.txt` 的詞只准出現在該題材樹；框架目錄、根目錄檔與其他題材樹都掃，`games/` 頂層索引檔例外。非商業授權參考的名稱也列在該題材的詞表。
-- R4：`games/<game>/wf/boundary.json` 宣告 `pack_prefix`；pack 內除 mod_info.json 外每個 object_id 都要帶前綴，刻意 patch 框架 id 列入 `allowed_unprefixed_ids`。有 pack/ 卻沒有 boundary.json 也算違規。
+`python3 tools/boundary_lint.py` 與文件 lint 一起跑，`violations=0` 才通過；R1–R4 規則見 [編輯器載入與邊界檢查](pack-tools.md#邊界檢查)。
 
 ## 限制
 

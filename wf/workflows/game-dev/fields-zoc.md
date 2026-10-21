@@ -8,7 +8,7 @@
 
 ## Done when
 
-對應 Field／DualBoard 回歸命令有成功結果，新增情境可在 assertion 定位；公開 schema、分析與受影響工作流已更新，strict lint／boundary 回傳 0。只有取得實際執行證據才能寫通過，headless 的成功不代表視覺或硬體輸入已驗。
+對應 Field／DualBoard 回歸命令有成功結果，新增情境可在 assertion 定位；公開 schema、分析與受影響工作流已更新；文件 lint 與 boundary 檢查通過（見 [testing](../testing.md#文件檢查修改後必跑)）。只有取得實際執行證據才能寫通過，headless 的成功不代表視覺或硬體輸入已驗。
 
 ## 流程
 
@@ -30,7 +30,9 @@
 
 危險預覽只支援分析列出的 action，不是任意腳本模擬。未知效果須明列估值缺口，不能以零估值宣稱安全；preview 不能消耗 RNG、充能、HP 或 block。至少比對一次實際 handler 結果，並加入 target override、block、多控制者及已用借機配對。
 
-區分三種限制：免費點數吃地形／ZOC 成本，付費額度按實際格數，卡牌 `distance` 是實際步數上限。不要把同一個 budget 參數傳遍所有入口。測高成本一格、八向但曼哈頓射程、穿友不准停、撤銷被出牌／場域事件失效；強制位移另驗抗性、多格與碰撞 tick。
+區分三種限制：免費點數吃地形／ZOC 成本，付費額度按實際格數，卡牌 `distance` 是實際步數上限。不要把同一個 budget 參數傳遍所有入口。
+
+<!-- TODO(程式 agent)：M1「移動預檢步數／費用」修正中（ValidatorPathExists 的 `max_length` 與 `consumes_move_points`、BoardPathfinding.reachable_active 的付費格優先）；完成後依新程式補述出牌預檢與實際移動如何共用同一可達查詢。 -->測高成本一格、八向但曼哈頓射程、穿友不准停、撤銷被出牌／場域事件失效；強制位移另驗抗性、多格與碰撞 tick。
 
 ## 驗證與交接
 

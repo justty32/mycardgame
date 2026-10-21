@@ -1,6 +1,6 @@
 # 內容包的獨立可玩副本
 
-[內容子流程](README.md)｜[內容包契約](pack.md)｜[驗證](../../testing.md)
+[內容入口](../content.md)｜[內容包契約](pack.md)｜[驗證](../../testing.md)
 
 **何時用**：包已有角色／地圖／遭遇等必要內容，要準備一份讓使用者自行開啟的獨立專案，保留來源、個人 mod 清單與進度。
 
@@ -24,7 +24,7 @@ python3 tools/prepare_pack.py --pack games/<game>/pack
 
 副本 `project.godot` 設定 `game/content_profile="pack"`，停用框架範例內容生成。包須自備引用資料；副本設定唯一 `config/custom_user_dir_name`，user:// 與其他副本分開。框架除錯存檔仍寫在這份副本自己的 `external/`，不共享來源進度。
 
-工具不啟動引擎。輸出提供絕對專案路徑、manifest 路徑，以及使用者自行操作的 PowerShell／POSIX 編輯器、首次 headless import、直接遊玩命令；可加 `--godot-path <執行檔>` 將本機 Godot 4.7.x 路徑寫進命令，僅列印、不執行。未指定時以 `godot` 代稱。首次直接遊玩前需匯入建立 class cache。agent 仍遵守 [操作邊界](../../common/user.md)，不得因工具印出命令便啟動 GUI。
+工具不啟動引擎。輸出提供絕對專案路徑、manifest 路徑，以及使用者自行操作的 PowerShell／POSIX 編輯器、首次 headless import、直接遊玩命令；可加 `--godot-path <執行檔>` 將本機 Godot 4.7.x 路徑寫進命令，僅列印、不執行。未指定時以 `godot` 代稱。首次直接遊玩前需匯入建立 class cache。這些命令供使用者自行執行，agent 不因工具印出命令就啟動 GUI（操作邊界見 [user.md](../../common/user.md#桌面與程序邊界)）。
 
 runner 若要驗這份已安裝內容的副本，先用工具的純讀取 `validate_prepared_game(game)` 檢查 manifest identity、完整副本與每包雜湊、專案 profile 與精確 mod 清單。額外包檔、變動來源副本或 `override.cfg` 會被拒絕；勿再次安裝同名包來規避衝突。實際 runner 參數與流程入口依 [驗證](../../testing.md)，不由準備工具啟動引擎。
 

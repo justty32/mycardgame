@@ -16,7 +16,9 @@
 
 場景負責組裝元件，Director 保留普通 CTB、Encounter、waves 與行動流程。棋盤幾何、場域、移動、undo、盤面威脅與呈現歸模組；需要相容 getter 可以保留，但不能讓核心在缺模組時偷偷 new 棋盤來補洞。新需求先用現有 hooks，不為單一棋盤元件建立通用 plugin 系統。
 
-2026-10-20 搬移呈現後，舊 Board 回歸仍直取 `Combat/BoardView` 而失敗。搬節點時先搜尋程式與全部測試的硬路徑；擴充改走 Combat 相容 getter 或模組 owner，保留節點有效、在樹內與可見性的斷言。不能只刪掉失效檢查。
+<!-- TODO(程式 agent)：棋盤模組化進行中（例如移除 `BoardData.get_active()` 這類由 director 取盤的全域 getter）；完成後核對本節「相容 getter」與模組 owner 的描述。 -->
+
+搬動呈現節點時，先搜尋程式與全部測試裡的硬路徑：呈現搬進模組後，直取 `Combat/BoardView` 的舊 Board 回歸就曾因此失敗。擴充改走 Combat 相容 getter 或模組 owner，並保留節點有效、在樹內與可見性的斷言；不能只刪掉失效的檢查。
 
 ## 實作時保留普通流程
 
@@ -38,4 +40,4 @@
 
 覆蓋掛載到下一場 NONE、NONE 到掛載、死亡後重開、後續 wave、存讀續玩。若宣稱支援真正卸載，增加「排隊後卸載 → 出隊拒絕且只退一次 → 普通牌仍可打 → 重掛後舊請求仍拒絕」；模組 instance、模組 generation 與 Director generation 都要在證據中可辨識，並驗同一個 Node 重新使用時舊請求仍失效。既有 Board／DualBoard／Field／Wave 回歸用來排除拆分造成的語義改變，不能取代 NONE 專項。
 
-交付記錄實際引擎、來源與測試 hash、日誌、失敗及重跑結果；原始碼凍結後發現問題先通知整合 owner，再修指定範圍並更新證據。文檔 strict lint 與框架／題材邊界檢查由整合 owner 收尾。禁止 GUI 的 session 不得開視窗驗畫面，也不能把 headless 測試寫成視覺驗收。
+交付記錄實際引擎、來源與測試 hash、日誌、失敗及重跑結果；原始碼凍結後發現問題先通知整合 owner，再修指定範圍並更新證據。文件 lint 與框架／題材邊界檢查由整合 owner 收尾（見 [testing](../../testing.md#文件檢查修改後必跑)）。headless 測試不能寫成視覺驗收。

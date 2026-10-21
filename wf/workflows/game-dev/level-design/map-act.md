@@ -40,7 +40,7 @@
 
 至少覆蓋新局起點、戰鬥勝敗、EVENT 返回、SHOP、REST、TREASURE、非終局 Boss 轉幕與最終戰結算。針對變更的分岔做保存→另一程序讀取→下一步，與不中斷路徑比較。現有 `python3 tools/test_game.py --suite Combat`／`--suite SaveLoad` 只提供基準，沒有全幕 suite；新增專項與 runner 接線後才有本次命令，不把舊 suite 當整章完成。
 
-背景測試由 runtime owner 依 [validation](../validation.md) 串行安排。地圖可讀性、點擊命中與視聽節奏在目前禁止視窗操作下保留未驗；記錄版本、seed、樣本與策略，區分可達性及平衡假說。
+背景測試由 runtime owner 依 [validation](../validation.md) 串行安排。地圖可讀性、點擊命中與視聽節奏需要 GUI 驗收，未執行時保留未驗；記錄版本、seed、樣本與策略，區分可達性及平衡假說。
 
 ## 交接
 

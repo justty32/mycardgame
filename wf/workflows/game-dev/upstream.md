@@ -22,7 +22,7 @@
 
 ## 驗收再切換
 
-候選版本先透過隔離 runner 的 `--source-game` 指向候選原始碼，完成背景 import、框架 smoke、受影響的功能回歸及必要存讀相容驗證。實際渲染與輸入依有效授權處理，目前禁止桌面／視窗操作，保留為未驗。工具 game.ps1 固定針對正式 game/，不能誤跑舊版後宣稱新版通過。
+候選版本先透過隔離 runner 的 `--source-game` 指向候選原始碼，完成背景 import、框架 smoke、受影響的功能回歸及必要存讀相容驗證。實際渲染與輸入需要 GUI，未執行時保留為未驗。工具 game.ps1 固定針對正式 game/，不能誤跑舊版後宣稱新版通過。
 
 與原基準比較新增／消失的警告。當前已有 Dictionary merge 等本地修復，先核對 upstream.json 的 local_patches，確認候選是否包含等效修正；以公開 JSON 回歸與跨程序存讀測試驗證，不能只刪補丁或 KNOWN ISSUE 文字。原 dated 驗證報告保持歷史事實，新增當前版本結果並更新現行指引。
 
@@ -32,7 +32,7 @@
 
 - 升級筆記存在，含新舊 commit、引擎、相容性差異與實跑結果。
 - 純上游 checkout 的實際 HEAD 與來源紀錄一致；snapshot 的本地差異與補丁已核對並記錄。
-- validation 選出的測試回傳符合預期，strict lint 回傳 0。
+- validation 選出的測試回傳符合預期；文件 lint 通過（見 [testing](../testing.md#文件檢查修改後必跑)）。
 - 原基準可追溯；新增缺陷與未驗範圍在目前文件可見。
 
 ## 交接
