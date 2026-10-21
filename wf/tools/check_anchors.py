@@ -9,6 +9,7 @@ import configparser
 import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 import unicodedata
 from urllib.parse import unquote
@@ -148,7 +149,42 @@ def _is_mail_inbox(parent_parts: tuple[str, ...], directory: str) -> bool:
     return directory == "inbox" and parent_parts[-1:] != ("workflows",)
 
 
+def git_markdown_files(root: Path) -> list[Path] | None:
+    """在 git 工作樹內只列已追蹤＋未忽略的 md（.gitignore 掉的 artifacts/ 等不掃）；不在 git 內回 None。"""
+    try:
+        done = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."],
+            capture_output=True, check=False, stdin=subprocess.DEVNULL,
+        )
+    except OSError:
+        return None
+    if done.returncode != 0:
+        return None
+    # root 本身被忽略（例：artifacts/ 下的測試樹）時 ls-files 會是空的，退回 os.walk。
+    ignored = subprocess.run(["git", "-C", str(root), "check-ignore", "-q", "."],
+                             capture_output=True, check=False, stdin=subprocess.DEVNULL)
+    if ignored.returncode == 0:
+        return None
+    markdown: list[Path] = []
+    for rel in sorted(set(done.stdout.decode("utf-8", "replace").split("\0"))):
+        if not rel.endswith(".md"):
+            continue
+        parts = tuple(rel.split("/"))
+        dirs = parts[:-1]
+        if any(part in SKIP_PARTS for part in dirs):
+            continue
+        if any(_is_mail_inbox(dirs[:i], d) for i, d in enumerate(dirs)):
+            continue
+        path = root / rel
+        if path.is_file() and not path.is_symlink():
+            markdown.append(path)
+    return markdown
+
+
 def markdown_files(root: Path) -> list[Path]:
+    listed = git_markdown_files(root)
+    if listed is not None:
+        return listed
     submodules = submodule_paths(root)
     markdown: list[Path] = []
     for current, dirs, files in os.walk(root):

@@ -70,6 +70,8 @@ def main() -> None:
         "r2_text": ("@G/beta/notes.md", "copy from @G/alpha/pack\n", ["R2"]),
         "r2_link": ("@G/beta/d.md", "[x](../alpha/README.md)\n", ["R2"]),
         "r3_framework_term": ("tools/t.py", "# ALPHA SAGA mention\n", ["R3"]),
+        "r1_examples_path": ("examples/demo/README.md", "see @G/alpha/design\n", ["R1"]),
+        "r3_examples_term": ("examples/demo/pack/cards.json", '{"name": "Alpha Saga"}\n', ["R3"]),
         "r3_other_game_term": ("@G/beta/e.md", "uses 秘詞 here\n", ["R3"]),
         "r3_root_file": ("README.md", "card alp_card\n", ["R3"]),
         "r4_prefix": ("@G/alpha/pack/enemies/x.json", json.dumps({"properties": {"object_id": "enemy_plain"}}), ["R4"]),

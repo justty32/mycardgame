@@ -38,7 +38,7 @@ Linux／macOS 用 bash；Windows 經 WSL 或 Git Bash，步驟與商店別名／
 
 WSL 的 CRLF 錯誤依 [版本控制](version-control.md) 查 shell 換行。
 
-exit 0 且 broken、residue、oversize、biglist、querycmd 均為 0。新增分析仍納入根目錄掃描。此檢查不能證明遊戲玩法正確。
+exit 0 且 broken、residue、oversize、biglist、querycmd 均為 0；broken 任何時候都使 exit 1，`--strict` 另把其餘四項算失敗。在 git 工作樹內只掃已追蹤與未忽略的新檔，`artifacts/` 等 .gitignore 路徑不掃（WSL `/mnt/c` 全量約半分鐘）；boundary lint 把 `examples/` 當框架目錄檢查。新增分析仍納入根目錄掃描。lint 自身的合成測試為 `python3 wf/tools/test_wf_lint.py` 與 `python3 tests/test_boundary_lint.py`。此檢查不能證明遊戲玩法正確。
 
 ## 已知訊息與尚未覆蓋
 

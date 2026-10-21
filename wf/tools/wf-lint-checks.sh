@@ -38,26 +38,37 @@ check_links() {
 
 # archive/reference/vendor（含依協議分層的 done/superseded，如 dispatch 的 handoff）、放信的 inbox/（寄件原文不改；
 # workflows/inbox/ 是工作流文件，照掃）與 .gitmodules 宣告的 submodule 不下鑽。
+# 在 git 工作樹內改用 git ls-files（已追蹤＋未忽略的新檔），.gitignore 掉的 artifacts/ 等不掃、也快得多。
+# 用法：list_owned_files ROOT EXT...（例 md json csv）
 list_owned_files() {
   local root=${1%/} _ rel
   shift
-  local -a prunes=(
+  local exts; exts=$(IFS='|'; echo "$*")
+  local skip='(^|/)(\.git|node_modules|\.venv|venv|__pycache__|archive|references?|vendor|done|superseded)/'
+  # root 本身被忽略（例：artifacts/ 下的測試樹）時 ls-files 會是空的，退回 find。
+  if git -C "$root" rev-parse --is-inside-work-tree >/dev/null 2>&1 && ! git -C "$root" check-ignore -q . 2>/dev/null; then
+    git -C "$root" ls-files -z --cached --others --exclude-standard -- . 2>/dev/null \
+      | tr '\0' '\n' | grep -E "\.($exts)\$" | grep -vE "$skip" \
+      | awk '!/(^|\/)inbox\// || /(^|\/)workflows\/inbox\//' \
+      | while IFS= read -r rel; do [[ -f "$root/$rel" && ! -L "$root/$rel" ]] && printf '%s\n' "$root/$rel"; done | sort -u
+    return
+  fi
+  local -a names=() prunes=(
     -path '*/.git' -o -path '*/node_modules' -o -path '*/.venv' -o -path '*/venv' -o -path '*/__pycache__'
     -o -path '*/archive' -o -path '*/reference' -o -path '*/references' -o -path '*/vendor'
     -o -path '*/done' -o -path '*/superseded'
     -o \( -path '*/inbox' ! -path '*/workflows/inbox' \)
   )
-  # .gitmodules 在 git 頂層，$root 可能是子目錄（例 skills/）；宣告過的 submodule 路徑不論落在哪一層都不下鑽。
-  local top; top=$(git -C "$root" rev-parse --show-toplevel 2>/dev/null) || top=""
+  for _ in "$@"; do names+=( ${names:+-o} -name "*.$_" ); done
   while read -r _ rel; do
     [[ -n $rel ]] && prunes+=( -o -path "$root/${rel%/}" -o -path "*/${rel%/}" )
-  done < <(git -C "${top:-$root}" config --file "${top:-$root}/.gitmodules" --get-regexp '^submodule\..*\.path$' 2>/dev/null || true)
+  done < <(git config --file "$root/.gitmodules" --get-regexp '^submodule\..*\.path$' 2>/dev/null || true)
   find "$root" \( -type d \( "${prunes[@]}" \) \) -prune \
-    -o -type f \( "$@" \) -print | sort
+    -o -type f \( "${names[@]}" \) -print | sort
 }
 
-list_md() { list_owned_files "$1" -name '*.md'; }
-list_data() { list_owned_files "$1" -name '*.json' -o -name '*.csv'; }
+list_md() { list_owned_files "$1" md; }
+list_data() { list_owned_files "$1" json csv; }
 
 # 全 repo 超標掃描：排除 .git／__pycache__、.venv／venv（Python 虛擬環境）、agent 工具的
 # worktree 暫存區（repo 的巢狀副本）與 .gitmodules 宣告的 submodule（上游 vendor 碼不受 8 KB 限制）。

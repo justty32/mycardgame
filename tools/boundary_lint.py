@@ -30,7 +30,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-FRAMEWORK_DIRS = ("game", "tools", "tests", "analysis", "wf", ".claude")
+# examples/ holds theme-neutral framework demo packs, so it obeys the same rules as the framework.
+FRAMEWORK_DIRS = ("game", "tools", "tests", "analysis", "wf", "examples", ".claude")
 GAMES_DIR = "games"
 TERMS_FILE = Path("wf") / "forbidden-terms.txt"
 BOUNDARY_FILE = Path("wf") / "boundary.json"
