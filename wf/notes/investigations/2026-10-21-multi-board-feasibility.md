@@ -2,7 +2,7 @@
 
 > 2026-10-21 使用者已決定：盤數每場決定，含 0 盤。
 >
-> 狀態：2026-10-21 唯讀調查，尚待使用者決定多盤玩法語意，未實作。續篇（語意模型與推薦方案）：[models](2026-10-21-multi-board-models.md)。
+> 狀態：2026-10-21 唯讀調查，未實作。使用者後續要求先規劃乾淨解耦結構，不先定死部署玩法；接 [架構草案](../../specs/multi-board/README.md)。原語意模型與推薦方案保留在 [models](2026-10-21-multi-board-models.md)，不視為決策。
 
 日期：2026-10-21｜基準：main @ bc7fe2d｜方式：唯讀靜態讀碼，未跑 Godot、未改檔。
 
@@ -48,6 +48,8 @@
 存讀檔｜spec dual-board README「位置、陣營與戰鬥」｜不存戰中盤，從 Encounter 重建——盤數由資料決定即可
 
 ### 2. 寫死兩盤（或 SINGLE/DUAL 二選一）的地方
+
+**H0：每場 0 盤還缺裝配橋接。** 於 `7eba093` 再核對：`Combat._on_combat_started` 先呼叫 `_compose_board_module()` 再 `begin_combat`；前者只讀場景／全域旗標與模組檔案存在，後者才解析 Encounter（Combat.gd:237-240、297-308；CombatDirector.gd:168-171）。空 `encounter_boards` 是沿用預設的覆寫字典，不代表 0 盤。只讓 `get_board_ids()` 回空陣列仍會撞上 EncounterData.gd:116 的最後一盤索引與 BoardController.gd:52-59 的主角部署；也會留下已掛模組，違反 0 盤必須真正 NONE 的決策。實作前須先取得同一份遭遇資料供場景裝配與 Director 使用，補同場景 0→既有 DUAL→0 的生命週期驗收；此切片不依賴 3 盤以上的排版或部署語意。
 
 #｜位置｜寫死內容｜多盤時的問題
 

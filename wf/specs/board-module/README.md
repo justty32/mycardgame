@@ -6,6 +6,8 @@
 
 ## 裝配與責任
 
+本節描述現有程式。2026-10-21 稍後已決定盤數由每場 Encounter 決定（含 0 盤），但尚未接上每場裝配；缺口見 [盤數調查](../../notes/investigations/2026-10-21-multi-board-feasibility.md)，後續依使用者要求先做 [解耦架構規劃](../multi-board/README.md)。不能把目前旗標開關當作新決策已完成。
+
 ```mermaid
 flowchart TD
   Combat[Combat 場景裝配] --> Core[Director / CTB / 波次]

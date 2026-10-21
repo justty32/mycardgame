@@ -145,6 +145,20 @@
    "retest_reviewer": "fresh_content_review",
    "retest_evidence": "案五能定位選單／結算場景與字型、返回狀態、Damage Taken 文案耦合、viewport assertions 及真實 suite，保留 glyph／輸入未驗。 [獨立六案報告](evidence/content-review.md)",
    "limits": "既有勝利 fixture 是單場勝利非通關結算；實際 glyph、視覺、命中、長文與新 viewport 仍需專項證據。"
+  },
+  {
+   "id": "per-encounter-board-count",
+   "task": "由 wf 接手每場 0~N 盤，辨識已定、未定、實作缺口與驗收入口",
+   "initial_route": "AGENTS → WORKFLOWS / agent-session / user / SESSION / WAIT → game-dev / mechanics / board-module / validation / testing → conventions / code-map / dev-env → 盤數調查 → Combat / Director / Encounter / Boardless",
+   "initial_gap": "7eba093：已決每場含 0，但 models 推薦仍限 2..上限且說 NONE 不讀欄位；Combat 先按全域／場景旗標裝配，Director 後解析遭遇。空 encounter_boards 仍為覆寫預設，get_board_ids 只回 1/2 且驗證索引最後一盤。缺每場 0 的裝配橋接。",
+   "initial_report": "artifacts/cold-start/2026-10-21-cold-route-audit-initial.json",
+   "initial_sha256": "4c17bb3aa84500ec140ce188389ec9282b6fe3595c3ec905c980ae3cc8f25919",
+   "repair_entry": "../../../wf/workflows/game-dev/mechanics/board-module.md",
+   "repair_summary": "補 H0、正規化遭遇後再裝配與同場景0→DUAL→0驗收；board-size改清楚區分舊現況與新決策，調查不再冒充定案schema。後續使用者改要求先結構規劃，入口再接multi-board架構草案，未實作。",
+   "retest_status": "pass",
+   "retest_reviewer": "cold_recheck（fork_turns=none）",
+   "retest_evidence": "2026-10-21，獨立報告 artifacts/cold-start/2026-10-21-cold-recheck.json；由 mechanics→board-module 找到 H0，核對 Combat先compose、Director後解析、空字典不等於NONE、allowed[-1]與雙槽clamp；提出解析→裝配→setup及Boardless/BoardRemoved/DualBoard/Board/Smoke/ResourceLifecycle等受影響驗收，保留部署與schema未定。只讀無Godot。",
+   "limits": "導航復走發生在新增正式架構文件前，僅證明裝配缺口與接手入口可定位；正式架構另交獨立review。沒有實作或runtime驗證，不能將此pass當每場0~N已支援。"
   }
  ]
 }

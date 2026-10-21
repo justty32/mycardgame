@@ -2,7 +2,7 @@
 
 > 2026-10-21 使用者已決定：盤數每場決定，含 0 盤。
 >
-> 狀態：2026-10-21 唯讀調查，尚待使用者決定多盤玩法語意，未實作。前篇（問題、方法、現況發現）：[feasibility](2026-10-21-multi-board-feasibility.md)。
+> 狀態：2026-10-21 唯讀調查，未實作。使用者後續要求先規劃乾淨解耦結構，不先定死部署玩法；目前接 [架構草案](../../specs/multi-board/README.md)。以下 M1–M4 與問題保留為候選分析，不是開工前必須逐項問使用者的清單。前篇：[feasibility](2026-10-21-multi-board-feasibility.md)。
 
 ## 可行語意模型
 
@@ -18,6 +18,8 @@
 
 ## 結論與推薦：最小可行方案（M1，含 M2）
 
+以下是多盤語意的**工程提案，尚非定案 schema**。每場 0 盤已獲使用者確認；本節原先的 2..上限與 NONE 不讀新欄位只描述舊推薦，不能覆蓋新決策。必須先補 [H0 裝配缺口](2026-10-21-multi-board-feasibility.md#2-寫死兩盤或-singledual-二選一的地方)：解析同一份 Encounter 後，0 盤走真正未掛模組；正盤才交模組驗盤資料。舊內容省略欄位仍須保留 SINGLE／DUAL 相容行為，明確 0 盤不能等同省略。場景／規則旗標與模組檔案缺失的既有能力邊界亦須回歸。
+
 **可行，且不需動規則 A、卡牌或 AI 核心。** 推薦以「盤清單資料化」實作 M1，DUAL／SINGLE 保持原義作為內建預設：
 
 (1) **資料（EncounterData）**：新增模式（例：`BOARD_MODES.MULTI`）或「`encounter_board_list` 非空即多盤」；清單元素 `{id, home: "party"|"enemy"|"none", size?, deploy_cells?, ...}`，順序＝畫面順序。`get_board_ids` 回清單 id（H2）；驗證：id 唯一、恰一個 party 主場盤（主角部署）、至少一個 enemy 主場盤或所有波次單位明寫 board_id、盤數 2..`board_max_count`（H3）。`default_wave_board` 改為「第一個 enemy 主場盤」，與模組共用同一函式（H4/H7）。
@@ -28,11 +30,13 @@
 
 (4) **呈現**：`view_position(index, count, size)` 依 count 產生 N 個槽（3 盤：三等分寬或 2+1；4 盤：2×2），槽尺寸由 count 決定並傳入 `compute_layout`；`actor_scale_for` 已按格寬算，可沿用（H8/H9）。這會觸發 decisions.json「棋盤大小」列的 premise（槽尺寸改變→重看上下限），需在 board-size.md 補「多盤時的有效上限」或按盤數收窄驗證。
 
-(5) **不改**：CrossBoardPolicy、BoardTargeting、IntentResolver、ThreatPreview、Field/ZOC、Hand／HandManager／CardPlayAdapter、普通卡。NONE 路徑（未掛模組）完全不讀這些欄位。
+(5) **不改**：CrossBoardPolicy、BoardTargeting、IntentResolver、ThreatPreview、Field/ZOC、Hand／HandManager／CardPlayAdapter、普通卡。NONE 不建立盤面資源、不解析盤面幾何；但場景裝配必須讀遭遇的盤數選擇，才能決定這一場走 NONE。
 
 (6) **測試**：新增 `multi_board_cases`＋3 盤 fixture（1 party＋2 enemy＋可選 1 none）：建盤數與 home 解析、波次預設盤、敵方盤間 TELEPORT／SWAP 原子性、ALL 只含選定盤、AI 無同盤目標時 uid fallback、場域時鐘跨 3 盤排序、view 位置互不重疊且在畫面內、驗證錯誤碼；既有 DUAL／Boardless／BoardRemoved 回歸不改斷言即應全綠。
 
 (7) **工作量估計**：中。核心程式改動約 5 檔（EncounterData、CombatRulesData、CombatBattlefield、BoardController/BoardCombatModule 小改、BoardCombatPresentation），加 1 個測試檔與 spec（board-module 新增 multi-board 節、decisions 一列）。
+
+零盤先行驗收以既有 DUAL 為正盤對照：同一場景依遭遇資料走 0→DUAL→0，確認普通卡牌／敵人／波次仍運作，0 盤沒有模組、盤面 UI 或殘留格位，舊請求不能越過模組 generation，之後再回正盤能重建。既有 Boardless 的全域／場景關閉回歸不等於這組新測例已完成；真正 N 盤另需上述多盤測試。
 
 **需使用者決定（未驗證、不自行補完）**：
 多盤要服務的玩法是哪種（M1 多敵方盤？M2 中立區？）——決定 `home` 的種類與驗證規則。

@@ -2,7 +2,7 @@
 
 [模組契約](README.md)｜[雙盤 A](../dual-board/README.md)｜[呈現](../dual-board/presentation.md)｜[關卡：戰鬥遭遇](../../workflows/game-dev/level-design/combat.md)
 
-2026-10-21 使用者要求每場戰鬥（encounter）都能自由調整棋盤大小；決定記錄見 [decisions.json](../../workflows/decisions.json)。本頁只管「大小」：要不要掛棋盤仍由場景旗標與規則 `board_enabled` 決定，沒有每場戰鬥的掛載開關（使用者同日決定不加）。未掛棋盤時不建立 Battlefield，也不讀、不驗這些欄位。
+2026-10-21 使用者要求每場戰鬥（encounter）都能自由調整棋盤大小；決定記錄見 [decisions.json](../../workflows/decisions.json)。本頁只管已實作的「大小」：目前掛載仍由場景旗標與規則 `board_enabled` 決定。使用者同日稍後已改定每場 0~N 盤，取代「不加每場開關」；[盤數調查](../../notes/investigations/2026-10-21-multi-board-feasibility.md) 記錄尚未實作的裝配缺口。未掛棋盤時不建立 Battlefield，也不讀、不驗這些大小欄位。
 
 ## 內容包怎麼寫
 
