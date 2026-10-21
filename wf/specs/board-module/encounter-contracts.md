@@ -30,7 +30,7 @@ C 的具體欄位、相容規則與能力錯誤見 [資料格式 v1](encounter-f
 
 `Global.get_event_encounter_data` 與 `EncounterData.synthesize_from_event` 保留查找／合成責任；新的準備入口只呼叫一次。`Combat._ready` 不先假設某場需要棋盤；`request_combat_event` 先準備、裝配及暫存 setup，成功才發布 `combat_started`，再將同一份準備結果交 Director 開始。直接 `CombatDirector.begin_combat` 轉送同一場景請求。Director 不另查 Encounter，也不解析盤 schema；它繼續只經 CombatModule hooks 執行。
 
-`EncounterData.get_board_ids`、`get_board_config` 與 `validate_configuration_detail` 的舊邏輯逐步集中至相容轉譯與棋盤驗證；Smoke 的 `unit_registry_probe` 與既有純物件測試也改走同一入口，避免測試與 runtime 接受不同資料。`CombatRulesData.BOARD_MODES` 留作舊資料數值相容，不再新增 N 盤分支；尺寸限制仍是棋盤設定的約束。
+`EncounterData.get_board_ids`、`get_board_config` 與 `validate_configuration_detail` 保留舊資料相容邏輯，由 `BoardSetup.from_legacy` 使用。Smoke 的 `unit_registry_probe` 仍逐一以舊 validator 檢查已載入 Encounter 的 legacy 尺寸／位置欄位；新格式另有 `prepared_schema_cases` 經公開 serializer 與 Prepared 入口的專項，不能將這些 fixture 推論為所有已載入新格式內容均已驗證。正式新格式開場經模組正規化器檢查。`CombatRulesData.BOARD_MODES` 留作舊資料數值相容，不再新增 N 盤分支；尺寸限制仍是棋盤設定的約束。
 
 `CombatBattlefield.default_board_id` 與 `BoardController.setup` 的主角部署從世界幾何移到部署政策；`BoardCombatModule.resolve_spawn_location`、`prepare_spawned_unit`、波次預設盤與召喚必須共用它。UnitSpawner 保留生成與 admission，政策不得再次生成或直接發動行動。已在盤上的單位查詢、移動與交換不再經初始部署 fallback。
 

@@ -36,6 +36,12 @@ runner 為每個程序設外層期限（預設 180 秒，可用 `--timeout-secon
 
 日誌、命令及 results.json 留在唯一輸出目錄，不覆蓋舊證據。歷史重現開關不能當作修復後的通過標準。
 
+## 收尾時核對既有證據
+
+來源凍結後，逐 suite 比對 results 的 source／test hash 與當前檔案；hash 不同不能直接說是最終版通過。先查實際差異及入口呼叫鏈：只有能證明未影響該 suite 的斷言範圍、且變動路徑另有修後驗證時，才保留舊結果。摘要須列原／現 hash、差異、沿用理由與新驗證；無法界定影響就重跑適用 suite。runner 記錄所有 helper，不代表每個 suite 都呼叫它。
+
+2026-10-21 `7feefd5` 的 [12 套整合證據](../../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md) 區分七套最終 hash 與五套停止 UI 清理差異的沿用結果；此判讀不適用尚在變動的來源，也不能拿未執行 helper 的 hash 充當功能覆蓋。
+
 ## 診斷紀錄與 runner 自身的測試
 
 runner 逐階段落盤 PID、時間、退出碼、來源與測試 hash、crash 標記，啟動前先確認 log 可寫；欄位與 wrapper PID 的限制見 [原生崩潰調查](../../notes/investigations/godot-native-crash.md)。

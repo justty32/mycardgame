@@ -11,3 +11,4 @@
 | [combat-framework/phase-3.md](combat-framework/phase-3.md) | 2026-10-21 | 已完成（4c386e0）；現況見 wf/specs/dual-board/README.md |
 | [combat-framework/phase-2-deviations.json](combat-framework/phase-2-deviations.json) | 2026-10-21 | 隨 Phase 2 plan 已完成封存；現況見 wf/specs/board-module/README.md |
 | [combat-framework/phase-2-done-when.json](combat-framework/phase-2-done-when.json) | 2026-10-21 | 隨 Phase 2 plan 已完成封存；現況見 wf/specs/board-module/README.md |
+| [multi-board/README.md](multi-board/README.md) | 2026-10-21 | A／B／C 與 D 適用工程驗收完成；現況見 analysis/slay-the-robot/architecture/10_multi_board_encounters.md 與 wf/specs/board-module/ |

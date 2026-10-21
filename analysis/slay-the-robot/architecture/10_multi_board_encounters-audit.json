@@ -372,9 +372,9 @@
     "tools/upstream.json"
    ],
    "test_files": [],
-   "evidence": "b510dff 增量 patch SHA256 6d5ccae9de6ca648eba6434e5b02409dfa4c3181545acf84f2b2094598c7c42b，隔離重建 17 產品檔逐檔一致。",
+   "evidence": "b510dff 增量 patch SHA256 6d5ccae9de6ca648eba6434e5b02409dfa4c3181545acf84f2b2094598c7c42b，隔離重建 17 產品檔逐檔一致。 實作提交 7feefd5754e5f9f3472d933b44b9d8a3879b48e1 已正常推送；2026-10-21 收尾核對 origin/main 同 SHA、worktree 乾淨，16 個 patch 鎖與 12 套原始 manifest SHA 及來源差異表仍相符。",
    "status": "verified",
-   "remaining_or_limit": "commit／push 結果由 git ref 與交付訊息記錄；本列證明可攜來源與補丁，不預填尚未產生的提交 SHA。"
+   "remaining_or_limit": ""
   },
   {
    "id": "D04",

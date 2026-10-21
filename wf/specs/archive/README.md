@@ -12,3 +12,4 @@
 | [combat-framework/08e-phase-3-2b.md](combat-framework/08e-phase-3-2b.md) | 2026-10-21 | 已完成（Phase 3 與 Phase 2b）；現況見 wf/specs/dual-board/README.md |
 | [combat-framework/current-single-player.json](combat-framework/current-single-player.json) | 2026-10-21 | 開工前（2026-10-19）單人現況快照，Phase 0–3 已改變；現況見 wf/workflows/common/code-map/combat-framework.md |
 | [combat-framework/current-turn-based.json](combat-framework/current-turn-based.json) | 2026-10-21 | 開工前（2026-10-19）回合制現況快照，Phase 1 起改為 CTB；現況見 wf/workflows/common/code-map/combat-framework.md |
+| [multi-board/README.md](multi-board/README.md) | 2026-10-21 | A／B／C 與 D 適用工程驗收完成；現況見 analysis/slay-the-robot/architecture/10_multi_board_encounters.md 與 wf/specs/board-module/ |

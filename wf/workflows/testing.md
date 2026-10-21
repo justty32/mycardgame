@@ -6,7 +6,7 @@
 
 **何時不用**：決定某類變更該補哪些測試 → [validation](game-dev/validation.md)；安裝環境與引擎探測 → [dev-env](dev-env.md)。
 
-上游與引擎基準見 [dev-env](dev-env.md#環境與來源)。最新驗證狀態見 [資源生命週期報告](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)；[04 報告](../../analysis/slay-the-robot/architecture/04_regression_validation.md) 保留前次功能與資源限制，不代表所有玩法或發行版已通過。
+上游與引擎基準見 [dev-env](dev-env.md#環境與來源)。資源退出基準見 [生命週期報告](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)，每場 0／N 與開始清理的驗證見 [整合分析](../../analysis/slay-the-robot/architecture/10_multi_board_encounters.md)；[04 報告](../../analysis/slay-the-robot/architecture/04_regression_validation.md) 保留前次功能與資源限制，不代表所有玩法或發行版已通過。
 
 新任務依 [變更類型選驗證](game-dev/validation.md) 決定現有檢查與需補的測試；原生崩潰、記憶體讀取錯誤或異常退出見 [原生崩潰調查](../notes/investigations/godot-native-crash.md)（已依使用者要求擱置）。
 
