@@ -2,7 +2,7 @@
 
 [分析入口](../README.md)｜[進階指南](senior_guide.md)｜[核實紀錄](verification.md)
 
-依匯入 commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 核對，日期 2026-10-19。前置知識是 Godot 4.6 專案操作、JSON 與基本 GDScript。本文範例已對照原始碼；尚未將範例 mod 實際寫入遊戲或驗收玩法。
+依匯入 commit `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 核對，日期 2026-10-19。前置知識是 Godot 4.x 專案操作（目前 project.godot 標記 4.7）、JSON 與基本 GDScript。本文範例已對照原始碼；尚未將範例 mod 實際寫入遊戲或驗收玩法。
 
 ## 資料從哪裡來
 

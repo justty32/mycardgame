@@ -62,4 +62,4 @@ Global.forfeit_run_from_title 不檢查 load_game 是否成功，後面仍執行
 
 [combat_flow.gd](../../../tests/combat_flow.gd) 以真實新局 handler、起點選擇、地圖按鈕、出牌及敵方攻擊，驗單場勝利→獎勵→回地圖與敗北→摘要→End Run；敗北分支確認刪 run save、profile loss／history 增加及 profile 檔案存在。[save_load_flow.gd](../../../tests/save_load_flow.gd) 驗跨程序語意、RNG、MainMenu Continue 後下一遭遇與拒絕保護。
 
-最新 [資源生命週期報告](../architecture/05_resource_lifecycle.md) 記錄 498 checks／0 failures；這是既有整合證據，本篇未重跑。尚無完整多幕正常通關、最終 Boss 勝利 profile、所有非戰鬥、結算後再開及所有 checkpoint 中斷點的測試保證。headless handler 接線不證明滑鼠命中、視覺、GPU 或成品 export；本次禁止桌面／視窗／截圖／GUI 與干預既有程序。
+[資源生命週期報告](../architecture/05_resource_lifecycle.md) 當時記錄 498 checks／0 failures；其後的全套結果見 [Windows 驗證](../architecture/06_windows_validation.md) 與 [雙盤證據](../evidence/2026-10-20/dual-board/README.md)。這些是既有整合證據，本篇未重跑。尚無完整多幕正常通關、最終 Boss 勝利 profile、所有非戰鬥、結算後再開及所有 checkpoint 中斷點的測試保證。headless handler 接線不證明滑鼠命中、視覺、GPU 或成品 export（[操作邊界](../../../wf/workflows/common/user.md#桌面與程序邊界)）。

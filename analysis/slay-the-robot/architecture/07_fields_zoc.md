@@ -24,7 +24,7 @@ tick 使用動態邊界排程：每個邊界的子行動完成後重新找下一
 
 ## 移動成本與控制區
 
-[BoardPathfinding](../../../game/scripts/combat/board/BoardPathfinding.gd) 分開成本預算與實際格數。`reachable_cells()` 是 Dijkstra 成本；卡牌距離限制用 `reachable_steps()`，主動移動用 `reachable_active()` 同時算免費點與付費格額度。八向不改卡牌距離使用的 distance metric。穿越友軍／敵軍與飛行只允許經過，終點仍須可站。
+[BoardPathfinding](../../../game/scripts/combat/board/BoardPathfinding.gd) 分開成本預算與實際格數。[BoardData](../../../game/scripts/combat/board/BoardData.gd) 的 `reachable_cells()` 委派 BoardPathfinding `reachable()` 做 Dijkstra 成本；卡牌距離限制用 `reachable_steps()`，主動移動用 `reachable_active()` 同時算免費點與付費格額度（BoardData 同名方法皆轉呼叫 BoardPathfinding）。八向不改卡牌距離使用的 distance metric。穿越友軍／敵軍與飛行只允許經過，終點仍須可站。
 
 [BoardMovementState](../../../game/scripts/combat/board/BoardMovementState.gd) 管同盤 ZOC、借機節流與撤銷。EXTRA_MOVE_COST 在離開敵對相鄰格時加點數成本；OPPORTUNITY_ATTACK 每攻擊者／移動者配對每行動一次。強制位移預設不觸發 ZOC；可明確啟用。卡牌移動預設觸發，也可 `ignore_zoc`。撤銷只限未出牌、未觸發效果且起點仍合法；跨盤轉移使原盤快照失效。
 

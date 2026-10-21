@@ -40,7 +40,7 @@ generate_music_action 預設傳 3 秒；generate_location_music_action 嘗試事
 
 [UserSettingsData](../../../game/data/mutable/UserSettingsData.gd) 有 master／music／effects volume 及失焦靜音，沒有 audioPrefs 欄位。檔頭「none hooked up」註解已落後實作。[SettingsMenu](../../../game/scripts/ui/menus/SettingsMenu.gd) 的 slider signal 將 music×master、effects×master 送至 bus；沒有直接調 Master bus volume。離開該 menu 時保存至 external/user_settings.json，Global 啟動時先 load_user_settings，但該函式只反序列化，未套音量。populate_menu 可能藉 slider value_changed 間接套用；未進設定頁的冷啟動不應被當作音量已還原。
 
-SoundManager 收到焦點外移且設定啟用時 mute Master；焦點回來無條件解除 Master mute。這是臨時失焦靜音，不是獨立、可持久的 master mute；未來新增手動 mute 須避免焦點回復覆蓋它。當前禁止實際操作焦點，測試只能在授權隔離背景程序內驗 handler，不能聲稱驗過 OS 事件。
+SoundManager 收到焦點外移且設定啟用時 mute Master；焦點回來無條件解除 Master mute。這是臨時失焦靜音，不是獨立、可持久的 master mute；未來新增手動 mute 須避免焦點回復覆蓋它。依[操作邊界](../../../wf/workflows/common/user.md#桌面與程序邊界)不實際操作焦點，測試只能在授權隔離背景程序內驗 handler，不能聲稱驗過 OS 事件。
 
 另兩個 API 邊界可從本地碼看到：get_currently_playing_music_tracks 呼叫 music.get_current_tracks，但實際方法名為 get_currently_playing_tracks；get_last_played_music_track 直接取 history[0]，未保護空歷史。新接線不要假定這些 wrapper 已可靠。
 

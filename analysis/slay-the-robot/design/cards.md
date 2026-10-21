@@ -38,7 +38,7 @@
 
 [combat_flow.gd](../../../tests/combat_flow.gd) 和 [combat_fixture.gd](../../../tests/combat_fixture.gd) 是固定情境的功能回歸；[save_load_flow.gd](../../../tests/save_load_flow.gd) 驗存讀與續玩。它們沒有通用出牌策略、跨 seed 平衡採樣或人工體驗資料。工作流中的 brief、試驗矩陣、指標和統計要求都是本專案建議契約，不宣稱上游提供模擬器。
 
-2026-10-19 冷接手靜態核對：Combat fixture 會把角色起始牌改成三張原生 Basic Attack 與兩張 Basic Block，`combat_flow._play()` 固定斷言扣 1 能量，並非任意卡牌測試 API。[test_game.py](../../../tools/test_game.py) 只接受 All／Dictionary／Combat（含 CombatVictory／CombatDefeat）／SaveLoad／Smoke／ResourceLifecycle；新增專項須整合 runner，不能用不存在的 Cards suite。新 mod 或數值改版不會自動被此 fixture 覆蓋。
+2026-10-19 冷接手靜態核對：Combat fixture 會把角色起始牌改成三張原生 Basic Attack 與兩張 Basic Block，`combat_flow._play()` 固定斷言扣 1 能量，並非任意卡牌測試 API。[test_game.py](../../../tools/test_game.py) 只接受 All／Dictionary／Smoke／Combat（含 CombatVictory／CombatDefeat）／SaveLoad／ResourceLifecycle／Ctb／Board／Wave／Field／DualBoard／Boardless，以及需帶 pack 的 PackScenario（2026-10-21 依 `SUITE_CHOICES` 核對）；新增專項須整合 runner，不能用不存在的 Cards suite。新 mod 或數值改版不會自動被此 fixture 覆蓋。
 
 ## 評量情境的現成入口
 

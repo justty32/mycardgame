@@ -8,7 +8,7 @@
 
 [最終 results](final-all-results.json) 對應 run `20261020-082010-447c566b`：21 個程序階段均通過，768 個 assertions、零失敗。此 run 已包含 JSON 資料檔過濾修正與新增 Smoke 回歸；較早 746 項 run 不作為最終來源驗證。
 
-各 suite 主日誌位於 `final-all/`。數量為 ResourceLifecycle 127、Dictionary 47、Smoke 110、CombatVictory 90、CombatDefeat 48、Ctb 53、Board 88、Wave 48、SaveLoad write／read／rejected 分別 28／56／73。來源與發布檔案的對照、SHA-256、位元組數及轉換方式收於 manifest，不另複製一份逐檔清單。
+各 suite 主日誌位於 `final-all/`。數量為 ResourceLifecycle 127、Dictionary 47、Smoke 110、CombatVictory 90、CombatDefeat 48、Ctb 53、Board 88、Wave 48、SaveLoad write／read／rejected 分別 28／56／73。來源與發布檔案的對照、SHA-256、位元組數及轉換方式收於 manifest，不另複製一份逐檔清單。與後續雙盤／棋盤模組 run 逐位元組相同的 7 份主日誌已去重：manifest 的 `published_path` 指向保留副本，原位置記在 `removed_copy`，另見 [去重索引](../dedup-index.json)。
 
 ## 失敗出口與工具回歸
 

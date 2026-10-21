@@ -13,6 +13,7 @@
   "id",
   "raw_artifact",
   "published_path",
+  "removed_copy",
   "raw_sha256",
   "published_sha256",
   "raw_bytes",
@@ -103,22 +104,24 @@
   {
    "id": "final-all-ResourceLifecycle-import",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/ResourceLifecycle/import.log",
-   "published_path": "final-all/ResourceLifecycle/import.log",
+   "published_path": "final-all/CombatDefeat/import.log",
    "raw_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "published_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "raw_bytes": 16968,
    "published_bytes": 16968,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/ResourceLifecycle/import.log"
   },
   {
    "id": "final-all-ResourceLifecycle-import-verified",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/ResourceLifecycle/import-verified.log",
-   "published_path": "final-all/ResourceLifecycle/import-verified.log",
+   "published_path": "final-all/CombatDefeat/import-verified.log",
    "raw_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "published_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "raw_bytes": 1964,
    "published_bytes": 1964,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/ResourceLifecycle/import-verified.log"
   },
   {
    "id": "final-all-ResourceLifecycle-resourcelifecycle",
@@ -133,22 +136,24 @@
   {
    "id": "final-all-Dictionary-import",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/Dictionary/import.log",
-   "published_path": "final-all/Dictionary/import.log",
+   "published_path": "final-all/CombatDefeat/import.log",
    "raw_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "published_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "raw_bytes": 16968,
    "published_bytes": 16968,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/Dictionary/import.log"
   },
   {
    "id": "final-all-Dictionary-import-verified",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/Dictionary/import-verified.log",
-   "published_path": "final-all/Dictionary/import-verified.log",
+   "published_path": "final-all/CombatDefeat/import-verified.log",
    "raw_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "published_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "raw_bytes": 1964,
    "published_bytes": 1964,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/Dictionary/import-verified.log"
   },
   {
    "id": "final-all-Dictionary-dictionary",
@@ -163,22 +168,24 @@
   {
    "id": "final-all-Smoke-import",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/Smoke/import.log",
-   "published_path": "final-all/Smoke/import.log",
+   "published_path": "final-all/CombatDefeat/import.log",
    "raw_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "published_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "raw_bytes": 16968,
    "published_bytes": 16968,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/Smoke/import.log"
   },
   {
    "id": "final-all-Smoke-import-verified",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/Smoke/import-verified.log",
-   "published_path": "final-all/Smoke/import-verified.log",
+   "published_path": "final-all/CombatDefeat/import-verified.log",
    "raw_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "published_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "raw_bytes": 1964,
    "published_bytes": 1964,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/Smoke/import-verified.log"
   },
   {
    "id": "final-all-Smoke-smoke",
@@ -193,22 +200,24 @@
   {
    "id": "final-all-CombatVictory-import",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/CombatVictory/import.log",
-   "published_path": "final-all/CombatVictory/import.log",
+   "published_path": "final-all/CombatDefeat/import.log",
    "raw_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "published_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "raw_bytes": 16968,
    "published_bytes": 16968,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/CombatVictory/import.log"
   },
   {
    "id": "final-all-CombatVictory-import-verified",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/CombatVictory/import-verified.log",
-   "published_path": "final-all/CombatVictory/import-verified.log",
+   "published_path": "final-all/CombatDefeat/import-verified.log",
    "raw_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "published_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "raw_bytes": 1964,
    "published_bytes": 1964,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/CombatVictory/import-verified.log"
   },
   {
    "id": "final-all-CombatVictory-combatvictory",
@@ -253,22 +262,24 @@
   {
    "id": "final-all-SaveLoad-import",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/SaveLoad/import.log",
-   "published_path": "final-all/SaveLoad/import.log",
+   "published_path": "final-all/CombatDefeat/import.log",
    "raw_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "published_sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
    "raw_bytes": 16968,
    "published_bytes": 16968,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/SaveLoad/import.log"
   },
   {
    "id": "final-all-SaveLoad-import-verified",
    "raw_artifact": "artifacts/verification/20261019-141014-31bb0cb1/SaveLoad/import-verified.log",
-   "published_path": "final-all/SaveLoad/import-verified.log",
+   "published_path": "final-all/CombatDefeat/import-verified.log",
    "raw_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "published_sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
    "raw_bytes": 1964,
    "published_bytes": 1964,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all/SaveLoad/import-verified.log"
   },
   {
    "id": "final-all-SaveLoad-save-write",
@@ -383,12 +394,13 @@
   {
    "id": "final-all-472-ResourceLifecycle-import",
    "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/ResourceLifecycle/import.log",
-   "published_path": "final-all-4.7.2-linux/ResourceLifecycle/import.log",
+   "published_path": "final-all-4.7.2-linux/CombatDefeat/import.log",
    "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "raw_bytes": 16955,
    "published_bytes": 16955,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all-4.7.2-linux/ResourceLifecycle/import.log"
   },
   {
    "id": "final-all-472-ResourceLifecycle-resourcelifecycle",
@@ -403,12 +415,13 @@
   {
    "id": "final-all-472-Dictionary-import",
    "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/Dictionary/import.log",
-   "published_path": "final-all-4.7.2-linux/Dictionary/import.log",
+   "published_path": "final-all-4.7.2-linux/CombatDefeat/import.log",
    "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "raw_bytes": 16955,
    "published_bytes": 16955,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all-4.7.2-linux/Dictionary/import.log"
   },
   {
    "id": "final-all-472-Dictionary-dictionary",
@@ -423,12 +436,13 @@
   {
    "id": "final-all-472-Smoke-import",
    "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/Smoke/import.log",
-   "published_path": "final-all-4.7.2-linux/Smoke/import.log",
+   "published_path": "final-all-4.7.2-linux/CombatDefeat/import.log",
    "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "raw_bytes": 16955,
    "published_bytes": 16955,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all-4.7.2-linux/Smoke/import.log"
   },
   {
    "id": "final-all-472-Smoke-smoke",
@@ -443,12 +457,13 @@
   {
    "id": "final-all-472-CombatVictory-import",
    "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/CombatVictory/import.log",
-   "published_path": "final-all-4.7.2-linux/CombatVictory/import.log",
+   "published_path": "final-all-4.7.2-linux/CombatDefeat/import.log",
    "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "raw_bytes": 16955,
    "published_bytes": 16955,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all-4.7.2-linux/CombatVictory/import.log"
   },
   {
    "id": "final-all-472-CombatVictory-combatvictory",
@@ -483,12 +498,13 @@
   {
    "id": "final-all-472-SaveLoad-import",
    "raw_artifact": "artifacts/verification/20261019-194556-becc58ea/SaveLoad/import.log",
-   "published_path": "final-all-4.7.2-linux/SaveLoad/import.log",
+   "published_path": "final-all-4.7.2-linux/CombatDefeat/import.log",
    "raw_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "published_sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
    "raw_bytes": 16955,
    "published_bytes": 16955,
-   "transformation": "path-prefix-redaction; UTF-8 LF"
+   "transformation": "path-prefix-redaction; UTF-8 LF; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "final-all-4.7.2-linux/SaveLoad/import.log"
   },
   {
    "id": "final-all-472-SaveLoad-save-write",

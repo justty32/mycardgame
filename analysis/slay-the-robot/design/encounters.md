@@ -56,4 +56,4 @@ ActionVisitLocation 先更新位置、清 shop、autosave，才發訪問訊號�
 
 ## 後續驗證範圍
 
-現有 [combat_flow.gd](../../../tests/combat_flow.gd) 與 [save_load_flow.gd](../../../tests/save_load_flow.gd) 提供單場勝敗、獎勵及跨程序續玩基準，不能證明全部敵人、全 act 拓撲或平衡。新增內容需按工作流補圖結構不變條件、固定 seed 與操作序列、分支／難度／召喚、boss 轉幕／終局及存讀後下一步測例。GUI 可讀性與視聽節奏在目前禁止視窗操作的邊界下留為未驗。
+現有 [combat_flow.gd](../../../tests/combat_flow.gd) 與 [save_load_flow.gd](../../../tests/save_load_flow.gd) 提供單場勝敗、獎勵及跨程序續玩基準，不能證明全部敵人、全 act 拓撲或平衡。新增內容需按工作流補圖結構不變條件、固定 seed 與操作序列、分支／難度／召喚、boss 轉幕／終局及存讀後下一步測例。GUI 可讀性與視聽節奏依目前[操作邊界](../../../wf/workflows/common/user.md#桌面與程序邊界)留為未驗。

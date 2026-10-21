@@ -2,17 +2,17 @@
 
 [分析入口](../README.md)｜[擴充方式](02_extension_points.md)
 
-核實日期：2026-10-19。基準 commit：`4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`。本篇為靜態程式碼查核；啟動、畫面與操作是否成功，須另看本輪執行驗證，不由本篇推論。以下原始碼連結相對於本專案，函式名可直接搜尋。
+核實日期：2026-10-19；版本、行號與 content profile 條件於 2026-10-21 重核（行號會漂移，以函式名搜尋為準）。基準 commit：`4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d`。本篇為靜態程式碼查核；啟動、畫面與操作是否成功，須另看本輪執行驗證，不由本篇推論。以下原始碼連結相對於本專案，函式名可直接搜尋。
 
 ## 啟動與資料來源
 
-[project.godot](../../../game/project.godot) 的 `[application]` 指向 `res://scenes/Root.tscn`，標記 Godot 4.6；渲染器為 `gl_compatibility`。`[autoload]` 依序提供 Signals、Scenes、Scripts、FileLoader、Random、Global、兩個資料生成器、ActionHandler 等單例。
+[project.godot](../../../game/project.godot) 的 `[application]` 指向 `res://scenes/Root.tscn`，`config/features` 標記 Godot 4.7（2026-10-19 起的引擎基準；上游基準 commit 時為 4.6）；渲染器為 `gl_compatibility`。`[autoload]` 依序提供 Signals、Scenes、Scripts、FileLoader、Random、Global、兩個資料生成器、ActionHandler 等單例。
 
-真正的資料啟動入口是 [Global.gd](../../../game/autoload/Global.gd) 的 `_ready()`（161 行），不是只有 `extends Control` 的 [Root.gd](../../../game/scripts/Root.gd)。依原碼順序：
+真正的資料啟動入口是 [Global.gd](../../../game/autoload/Global.gd) 的 `_ready()`（2026-10-21 核對約 188 行），不是只有 `extends Control` 的 [Root.gd](../../../game/scripts/Root.gd)。依原碼順序：
 
 1. `_generate_schema()` 由 `SCHEMA` 建立型別與資料表映射，接著建立 SerializableData 的 script cache。
 2. 載入 profile 與 user settings。
-3. 執行 `GlobalTestDataGenerator.generate_test_data()`；production generator 的呼叫目前被註解。測試資料生成不是自動測試套件。
+3. 只有 `get_content_profile() == CONTENT_PROFILE_TEST`（預設 `test`；可由 `--content-profile=` 或專案設定 `game/content_profile` 改為 `pack`）時才執行 `GlobalTestDataGenerator.generate_test_data()`；`pack` 略過，只用外部資料與啟用的 mod。production generator 的呼叫目前被註解。測試資料生成不是自動測試套件。
 4. `FileLoader.load_read_only_data()` 載入外部資料與 mod，能修補前一步生成的同 ID 物件。
 5. 註冊 custom signals、建立卡牌／遺物／消耗品 pack 的 filter cache、生成動畫。
 
@@ -22,7 +22,7 @@
 
 [SerializableData.gd](../../../game/data/SerializableData.gd) 以 `get_serializable_properties()`／`set_serializable_properties()` 處理具有 storage 標記的欄位（一般為 `@export`），支援巢狀 SerializableData 與部分 Godot 原生型別轉換。不是任意腳本變數都會存檔。
 
-[PrototypeData.gd](../../../game/data/PrototypeData.gd) 的 `get_prototype()` 深複製資料並生成 `object_uid`；`object_id` 表示內容種類，`object_uid` 區別執行期實例。卡牌、敵人、遺物與玩家使用此層。Global 的 `get_card_data()` 取得模板，`get_card_data_from_prototype()`（611 行）才取得可修改的卡牌副本。
+[PrototypeData.gd](../../../game/data/PrototypeData.gd) 的 `get_prototype()` 深複製資料並生成 `object_uid`；`object_id` 表示內容種類，`object_uid` 區別執行期實例。卡牌、敵人、遺物與玩家使用此層。Global 的 `get_card_data()` 取得模板，`get_card_data_from_prototype()`（2026-10-21 核對約 708 行）才取得可修改的卡牌副本。
 
 [Global.gd](../../../game/autoload/Global.gd) 的 `start_run()` 從 CharacterData 指定的 PlayerData 模板建立 run，填入起始牌組、遺物、pack IDs、血量、金錢及難度；`player_data` 是當前 run 的中心。手牌與戰鬥牌堆則由 [HandManager.gd](../../../game/autoload/HandManager.gd) 管理，`generate_combat_deck()` 與 `reset_deck()` 處理戰鬥副本。不要假設每一個戰鬥瞬間都完整保存在 PlayerData。
 
@@ -48,7 +48,7 @@
 
 ## 存檔與重新進入
 
-[FileLoader.gd](../../../game/autoload/FileLoader.gd) 的 `save_game()`／`load_game()`（408／415 行）序列化 PlayerData 到 `external/saves/save.json`。載入後設定 Global.player_data、呼叫 `player_data.init()`、恢復 StatsHandler 引用，再發出 `run_started` 與 `map_location_selected` 重建所在位置；不是保存整個 SceneTree。
+[FileLoader.gd](../../../game/autoload/FileLoader.gd) 的 `save_game()`／`load_game()`（2026-10-21 核對約 411／418 行）序列化 PlayerData 到 `external/saves/save.json`。載入後設定 Global.player_data、呼叫 `player_data.init()`、恢復 StatsHandler 引用，再發出 `run_started` 與 `map_location_selected` 重建所在位置；不是保存整個 SceneTree。
 
 本地 load_game 已先驗證指定檔案、JSON 與必要包裝／角色，拒絕時不替換目前 run；這不是完整 schema 遷移。跨程序還原與 Continue 後進入戰鬥的實測見 [回歸報告](04_regression_validation.md)。
 

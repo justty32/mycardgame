@@ -1,0 +1,277 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-21",
+ "columns": [
+  "removed_copy",
+  "canonical_path",
+  "sha256",
+  "bytes",
+  "manifest_path"
+ ],
+ "link_columns": [
+  "canonical_path",
+  "manifest_path"
+ ],
+ "rows": [
+  {
+   "removed_copy": "2026-10-19/final-all-4.7.2-linux/CombatVictory/import.log",
+   "canonical_path": "2026-10-19/final-all-4.7.2-linux/CombatDefeat/import.log",
+   "sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "bytes": 16955,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all-4.7.2-linux/Dictionary/import.log",
+   "canonical_path": "2026-10-19/final-all-4.7.2-linux/CombatDefeat/import.log",
+   "sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "bytes": 16955,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all-4.7.2-linux/ResourceLifecycle/import.log",
+   "canonical_path": "2026-10-19/final-all-4.7.2-linux/CombatDefeat/import.log",
+   "sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "bytes": 16955,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all-4.7.2-linux/SaveLoad/import.log",
+   "canonical_path": "2026-10-19/final-all-4.7.2-linux/CombatDefeat/import.log",
+   "sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "bytes": 16955,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all-4.7.2-linux/Smoke/import.log",
+   "canonical_path": "2026-10-19/final-all-4.7.2-linux/CombatDefeat/import.log",
+   "sha256": "f18f1493210b7287abe39b4dd10a356ba1b78ddab383961a3670462dbe39c43e",
+   "bytes": 16955,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/CombatVictory/import-verified.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import-verified.log",
+   "sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
+   "bytes": 1964,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/Dictionary/import-verified.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import-verified.log",
+   "sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
+   "bytes": 1964,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/ResourceLifecycle/import-verified.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import-verified.log",
+   "sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
+   "bytes": 1964,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/SaveLoad/import-verified.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import-verified.log",
+   "sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
+   "bytes": 1964,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/Smoke/import-verified.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import-verified.log",
+   "sha256": "96bc4c61eb61059b94324fa93150422a6371f8dadbc3833d8372dc9a7137bb46",
+   "bytes": 1964,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/CombatVictory/import.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import.log",
+   "sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
+   "bytes": 16968,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/Dictionary/import.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import.log",
+   "sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
+   "bytes": 16968,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/ResourceLifecycle/import.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import.log",
+   "sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
+   "bytes": 16968,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/SaveLoad/import.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import.log",
+   "sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
+   "bytes": 16968,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-19/final-all/Smoke/import.log",
+   "canonical_path": "2026-10-19/final-all/CombatDefeat/import.log",
+   "sha256": "d411afcf3bc7edb64e4addcbb71684ce8046414cc2250d8fcedbafe089f41e7c",
+   "bytes": 16968,
+   "manifest_path": "2026-10-19/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/CombatDefeat/combatdefeat.log",
+   "canonical_path": "2026-10-20/board-module/final-all/CombatDefeat/combatdefeat.log",
+   "sha256": "6f4a31afb084089924f96ce774e794ab8b78adb83f06149f4cc0ffa9ad11507a",
+   "bytes": 11145,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/final-all/CombatDefeat/combatdefeat.log",
+   "canonical_path": "2026-10-20/board-module/final-all/CombatDefeat/combatdefeat.log",
+   "sha256": "6f4a31afb084089924f96ce774e794ab8b78adb83f06149f4cc0ffa9ad11507a",
+   "bytes": 11145,
+   "manifest_path": "2026-10-20/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Ctb/ctb.log",
+   "canonical_path": "2026-10-20/board-module/final-all/Ctb/ctb.log",
+   "sha256": "065656ef77bf31a1dfe21862b3948556e33b7a61137e9805ba9502819ff93c53",
+   "bytes": 10393,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/final-all/Ctb/ctb.log",
+   "canonical_path": "2026-10-20/board-module/final-all/Ctb/ctb.log",
+   "sha256": "065656ef77bf31a1dfe21862b3948556e33b7a61137e9805ba9502819ff93c53",
+   "bytes": 10393,
+   "manifest_path": "2026-10-20/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Dictionary/dictionary.log",
+   "canonical_path": "2026-10-20/board-module/final-all/Dictionary/dictionary.log",
+   "sha256": "b2f327923ba0e704e225235bd9c34ad28ba535649517c6a0675d243b89f448e3",
+   "bytes": 9579,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/final-all/Dictionary/dictionary.log",
+   "canonical_path": "2026-10-20/board-module/final-all/Dictionary/dictionary.log",
+   "sha256": "b2f327923ba0e704e225235bd9c34ad28ba535649517c6a0675d243b89f448e3",
+   "bytes": 9579,
+   "manifest_path": "2026-10-20/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/ResourceLifecycle/resourcelifecycle.log",
+   "canonical_path": "2026-10-20/board-module/final-all/ResourceLifecycle/resourcelifecycle.log",
+   "sha256": "1b73e1d5b51fe62407cb6844d4718d2a2f89083e2ebe15b8e2e8361246238012",
+   "bytes": 12958,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/final-all/ResourceLifecycle/resourcelifecycle.log",
+   "canonical_path": "2026-10-20/board-module/final-all/ResourceLifecycle/resourcelifecycle.log",
+   "sha256": "1b73e1d5b51fe62407cb6844d4718d2a2f89083e2ebe15b8e2e8361246238012",
+   "bytes": 12958,
+   "manifest_path": "2026-10-20/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Wave/wave.log",
+   "canonical_path": "2026-10-20/board-module/final-all/Wave/wave.log",
+   "sha256": "e8fd30f5af55cebabc86e4f45b490bbf5cf2ca110a14d4bced59d89a8643a33d",
+   "bytes": 10123,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/final-all/Wave/wave.log",
+   "canonical_path": "2026-10-20/board-module/final-all/Wave/wave.log",
+   "sha256": "e8fd30f5af55cebabc86e4f45b490bbf5cf2ca110a14d4bced59d89a8643a33d",
+   "bytes": 10123,
+   "manifest_path": "2026-10-20/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/final-all/Board/board.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/board.log",
+   "sha256": "44fb0a60e642c7dc1751d66654e7b2a7a5c5e9e6ab2164255682403122aaeb0b",
+   "bytes": 12421,
+   "manifest_path": "2026-10-20/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/CombatDefeat/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/CombatVictory/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Ctb/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Dictionary/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/DualBoard/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Field/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/ResourceLifecycle/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/SaveLoad/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Smoke/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/dual-board/final-all/Wave/import.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/Board/import.log",
+   "sha256": "2871112426ef96c658840e8fa5f4e8c47549049cdffd1ab620225e4fd849d7fa",
+   "bytes": 19681,
+   "manifest_path": "2026-10-20/dual-board/manifest.json"
+  },
+  {
+   "removed_copy": "2026-10-20/final-all/CombatVictory/combatvictory.log",
+   "canonical_path": "2026-10-20/dual-board/final-all/CombatVictory/combatvictory.log",
+   "sha256": "19eb0f662578b7dec1ba89daf914766758c9e417b3789be3a187ac8590fd445a",
+   "bytes": 14121,
+   "manifest_path": "2026-10-20/manifest.json"
+  }
+ ]
+}

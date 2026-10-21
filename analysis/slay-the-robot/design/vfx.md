@@ -52,7 +52,7 @@ ActionHandler.clear_all_actions 清佇列、generation、timer 與 async action�
 
 ## 專項測試接點
 
-[test_game.py](../../../tools/test_game.py) 只有 All、Dictionary、Combat（含 CombatVictory、CombatDefeat）、SaveLoad、Smoke、ResourceLifecycle，沒有 VFX suite。本節為後續實作的測試設計，本次未改 tests／tools、未執行引擎。既有測試只提供骨架與觀測方式，不是下列案例已存在。
+[test_game.py](../../../tools/test_game.py) 只接受 All／Dictionary／Smoke／Combat（含 CombatVictory／CombatDefeat）／SaveLoad／ResourceLifecycle／Ctb／Board／Wave／Field／DualBoard／Boardless，以及需帶 pack 的 PackScenario（2026-10-21 依 `SUITE_CHOICES` 核對），沒有 VFX suite。本節為後續實作的測試設計（查核範圍見開頭）；既有測試只提供骨架與觀測方式，不是下列案例已存在。
 
 在 [framework_smoke.gd](../../../tests/framework_smoke.gd) 的 singleton 就緒後 helper 接新 AnimationData：經正式 FileLoader／註冊路徑取得，斷言非 fallback、track/frame 數、fps、loop=false，並比較 helper 與 regenerate 後結果。對非法 ID、缺 track、空 frames 定義預期拒絕與無殘留，而非允許靜默永存。
 
@@ -62,4 +62,4 @@ ActionHandler.clear_all_actions 清佇列、generation、timer 與 async action�
 
 完成上述實作後，依變更執行 `python3 tools/test_game.py --suite Smoke`、`--suite Combat`、`--suite ResourceLifecycle`，保存完成標記、退出碼與完整日誌。不能將這份未執行清單報作 pass，也不能以 ResourceLifecycle 舊結果宣稱 GPU 記憶體或 VFX 所有權已驗。
 
-視覺驗收另需實際畫面證據：透明邊、峰值與命中對齊、最壞重疊、資訊可辨、無反覆明暗閃爍、停用強光／震動後提示仍完整。性能需記目標裝置／設定與峰值並發量測；靜態紋理估算只是預算，headless 不驗 GPU 過繪。當前操作邊界禁止 UI／截圖／GUI，以上均保留待驗，不用舊選單截圖代替戰鬥效果證據。
+視覺驗收另需實際畫面證據：透明邊、峰值與命中對齊、最壞重疊、資訊可辨、無反覆明暗閃爍、停用強光／震動後提示仍完整。性能需記目標裝置／設定與峰值並發量測；靜態紋理估算只是預算，headless 不驗 GPU 過繪。依目前[操作邊界](../../../wf/workflows/common/user.md#桌面與程序邊界)，以上均保留待驗，不用舊選單截圖代替戰鬥效果證據。

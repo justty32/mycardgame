@@ -95,7 +95,7 @@ keyword_tooltip_theme 同時用於 Root Tooptips、KeywordTooltip 與 DialogueOp
 
 ## 完整場景用途的新增核實
 
-2026-10-19 追加需求後靜態讀碼。新流程入口為 [UI 場景](../../../wf/workflows/game-dev/ui/screens/README.md)，依玩家用途串接整套組合，而非把元件名當畫面規格；本輪仍未執行 Godot、GUI、音訊或實際輸入。
+2026-10-19 追加需求後靜態讀碼（查核範圍同開頭）。新流程入口為 [UI 場景](../../../wf/workflows/game-dev/ui/screens/README.md)，依玩家用途串接整套組合，而非把元件名當畫面規格。
 
 DialogueOverlay 的 Name 來自 DialogueData 整段事件名，Prompt／Texture 來自 embedded state；不存在 speaker／portrait／逐字／語音／Skip API。非空 state texture 才覆寫，空 path 沿用前圖，reset 才用 icon.svg。DialogueOption 是 PanelContainer，left_click pressed 立即送出；validators 僅 init 時計算，handler 等 actions 後走 next，沒有通用確認／重入鎖。所有選項無效會產生錯誤離開項；missing initial state 沒有完整 null 防護。完整組合及待新增契約見 [對話畫面](../../../wf/workflows/game-dev/ui/screens/dialogue.md)。
 

@@ -13,6 +13,7 @@
   "id",
   "raw_artifact",
   "published_path",
+  "removed_copy",
   "raw_sha256",
   "published_sha256",
   "raw_bytes",
@@ -83,32 +84,35 @@
   {
    "id": "prepared-PackScenario-scenario-write.log",
    "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-write.log",
-   "published_path": "prepared/PackScenario/scenario-write.log",
+   "published_path": "standalone/PackScenario/scenario-write.log",
    "raw_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
    "published_sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
    "raw_bytes": 12321,
    "published_bytes": 12321,
-   "transformation": "UTF-8 LF; path-prefix-redaction"
+   "transformation": "UTF-8 LF; path-prefix-redaction; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "prepared/PackScenario/scenario-write.log"
   },
   {
    "id": "prepared-PackScenario-scenario-read.log",
    "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-read.log",
-   "published_path": "prepared/PackScenario/scenario-read.log",
+   "published_path": "standalone/PackScenario/scenario-read.log",
    "raw_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
    "published_sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
    "raw_bytes": 12050,
    "published_bytes": 12050,
-   "transformation": "UTF-8 LF; path-prefix-redaction"
+   "transformation": "UTF-8 LF; path-prefix-redaction; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "prepared/PackScenario/scenario-read.log"
   },
   {
    "id": "prepared-PackScenario-scenario-defeat.log",
    "raw_artifact": "artifacts/verification/20261020-114738-1a266209/PackScenario/scenario-defeat.log",
-   "published_path": "prepared/PackScenario/scenario-defeat.log",
+   "published_path": "standalone/PackScenario/scenario-defeat.log",
    "raw_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
    "published_sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
    "raw_bytes": 10995,
    "published_bytes": 10995,
-   "transformation": "UTF-8 LF; path-prefix-redaction"
+   "transformation": "UTF-8 LF; path-prefix-redaction; dedup: byte-identical copy at removed_copy deleted, published_path now points to the retained copy (same published_sha256)",
+   "removed_copy": "prepared/PackScenario/scenario-defeat.log"
   }
  ]
 }

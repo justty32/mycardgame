@@ -1,0 +1,39 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-21",
+ "columns": [
+  "removed_copy",
+  "canonical_path",
+  "sha256",
+  "bytes",
+  "manifest_path"
+ ],
+ "link_columns": [
+  "canonical_path",
+  "manifest_path"
+ ],
+ "rows": [
+  {
+   "removed_copy": "prepared/PackScenario/scenario-defeat.log",
+   "canonical_path": "standalone/PackScenario/scenario-defeat.log",
+   "sha256": "262a6f9addea3852b1c1701b266730a4c8eaac27f6ff0978d7b39770394ab94c",
+   "bytes": 10995,
+   "manifest_path": "manifest.json"
+  },
+  {
+   "removed_copy": "prepared/PackScenario/scenario-read.log",
+   "canonical_path": "standalone/PackScenario/scenario-read.log",
+   "sha256": "5a6d2707614ee4c9e645c9acfd7cae9546741e0a1f4613d9d9f138d8eca35ea4",
+   "bytes": 12050,
+   "manifest_path": "manifest.json"
+  },
+  {
+   "removed_copy": "prepared/PackScenario/scenario-write.log",
+   "canonical_path": "standalone/PackScenario/scenario-write.log",
+   "sha256": "b9c7e3bdf1a20d9f4f978202472cca3de1290efc4360b62244a77e5c113edd6b",
+   "bytes": 12321,
+   "manifest_path": "manifest.json"
+  }
+ ]
+}
