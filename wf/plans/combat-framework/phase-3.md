@@ -8,7 +8,7 @@
 
 639 行的 Director 拆成每場建立的元件，Director 保留委派，呼叫端不改：
 
-- [BoardController](../../../game/scripts/combat/BoardController.gd)：建棋盤、部署主角、NEAREST_EMPTY 放置、移動預算與點格移動。
+- [BoardController](../../../game/scripts/combat/board/BoardController.gd)：建棋盤、部署主角、NEAREST_EMPTY 放置、移動預算與點格移動。
 - [UnitSpawner](../../../game/scripts/combat/UnitSpawner.gd)：波次單位與棋盤召喚。
 - [CombatActionPhases](../../../game/scripts/combat/CombatActionPhases.gd)：一次行動固定的開始／結束階段。
 - [CombatStartActions](../../../game/scripts/combat/CombatStartActions.gd)：開戰前的初始動作。
