@@ -102,6 +102,8 @@ SOURCE_HASH_PATHS = (
     "autoload/Global.gd",
     "scripts/ui/menus/NewRunMenu.gd",
     "scripts/combat/CombatDirector.gd",
+    "scripts/combat/PreparedEncounter.gd",
+    "scripts/combat/CombatStartActions.gd",
     "scripts/combat/board/BoardController.gd",
     "scripts/combat/UnitSpawner.gd",
     "scripts/combat/CombatActionPhases.gd",

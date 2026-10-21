@@ -10,7 +10,7 @@
 
 ## 先確定裝配與範圍
 
-遇到每場 0~N 盤需求，先對照 [盤數決策與裝配缺口](../../../notes/investigations/2026-10-21-multi-board-feasibility.md)：基準 `7eba093` 仍先裝配、後解析遭遇，現有旗標開關不代表每場選擇已實作。後續方案以 [解耦架構草案](../../../specs/multi-board/README.md) 與遷移計畫為入口：使用者要求先規劃結構，不先定部署玩法。實作時統一遭遇解析與裝配資料，驗同場景 0→既有 DUAL→0；不得以空盤或空覆寫字典冒充 0。未定主場／生成目的盤留在內容與政策層，不阻擋責任分離規劃。
+遇到每場 0~N 盤需求，先對照 [架構與遷移計畫](../../../specs/multi-board/README.md)；[調查 H0](../../../notes/investigations/2026-10-21-multi-board-feasibility.md) 的先裝配後解析是 `7eba093` 舊基準。遷移 A 已以 PreparedEncounter 統一準備與裝配，尚未加入每場新盤數格式。改開戰入口時沿同份 prepared，不自行再查 Global 遭遇；本場規則讀 `get_combat_rules`，下一場準備才讀 `get_configured_combat_rules`，停止後清唯一 active prepared。核實及專項見 [準備分析](../../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。後續仍須驗同場景 0→正盤→0，不得以空盤／空覆寫字典冒充 0；主場與生成政策不先定死。
 
 讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd)、[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)、[BoardCombatModule.gd](../../../../game/scripts/combat/board/BoardCombatModule.gd)，確認場景 `board_module_enabled` 與 rules `board_enabled` 的實際值（兩者都開才掛載，見 [架構分析的裝配與責任](../../../specs/board-module/README.md#裝配與責任)）。不要把 SINGLE、隱藏 BoardView、空棋盤或零移動點當作關閉功能。
 

@@ -30,7 +30,7 @@
 
 [Root.tscn](../../../game/scenes/Root.tscn) 組合 TitleScreen、RunScreen、Combat、Map 及選牌／獎勵／對話等 overlays；[Scenes.gd](../../../game/autoload/Scenes.gd) 快取 Card、Enemy、Player、StatusEffect 等可實例化場景。這不是以場景切換器不停更換整個遊戲場景的結構。
 
-[RunScreen.gd](../../../game/scripts/ui/menus/RunScreen.gd) 監聽 `run_started`／`run_ended` 切換可見性；[Combat.gd](../../../game/scripts/ui/Combat.gd) 的 `_ready()` 接線 HUD 並在檔案存在時組裝可選棋盤模組（[CombatModule](../../../game/scripts/combat/CombatModule.gd) 介面，見 [棋盤模組](../../../wf/specs/board-module/README.md)），`_on_map_location_selected()` 決定戰鬥、寶箱或商店，並更新背景／音樂；回合／行動迴圈在 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd)。[Map.gd](../../../game/scripts/ui/Map.gd) 選點後呼叫 ActionGenerator 的 `generate_visition_location()`（名稱保留上游拼法）。
+[RunScreen.gd](../../../game/scripts/ui/menus/RunScreen.gd) 監聽 `run_started`／`run_ended` 切換可見性；[Combat.gd](../../../game/scripts/ui/Combat.gd) 的 `_ready()` 接線 HUD，開戰時先建立 [每場準備快照](08_combat_preparation.md)，再依該份規則與場景能力組裝可選棋盤模組（[CombatModule](../../../game/scripts/combat/CombatModule.gd) 介面，見 [棋盤模組](../../../wf/specs/board-module/README.md)）。`_on_map_location_selected()` 決定戰鬥、寶箱或商店，並更新背景／音樂；回合／行動迴圈在 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd)。[Map.gd](../../../game/scripts/ui/Map.gd) 選點後呼叫 ActionGenerator 的 `generate_visition_location()`（名稱保留上游拼法）。
 
 戰鬥框架 Phase 0（本地補丁，見 [spec](../../../wf/specs/combat-framework/README.md)）加了 `UnitRegistry` autoload。`Global.get_player()` 取它登記的主角，`get_alive_enemies()` 取 ENEMY 陣營並依場景樹順序排列，所以結果仍和原本的群組查詢相同。開局能量與抽牌數改讀 `CombatRulesData`，預設值即原行為。舊回合流程只對主角發 `unit_action_started/ended`。
 

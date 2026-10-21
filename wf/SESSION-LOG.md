@@ -11,7 +11,7 @@
 
 ## 最新進度
 
-- [game-dev] 每場 0~N 盤的解耦架構規劃已交付，獨立審查與文件驗證通過；程式未動工，後續依遷移 A 階段集中每場準備入口，不先定部署玩法 → [遷移計畫](plans/multi-board/README.md)
+- [game-dev] 每場 0~N 盤遷移 A 已完成：單次準備與唯一 active 快照，獨立 review／8 套件 1465 項通過；下一步 B 分離盤定義、部署與排版，C 的新盤數格式仍未實作 → [遷移計畫](plans/multi-board/README.md)
 
 ## 各工作流 session-log
 

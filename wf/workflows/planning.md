@@ -60,14 +60,9 @@
 
 ## roadmap（會做，何時）
 
-| 事項 | 何時 / 順序 | 前提 |
-|------|------------|---------|
-| 定義各款遊戲的原創玩法與最小可玩內容 | 各題材的進度與順序記在該題材樹的 wf/ roadmap | 決定核心玩法，再依 game-flow 建立新局、選擇、戰鬥／非戰鬥、結算與續玩的最小閉環 |
-| 框架戰鬥系統（隊伍制 CTB；棋盤為可選模組，掛載時雙盤 A） | Phase 0–3、2b 已完成；下一步 Phase 4–6，見 [spec](../specs/combat-framework/README.md) | 題材中立；需求樣本來自各題材樹 |
-| 每場 0~N 盤的解耦結構 | 先交 [架構草案](../specs/multi-board/README.md) 與 [遷移計畫](../plans/multi-board/README.md)，程式未動工 | 2026-10-21 使用者要求先規劃，不先定死部署、排法或陣營主場 |
-| 第二款原創題材（異能戰鬥卡牌遊戲） | 使用者已表示要做，尚未建樹；開始時用 `tools/new_pack.py` 建樹並走「遊戲規劃」提問 | 與現有題材共用框架，題材間互不連結 |
+已抽到 [roadmap 資料](planning-roadmap.json)（4 列）。`item` 是事項，`order` 是順序與接手入口，`premise` 是前提；涵蓋題材最小版本、框架階段、每場盤數遷移與第二款題材。
 
-框架已匯入、修復 Dictionary 與資源生命週期並建立流程回歸，見 [當前驗證](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。上表仍屬後續玩法方向，基準測試通過不代表原創內容已完成；落地順序見 [整體遊戲流程](game-dev/game-flow.md)。
+框架已匯入、修復 Dictionary 與資源生命週期並建立流程回歸，見 [當前驗證](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。上述事項仍屬後續玩法方向，基準測試通過不代表原創內容已完成；落地順序見 [整體遊戲流程](game-dev/game-flow.md)。
 
 ## 交接
 

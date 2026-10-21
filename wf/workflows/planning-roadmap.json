@@ -1,0 +1,32 @@
+{
+ "contract": "wf-table/1",
+ "source": "planning.md",
+ "extracted": "2026-10-21",
+ "columns": [
+  "item",
+  "order",
+  "premise"
+ ],
+ "rows": [
+  {
+   "item": "定義各款遊戲的原創玩法與最小可玩內容",
+   "order": "各題材的進度與順序記在該題材樹的 wf/ roadmap",
+   "premise": "決定核心玩法，再依 game-flow 建立新局、選擇、戰鬥／非戰鬥、結算與續玩的最小閉環"
+  },
+  {
+   "item": "框架戰鬥系統（隊伍制 CTB；棋盤為可選模組，掛載時雙盤 A）",
+   "order": "Phase 0–3、2b 已完成；下一步 Phase 4–6，見 [spec](../specs/combat-framework/README.md)",
+   "premise": "題材中立；需求樣本來自各題材樹"
+  },
+  {
+   "item": "每場 0~N 盤的解耦結構",
+   "order": "[架構](../specs/multi-board/README.md) 已交付，A 每場準備已完成；下一步依 [遷移計畫](../plans/multi-board/README.md) 做 B／C",
+   "premise": "2026-10-21 使用者要求先規劃，不先定死部署、排法或陣營主場"
+  },
+  {
+   "item": "第二款原創題材（異能戰鬥卡牌遊戲）",
+   "order": "使用者已表示要做，尚未建樹；開始時用 `tools/new_pack.py` 建樹並走「遊戲規劃」提問",
+   "premise": "與現有題材共用框架，題材間互不連結"
+  }
+ ]
+}

@@ -81,6 +81,12 @@
       "sha256": "8c35464dad8e0783a4b895ca940da7e8dcdd661fb6a8279334b533cfc7f3ca90",
       "description": "Per-encounter board size: CombatRulesData board_min_size 3x3 / new board_max_size 12x12 (ceiling 16x16) with limit validation; EncounterData resolves per-board sizes (encounter_boards.<id>.size > encounter_board_size > default_board_size) and rejects out-of-range sizes and off-board deploy/spawn/blocked/field/wave cells with author-facing details (CombatBattlefield.error_detail, logged by BoardController); BoardView.compute_layout, BoardCombatPresentation.view_position (board centred in its slot) and BoardActorPresentation.actor_scale_for. Includes all game source changes relative to 1f33faa; applies after board-module-decoupling.patch.",
       "validation": "wf/specs/board-module/board-size.md"
+    },
+    {
+      "file": "tools/patches/combat-preparation.patch",
+      "sha256": "62b91863976e55540f836c3e54961e9e3c7c499cc41aa73e112283ab3301381f",
+      "description": "Per-combat preparation migration A: PreparedEncounter snapshots Event/Rules/Encounter once; Combat composes after preparation rather than _ready, Director consumes the same preparation and owns its active lifetime. Global separates configured and active rules, synthesis consumes prepared rules, and initial combat actions use the explicit prepared event. Preserves existing SINGLE/DUAL and board-disabled/removed behavior; does not add per-encounter zero/N board schema. Includes all game source changes relative to 2b3dec8; applies after board-size-per-encounter.patch.",
+      "validation": "analysis/slay-the-robot/architecture/08_combat_preparation.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

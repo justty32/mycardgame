@@ -1,0 +1,193 @@
+diff --git a/autoload/Global.gd b/autoload/Global.gd
+index 7d12032c5c43202b31b038f1ad24e73e9a314d16..866118e53477a98279834625fde0a6585705a1bc 100644
+--- a/autoload/Global.gd
++++ b/autoload/Global.gd
+@@ -573,6 +573,13 @@ func get_combat_rules_data(combat_rules_object_id: String) -> CombatRulesData:
+ 
+ ## The rules every combat reads: CombatRulesData.DEFAULT_OBJECT_ID, or the built-in default.
+ func get_combat_rules() -> CombatRulesData:
++	var director: CombatDirector = get_combat_director()
++	if director != null and director.prepared_encounter != null:
++		return director.rules
++	return get_configured_combat_rules()
++
++## Author configuration for the next start, independent of an active combat snapshot.
++func get_configured_combat_rules() -> CombatRulesData:
+ 	var combat_rules_data: CombatRulesData = get_combat_rules_data(CombatRulesData.DEFAULT_OBJECT_ID)
+ 	if combat_rules_data != null:
+ 		return combat_rules_data
+@@ -588,13 +595,13 @@ func get_encounter_data(encounter_object_id: String) -> EncounterData:
+ 
+ ## The board encounter of an event: its event_encounter_object_id, or one synthesized from the
+ ## event's enemy list (legacy events).
+-func get_event_encounter_data(event_data: EventData) -> EncounterData:
++func get_event_encounter_data(event_data: EventData, combat_rules: CombatRulesData = null) -> EncounterData:
+ 	if event_data != null and event_data.event_encounter_object_id != "":
+ 		var encounter_data: EncounterData = get_encounter_data(event_data.event_encounter_object_id)
+ 		if encounter_data != null:
+ 			return encounter_data
+ 		DebugLogger.log_error("Global: EncounterData \"{0}\" of event \"{1}\" not found; synthesizing".format([event_data.event_encounter_object_id, event_data.object_id]))
+-	return EncounterData.synthesize_from_event(event_data, get_combat_rules())
++	return EncounterData.synthesize_from_event(event_data, combat_rules if combat_rules != null else get_combat_rules())
+ #endregion
+ 
+ #region Locations
+diff --git a/scripts/combat/CombatDirector.gd b/scripts/combat/CombatDirector.gd
+index 67fc0406f1f0cd92dde3487da55ff67ad38cd038..a43926a330af84010e2842d5ca1e37cb42fcf492 100644
+--- a/scripts/combat/CombatDirector.gd
++++ b/scripts/combat/CombatDirector.gd
+@@ -41,6 +41,8 @@ var unit_spawner: UnitSpawner = null
+ var waves: WaveController = null
+ ## Encounter and waves exist independently of any optional module.
+ var encounter: EncounterData = null
++var prepared_encounter: PreparedEncounter = null
++var event: EventData = null
+ 
+ ## Compatibility forwards (untyped, no module class dependency): the mounted board module and
+ ## its current resources, or null. Board-specific work belongs to the module itself.
+@@ -153,9 +155,15 @@ func project_timeline(count: int) -> Array[Dictionary]:
+ ## Called by Combat: sets up any mounted module, spawns wave 0 and runs the CTB loop.
+ ## event_data null = the player's current event.
+ func begin_combat(event_data: EventData = null) -> void:
++	var prepared: PreparedEncounter = PreparedEncounter.prepare(event_data)
++	get_parent().compose_combat_module(prepared)
++	await begin_prepared_combat(prepared)
++
++func begin_prepared_combat(prepared: PreparedEncounter) -> void:
+ 	_generation += 1
+ 	var generation: int = _generation
+-	rules = Global.get_combat_rules()
++	prepared_encounter = prepared
++	rules = prepared.get_rules()
+ 	timeline = CombatTimeline.new(rules)
+ 	current_tick = 0
+ 	acting_unit = null
+@@ -163,9 +171,9 @@ func begin_combat(event_data: EventData = null) -> void:
+ 	_player_finish_pending = false
+ 	_cards_played_this_action.clear()
+ 	reset_end_action()
+-	if event_data == null:
+-		event_data = Global.get_player_event_data()
+-	encounter = Global.get_event_encounter_data(event_data)
++	event = prepared.get_event()
++	var event_data: EventData = event
++	encounter = prepared.get_encounter()
+ 	# The scene composition owns the optional component; the core never creates it.
+ 	combat_module = get_parent().get("combat_module") as CombatModule
+ 	if combat_module != null and not combat_module.setup(self, encounter):
+@@ -203,6 +211,7 @@ func begin_combat(event_data: EventData = null) -> void:
+ 		acting_unit = null
+ 
+ func _stop(preserve_presentation: bool = false) -> void:
++	prepared_encounter = null
+ 	_generation += 1
+ 	is_running = false
+ 	acting_unit = null
+diff --git a/scripts/combat/CombatStartActions.gd b/scripts/combat/CombatStartActions.gd
+index 1f9791b84c7f6ddb974740a12dd2fbf5b2c0a805..48dc10c986c0647ec6727489508113f1062fc260 100644
+--- a/scripts/combat/CombatStartActions.gd
++++ b/scripts/combat/CombatStartActions.gd
+@@ -18,7 +18,7 @@ static func perform(director: CombatDirector, generation: int) -> void:
+ 		if director.is_aborted(generation):
+ 			return
+ 		# event initial actions
+-		var event_data: EventData = Global.get_player_event_data()
++		var event_data: EventData = director.event
+ 		if event_data != null:
+ 			var event_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], event_data.event_initial_combat_actions, null)
+ 			ActionHandler.add_actions(event_initial_combat_actions)
+diff --git a/scripts/ui/Combat.gd b/scripts/ui/Combat.gd
+index c6511faa0108466334ecb1595c5a2edc53adbff5..e8f8f6f59dbf77800228a83313962f762f317b34 100644
+--- a/scripts/ui/Combat.gd
++++ b/scripts/ui/Combat.gd
+@@ -27,6 +27,9 @@ extends Control
+ const BOARD_MODULE_SCRIPT: String = "res://scripts/combat/board/BoardCombatModule.gd"
+ ## The composed optional module (a CombatModule), or null for an ordinary combat.
+ var combat_module: CombatModule = null
++var prepared_encounter: PreparedEncounter:
++	get:
++		return combat_director.prepared_encounter if is_instance_valid(combat_director) else null
+ ## Core card policy used whenever no module supplies one.
+ var _core_card_play_adapter: CardPlayAdapter = CardPlayAdapter.new()
+ var card_play_adapter: CardPlayAdapter:
+@@ -63,7 +66,6 @@ var undo_move_button:
+ var _combat_ending: bool = false	# end_combat() runs once per combat
+ 
+ func _ready():
+-	_compose_board_module()
+ 	Signals.player_money_changed.connect(_on_player_money_changed)
+ 	Signals.player_health_changed.connect(_on_player_health_changed)
+ 
+@@ -236,8 +238,9 @@ func _on_combat_started(event_id: String):
+ 
+ 	# compose / drop the optional module, then the director sets it up, spawns the encounter's
+ 	# units and runs the action timeline
+-	_compose_board_module()
+-	combat_director.begin_combat(current_event)
++	var prepared: PreparedEncounter = PreparedEncounter.prepare(current_event)
++	_compose_board_module(prepared)
++	combat_director.begin_prepared_combat(prepared)
+ 	timeline_bar.visible = true
+ 
+ func _on_combat_ended():
+@@ -294,8 +297,12 @@ func end_combat() -> void:
+ 
+ ## Scene composition owns the optional board feature; core combat only sees CombatModule.
+ ## Loaded by path when present, so deleting the module's files leaves ordinary combat intact.
+-func _compose_board_module() -> void:
+-	var enabled: bool = board_module_enabled and Global.get_combat_rules().board_enabled and ResourceLoader.exists(BOARD_MODULE_SCRIPT)
++func _compose_board_module(prepared: PreparedEncounter = null) -> void:
++	compose_combat_module(prepared)
++
++func compose_combat_module(prepared: PreparedEncounter = null) -> void:
++	var current: PreparedEncounter = prepared if prepared != null else prepared_encounter
++	var enabled: bool = current != null and board_module_enabled and current.allows_board_module() and ResourceLoader.exists(BOARD_MODULE_SCRIPT)
+ 	if enabled and not is_instance_valid(combat_module):
+ 		var script: Script = load(BOARD_MODULE_SCRIPT) as Script
+ 		combat_module = script.new() as CombatModule if script != null else null
+diff --git a/scripts/combat/PreparedEncounter.gd b/scripts/combat/PreparedEncounter.gd
+new file mode 100644
+index 0000000000000000000000000000000000000000..c769bff362deab9af85739b98cd6b99df06862cd
+--- /dev/null
++++ b/scripts/combat/PreparedEncounter.gd
+@@ -0,0 +1,40 @@
++## Detached author-data snapshots for one start. No runtime objects or module dependencies.
++extends RefCounted
++class_name PreparedEncounter
++
++var _event: Dictionary = {}
++var _rules: Dictionary = {}
++var _encounter: Dictionary = {}
++
++## The optional resolver supports the same single lookup in compatibility callers and probes.
++static func prepare(event_data: EventData = null, resolver: Callable = Callable()) -> PreparedEncounter:
++	if event_data == null:
++		event_data = Global.get_player_event_data()
++	var prepared := PreparedEncounter.new()
++	if event_data != null:
++		prepared._event = event_data.get_serializable_properties().duplicate(true)
++	prepared._rules = Global.get_configured_combat_rules().get_serializable_properties().duplicate(true)
++	var event_snapshot: EventData = prepared.get_event()
++	var resolved: EncounterData = resolver.call(event_snapshot) if resolver.is_valid() else Global.get_event_encounter_data(event_snapshot, prepared.get_rules())
++	prepared._encounter = resolved.get_serializable_properties().duplicate(true)
++	return prepared
++
++func get_event() -> EventData:
++	if _event.is_empty():
++		return null
++	var data := EventData.new()
++	data.set_serializable_properties(_event.duplicate(true))
++	return data
++
++func get_rules() -> CombatRulesData:
++	var data := CombatRulesData.new()
++	data.set_serializable_properties(_rules.duplicate(true))
++	return data
++
++func get_encounter() -> EncounterData:
++	var data := EncounterData.new()
++	data.set_serializable_properties(_encounter.duplicate(true))
++	return data
++
++func allows_board_module() -> bool:
++	return bool(_rules.get("board_enabled", true))

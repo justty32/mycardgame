@@ -10,6 +10,10 @@
 
 所有 suite 通過都不代表全部卡牌、遭遇或自訂內容已驗證；fixture 與結果見各報告。
 
+## 每場準備（Smoke／DualBoard）
+
+Smoke 呼叫 [prepared_encounter_probe.gd](../../../tests/prepared_encounter_probe.gd)，驗未知遭遇不提前掛載、只解析一次、Event／Rules／Encounter 巢狀快照隔離與舊模式相容。DualBoard 呼叫 [prepared_start_cases.gd](../../../tests/prepared_start_cases.gd)，在正常戰鬥停止後驗無參數裝配不復活舊場，再經 Director 相容入口啟動明確不同 Event，核對實際初始效果與首波；另驗當場普通卡規則與 Director 共用、下一場讀新配置。這些測例不代表每場 0／N 盤新 schema 已實作；結果與限制見 [準備分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。
+
 ## Dictionary、Combat、SaveLoad、ResourceLifecycle
 
 - [Dictionary](../../../tests/dictionary_regression.gd) 走 JSON patch API，涵蓋完整 patch 邊界。

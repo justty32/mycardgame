@@ -2,13 +2,15 @@
 
 [架構草案](../../specs/multi-board/README.md)｜[planning](../../workflows/planning.md)｜[遊戲驗收](../../workflows/game-dev/validation.md)
 
-狀態：2026-10-21 僅完成規劃，未開始程式實作。使用者要求先把結構規劃乾淨；本計畫不是部署玩法的定案。開工依 game-dev，先在 SESSION-LOG 記實際範圍，再分配檔案唯一 owner 與單一背景 runtime owner。上游身份看 tools/upstream.json，當前外層基準 `7eba093`。
+狀態：2026-10-21 規劃先於 `2b3dec8` 交付，持續工作已完成 A；B／C 尚未動工。使用者要求先把結構規劃乾淨；本計畫不是部署玩法的定案。開工依 game-dev，先在 SESSION-LOG 記實際範圍，再分配檔案唯一 owner 與單一背景 runtime owner。上游身份看 tools/upstream.json，A 的外層基準為 `2b3dec8`。
 
 ## A．集中每場準備，保持既有行為
 
 將 Global 取得／合成 Encounter 的呼叫集中到開戰準備入口，讓 Combat 裝配與 Director 共用結果；消除 `_ready` 未知遭遇便先掛載的前提。先只對舊資料轉譯，不引入新的部署或排版。由場景 owner 修改 Combat、Director、Encounter 接點；普通抽牌、費用與 CTB 演算法不動。
 
 完成條件：同一事件只解析一次；缺模組檔仍可 import／普通戰鬥；省略欄位的舊 SINGLE／DUAL、規則／場景關閉行為有斷言。新增準備結果不能含 runtime Node 或可變別名。舊入口需要保持時提供單一 forwarding 路徑，不能維持兩份解析邏輯。
+
+2026-10-21 已完成：PreparedEncounter、Combat／Director 共用入口、當場／配置規則分流、明確 Event 開場 actions 與停止後單一 prepared 失效。獨立最終 review PASS；8 套件合計 1465 checks／0 failures，包含 Smoke、DualBoard、Boardless、BoardRemoved、ResourceLifecycle、Board、Ctb、SaveLoad。來源／測例 hash 已與最終版本核對，增量補丁重建五產品檔一致；詳細結果與早期失敗保留見 [分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)。這不代表 C 的新盤數格式或完整開場交易已完成。
 
 ## B．抽離盤定義、部署與排版
 
@@ -28,9 +30,9 @@
 
 程式修改後同步 board-module 現行契約、code map、suite coverage、受影響 analysis 與來源補丁／upstream 鎖。補丁按明確來源基準產生並檢查順序／hash；未改遊戲的本輪不產生空補丁。測試副本留 artifacts，必要證據才依版本控制流程取可攜副本。
 
-實作完成後依 STRUCTURE 封存已完成 plan；本計畫仍未實作，不因文件審查通過就封存或將 0~N 目標標完成。GUI、所有內容包、多幕通關與大規模效能未經實測都另列限制。
+所有階段完成後依 STRUCTURE 封存 plan；目前僅 A 完成，保留 B／C open，不將 0~N 目標標完成。GUI、所有內容包、多幕通關與大規模效能未經實測都另列限制。
 
-## 本輪規劃驗收
+## 初次規劃驗收（2b3dec8）
 
 已核對 Combat／Director／Encounter／Battlefield／Controller／Presentation 的現況與缺口，已提出資料所有權、可移除模組依賴、部署與排版分離、失敗清理與相容遷移。本輪未改程式、未跑 Godot。
 

@@ -41,6 +41,8 @@ var unit_spawner: UnitSpawner = null
 var waves: WaveController = null
 ## Encounter and waves exist independently of any optional module.
 var encounter: EncounterData = null
+var prepared_encounter: PreparedEncounter = null
+var event: EventData = null
 
 ## Compatibility forwards (untyped, no module class dependency): the mounted board module and
 ## its current resources, or null. Board-specific work belongs to the module itself.
@@ -153,9 +155,15 @@ func project_timeline(count: int) -> Array[Dictionary]:
 ## Called by Combat: sets up any mounted module, spawns wave 0 and runs the CTB loop.
 ## event_data null = the player's current event.
 func begin_combat(event_data: EventData = null) -> void:
+	var prepared: PreparedEncounter = PreparedEncounter.prepare(event_data)
+	get_parent().compose_combat_module(prepared)
+	await begin_prepared_combat(prepared)
+
+func begin_prepared_combat(prepared: PreparedEncounter) -> void:
 	_generation += 1
 	var generation: int = _generation
-	rules = Global.get_combat_rules()
+	prepared_encounter = prepared
+	rules = prepared.get_rules()
 	timeline = CombatTimeline.new(rules)
 	current_tick = 0
 	acting_unit = null
@@ -163,9 +171,9 @@ func begin_combat(event_data: EventData = null) -> void:
 	_player_finish_pending = false
 	_cards_played_this_action.clear()
 	reset_end_action()
-	if event_data == null:
-		event_data = Global.get_player_event_data()
-	encounter = Global.get_event_encounter_data(event_data)
+	event = prepared.get_event()
+	var event_data: EventData = event
+	encounter = prepared.get_encounter()
 	# The scene composition owns the optional component; the core never creates it.
 	combat_module = get_parent().get("combat_module") as CombatModule
 	if combat_module != null and not combat_module.setup(self, encounter):
@@ -203,6 +211,7 @@ func begin_combat(event_data: EventData = null) -> void:
 		acting_unit = null
 
 func _stop(preserve_presentation: bool = false) -> void:
+	prepared_encounter = null
 	_generation += 1
 	is_running = false
 	acting_unit = null

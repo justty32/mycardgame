@@ -573,6 +573,13 @@ func get_combat_rules_data(combat_rules_object_id: String) -> CombatRulesData:
 
 ## The rules every combat reads: CombatRulesData.DEFAULT_OBJECT_ID, or the built-in default.
 func get_combat_rules() -> CombatRulesData:
+	var director: CombatDirector = get_combat_director()
+	if director != null and director.prepared_encounter != null:
+		return director.rules
+	return get_configured_combat_rules()
+
+## Author configuration for the next start, independent of an active combat snapshot.
+func get_configured_combat_rules() -> CombatRulesData:
 	var combat_rules_data: CombatRulesData = get_combat_rules_data(CombatRulesData.DEFAULT_OBJECT_ID)
 	if combat_rules_data != null:
 		return combat_rules_data
@@ -588,13 +595,13 @@ func get_encounter_data(encounter_object_id: String) -> EncounterData:
 
 ## The board encounter of an event: its event_encounter_object_id, or one synthesized from the
 ## event's enemy list (legacy events).
-func get_event_encounter_data(event_data: EventData) -> EncounterData:
+func get_event_encounter_data(event_data: EventData, combat_rules: CombatRulesData = null) -> EncounterData:
 	if event_data != null and event_data.event_encounter_object_id != "":
 		var encounter_data: EncounterData = get_encounter_data(event_data.event_encounter_object_id)
 		if encounter_data != null:
 			return encounter_data
 		DebugLogger.log_error("Global: EncounterData \"{0}\" of event \"{1}\" not found; synthesizing".format([event_data.event_encounter_object_id, event_data.object_id]))
-	return EncounterData.synthesize_from_event(event_data, get_combat_rules())
+	return EncounterData.synthesize_from_event(event_data, combat_rules if combat_rules != null else get_combat_rules())
 #endregion
 
 #region Locations

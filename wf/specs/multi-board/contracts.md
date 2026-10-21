@@ -2,7 +2,7 @@
 
 [架構入口](README.md)｜[生命週期](lifecycle.md)｜[遷移計畫](../../plans/multi-board/README.md)
 
-以下名稱描述內部角色，屬提案，非已存在的 class 或最終 JSON schema。
+以下描述目標責任，非最終 JSON schema。遷移 A 的 PreparedEncounter 已實作，實際範圍見 [分析](../../../analysis/slay-the-robot/architecture/08_combat_preparation.md)；棋盤正規化器、BoardSetup、部署與排版分離仍是 B／C 提案。
 
 ## 每場準備結果
 

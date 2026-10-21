@@ -12,6 +12,14 @@ func _scenario() -> bool:
 	fixture.install()
 	if not await _start_combat():
 		return false
+	_check(combat.prepared_encounter == director.prepared_encounter and director.event.object_id == "board_flow_event", "scene and director share one prepared start and explicit event")
+	_check(Global.get_combat_rules() == director.rules and director.rules != Global.get_configured_combat_rules(), "ordinary card rules and director use the detached current-combat rules")
+	var configured: CombatRulesData = Global.get_configured_combat_rules()
+	var original_draw: int = configured.draw_per_action
+	configured.draw_per_action = original_draw + 2
+	var next: PreparedEncounter = PreparedEncounter.prepare(director.event)
+	_check(Global.get_combat_rules().draw_per_action == original_draw and next.get_rules().draw_per_action == original_draw + 2, "next preparation reads new configuration without changing current combat")
+	configured.draw_per_action = original_draw
 	battlefield = director.battlefield
 	party_board = battlefield.get_board("party")
 	enemy_board = battlefield.get_board("enemy")
@@ -28,6 +36,7 @@ func _scenario() -> bool:
 	await presentation.run_exit(self)
 	var waves: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join("dual_board_wave_cases.gd")).new()
 	await waves.run(self)
+	await load(flow.get_script().resource_path.get_base_dir().path_join("prepared_start_cases.gd")).new().run(self)
 	return true
 
 func _play_board(card_id: String, board_id: String, cell: Vector2i) -> String:

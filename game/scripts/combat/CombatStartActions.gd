@@ -18,7 +18,7 @@ static func perform(director: CombatDirector, generation: int) -> void:
 		if director.is_aborted(generation):
 			return
 		# event initial actions
-		var event_data: EventData = Global.get_player_event_data()
+		var event_data: EventData = director.event
 		if event_data != null:
 			var event_initial_combat_actions: Array[BaseAction] = ActionGenerator.create_actions(hero, card_play_request, [], event_data.event_initial_combat_actions, null)
 			ActionHandler.add_actions(event_initial_combat_actions)

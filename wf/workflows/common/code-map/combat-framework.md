@@ -6,6 +6,8 @@
 
 ## 時間軸與單位
 
+每場開始的解析、裝配與規則資料所有權，見 [每場準備 code map](combat-preparation.md)。
+
 [UnitRegistry.gd](../../../../game/scripts/combat/UnitRegistry.gd)（autoload）管 unit_uid、陣營、主角與 unit_spawned／unit_removed。[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)（`Global.get_combat_director()`）跑 CTB 行動迴圈與開戰／停止，只經核心 [CombatModule.gd](../../../../game/scripts/combat/CombatModule.gd) 介面呼叫可選模組（不引用棋盤類別），缺模組內容由 [CombatContentRequirements.gd](../../../../game/scripts/combat/CombatContentRequirements.gd) 以資料標記判定；可選 [BoardCombatModule](../../../../game/scripts/combat/board/BoardCombatModule.gd) 由 Combat 場景在檔案存在時以路徑組裝（模組範圍：`combat/board/`、`actions/board_actions/`、`validators/board/`、`ui/Board*.gd`），內部 [BoardController.gd](../../../../game/scripts/combat/board/BoardController.gd) 建棋盤、部署主角、放置單位與點格移動，[UnitSpawner.gd](../../../../game/scripts/combat/UnitSpawner.gd) 生成波次單位（待進場佇列與進場格策略）與棋盤召喚，[WaveController.gd](../../../../game/scripts/combat/WaveController.gd) 管波次開始／清空、下一波排程與勝利判定，[CombatActionPhases.gd](../../../../game/scripts/combat/CombatActionPhases.gd) 是一次行動固定的開始／結束階段，[CombatStartActions.gd](../../../../game/scripts/combat/CombatStartActions.gd) 是開戰前的初始動作；EnemyIntentController 在未掛模組時保留普通意圖，掛載時交 BoardCombatModule／BoardEnemyIntent 執行空間意圖。排序在 [CombatTimeline.gd](../../../../game/scripts/combat/CombatTimeline.gd)，`controllers/` 分玩家與敵人。[CombatEndAction.gd](../../../../game/scripts/ui/CombatEndAction.gd) 等出牌佇列清空後結束行動，[TimelineBar.gd](../../../../game/scripts/ui/TimelineBar.gd) 顯示行動順序。
 
 [BaseCombatant.gd](../../../../game/scripts/combatants/BaseCombatant.gd) 帶單位身分與每次行動的移動計數。[CombatRulesData.gd](../../../../game/data/readonly/CombatRulesData.gd)（`Global.get_combat_rules()`）定節奏與移動規則。

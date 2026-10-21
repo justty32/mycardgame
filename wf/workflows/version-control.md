@@ -30,6 +30,8 @@ commit／push 授權、Git 全域身份與各機器的執行環境見 [user](com
 
 保留框架、addons 與 workflows 原授權。純上游重建用補丁的核對步驟見 [dev-env](dev-env.md#換機與重建)；snapshot 已含補丁結果，不能在 clone 後重複套用。
 
+在本 repo 的 artifacts 子目錄做補丁重建時，`git apply` 仍可能找到外層 Git 並略過相對路徑；應從 repo 根用 `--directory=<隔離副本的相對路徑>` 明確指定，並逐檔比較重建內容與工作檔 hash，不能只看 exit 0。2026-10-21 的 [每場準備補丁](../../analysis/slay-the-robot/architecture/08_combat_preparation.md) 已實證此情境；獨立 repo／repo 外目錄則依其根目錄操作，不盲加同一路徑。
+
 `.tools/` 的引擎、artifacts/ 的測試遊戲副本、Godot cache、個人 profile／settings／saves 與憑證按 .gitignore 排除，不屬於發布原始碼。文件若直接連到未發布的 artifacts，選必要小型證據另存 analysis 的 evidence/，保留原件不動；副本遮罩個人／絕對路徑，manifest 記錄來源、原件與副本雜湊及轉換，不能當成未處理的原始日誌。更新文件指向可攜副本，再驗 fresh clone 的連結。
 
 ### 驗收與推送

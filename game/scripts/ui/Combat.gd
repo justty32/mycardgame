@@ -27,6 +27,9 @@ extends Control
 const BOARD_MODULE_SCRIPT: String = "res://scripts/combat/board/BoardCombatModule.gd"
 ## The composed optional module (a CombatModule), or null for an ordinary combat.
 var combat_module: CombatModule = null
+var prepared_encounter: PreparedEncounter:
+	get:
+		return combat_director.prepared_encounter if is_instance_valid(combat_director) else null
 ## Core card policy used whenever no module supplies one.
 var _core_card_play_adapter: CardPlayAdapter = CardPlayAdapter.new()
 var card_play_adapter: CardPlayAdapter:
@@ -63,7 +66,6 @@ var undo_move_button:
 var _combat_ending: bool = false	# end_combat() runs once per combat
 
 func _ready():
-	_compose_board_module()
 	Signals.player_money_changed.connect(_on_player_money_changed)
 	Signals.player_health_changed.connect(_on_player_health_changed)
 
@@ -236,8 +238,9 @@ func _on_combat_started(event_id: String):
 
 	# compose / drop the optional module, then the director sets it up, spawns the encounter's
 	# units and runs the action timeline
-	_compose_board_module()
-	combat_director.begin_combat(current_event)
+	var prepared: PreparedEncounter = PreparedEncounter.prepare(current_event)
+	_compose_board_module(prepared)
+	combat_director.begin_prepared_combat(prepared)
 	timeline_bar.visible = true
 
 func _on_combat_ended():
@@ -294,8 +297,12 @@ func end_combat() -> void:
 
 ## Scene composition owns the optional board feature; core combat only sees CombatModule.
 ## Loaded by path when present, so deleting the module's files leaves ordinary combat intact.
-func _compose_board_module() -> void:
-	var enabled: bool = board_module_enabled and Global.get_combat_rules().board_enabled and ResourceLoader.exists(BOARD_MODULE_SCRIPT)
+func _compose_board_module(prepared: PreparedEncounter = null) -> void:
+	compose_combat_module(prepared)
+
+func compose_combat_module(prepared: PreparedEncounter = null) -> void:
+	var current: PreparedEncounter = prepared if prepared != null else prepared_encounter
+	var enabled: bool = current != null and board_module_enabled and current.allows_board_module() and ResourceLoader.exists(BOARD_MODULE_SCRIPT)
 	if enabled and not is_instance_valid(combat_module):
 		var script: Script = load(BOARD_MODULE_SCRIPT) as Script
 		combat_module = script.new() as CombatModule if script != null else null
