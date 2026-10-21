@@ -56,6 +56,17 @@ func check(tree_root: Window, game_root: Node) -> Dictionary:
 	results["CombatRulesData JSON patch sets int and Vector2i fields"] = patched.draw_per_action == 3 and patched.default_board_size == Vector2i(7, 6)
 	var exported: Dictionary = patched.get_serializable_properties(true)
 	results["CombatRulesData exports Vector2i as a JSON array"] = exported.get("default_board_size") == [7, 6]
+	var limits: CombatRulesData = CombatRulesData.new("probe_rules")
+	limits.set_serializable_properties_from_json_patch({"properties": {"board_min_size": [4, 3], "board_max_size": [10, 8]}, "patch_data": {}})
+	results["CombatRulesData JSON patch sets board_min_size / board_max_size"] = limits.board_min_size == Vector2i(4, 3) and limits.board_max_size == Vector2i(10, 8) and limits.validate_configuration() == ""
+	# Author feedback: every loaded encounter must fit the active rules (sizes, cells, wave boards).
+	if rules != null and rules.board_enabled:
+		var invalid: Array[String] = []
+		for encounter: EncounterData in global_data._id_to_encounter_data.values():
+			var checked: Dictionary = encounter.validate_configuration_detail(rules)
+			if checked.code != "":
+				invalid.append(checked.detail)
+		results["loaded EncounterData fit the active board rules" + ("" if invalid.is_empty() else ": " + "; ".join(invalid))] = invalid.is_empty() and rules.validate_configuration() == ""
 
 	# board (Phase 2): legacy events synthesize a default encounter; pure board queries
 	results["EncounterData is in Global.CLASS_NAME_TO_CLASS"] = global_data.CLASS_NAME_TO_CLASS.get("EncounterData") == EncounterData

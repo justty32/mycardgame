@@ -13,8 +13,9 @@ const BOARD_SIZE_DEFAULT: Vector2i = Vector2i(0, 0)
 ## blocked_cells, deploy_cells, spawn_zone_cells, initial_fields. Missing keys use legacy fields.
 @export var encounter_boards: Dictionary = {}
 
-## Board size; BOARD_SIZE_DEFAULT = CombatRulesData.default_board_size. Smaller than
-## CombatRulesData.board_min_size logs an error and is clamped to the minimum.
+## Board size of every board unless encounter_boards.<id>.size overrides it.
+## BOARD_SIZE_DEFAULT (0, 0) = CombatRulesData.default_board_size. Sizes outside
+## [CombatRulesData.board_min_size, board_max_size] fail validate_configuration.
 @export var encounter_board_size: Vector2i = BOARD_SIZE_DEFAULT
 ## Party deploy cells in order (hero first). Empty = the two south rows, centered.
 @export var encounter_deploy_cells: Array[Array] = []
@@ -33,18 +34,22 @@ func _get_native_properties() -> Dictionary:
 		"encounter_board_size": Vector2i(),
 	}
 
-## Board size after defaults and the minimum clamp.
+## Legacy single size after defaults, clamped into the rules range (validation reports violations).
 func get_board_size(rules: CombatRulesData) -> Vector2i:
 	var board_size: Vector2i = encounter_board_size
 	if board_size.x <= 0 or board_size.y <= 0:
 		board_size = rules.default_board_size
-	if board_size.x < rules.board_min_size.x or board_size.y < rules.board_min_size.y:
-		DebugLogger.log_error("EncounterData: board size {0} of \"{1}\" is below the minimum {2}; clamped".format([board_size, object_id, rules.board_min_size]))
-		board_size = Vector2i(max(board_size.x, rules.board_min_size.x), max(board_size.y, rules.board_min_size.y))
-	return board_size
+	return _clamp_size(board_size, rules)
 
 func get_board_mode(rules: CombatRulesData) -> int:
 	return rules.board_mode if encounter_board_mode == -1 else encounter_board_mode
+
+## Board ids the mode creates: shared in SINGLE, party / enemy in DUAL.
+func get_board_ids(rules: CombatRulesData) -> Array[String]:
+	var ids: Array[String] = ["shared"]
+	if get_board_mode(rules) == CombatRulesData.BOARD_MODES.DUAL:
+		ids.assign(["party", "enemy"])
+	return ids
 
 func get_board_config(board_id: String) -> Dictionary:
 	var result: Dictionary = {
@@ -59,37 +64,104 @@ func get_board_config(board_id: String) -> Dictionary:
 		result.merge(overrides, true)
 	return result
 
+## Per-board size: encounter_boards.<id>.size, else encounter_board_size, else the rules default.
+## [0, 0] at either level means "inherit".
 func get_size_for_board(board_id: String, rules: CombatRulesData) -> Vector2i:
 	var configured: Vector2i = cell_from_json(get_board_config(board_id).size)
 	if configured.x <= 0 or configured.y <= 0:
 		return get_board_size(rules)
-	return Vector2i(max(configured.x, rules.board_min_size.x), max(configured.y, rules.board_min_size.y))
+	return _clamp_size(configured, rules)
 
+static func _clamp_size(size: Vector2i, rules: CombatRulesData) -> Vector2i:
+	return Vector2i(clampi(size.x, max(1, rules.board_min_size.x), max(1, rules.board_max_size.x)), clampi(size.y, max(1, rules.board_min_size.y), max(1, rules.board_max_size.y)))
+
+## Error code only ("" = valid). See validate_configuration_detail for the author-facing message.
 func validate_configuration(rules: CombatRulesData) -> String:
-	if get_board_mode(rules) not in [CombatRulesData.BOARD_MODES.SINGLE, CombatRulesData.BOARD_MODES.DUAL]:
-		return "unknown_encounter_board_mode"
-	var allowed: Array = ["shared"] if get_board_mode(rules) == CombatRulesData.BOARD_MODES.SINGLE else ["party", "enemy"]
+	return validate_configuration_detail(rules).code
+
+## {code, detail}: code is a stable identifier, detail names the encounter, board and offending value.
+func validate_configuration_detail(rules: CombatRulesData) -> Dictionary:
+	var mode: int = get_board_mode(rules)
+	if mode not in [CombatRulesData.BOARD_MODES.SINGLE, CombatRulesData.BOARD_MODES.DUAL]:
+		return _invalid("unknown_encounter_board_mode", "encounter_board_mode %s" % [mode])
+	var allowed: Array[String] = get_board_ids(rules)
 	for board_id: Variant in encounter_boards:
 		if board_id not in allowed or not encounter_boards[board_id] is Dictionary:
-			return "invalid_encounter_board"
-		var config: Dictionary = encounter_boards[board_id]
-		if config.has("size") and not _valid_cell(config.size):
-			return "invalid_encounter_board_size"
+			return _invalid("invalid_encounter_board", "encounter_boards key \"%s\" (this mode allows %s, each value an object)" % [board_id, allowed])
+	var legacy: Dictionary = _check_size(encounter_board_size, rules, "encounter_board_size")
+	if legacy.code != "":
+		return legacy
+	for board_id: String in allowed:
+		var config: Dictionary = get_board_config(board_id)
+		var checked: Dictionary = _check_size(config.size, rules, "board \"%s\" size" % board_id)
+		if checked.code != "":
+			return checked
+		var board_size: Vector2i = get_size_for_board(board_id, rules)
 		for key: String in ["blocked_cells", "deploy_cells", "spawn_zone_cells"]:
-			if not config.has(key):
-				continue
 			if not config[key] is Array:
-				return "invalid_encounter_board_cells"
+				return _invalid("invalid_encounter_board_cells", "board \"%s\" %s must be [[x, y], ...]" % [board_id, key])
 			for cell: Variant in config[key]:
-				if not _valid_cell(cell):
-					return "invalid_encounter_board_cells"
-		if config.has("initial_fields"):
-			if not config.initial_fields is Array:
-				return "invalid_encounter_board_fields"
-			for field: Variant in config.initial_fields:
-				if not field is Dictionary:
-					return "invalid_encounter_board_fields"
-	return ""
+				var bad: Dictionary = _check_cell(cell, board_size, "board \"%s\" %s" % [board_id, key])
+				if bad.code != "":
+					return bad
+		if not config.initial_fields is Array:
+			return _invalid("invalid_encounter_board_fields", "board \"%s\" initial_fields must be an array" % board_id)
+		for field: Variant in config.initial_fields:
+			if not field is Dictionary or not field.get("cells", []) is Array:
+				return _invalid("invalid_encounter_board_fields", "board \"%s\" initial_fields entries are {field_id, cells}" % board_id)
+			for cell: Variant in field.get("cells", []):
+				var bad: Dictionary = _check_cell(cell, board_size, "board \"%s\" initial_fields %s" % [board_id, field.get("field_id", "")])
+				if bad.code != "":
+					return bad
+	var default_wave_board: String = allowed[allowed.size() - 1]
+	for wave_index: int in encounter_waves.size():
+		var wave: EncounterWaveData = encounter_waves[wave_index]
+		if wave == null:
+			continue
+		for unit_index: int in wave.wave_units.size():
+			var unit_entry: Dictionary = wave.wave_units[unit_index]
+			var label: String = "wave %d unit %d" % [wave_index, unit_index]
+			var board_id: String = str(unit_entry.get("board_id", ""))
+			if board_id == "":
+				board_id = default_wave_board
+			if board_id not in allowed:
+				return _invalid("invalid_encounter_wave_board", "%s board_id \"%s\" (this mode allows %s)" % [label, board_id, allowed])
+			if unit_entry.has("cell"):
+				var bad: Dictionary = _check_cell(unit_entry.cell, get_size_for_board(board_id, rules), "%s cell on board \"%s\"" % [label, board_id])
+				if bad.code != "":
+					return bad
+	return {"code": "", "detail": ""}
+
+func _invalid(code: String, detail: String) -> Dictionary:
+	return {"code": code, "detail": "EncounterData \"%s\": %s" % [object_id, detail]}
+
+## [0, 0] (inherit) is valid; otherwise both axes must be whole numbers inside the rules range.
+func _check_size(value: Variant, rules: CombatRulesData, label: String) -> Dictionary:
+	if not _valid_cell(value) or not _whole_cell(value):
+		return _invalid("invalid_encounter_board_size", "%s %s is not [width, height] in whole cells" % [label, value])
+	var size: Vector2i = cell_from_json(value)
+	if size == Vector2i.ZERO:
+		return {"code": "", "detail": ""}
+	if size.x <= 0 or size.y <= 0:
+		return _invalid("invalid_encounter_board_size", "%s %s needs both axes > 0 ([0, 0] inherits the default)" % [label, value])
+	if not rules.is_board_size_allowed(size):
+		return _invalid("encounter_board_size_out_of_range", "%s %dx%d is outside the allowed %s (CombatRulesData board_min_size / board_max_size)" % [label, size.x, size.y, rules.describe_board_size_limits()])
+	return {"code": "", "detail": ""}
+
+func _check_cell(value: Variant, board_size: Vector2i, label: String) -> Dictionary:
+	if not _valid_cell(value) or not _whole_cell(value):
+		return _invalid("invalid_encounter_board_cells", "%s %s is not [x, y] in whole cells" % [label, value])
+	var cell: Vector2i = cell_from_json(value)
+	if cell.x < 0 or cell.y < 0 or cell.x >= board_size.x or cell.y >= board_size.y:
+		return _invalid("encounter_cell_out_of_bounds", "%s [%d, %d] is outside the %dx%d board (x 0..%d, y 0..%d)" % [label, cell.x, cell.y, board_size.x, board_size.y, board_size.x - 1, board_size.y - 1])
+	return {"code": "", "detail": ""}
+
+static func _whole_cell(value: Variant) -> bool:
+	if value is Vector2:
+		return value.x == floorf(value.x) and value.y == floorf(value.y)
+	if value is Array:
+		return float(value[0]) == floorf(float(value[0])) and float(value[1]) == floorf(float(value[1]))
+	return true
 
 static func _valid_cell(value: Variant) -> bool:
 	if value is Vector2i or value is Vector2:

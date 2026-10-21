@@ -6,7 +6,7 @@
 
 ## 位置、陣營與戰鬥
 
-`BoardPosition(board_id, cell)` 是位置，`CombatBattlefield` 持有兩個獨立 BoardData。正常新局的 CombatRulesData 預設 DUAL，舊單盤回歸明確指定 SINGLE；Encounter 可覆寫模式，各盤各有 size、blocked/deploy/spawn cells 與 initial_fields。party／enemy 是初始配置盤名，不限制陣營。單位跨盤不換 UID、陣營、控制者、registry 或 CTB 身分；仍是一場戰鬥、同一時間軸。
+`BoardPosition(board_id, cell)` 是位置，`CombatBattlefield` 持有兩個獨立 BoardData。正常新局的 CombatRulesData 預設 DUAL，舊單盤回歸明確指定 SINGLE；Encounter 可覆寫模式，各盤各有 size（可兩盤不同，範圍與驗證見 [棋盤大小](../board-module/board-size.md)）、blocked/deploy/spawn cells 與 initial_fields。party／enemy 是初始配置盤名，不限制陣營。單位跨盤不換 UID、陣營、控制者、registry 或 CTB 身分；仍是一場戰鬥、同一時間軸。
 
 局部格、佔格、footprint、尋路、場域與相鄰由各盤管理；Director 的生成與行動開始查實際所在盤，tick 排程覆蓋兩盤。勝敗、波次與全戰場目標跨盤查活單位；敵人盤滿時不能使用玩家盤空格冒充生成成功。存檔不保存戰鬥中棋盤，讀檔後從 Encounter 重建雙盤。
 

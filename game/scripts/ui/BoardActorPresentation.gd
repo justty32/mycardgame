@@ -4,6 +4,10 @@ extends Node
 class_name BoardActorPresentation
 
 const MOVE_SECONDS: float = 0.16
+## Actor scale follows the board's cell size (cell / 128, capped at 0.65).
+static func actor_scale_for(cell_size: float) -> float:
+	return minf(0.65, cell_size / 128.0)
+
 var views: Dictionary[String, BoardView] = {}
 var _actors: Dictionary = {}
 var _tweens: Dictionary = {}
@@ -124,7 +128,7 @@ func sync_positions(animate: bool = false) -> void:
 		var first: bool = not _actors.has(unit.unit_uid)
 		if first:
 			_capture(unit)
-		unit.scale = Vector2.ONE * minf(0.65, view.cell_size / 128.0)
+		unit.scale = Vector2.ONE * actor_scale_for(view.cell_size)
 		var target: Vector2 = target_position_for(unit)
 		# Each actor owns its complete sprite/HUD/hitbox subtree. Feet provide stable depth order.
 		unit.z_index = 1 + clampi(int(7.0 * (unit.board_anchor.y + unit.footprint.y) / view.get_board().size.y), 0, 7)

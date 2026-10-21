@@ -19,13 +19,13 @@
 - [IntentResolver.gd](../../../../game/scripts/combat/board/IntentResolver.gd)：敵人意圖的目標、預計格與命中。
 - [ThreatPreview.gd](../../../../game/scripts/combat/board/ThreatPreview.gd)：預計受傷。
 
-遭遇資料是 [EncounterData.gd](../../../../game/data/readonly/EncounterData.gd)（波次在 embedded/EncounterWaveData.gd），沒有遭遇 id 的事件由它合成。棋盤 Action 在 `game/scripts/actions/board_actions/`（[ActionMoveUnit](../../../../game/scripts/actions/board_actions/ActionMoveUnit.gd)、[ActionDisplaceUnit](../../../../game/scripts/actions/board_actions/ActionDisplaceUnit.gd)、ActionGrantMovePoints、ActionComputeBoardValue），Validator 在 `game/scripts/validators/board/`。
+遭遇資料是 [EncounterData.gd](../../../../game/data/readonly/EncounterData.gd)（波次在 embedded/EncounterWaveData.gd），沒有遭遇 id 的事件由它合成；它也負責每盤大小解析與大小／格子驗證（`validate_configuration_detail`，契約見 [棋盤大小](../../../specs/board-module/board-size.md)），上下限在 CombatRulesData。棋盤 Action 在 `game/scripts/actions/board_actions/`（[ActionMoveUnit](../../../../game/scripts/actions/board_actions/ActionMoveUnit.gd)、[ActionDisplaceUnit](../../../../game/scripts/actions/board_actions/ActionDisplaceUnit.gd)、ActionGrantMovePoints、ActionComputeBoardValue），Validator 在 `game/scripts/validators/board/`。
 
 UI 是 [BoardView.gd](../../../../game/scripts/ui/BoardView.gd)，由模組的 [BoardCombatPresentation](../../../../game/scripts/ui/BoardCombatPresentation.gd) 管理格子、角色映射與 Undo。Hand／HandManager 只使用 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd) 通用 hooks（未掛模組時缺模組的牌變灰並費用前拒絕，原因在 `request.rejection_reason`）；掛載時模組提供的 [BoardCardAdapter](../../../../game/scripts/combat/board/BoardCardAdapter.gd) 與 BoardCardInput 接棋盤目標、預檢、點格與舊欄位轉譯。生成仍經 [EnemyContainer.gd](../../../../game/scripts/ui/EnemyContainer.gd)。
 
 ## 測試
 
-Smoke 呼叫 [unit_registry_probe.gd](../../../../tests/unit_registry_probe.gd)，驗合成遭遇與純棋盤查詢。suite Ctb 跑 [ctb_flow.gd](../../../../tests/ctb_flow.gd) 加 [ctb_fixture.gd](../../../../tests/ctb_fixture.gd)。suite Wave 跑 [wave_flow.gd](../../../../tests/wave_flow.gd)，情境在 [wave_cases.gd](../../../../tests/wave_cases.gd)，fixture 在 [wave_fixture.gd](../../../../tests/wave_fixture.gd)。suite Board 跑 [board_flow.gd](../../../../tests/board_flow.gd)，情境在 [board_cases.gd](../../../../tests/board_cases.gd)，fixture 在 [board_fixture.gd](../../../../tests/board_fixture.gd)。
+Smoke 呼叫 [unit_registry_probe.gd](../../../../tests/unit_registry_probe.gd)，驗合成遭遇與純棋盤查詢。suite Ctb 跑 [ctb_flow.gd](../../../../tests/ctb_flow.gd) 加 [ctb_fixture.gd](../../../../tests/ctb_fixture.gd)。suite Wave 跑 [wave_flow.gd](../../../../tests/wave_flow.gd)，情境在 [wave_cases.gd](../../../../tests/wave_cases.gd)，fixture 在 [wave_fixture.gd](../../../../tests/wave_fixture.gd)。suite Board 跑 [board_flow.gd](../../../../tests/board_flow.gd)，情境在 [board_cases.gd](../../../../tests/board_cases.gd)，fixture 在 [board_fixture.gd](../../../../tests/board_fixture.gd)；每場棋盤大小與版面數值在 [board_size_cases.gd](../../../../tests/board_size_cases.gd)。
 
 ## 雙盤 A 與 Phase 2b
 

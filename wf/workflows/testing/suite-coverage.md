@@ -30,6 +30,8 @@
 - 突進、推、拉近、交換、閃現與定身；召喚到最近空格；
 - KEEP_RANGE／CHARGE／APPROACH 的移動，以及 ThreatPreview 與實際受傷相等。
 
+開場前先跑純物件的 [board_size_cases.gd](../../../tests/board_size_cases.gd)：每場棋盤大小（預設 5×5 不變、3×3、8×6、不對稱雙盤）、規則上下限、錯誤代碼與說明，以及 BoardView 版面數值；不含實際畫面。
+
 ## Wave
 
 入口 [wave_flow.gd](../../../tests/wave_flow.gd)，cases [wave_cases.gd](../../../tests/wave_cases.gd)，fixture [wave_fixture.gd](../../../tests/wave_fixture.gd)，標記 `WAVE PASS:`。驗三波遭遇：wave_started／wave_cleared 的刻數；波與波之間的格擋牌不被短路；登場延遲與錯開；WAIT_UNTIL_FREE 重試後改用最近空格；FAIL_SKIP 跳過；雜兵不擋清波；每波 wave_on_cleared_actions 加錢；最後一波清空才 combat_ended。

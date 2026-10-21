@@ -31,7 +31,7 @@ BaseCombatant
 
 ```
 EncounterData extends SerializableData（SCHEMA: "encounters/"）
-  encounter_board_size: Vector2i（< board_min_size 則報錯並夾到最小值）
+  encounter_board_size: Vector2i（超出 board_min_size..board_max_size 則驗證拒絕，見 board-module/board-size.md）
   encounter_deploy_cells: Array[Vector2i]    # 空 = 預設南側兩列
   encounter_waves: Array[EncounterWaveData]（embedded）
     wave_units: Array[Dictionary]  # {"weights": {"enemy_id": w}, "cell": [x,y], "spawn_delay_ticks": int}
@@ -43,7 +43,7 @@ EventData
   + event_encounter_object_id: String   # 空 = 由 event_weighted_enemy_object_ids 自動合成單波遭遇（北側一列、預設尺寸）→ 既有事件零改動
 ```
 
-修訂（實作 Phase 2）：格子清單欄位（deploy／spawn zone／blocked）為 `Array[Array]`（`[[x, y], ...]`，JSON 友善）；`encounter_board_size` 預設 (0,0) = `rules.default_board_size`；合成遭遇的敵人排在北側一列置中，主角取部署格第一格（預設南側中央）；`event_encounter_object_id` 指向不存在的 id 時記錯誤並改用合成。
+修訂（實作 Phase 2）：格子清單欄位（deploy／spawn zone／blocked）為 `Array[Array]`（`[[x, y], ...]`，JSON 友善）；`encounter_board_size` 預設 (0,0) = `rules.default_board_size`；合成遭遇的敵人排在北側一列置中，主角取部署格第一格（預設南側中央）；`event_encounter_object_id` 指向不存在的 id 時記錯誤並改用合成。2026-10-21 起每盤可用 `encounter_boards.<盤>.size` 個別指定、上下限與錯誤代碼見 [每場戰鬥的棋盤大小](../board-module/board-size.md)。
 
 ## 3.1.5 卡牌、意圖與目標
 

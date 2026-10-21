@@ -75,6 +75,12 @@
       "sha256": "b2c323defab28437da7411a8c5b77318a475dcaf8f25225aaee85f3273a5b268",
       "description": "Board as a removable CombatModule: core (CombatDirector, Combat, UnitSpawner, BaseAction, Signals, CardPlayAdapter, EnemyIntentController) references no board class; CombatContentRequirements refuses / greys out / skips board-only content by data markers; scene composes the module by path when present; refused boardless intents rotate instead of stalling; step-limited ValidatorPathExists, paid-cell-minimal active paths, executed path == preview, event-driven board previews, inline empty field-clock boundaries, upstream PARENT targeting restored; BoardController moved into combat/board/. Includes all game source changes relative to 2757e06; applies after optional-board-module.patch.",
       "validation": "wf/specs/board-module/README.md"
+    },
+    {
+      "file": "tools/patches/board-size-per-encounter.patch",
+      "sha256": "8c35464dad8e0783a4b895ca940da7e8dcdd661fb6a8279334b533cfc7f3ca90",
+      "description": "Per-encounter board size: CombatRulesData board_min_size 3x3 / new board_max_size 12x12 (ceiling 16x16) with limit validation; EncounterData resolves per-board sizes (encounter_boards.<id>.size > encounter_board_size > default_board_size) and rejects out-of-range sizes and off-board deploy/spawn/blocked/field/wave cells with author-facing details (CombatBattlefield.error_detail, logged by BoardController); BoardView.compute_layout, BoardCombatPresentation.view_position (board centred in its slot) and BoardActorPresentation.actor_scale_for. Includes all game source changes relative to 1f33faa; applies after board-module-decoupling.patch.",
+      "validation": "wf/specs/board-module/board-size.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

@@ -8,6 +8,8 @@ class_name CombatRulesData
 const DEFAULT_OBJECT_ID: String = "combat_rules_default"
 ## energy_per_action / energy_cap value meaning "refill to max" / "cap is the unit's max energy".
 const ENERGY_REFILL: int = -1
+## Hard upper bound for board_max_size: above it BoardView cells drop below ~17 px.
+const BOARD_SIZE_CEILING: Vector2i = Vector2i(16, 16)
 
 enum DISTANCE_METRICS {MANHATTAN, CHEBYSHEV}
 enum DOWNED_MEMBER_POLICIES {REVIVE_AFTER_COMBAT_1HP, LEAVE_PARTY, PERMADEATH}
@@ -50,7 +52,12 @@ enum BOARD_MODES {SINGLE, DUAL}
 @export var cross_board_policy: String = "SELECT_TARGET_CELL"
 @export var free_move_per_action: int = 0
 @export var distance_metric: int = DISTANCE_METRICS.MANHATTAN
-@export var board_min_size: Vector2i = Vector2i(5, 5)
+## Allowed board size per axis for every encounter board (inclusive). 3 keeps CROSS / SQUARE_3 and a
+## centre cell on the board; 12 keeps the cell >= 23 px in BoardView's 460x280 slot. Packs may narrow
+## or widen these within [1, BOARD_SIZE_CEILING]; out-of-range encounter sizes are rejected.
+@export var board_min_size: Vector2i = Vector2i(3, 3)
+@export var board_max_size: Vector2i = Vector2i(12, 12)
+## Size of a board whose encounter declares none.
 @export var default_board_size: Vector2i = Vector2i(5, 5)
 #endregion
 
@@ -85,6 +92,7 @@ enum BOARD_MODES {SINGLE, DUAL}
 func _get_native_properties() -> Dictionary:
 	return {
 		"board_min_size": Vector2i(),
+		"board_max_size": Vector2i(),
 		"default_board_size": Vector2i(),
 	}
 
@@ -96,7 +104,19 @@ func validate_configuration() -> String:
 		return "unsupported_cross_board_policy_version"
 	if cross_board_policy != "SELECT_TARGET_CELL":
 		return "unknown_cross_board_policy"
+	if board_min_size.x < 1 or board_min_size.y < 1 or board_max_size.x > BOARD_SIZE_CEILING.x or board_max_size.y > BOARD_SIZE_CEILING.y:
+		return "invalid_board_size_limits"
+	if board_min_size.x > board_max_size.x or board_min_size.y > board_max_size.y or not is_board_size_allowed(default_board_size):
+		return "invalid_board_size_limits"
 	return ""
+
+## True when size lies inside [board_min_size, board_max_size] on both axes.
+func is_board_size_allowed(size: Vector2i) -> bool:
+	return size.x >= board_min_size.x and size.y >= board_min_size.y and size.x <= board_max_size.x and size.y <= board_max_size.y
+
+## Human readable allowed range, used in validation details.
+func describe_board_size_limits() -> String:
+	return "%dx%d..%dx%d" % [board_min_size.x, board_min_size.y, board_max_size.x, board_max_size.y]
 
 ## Energy to add at the start of an action, given the unit's current and max energy.
 ## With ENERGY_REFILL the caller resets energy to 0 first, so the gain is the full max.

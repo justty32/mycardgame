@@ -24,6 +24,10 @@
 
 普通池接 Act 的 easy/hard，精英接 miniboss，Boss 接 boss；地圖節點仍須是 COMBAT/MINIBOSS/BOSS，才由 [Combat 的訪問 handler](../../../../game/scripts/ui/Combat.gd) 啟動。敵人的 `enemy_type` 與節點 `location_type` 分別負責敵人分類和場景路由；只改前者不會生成精英節點或改節點獎勵。池的抽取規則與路線可達性見 [map-act](map-act.md#寫圖不變條件與池契約)；加入池不保證每局出現。
 
+### 指定棋盤大小（掛棋盤時）
+
+每場戰鬥的棋盤大小寫在 EncounterData：`encounter_boards.party.size`／`encounter_boards.enemy.size` 分別指定雙盤寬高（如 `[3, 3]`、`[8, 6]`），或用 `encounter_board_size` 一次套所有盤；省略就沿用規則預設 5×5。預設允許 3×3 到 12×12，部署、生成、障礙、初始場域與波次格都要落在所屬盤內，否則該場以清楚的錯誤拒絕建立棋盤。JSON 範例、上下限理由與錯誤代碼見 [每場戰鬥的棋盤大小](../../../specs/board-module/board-size.md)；帶內容包跑 Smoke 可提早列出不合格的遭遇。換大小後重跑該遭遇的站位、射程與波次測例，實際觀感交人工試玩。
+
 ### 核對收益與終局
 
 `event_has_combat_rewards` 是總開關；獎勵生成時點、稀有度與金錢範圍見[核實的獎勵段](../../../../analysis/slay-the-robot/design/encounters.md#獎勵overlay-與存檔邊界)，EventData 沒有金錢 budget 欄。自訂收益沿實際 action／interceptor 管線，不新增無消費端欄位。最終戰不顯示一般戰後獎勵，設計最終 Boss 收益前先看 [map-act 的終局出口](map-act.md#指定跨幕終局與保存邊界)，判斷是否要改終局機制。

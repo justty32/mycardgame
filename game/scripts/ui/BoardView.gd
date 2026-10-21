@@ -79,11 +79,18 @@ func _process(_delta: float) -> void:
 			_last_selected_card = selected
 			queue_redraw()
 
+## Square cells as large as fit PANEL_MAX_SIZE (capped at CELL_SIZE_MAX) for any board size.
+static func compute_layout(board_size: Vector2i) -> Dictionary:
+	var cells: Vector2 = Vector2(max(1, board_size.x), max(1, board_size.y))
+	var fitted: float = minf(CELL_SIZE_MAX, minf(PANEL_MAX_SIZE.x / cells.x, PANEL_MAX_SIZE.y / cells.y))
+	return {"cell_size": fitted, "size": cells * fitted}
+
 func _resize(board: BoardData, force_redraw: bool = false) -> void:
 	if board == null:
 		return
-	var new_cell_size: float = min(CELL_SIZE_MAX, min(PANEL_MAX_SIZE.x / board.size.x, PANEL_MAX_SIZE.y / board.size.y))
-	var new_size: Vector2 = Vector2(board.size) * new_cell_size
+	var layout: Dictionary = compute_layout(board.size)
+	var new_cell_size: float = layout.cell_size
+	var new_size: Vector2 = layout.size
 	if not force_redraw and is_equal_approx(new_cell_size, cell_size) and new_size.is_equal_approx(size):
 		return
 	cell_size = new_cell_size

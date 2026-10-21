@@ -16,7 +16,8 @@ enum SPAWN_POLICIES {NEAREST_EMPTY, WAIT_UNTIL_FREE, FAIL_SKIP}
 
 ## One entry per unit: {"weights": {"enemy_id": weight}, "cell": [x, y], "spawn_delay_ticks": int}.
 ## Optional board_id selects a destination board; absent means enemy/shared, never overflow to another board.
-## A missing or off-board "cell" places the unit on the nearest empty spawn-zone cell.
+## A missing "cell" places the unit on the nearest empty spawn-zone cell; a cell outside its board
+## fails EncounterData.validate_configuration (encounter_cell_out_of_bounds).
 @export var wave_units: Array[Dictionary] = []
 @export var wave_enter_delay_ticks: int = 0
 @export var wave_stagger_ticks: int = 0

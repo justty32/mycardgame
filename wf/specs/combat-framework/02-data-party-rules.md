@@ -54,7 +54,8 @@ CombatRulesData extends SerializableData（SCHEMA: "combat_rules/"；框架在�
   reset_block_on_action_start: bool = true
   free_move_per_action: int = 0
   distance_metric: int = MANHATTAN
-  board_min_size: Vector2i = (5,5)
+  board_min_size: Vector2i = (3,3)       # 2026-10-21 由 (5,5) 放寬，見 board-module/board-size.md
+  board_max_size: Vector2i = (12,12)     # 硬上限 BOARD_SIZE_CEILING (16,16)
   default_board_size: Vector2i = (5,5)
   party_size_max: int = 1
   deploy_size_max: int = 1

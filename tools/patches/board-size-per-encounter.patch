@@ -1,0 +1,366 @@
+diff --git a/data/readonly/CombatRulesData.gd b/data/readonly/CombatRulesData.gd
+index 5786cf52e07672d102655df65075a85cbcd55d9e..4ca18ddc8539bb08fe9f0678ce681ce15bafabe3 100644
+--- a/data/readonly/CombatRulesData.gd
++++ b/data/readonly/CombatRulesData.gd
+@@ -8,6 +8,8 @@ class_name CombatRulesData
+ const DEFAULT_OBJECT_ID: String = "combat_rules_default"
+ ## energy_per_action / energy_cap value meaning "refill to max" / "cap is the unit's max energy".
+ const ENERGY_REFILL: int = -1
++## Hard upper bound for board_max_size: above it BoardView cells drop below ~17 px.
++const BOARD_SIZE_CEILING: Vector2i = Vector2i(16, 16)
+ 
+ enum DISTANCE_METRICS {MANHATTAN, CHEBYSHEV}
+ enum DOWNED_MEMBER_POLICIES {REVIVE_AFTER_COMBAT_1HP, LEAVE_PARTY, PERMADEATH}
+@@ -50,7 +52,12 @@ enum BOARD_MODES {SINGLE, DUAL}
+ @export var cross_board_policy: String = "SELECT_TARGET_CELL"
+ @export var free_move_per_action: int = 0
+ @export var distance_metric: int = DISTANCE_METRICS.MANHATTAN
+-@export var board_min_size: Vector2i = Vector2i(5, 5)
++## Allowed board size per axis for every encounter board (inclusive). 3 keeps CROSS / SQUARE_3 and a
++## centre cell on the board; 12 keeps the cell >= 23 px in BoardView's 460x280 slot. Packs may narrow
++## or widen these within [1, BOARD_SIZE_CEILING]; out-of-range encounter sizes are rejected.
++@export var board_min_size: Vector2i = Vector2i(3, 3)
++@export var board_max_size: Vector2i = Vector2i(12, 12)
++## Size of a board whose encounter declares none.
+ @export var default_board_size: Vector2i = Vector2i(5, 5)
+ #endregion
+ 
+@@ -85,6 +92,7 @@ enum BOARD_MODES {SINGLE, DUAL}
+ func _get_native_properties() -> Dictionary:
+ 	return {
+ 		"board_min_size": Vector2i(),
++		"board_max_size": Vector2i(),
+ 		"default_board_size": Vector2i(),
+ 	}
+ 
+@@ -96,8 +104,20 @@ func validate_configuration() -> String:
+ 		return "unsupported_cross_board_policy_version"
+ 	if cross_board_policy != "SELECT_TARGET_CELL":
+ 		return "unknown_cross_board_policy"
++	if board_min_size.x < 1 or board_min_size.y < 1 or board_max_size.x > BOARD_SIZE_CEILING.x or board_max_size.y > BOARD_SIZE_CEILING.y:
++		return "invalid_board_size_limits"
++	if board_min_size.x > board_max_size.x or board_min_size.y > board_max_size.y or not is_board_size_allowed(default_board_size):
++		return "invalid_board_size_limits"
+ 	return ""
+ 
++## True when size lies inside [board_min_size, board_max_size] on both axes.
++func is_board_size_allowed(size: Vector2i) -> bool:
++	return size.x >= board_min_size.x and size.y >= board_min_size.y and size.x <= board_max_size.x and size.y <= board_max_size.y
++
++## Human readable allowed range, used in validation details.
++func describe_board_size_limits() -> String:
++	return "%dx%d..%dx%d" % [board_min_size.x, board_min_size.y, board_max_size.x, board_max_size.y]
++
+ ## Energy to add at the start of an action, given the unit's current and max energy.
+ ## With ENERGY_REFILL the caller resets energy to 0 first, so the gain is the full max.
+ ## Interceptors still adjust the generated ActionAddEnergy amount.
+diff --git a/data/readonly/EncounterData.gd b/data/readonly/EncounterData.gd
+index 78e194021aef750d92c399b22273f39b14589e49..e1f6d4990eaeb44af54f519a06145c30fa8f1ce9 100644
+--- a/data/readonly/EncounterData.gd
++++ b/data/readonly/EncounterData.gd
+@@ -13,8 +13,9 @@ const BOARD_SIZE_DEFAULT: Vector2i = Vector2i(0, 0)
+ ## blocked_cells, deploy_cells, spawn_zone_cells, initial_fields. Missing keys use legacy fields.
+ @export var encounter_boards: Dictionary = {}
+ 
+-## Board size; BOARD_SIZE_DEFAULT = CombatRulesData.default_board_size. Smaller than
+-## CombatRulesData.board_min_size logs an error and is clamped to the minimum.
++## Board size of every board unless encounter_boards.<id>.size overrides it.
++## BOARD_SIZE_DEFAULT (0, 0) = CombatRulesData.default_board_size. Sizes outside
++## [CombatRulesData.board_min_size, board_max_size] fail validate_configuration.
+ @export var encounter_board_size: Vector2i = BOARD_SIZE_DEFAULT
+ ## Party deploy cells in order (hero first). Empty = the two south rows, centered.
+ @export var encounter_deploy_cells: Array[Array] = []
+@@ -33,19 +34,23 @@ func _get_native_properties() -> Dictionary:
+ 		"encounter_board_size": Vector2i(),
+ 	}
+ 
+-## Board size after defaults and the minimum clamp.
++## Legacy single size after defaults, clamped into the rules range (validation reports violations).
+ func get_board_size(rules: CombatRulesData) -> Vector2i:
+ 	var board_size: Vector2i = encounter_board_size
+ 	if board_size.x <= 0 or board_size.y <= 0:
+ 		board_size = rules.default_board_size
+-	if board_size.x < rules.board_min_size.x or board_size.y < rules.board_min_size.y:
+-		DebugLogger.log_error("EncounterData: board size {0} of \"{1}\" is below the minimum {2}; clamped".format([board_size, object_id, rules.board_min_size]))
+-		board_size = Vector2i(max(board_size.x, rules.board_min_size.x), max(board_size.y, rules.board_min_size.y))
+-	return board_size
++	return _clamp_size(board_size, rules)
+ 
+ func get_board_mode(rules: CombatRulesData) -> int:
+ 	return rules.board_mode if encounter_board_mode == -1 else encounter_board_mode
+ 
++## Board ids the mode creates: shared in SINGLE, party / enemy in DUAL.
++func get_board_ids(rules: CombatRulesData) -> Array[String]:
++	var ids: Array[String] = ["shared"]
++	if get_board_mode(rules) == CombatRulesData.BOARD_MODES.DUAL:
++		ids.assign(["party", "enemy"])
++	return ids
++
+ func get_board_config(board_id: String) -> Dictionary:
+ 	var result: Dictionary = {
+ 		"size": encounter_board_size,
+@@ -59,37 +64,104 @@ func get_board_config(board_id: String) -> Dictionary:
+ 		result.merge(overrides, true)
+ 	return result
+ 
++## Per-board size: encounter_boards.<id>.size, else encounter_board_size, else the rules default.
++## [0, 0] at either level means "inherit".
+ func get_size_for_board(board_id: String, rules: CombatRulesData) -> Vector2i:
+ 	var configured: Vector2i = cell_from_json(get_board_config(board_id).size)
+ 	if configured.x <= 0 or configured.y <= 0:
+ 		return get_board_size(rules)
+-	return Vector2i(max(configured.x, rules.board_min_size.x), max(configured.y, rules.board_min_size.y))
++	return _clamp_size(configured, rules)
++
++static func _clamp_size(size: Vector2i, rules: CombatRulesData) -> Vector2i:
++	return Vector2i(clampi(size.x, max(1, rules.board_min_size.x), max(1, rules.board_max_size.x)), clampi(size.y, max(1, rules.board_min_size.y), max(1, rules.board_max_size.y)))
+ 
++## Error code only ("" = valid). See validate_configuration_detail for the author-facing message.
+ func validate_configuration(rules: CombatRulesData) -> String:
+-	if get_board_mode(rules) not in [CombatRulesData.BOARD_MODES.SINGLE, CombatRulesData.BOARD_MODES.DUAL]:
+-		return "unknown_encounter_board_mode"
+-	var allowed: Array = ["shared"] if get_board_mode(rules) == CombatRulesData.BOARD_MODES.SINGLE else ["party", "enemy"]
++	return validate_configuration_detail(rules).code
++
++## {code, detail}: code is a stable identifier, detail names the encounter, board and offending value.
++func validate_configuration_detail(rules: CombatRulesData) -> Dictionary:
++	var mode: int = get_board_mode(rules)
++	if mode not in [CombatRulesData.BOARD_MODES.SINGLE, CombatRulesData.BOARD_MODES.DUAL]:
++		return _invalid("unknown_encounter_board_mode", "encounter_board_mode %s" % [mode])
++	var allowed: Array[String] = get_board_ids(rules)
+ 	for board_id: Variant in encounter_boards:
+ 		if board_id not in allowed or not encounter_boards[board_id] is Dictionary:
+-			return "invalid_encounter_board"
+-		var config: Dictionary = encounter_boards[board_id]
+-		if config.has("size") and not _valid_cell(config.size):
+-			return "invalid_encounter_board_size"
++			return _invalid("invalid_encounter_board", "encounter_boards key \"%s\" (this mode allows %s, each value an object)" % [board_id, allowed])
++	var legacy: Dictionary = _check_size(encounter_board_size, rules, "encounter_board_size")
++	if legacy.code != "":
++		return legacy
++	for board_id: String in allowed:
++		var config: Dictionary = get_board_config(board_id)
++		var checked: Dictionary = _check_size(config.size, rules, "board \"%s\" size" % board_id)
++		if checked.code != "":
++			return checked
++		var board_size: Vector2i = get_size_for_board(board_id, rules)
+ 		for key: String in ["blocked_cells", "deploy_cells", "spawn_zone_cells"]:
+-			if not config.has(key):
+-				continue
+ 			if not config[key] is Array:
+-				return "invalid_encounter_board_cells"
++				return _invalid("invalid_encounter_board_cells", "board \"%s\" %s must be [[x, y], ...]" % [board_id, key])
+ 			for cell: Variant in config[key]:
+-				if not _valid_cell(cell):
+-					return "invalid_encounter_board_cells"
+-		if config.has("initial_fields"):
+-			if not config.initial_fields is Array:
+-				return "invalid_encounter_board_fields"
+-			for field: Variant in config.initial_fields:
+-				if not field is Dictionary:
+-					return "invalid_encounter_board_fields"
+-	return ""
++				var bad: Dictionary = _check_cell(cell, board_size, "board \"%s\" %s" % [board_id, key])
++				if bad.code != "":
++					return bad
++		if not config.initial_fields is Array:
++			return _invalid("invalid_encounter_board_fields", "board \"%s\" initial_fields must be an array" % board_id)
++		for field: Variant in config.initial_fields:
++			if not field is Dictionary or not field.get("cells", []) is Array:
++				return _invalid("invalid_encounter_board_fields", "board \"%s\" initial_fields entries are {field_id, cells}" % board_id)
++			for cell: Variant in field.get("cells", []):
++				var bad: Dictionary = _check_cell(cell, board_size, "board \"%s\" initial_fields %s" % [board_id, field.get("field_id", "")])
++				if bad.code != "":
++					return bad
++	var default_wave_board: String = allowed[allowed.size() - 1]
++	for wave_index: int in encounter_waves.size():
++		var wave: EncounterWaveData = encounter_waves[wave_index]
++		if wave == null:
++			continue
++		for unit_index: int in wave.wave_units.size():
++			var unit_entry: Dictionary = wave.wave_units[unit_index]
++			var label: String = "wave %d unit %d" % [wave_index, unit_index]
++			var board_id: String = str(unit_entry.get("board_id", ""))
++			if board_id == "":
++				board_id = default_wave_board
++			if board_id not in allowed:
++				return _invalid("invalid_encounter_wave_board", "%s board_id \"%s\" (this mode allows %s)" % [label, board_id, allowed])
++			if unit_entry.has("cell"):
++				var bad: Dictionary = _check_cell(unit_entry.cell, get_size_for_board(board_id, rules), "%s cell on board \"%s\"" % [label, board_id])
++				if bad.code != "":
++					return bad
++	return {"code": "", "detail": ""}
++
++func _invalid(code: String, detail: String) -> Dictionary:
++	return {"code": code, "detail": "EncounterData \"%s\": %s" % [object_id, detail]}
++
++## [0, 0] (inherit) is valid; otherwise both axes must be whole numbers inside the rules range.
++func _check_size(value: Variant, rules: CombatRulesData, label: String) -> Dictionary:
++	if not _valid_cell(value) or not _whole_cell(value):
++		return _invalid("invalid_encounter_board_size", "%s %s is not [width, height] in whole cells" % [label, value])
++	var size: Vector2i = cell_from_json(value)
++	if size == Vector2i.ZERO:
++		return {"code": "", "detail": ""}
++	if size.x <= 0 or size.y <= 0:
++		return _invalid("invalid_encounter_board_size", "%s %s needs both axes > 0 ([0, 0] inherits the default)" % [label, value])
++	if not rules.is_board_size_allowed(size):
++		return _invalid("encounter_board_size_out_of_range", "%s %dx%d is outside the allowed %s (CombatRulesData board_min_size / board_max_size)" % [label, size.x, size.y, rules.describe_board_size_limits()])
++	return {"code": "", "detail": ""}
++
++func _check_cell(value: Variant, board_size: Vector2i, label: String) -> Dictionary:
++	if not _valid_cell(value) or not _whole_cell(value):
++		return _invalid("invalid_encounter_board_cells", "%s %s is not [x, y] in whole cells" % [label, value])
++	var cell: Vector2i = cell_from_json(value)
++	if cell.x < 0 or cell.y < 0 or cell.x >= board_size.x or cell.y >= board_size.y:
++		return _invalid("encounter_cell_out_of_bounds", "%s [%d, %d] is outside the %dx%d board (x 0..%d, y 0..%d)" % [label, cell.x, cell.y, board_size.x, board_size.y, board_size.x - 1, board_size.y - 1])
++	return {"code": "", "detail": ""}
++
++static func _whole_cell(value: Variant) -> bool:
++	if value is Vector2:
++		return value.x == floorf(value.x) and value.y == floorf(value.y)
++	if value is Array:
++		return float(value[0]) == floorf(float(value[0])) and float(value[1]) == floorf(float(value[1]))
++	return true
+ 
+ static func _valid_cell(value: Variant) -> bool:
+ 	if value is Vector2i or value is Vector2:
+diff --git a/data/readonly/embedded/EncounterWaveData.gd b/data/readonly/embedded/EncounterWaveData.gd
+index db0e5c2d1a2d8f89bab495e3c4d4ad42b202e9ff..29ea875ab5063e8e535f7cd1711bce936db8a35b 100644
+--- a/data/readonly/embedded/EncounterWaveData.gd
++++ b/data/readonly/embedded/EncounterWaveData.gd
+@@ -16,7 +16,8 @@ enum SPAWN_POLICIES {NEAREST_EMPTY, WAIT_UNTIL_FREE, FAIL_SKIP}
+ 
+ ## One entry per unit: {"weights": {"enemy_id": weight}, "cell": [x, y], "spawn_delay_ticks": int}.
+ ## Optional board_id selects a destination board; absent means enemy/shared, never overflow to another board.
+-## A missing or off-board "cell" places the unit on the nearest empty spawn-zone cell.
++## A missing "cell" places the unit on the nearest empty spawn-zone cell; a cell outside its board
++## fails EncounterData.validate_configuration (encounter_cell_out_of_bounds).
+ @export var wave_units: Array[Dictionary] = []
+ @export var wave_enter_delay_ticks: int = 0
+ @export var wave_stagger_ticks: int = 0
+diff --git a/scripts/combat/board/BoardController.gd b/scripts/combat/board/BoardController.gd
+index 2cc61665a38c01f415b8178265281ad005bce742..3958d5c22c7d2531781cd38b530ee5141134214e 100644
+--- a/scripts/combat/board/BoardController.gd
++++ b/scripts/combat/board/BoardController.gd
+@@ -22,7 +22,7 @@ func setup(encounter_data: EncounterData) -> bool:
+ 	encounter = encounter_data
+ 	battlefield = CombatBattlefield.new(encounter, rules)
+ 	if not battlefield.valid:
+-		DebugLogger.log_error("BoardController: " + battlefield.error)
++		DebugLogger.log_error("BoardController: %s: %s" % [battlefield.error, battlefield.error_detail])
+ 		return false
+ 	var shared_opportunities: Dictionary = {}
+ 	for current: BoardData in battlefield.boards.values():
+diff --git a/scripts/combat/board/CombatBattlefield.gd b/scripts/combat/board/CombatBattlefield.gd
+index 9d2ee896def09c784d259da19b255e10e8e2e694..5bdd2929e7c9534b935699ada23082b450ddca55 100644
+--- a/scripts/combat/board/CombatBattlefield.gd
++++ b/scripts/combat/board/CombatBattlefield.gd
+@@ -13,21 +13,24 @@ var rules: CombatRulesData = null
+ var encounter: EncounterData = null
+ var valid: bool = false
+ var error: String = ""
++## Author-facing explanation of error (encounter, board, offending value and allowed range).
++var error_detail: String = ""
+ var board_mode: int = CombatRulesData.BOARD_MODES.DUAL
+ 
+ func _init(encounter_data: EncounterData = null, combat_rules: CombatRulesData = null) -> void:
+ 	rules = combat_rules if combat_rules != null else CombatRulesData.new()
+ 	encounter = encounter_data if encounter_data != null else EncounterData.new()
+ 	error = rules.validate_configuration()
+-	if error == "":
+-		error = encounter.validate_configuration(rules)
++	if error != "":
++		error_detail = "CombatRulesData \"%s\": %s (board sizes %s, default %s, ceiling %s)" % [rules.object_id, error, rules.describe_board_size_limits(), rules.default_board_size, CombatRulesData.BOARD_SIZE_CEILING]
++		return
++	var checked: Dictionary = encounter.validate_configuration_detail(rules)
++	error = checked.code
++	error_detail = checked.detail
+ 	if error != "":
+ 		return
+ 	board_mode = encounter.get_board_mode(rules)
+-	var ids: Array[String] = [BOARD_SHARED]
+-	if board_mode == CombatRulesData.BOARD_MODES.DUAL:
+-		ids.assign([BOARD_PARTY, BOARD_ENEMY])
+-	for id: String in ids:
++	for id: String in encounter.get_board_ids(rules):
+ 		var board := BoardData.new(encounter.get_size_for_board(id, rules), rules)
+ 		board.board_id = id
+ 		for cell: Vector2i in EncounterData.cells_from_json(encounter.get_board_config(id).blocked_cells):
+diff --git a/scripts/ui/BoardActorPresentation.gd b/scripts/ui/BoardActorPresentation.gd
+index dcfe57e1c8feffa2fabf4c4d24b566063daab7c4..2873acdbb32b7c090eaedf65d61d0924d657e612 100644
+--- a/scripts/ui/BoardActorPresentation.gd
++++ b/scripts/ui/BoardActorPresentation.gd
+@@ -4,6 +4,10 @@ extends Node
+ class_name BoardActorPresentation
+ 
+ const MOVE_SECONDS: float = 0.16
++## Actor scale follows the board's cell size (cell / 128, capped at 0.65).
++static func actor_scale_for(cell_size: float) -> float:
++	return minf(0.65, cell_size / 128.0)
++
+ var views: Dictionary[String, BoardView] = {}
+ var _actors: Dictionary = {}
+ var _tweens: Dictionary = {}
+@@ -124,7 +128,7 @@ func sync_positions(animate: bool = false) -> void:
+ 		var first: bool = not _actors.has(unit.unit_uid)
+ 		if first:
+ 			_capture(unit)
+-		unit.scale = Vector2.ONE * minf(0.65, view.cell_size / 128.0)
++		unit.scale = Vector2.ONE * actor_scale_for(view.cell_size)
+ 		var target: Vector2 = target_position_for(unit)
+ 		# Each actor owns its complete sprite/HUD/hitbox subtree. Feet provide stable depth order.
+ 		unit.z_index = 1 + clampi(int(7.0 * (unit.board_anchor.y + unit.footprint.y) / view.get_board().size.y), 0, 7)
+diff --git a/scripts/ui/BoardCombatPresentation.gd b/scripts/ui/BoardCombatPresentation.gd
+index 4f5e2fdb0e635e88c8c3dcd8f10aceb23107fefe..ebff5521b25d2cec5f31a3df874b52c1dc40c88e 100644
+--- a/scripts/ui/BoardCombatPresentation.gd
++++ b/scripts/ui/BoardCombatPresentation.gd
+@@ -12,6 +12,15 @@ var undo_move_button: Button = null
+ var _view_board_ids: Array = []
+ var _stopped: bool = true
+ 
++## Top-left of each board's slot (BoardView.PANEL_MAX_SIZE): two slots side by side, one centred slot.
++const DUAL_SLOT_ORIGINS: Array[Vector2] = [Vector2(70, 170), Vector2(640, 170)]
++const SINGLE_SLOT_ORIGIN: Vector2 = Vector2(360, 170)
++
++## Board view position: the board of view_size is centred inside its slot, so any size stays in it.
++static func view_position(index: int, count: int, view_size: Vector2) -> Vector2:
++	var origin: Vector2 = DUAL_SLOT_ORIGINS[clampi(index, 0, DUAL_SLOT_ORIGINS.size() - 1)] if count > 1 else SINGLE_SLOT_ORIGIN
++	return origin + ((BoardView.PANEL_MAX_SIZE - view_size) * 0.5).floor()
++
+ func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
+ 	director = value
+ 	module = board_module
+@@ -53,7 +62,7 @@ func sync_board_views() -> void:
+ 	for index: int in ids.size():
+ 		var view := BoardView.new()
+ 		view.board_id = ids[index]
+-		view.panel_position = Vector2(70 + index * 570, 170) if ids.size() > 1 else Vector2(360, 170)
++		view.panel_position = view_position(index, ids.size(), BoardView.compute_layout(battlefield.get_board(ids[index]).size).size)
+ 		view.position = view.panel_position
+ 		view.name = "BoardView_" + ids[index]
+ 		combat.add_child(view)
+diff --git a/scripts/ui/BoardView.gd b/scripts/ui/BoardView.gd
+index f4ee62b019515994d1f1f3b9c92e0642dba4eb47..d59f20828ade01a26e005c95d10fbd3c49b7abd1 100644
+--- a/scripts/ui/BoardView.gd
++++ b/scripts/ui/BoardView.gd
+@@ -79,11 +79,18 @@ func _process(_delta: float) -> void:
+ 			_last_selected_card = selected
+ 			queue_redraw()
+ 
++## Square cells as large as fit PANEL_MAX_SIZE (capped at CELL_SIZE_MAX) for any board size.
++static func compute_layout(board_size: Vector2i) -> Dictionary:
++	var cells: Vector2 = Vector2(max(1, board_size.x), max(1, board_size.y))
++	var fitted: float = minf(CELL_SIZE_MAX, minf(PANEL_MAX_SIZE.x / cells.x, PANEL_MAX_SIZE.y / cells.y))
++	return {"cell_size": fitted, "size": cells * fitted}
++
+ func _resize(board: BoardData, force_redraw: bool = false) -> void:
+ 	if board == null:
+ 		return
+-	var new_cell_size: float = min(CELL_SIZE_MAX, min(PANEL_MAX_SIZE.x / board.size.x, PANEL_MAX_SIZE.y / board.size.y))
+-	var new_size: Vector2 = Vector2(board.size) * new_cell_size
++	var layout: Dictionary = compute_layout(board.size)
++	var new_cell_size: float = layout.cell_size
++	var new_size: Vector2 = layout.size
+ 	if not force_redraw and is_equal_approx(new_cell_size, cell_size) and new_size.is_equal_approx(size):
+ 		return
+ 	cell_size = new_cell_size

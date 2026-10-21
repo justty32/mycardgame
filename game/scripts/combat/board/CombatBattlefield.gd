@@ -13,21 +13,24 @@ var rules: CombatRulesData = null
 var encounter: EncounterData = null
 var valid: bool = false
 var error: String = ""
+## Author-facing explanation of error (encounter, board, offending value and allowed range).
+var error_detail: String = ""
 var board_mode: int = CombatRulesData.BOARD_MODES.DUAL
 
 func _init(encounter_data: EncounterData = null, combat_rules: CombatRulesData = null) -> void:
 	rules = combat_rules if combat_rules != null else CombatRulesData.new()
 	encounter = encounter_data if encounter_data != null else EncounterData.new()
 	error = rules.validate_configuration()
-	if error == "":
-		error = encounter.validate_configuration(rules)
+	if error != "":
+		error_detail = "CombatRulesData \"%s\": %s (board sizes %s, default %s, ceiling %s)" % [rules.object_id, error, rules.describe_board_size_limits(), rules.default_board_size, CombatRulesData.BOARD_SIZE_CEILING]
+		return
+	var checked: Dictionary = encounter.validate_configuration_detail(rules)
+	error = checked.code
+	error_detail = checked.detail
 	if error != "":
 		return
 	board_mode = encounter.get_board_mode(rules)
-	var ids: Array[String] = [BOARD_SHARED]
-	if board_mode == CombatRulesData.BOARD_MODES.DUAL:
-		ids.assign([BOARD_PARTY, BOARD_ENEMY])
-	for id: String in ids:
+	for id: String in encounter.get_board_ids(rules):
 		var board := BoardData.new(encounter.get_size_for_board(id, rules), rules)
 		board.board_id = id
 		for cell: Vector2i in EncounterData.cells_from_json(encounter.get_board_config(id).blocked_cells):

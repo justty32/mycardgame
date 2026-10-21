@@ -22,7 +22,7 @@ func setup(encounter_data: EncounterData) -> bool:
 	encounter = encounter_data
 	battlefield = CombatBattlefield.new(encounter, rules)
 	if not battlefield.valid:
-		DebugLogger.log_error("BoardController: " + battlefield.error)
+		DebugLogger.log_error("BoardController: %s: %s" % [battlefield.error, battlefield.error_detail])
 		return false
 	var shared_opportunities: Dictionary = {}
 	for current: BoardData in battlefield.boards.values():

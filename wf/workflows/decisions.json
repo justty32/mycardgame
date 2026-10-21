@@ -152,6 +152,12 @@
    "decision": "不新增「每場戰鬥（per-encounter）各自決定是否掛棋盤」的開關；維持現有全域開關（來源：使用者 2026-10-21 當場決定）",
    "rejected_and_why": "per-encounter 開關：增加複雜度與組合狀態，使用者決定不做",
    "premise": "全域開關足以涵蓋現有需求；若出現必須逐場戰鬥不同棋盤設定的玩法再重看"
+  },
+  {
+   "date": "2026-10-21",
+   "decision": "棋盤大小改為每場戰鬥（encounter）資料指定：encounter_boards.<盤>.size 個別指定寬高、雙盤可不同，省略時沿用 encounter_board_size 再沿用規則 default_board_size（5×5 不變）；規則 board_min_size／board_max_size 預設 3×3～12×12（硬上限 16×16），超出範圍或盤外格子以錯誤代碼加說明拒絕建盤；BoardView 依大小取格並置中於槽。契約見 wf/specs/board-module/board-size.md（來源：使用者 2026-10-21 要求每場可自由調整）",
+   "rejected_and_why": "維持舊的 5×5 下限並把過小尺寸夾到下限：作者寫 3×3 會被默默改掉，盤外格也被靜默略過，錯誤難查；不設上限：超過 12 列時 460×280 槽的格寬低於約 23 px，難點選辨識；下限取 1 或 2：CROSS／SQUARE_3 無法完整落盤；把大小放進全域規則而非遭遇：做不到每場不同；同時加每場掛棋盤開關：使用者同日決定不做（見前一列）",
+   "premise": "畫面槽維持 460×280、雙盤左右並列與正方格；若改視角／槽尺寸或出現需要更大盤的玩法，重看上下限與 BOARD_SIZE_CEILING"
   }
  ]
 }

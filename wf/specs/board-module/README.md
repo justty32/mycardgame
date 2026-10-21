@@ -1,6 +1,6 @@
 # 棋盤是可選的 Combat 模組
 
-[設計分析入口](../../../analysis/slay-the-robot/design/README.md)｜[工作流](../../workflows/game-dev/mechanics/board-module.md)｜[雙盤 A 契約](../dual-board/README.md)｜[驗收矩陣](verification.json)
+[設計分析入口](../../../analysis/slay-the-robot/design/README.md)｜[工作流](../../workflows/game-dev/mechanics/board-module.md)｜[雙盤 A 契約](../dual-board/README.md)｜[棋盤大小](board-size.md)｜[驗收矩陣](verification.json)
 
 2026-10-20 核實，2026-10-21 依審查改為相依層面可移除。[證據](../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/README.md) 對應矩陣 8 列：scope 是需求，test_file／assertion_ids 是測例，status／run_path 是實證；2026-10-21 的 All（含新 suite BoardRemoved）與 PackScenario 結果只存本機 artifacts/verification/，未另選入 evidence。
 

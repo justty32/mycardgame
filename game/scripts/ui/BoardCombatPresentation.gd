@@ -12,6 +12,15 @@ var undo_move_button: Button = null
 var _view_board_ids: Array = []
 var _stopped: bool = true
 
+## Top-left of each board's slot (BoardView.PANEL_MAX_SIZE): two slots side by side, one centred slot.
+const DUAL_SLOT_ORIGINS: Array[Vector2] = [Vector2(70, 170), Vector2(640, 170)]
+const SINGLE_SLOT_ORIGIN: Vector2 = Vector2(360, 170)
+
+## Board view position: the board of view_size is centred inside its slot, so any size stays in it.
+static func view_position(index: int, count: int, view_size: Vector2) -> Vector2:
+	var origin: Vector2 = DUAL_SLOT_ORIGINS[clampi(index, 0, DUAL_SLOT_ORIGINS.size() - 1)] if count > 1 else SINGLE_SLOT_ORIGIN
+	return origin + ((BoardView.PANEL_MAX_SIZE - view_size) * 0.5).floor()
+
 func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
 	director = value
 	module = board_module
@@ -53,7 +62,7 @@ func sync_board_views() -> void:
 	for index: int in ids.size():
 		var view := BoardView.new()
 		view.board_id = ids[index]
-		view.panel_position = Vector2(70 + index * 570, 170) if ids.size() > 1 else Vector2(360, 170)
+		view.panel_position = view_position(index, ids.size(), BoardView.compute_layout(battlefield.get_board(ids[index]).size).size)
 		view.position = view.panel_position
 		view.name = "BoardView_" + ids[index]
 		combat.add_child(view)
