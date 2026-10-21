@@ -1,0 +1,2872 @@
+diff --git a/autoload/ActionGenerator.gd b/autoload/ActionGenerator.gd
+index 7fb1487595908a8493c6fc0e77c89ab81b6416f3..ef9e0a901ef9735f9ae9a4281429959846f5131e 100644
+--- a/autoload/ActionGenerator.gd
++++ b/autoload/ActionGenerator.gd
+@@ -293,6 +293,15 @@ func generate_decorator_actions(card_data: CardData, card_decorator_id: String)
+ 	ActionHandler.add_actions(actions, true)
+ 
+ ## Generates an instant message of the player saying they don't have enough energy to play a card.
++## Instant player speech bubble (not queued), e.g. why a card cannot be played.
++func generate_player_speech_bubble(message_bbcode: String) -> void:
++	var player: Player = Global.get_player()
++	if player == null:
++		return
++	var action_data: Array[Dictionary] = [{Scripts.ACTION_TALK: {"message_bbcode": message_bbcode}}]
++	var generated_action: BaseAction = ActionGenerator.create_actions(player, null, [player], action_data, null)[0]
++	generated_action.perform_action()
++
+ func generate_insufficient_energy_speech_bubble() -> void:
+ 	var player: Player = Global.get_player()
+ 	var action_data: Array[Dictionary] = [{Scripts.ACTION_TALK: {"message_bbcode": "I don't have enough energy!"}}]
+diff --git a/autoload/GlobalTestDataGenerator.gd b/autoload/GlobalTestDataGenerator.gd
+index f75700d25a0fc90c3e2115d23f3879256f5ce5c0..1214b9c1205665ffa9d128084daa3ec5806bdac6 100644
+--- a/autoload/GlobalTestDataGenerator.gd
++++ b/autoload/GlobalTestDataGenerator.gd
+@@ -4680,8 +4680,8 @@ func add_test_board_content() -> void:
+ 	card_test_dash_strike.card_energy_cost = 1
+ 	card_test_dash_strike.card_action_delay = 100
+ 	card_test_dash_strike.card_range = 3
+-	card_test_dash_strike.card_shape = BoardTargeting.TARGET_SHAPES.LINE
+-	card_test_dash_strike.card_target_faction = BoardTargeting.TARGET_FACTIONS.OPPONENT
++	card_test_dash_strike.card_shape = 5	# BoardTargeting.TARGET_SHAPES.LINE (board-module enums as literals: no compile-time dependency)
++	card_test_dash_strike.card_target_faction = 0	# TARGET_FACTIONS.OPPONENT
+ 	card_test_dash_strike.card_values = {"damage": 6, "distance": 2, "stop_at_distance": 1}
+ 	card_test_dash_strike.card_play_validators = [{Scripts.VALIDATOR_IN_LINE: {}}]
+ 	card_test_dash_strike.card_play_actions = [
+@@ -4689,7 +4689,7 @@ func add_test_board_content() -> void:
+ 			"validator_data": [{Scripts.VALIDATOR_DISTANCE: {"operator": "<=", "comparison_value": 1}}],
+ 			"passed_action_data": [{Scripts.ACTION_ATTACK_GENERATOR: {"time_delay": 0.0, "actions_on_lethal": []}}],
+ 		}},
+-		{Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TOWARD, "reference": ActionMoveUnit.REFERENCE_SELECTED_TARGET}},
++		{Scripts.ACTION_MOVE_UNIT: {"mode": "TOWARD", "reference": "SELECTED_TARGET"}},
+ 	]
+ 	card_test_dash_strike.card_ai_hints = {"role": "damage", "value_key": "damage", "danger": 0}
+ 	Global.register_rod(card_test_dash_strike)
+@@ -4705,11 +4705,11 @@ func add_test_board_content() -> void:
+ 	card_test_shove.card_appears_in_card_packs = false
+ 	card_test_shove.card_energy_cost = 1
+ 	card_test_shove.card_range = 1
+-	card_test_shove.card_shape = BoardTargeting.TARGET_SHAPES.SINGLE
+-	card_test_shove.card_target_faction = BoardTargeting.TARGET_FACTIONS.OPPONENT
++	card_test_shove.card_shape = 0	# TARGET_SHAPES.SINGLE
++	card_test_shove.card_target_faction = 0	# TARGET_FACTIONS.OPPONENT
+ 	card_test_shove.card_values = {"damage": 4, "distance": 2, "collision_damage_per_cell": 3}
+ 	card_test_shove.card_play_actions = [
+-		{Scripts.ACTION_DISPLACE_UNIT: {"mode": ActionDisplaceUnit.MODE_PUSH}},
++		{Scripts.ACTION_DISPLACE_UNIT: {"mode": "PUSH"}},
+ 		{Scripts.ACTION_ATTACK_GENERATOR: {"time_delay": 0.0, "actions_on_lethal": []}},
+ 	]
+ 	card_test_shove.card_ai_hints = {"role": "displace", "value_key": "damage"}
+@@ -4728,10 +4728,10 @@ func add_test_board_content() -> void:
+ 	card_test_blink.card_action_delay = 50
+ 	card_test_blink.card_requires_target = false
+ 	card_test_blink.card_range = 3
+-	card_test_blink.card_shape = BoardTargeting.TARGET_SHAPES.SINGLE
+-	card_test_blink.card_target_faction = BoardTargeting.TARGET_FACTIONS.EMPTY_CELL
++	card_test_blink.card_shape = 0	# TARGET_SHAPES.SINGLE
++	card_test_blink.card_target_faction = 4	# TARGET_FACTIONS.EMPTY_CELL
+ 	card_test_blink.card_play_validators = [{Scripts.VALIDATOR_CELL_FREE: {}}, {Scripts.VALIDATOR_PATH_EXISTS: {"teleport": true}}]
+-	card_test_blink.card_play_actions = [{Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TELEPORT}}]
++	card_test_blink.card_play_actions = [{Scripts.ACTION_MOVE_UNIT: {"mode": "TELEPORT"}}]
+ 	card_test_blink.card_ai_hints = {"role": "move", "value": 2}
+ 	Global.register_rod(card_test_blink)
+ 	
+diff --git a/autoload/HandManager.gd b/autoload/HandManager.gd
+index be74ff4a2e49e28e33e973a34153b02d0d1a4fec..949f6d823a6a769f72ee90e0b86bf9ebdc4a5c08 100644
+--- a/autoload/HandManager.gd
++++ b/autoload/HandManager.gd
+@@ -317,7 +317,7 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy:
+ 	# Optional scene rules reject before reserving energy, including automated / duplicated plays.
+ 	var play_rejection: String = get_card_play_adapter().validate_request(card_play_request)
+ 	if play_rejection != "":
+-		card_play_request.card_values["play_rejection"] = play_rejection
++		card_play_request.rejection_reason = play_rejection
+ 		return
+ 
+ 	# get intercepted card play results to determine energy costs
+@@ -370,12 +370,13 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy:
+ 		_perform_card_plays()
+ 
+ ## Scene-supplied optional rules; fallback keeps ordinary card play independent of modules.
++var _core_card_play_adapter: CardPlayAdapter = CardPlayAdapter.new()
+ func get_card_play_adapter() -> CardPlayAdapter:
+ 	if is_instance_valid(hand) and is_instance_valid(hand.combat):
+ 		var adapter: CardPlayAdapter = hand.combat.get("card_play_adapter")
+ 		if adapter != null:
+ 			return adapter
+-	return CardPlayAdapter.new()
++	return _core_card_play_adapter
+ 
+ ## Main looping/locking method for performing all cards in the card queue.
+ ## WARNING: Do not invoke this anywhere other than add_card_to_play_queue()
+@@ -397,7 +398,7 @@ func _perform_card_plays() -> void:
+ 		# Earlier queued effects may have changed the target or optional scene context.
+ 		var play_rejection: String = get_card_play_adapter().validate_request(card_play_request)
+ 		if play_rejection != "":
+-			card_play_request.card_values["play_rejection"] = play_rejection
++			card_play_request.rejection_reason = play_rejection
+ 			Global.player_data.player_energy += max(card_energy_cost, 0)
+ 			hand.combat.update_combat_display()
+ 			continue
+diff --git a/autoload/Signals.gd b/autoload/Signals.gd
+index 048f976ce75e0da8f6b8774d3df8855d9795205d..161e77ab9983617b68982dde54ed07d1be937627 100644
+--- a/autoload/Signals.gd
++++ b/autoload/Signals.gd
+@@ -175,7 +175,7 @@ signal unit_board_moved(unit: BaseCombatant, from_board_id: StringName, from: Ve
+ signal board_cell_clicked(board_id: StringName, cell: Vector2i)
+ signal board_cell_hovered(board_id: StringName, cell: Vector2i)
+ signal board_changed(board_id: StringName)
+-signal field_changed(instance: FieldInstance)
+-signal field_created(instance: FieldInstance)
+-signal field_removed(instance: FieldInstance)
++signal field_changed(instance)	# a board-module FieldInstance; untyped so the core does not depend on the module
++signal field_created(instance)	# a board-module FieldInstance; untyped so the core does not depend on the module
++signal field_removed(instance)	# a board-module FieldInstance; untyped so the core does not depend on the module
+ signal unit_left_zoc(mover: BaseCombatant, controller: BaseCombatant)
+diff --git a/data/CardPlayRequest.gd b/data/CardPlayRequest.gd
+index 038860486ba7fbe2a1d9159593af8d0f79c04058..c0e2a028b36a02dd32855d4813a40cceaef0f211 100644
+--- a/data/CardPlayRequest.gd
++++ b/data/CardPlayRequest.gd
+@@ -17,21 +17,9 @@ var module_contexts: Dictionary = {}
+ ## Generic actor/targets also support non-spatial combat modules.
+ var acting_unit: BaseCombatant = null
+ var resolved_targets: Array[BaseCombatant] = []
+-## Compatibility accessors: storage only; the card core does not interpret these values.
+-var selected_cell: Vector2i:
+-	get:
+-		return module_contexts.get("board", {}).get("cell", Vector2i(-1, -1))
+-	set(value):
+-		if not module_contexts.has("board"):
+-			module_contexts["board"] = {}
+-		module_contexts["board"]["cell"] = value
+-var selected_board_id: String:
+-	get:
+-		return module_contexts.get("board", {}).get("id", "")
+-	set(value):
+-		if not module_contexts.has("board"):
+-			module_contexts["board"] = {}
+-		module_contexts["board"]["id"] = value
++## Why the scene's CardPlayAdapter refused this play ("" = accepted). Diagnostic only; never
++## part of card_values, which feed BaseAction.get_action_value.
++var rejection_reason: String = ""
+ 
+ 
+ ## Where the card being played came from. This will almost always be HandManager.HAND_PILE, but can be
+diff --git a/scripts/actions/BaseAction.gd b/scripts/actions/BaseAction.gd
+index eb44c7bdc2d0399cc46651f224898dd5a4d6299f..a633ff4de0326f75ea695a707955f7aa17e11cbf 100644
+--- a/scripts/actions/BaseAction.gd
++++ b/scripts/actions/BaseAction.gd
+@@ -30,13 +30,16 @@ var action_tags: Array[String] = []
+ var parent_action: BaseAction = null
+ ## Ordered reactions finish their generated children before the next movement/event step.
+ var resolve_children_immediately: bool = false
+-## Field payloads re-resolve their owner at execution, including generated children.
+-var field_owner_bound: bool = false
+-var field_owner_uid: String = ""
+-var field_controller_ref: WeakRef = null
+-var field_controller_generation: int = -1
+-## Logical field-event time, distinct from the already committed CTB endpoint.
+-var field_effective_tick: int = -1
++## Deferred payloads (e.g. module field effects) re-resolve their owner at execution by unit uid,
++## including generated children.
++var owner_bound: bool = false
++var owner_uid: String = ""
++## Optional cancellation scope: an object with is_execution_scope_active(generation) -> bool.
++## A teardown (module clear) invalidates every already expanded action of that scope.
++var execution_scope_ref: WeakRef = null
++var execution_scope_generation: int = -1
++## Logical event time, distinct from the already committed CTB endpoint (-1 = none).
++var effective_tick: int = -1
+ 
+ signal action_async_finished	# allows for async callbacks
+ 
+@@ -78,20 +81,20 @@ func init(_parent_combatant: BaseCombatant = null, _card_play_request: CardPlayR
+ func inherit_execution_context(source: BaseAction) -> void:
+ 	if source == null:
+ 		return
+-	field_owner_bound = source.field_owner_bound
+-	field_owner_uid = source.field_owner_uid
+-	field_controller_ref = source.field_controller_ref
+-	field_controller_generation = source.field_controller_generation
+-	field_effective_tick = source.field_effective_tick
++	owner_bound = source.owner_bound
++	owner_uid = source.owner_uid
++	execution_scope_ref = source.execution_scope_ref
++	execution_scope_generation = source.execution_scope_generation
++	effective_tick = source.effective_tick
+ 
+-## false invalidates an already expanded field subtree after combat teardown.
++## false invalidates an already expanded scoped subtree after its scope was torn down.
+ func prepare_execution() -> bool:
+-	if field_controller_ref != null:
+-		var controller: FieldController = field_controller_ref.get_ref()
+-		if controller == null or not controller.active or controller.generation != field_controller_generation:
++	if execution_scope_ref != null:
++		var scope: Object = execution_scope_ref.get_ref()
++		if scope == null or not scope.call(&"is_execution_scope_active", execution_scope_generation):
+ 			return false
+-	if field_owner_bound:
+-		var owner: BaseCombatant = UnitRegistry.get_unit(field_owner_uid)
++	if owner_bound:
++		var owner: BaseCombatant = UnitRegistry.get_unit(owner_uid)
+ 		parent_combatant = owner if is_instance_valid(owner) and owner.is_alive() else null
+ 	elif not is_instance_valid(parent_combatant):
+ 		parent_combatant = null
+@@ -163,7 +166,9 @@ func get_adjusted_action_targets() -> Array[BaseCombatant]:
+ 					if target.is_alive() or force_dead_targets:
+ 						returned_targets.append(target)
+ 		TARGET_OVERRIDES.PARENT:
+-			if is_instance_valid(parent_combatant) and (parent_combatant.is_alive() or force_dead_targets):
++			# Upstream contract: the parent itself, alive or dead (force_dead_targets is not consulted).
++			# Only a missing / freed parent (e.g. a field payload whose owner died) yields no target.
++			if is_instance_valid(parent_combatant):
+ 				return [parent_combatant]
+ 		TARGET_OVERRIDES.PLAYER:
+ 			for player in Global.get_tree().get_nodes_in_group("players"):
+diff --git a/scripts/actions/board_actions/ActionCreateField.gd b/scripts/actions/board_actions/ActionCreateField.gd
+index fb4e33ebd3d5e01903afd638928dbb9ded371cf7..1d49147d439b7fcc28bf01775c0510a39feceef3 100644
+--- a/scripts/actions/board_actions/ActionCreateField.gd
++++ b/scripts/actions/board_actions/ActionCreateField.gd
+@@ -17,7 +17,7 @@ func perform_action() -> void:
+ 		var owner: BaseCombatant = parent_combatant if str(processor.get_shadowed_action_values("owner", "PARENT")) == "PARENT" else null
+ 		var director: CombatDirector = Global.get_combat_director()
+ 		var tick: int = director.current_tick if director != null else 0
+-		if field_effective_tick >= 0:
+-			tick = field_effective_tick
++		if effective_tick >= 0:
++			tick = effective_tick
+ 		for cell: Vector2i in cells:
+ 			controller.create_field(data, cell, owner, tick, int(processor.get_shadowed_action_values("duration_override", -2)))
+diff --git a/scripts/actions/board_actions/ActionDisplaceUnit.gd b/scripts/actions/board_actions/ActionDisplaceUnit.gd
+index f5a1ebeb4a915c422f7ad215e8c5cb212b126c85..c2e106b2a9bd8309677a6afed3637a5058bd6a7d 100644
+--- a/scripts/actions/board_actions/ActionDisplaceUnit.gd
++++ b/scripts/actions/board_actions/ActionDisplaceUnit.gd
+@@ -57,14 +57,14 @@ func _displace(board: BoardData, unit: BaseCombatant, processor: ActionIntercept
+ 	if mode == MODE_TO_CELL:
+ 		if distance <= resistance or bool(processor.get_shadowed_action_values("teleport_blocked", false)):
+ 			return
+-		if processor.get_shadowed_action_values("target_board_id", null) == null and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and card_play_request.selected_board_id != "" and card_play_request.selected_board_id != board.board_id:
++		if processor.get_shadowed_action_values("target_board_id", null) == null and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and BoardCardOptions.selected_board_id(card_play_request) != "" and BoardCardOptions.selected_board_id(card_play_request) != board.board_id:
+ 			return
+ 		var cell: Vector2i = EncounterData.cell_from_json(processor.get_shadowed_action_values("target_cell", null))
+ 		if cell == BaseCombatant.BOARD_ANCHOR_NONE and card_play_request != null:
+-			cell = card_play_request.selected_cell
++			cell = BoardCardOptions.selected_cell(card_play_request)
+ 		var target_board_id: String = str(processor.get_shadowed_action_values("target_board_id", board.board_id))
+ 		if target_board_id == "SELECTED" and card_play_request != null:
+-			target_board_id = card_play_request.selected_board_id
++			target_board_id = BoardCardOptions.selected_board_id(card_play_request)
+ 		if target_board_id != board.board_id:
+ 			BoardTransferAction.move_unit(self, unit, target_board_id, cell, true, ignore_zoc)
+ 		elif cell != from and board.can_teleport(unit, cell):
+diff --git a/scripts/actions/board_actions/ActionMoveUnit.gd b/scripts/actions/board_actions/ActionMoveUnit.gd
+index 43c2e35878a2fcc42a56de4506fce79a8d444b3d..64f780d9dd9d3c46e4b7c35995b5a5ff29c3eb81 100644
+--- a/scripts/actions/board_actions/ActionMoveUnit.gd
++++ b/scripts/actions/board_actions/ActionMoveUnit.gd
+@@ -2,7 +2,7 @@
+ ## unless values give a target_override. Values:
+ ##   mode: "TO_CELL" (default) | "TOWARD" | "AWAY" | "TELEPORT"
+ ##   distance: max cells (-1 = unlimited; status interceptors may set 0 = rooted)
+-##   target_cell: [x, y] / Vector2i (TO_CELL, TELEPORT); default card_play_request.selected_cell
++##   target_cell: [x, y] / Vector2i (TO_CELL, TELEPORT); default the card play's selected cell (BoardCardOptions.selected_cell)
+ ##   reference: "SELECTED_TARGET" (default) | "PARENT" | "NEAREST_OPPONENT" | "HERO" (TOWARD / AWAY)
+ ##   stop_at_distance: TOWARD stops once this close to the reference (default 1)
+ ##   consumes_move_points: spend free move points, then paid cells (+extra_move_delay_per_cell each)
+@@ -42,10 +42,10 @@ func _move_unit(board: BoardData, unit: BaseCombatant, processor: ActionIntercep
+ 	if teleport and bool(processor.get_shadowed_action_values("teleport_blocked", false)):
+ 		return
+ 	var target_board_id: String = str(processor.get_shadowed_action_values("target_board_id", ""))
+-	if target_board_id == "" and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and card_play_request.selected_board_id != "" and card_play_request.selected_board_id != board.board_id and (teleport or mode == MODE_TO_CELL):
++	if target_board_id == "" and processor.get_shadowed_action_values("target_cell", null) == null and card_play_request != null and BoardCardOptions.selected_board_id(card_play_request) != "" and BoardCardOptions.selected_board_id(card_play_request) != board.board_id and (teleport or mode == MODE_TO_CELL):
+ 		return
+ 	if target_board_id == "SELECTED" and card_play_request != null:
+-		target_board_id = card_play_request.selected_board_id
++		target_board_id = BoardCardOptions.selected_board_id(card_play_request)
+ 	if target_board_id != "" and target_board_id != board.board_id:
+ 		# An explicit teleport/direct placement authorizes crossing. Ordinary paths never do.
+ 		if teleport:
+@@ -94,7 +94,7 @@ func _move_unit(board: BoardData, unit: BaseCombatant, processor: ActionIntercep
+ func _get_target_cell(processor: ActionInterceptorProcessor) -> Vector2i:
+ 	var cell: Vector2i = EncounterData.cell_from_json(processor.get_shadowed_action_values("target_cell", null))
+ 	if cell == BaseCombatant.BOARD_ANCHOR_NONE and card_play_request != null:
+-		cell = card_play_request.selected_cell
++		cell = BoardCardOptions.selected_cell(card_play_request)
+ 	return cell
+ 
+ func _get_reference_unit(board: BoardData, unit: BaseCombatant, processor: ActionInterceptorProcessor) -> BaseCombatant:
+diff --git a/scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd b/scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd
+index 9d8eb714999ce50bd64f07031b3d10be886331d4..153857ad071a733406976d4c3d5fe8facaaabcd8 100644
+--- a/scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd
++++ b/scripts/actions/combatant_actions/enemy_actions/ActionSummonEnemies.gd
+@@ -1,9 +1,11 @@
+ ## Summons random enemies in given ememy slots
+ ## NOTE: This only works if the current EventData's event_enemy_placement_is_automatic flag
+ ## is false and positions are defined.
+-## Combat framework Phase 2: with "spawn_cells" ([[x, y], ...]) the enemies are summoned on the board
+-## at those cells instead (occupied cell -> nearest empty cell, NEAREST_EMPTY), independent of slots.
+-## Slot summons are also placed on the board (nearest empty cell to the spawn zone).
++## Combat framework Phase 2: with "spawn_cells" ([[x, y], ...]) and a mounted placement module (the
++## board) the enemies are summoned at those cells instead (occupied cell -> nearest empty cell),
++## independent of slots. Slot summons are also placed by the module (nearest empty cell to the
++## spawn zone). Without the module, spawn_slots still work; a cells-only summon is board content
++## (CombatContentRequirements) and is refused / skipped before it can silently do nothing.
+ extends BaseAction
+ 
+ func perform_action() -> void:
+@@ -22,7 +24,7 @@ func perform_action() -> void:
+ 			return
+ 		var spawn_cells: Array[Vector2i] = EncounterData.cells_from_json(action_interceptor_processor.get_shadowed_action_values("spawn_cells", []))
+ 		var director: CombatDirector = Global.get_combat_director()
+-		if not spawn_cells.is_empty() and director != null and director.board != null:
++		if not spawn_cells.is_empty() and director != null and director.get_placement_module() != null:
+ 			_summon_on_board(director, spawn_cells, number_of_spawns, random_enemy_object_ids, str(action_interceptor_processor.get_shadowed_action_values("board_id", "")))
+ 			continue
+ 
+diff --git a/scripts/combat/BoardController.gd b/scripts/combat/BoardController.gd
+deleted file mode 100644
+index ccb4602a6ab41af723c593cfa508313c53aeb5a3..0000000000000000000000000000000000000000
+--- a/scripts/combat/BoardController.gd
++++ /dev/null
+@@ -1,134 +0,0 @@
+-## Owns the boards, field controllers and movement state of one combat.
+-## Initial faction selects a home board; all subsequent queries use actual board identity.
+-extends RefCounted
+-class_name BoardController
+-
+-var rules: CombatRulesData
+-var encounter: EncounterData
+-var battlefield: CombatBattlefield
+-var field_controllers: Dictionary[String, FieldController] = {}
+-## Legacy query seam: shared board in SINGLE, party board in DUAL.
+-var board: BoardData:
+-	get:
+-		return battlefield.get_board(battlefield.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
+-var field_controller: FieldController:
+-	get:
+-		return FieldController.for_board(board)
+-
+-func _init(combat_rules: CombatRulesData) -> void:
+-	rules = combat_rules
+-
+-func setup(encounter_data: EncounterData) -> bool:
+-	encounter = encounter_data
+-	battlefield = CombatBattlefield.new(encounter, rules)
+-	if not battlefield.valid:
+-		DebugLogger.log_error("BoardController: " + battlefield.error)
+-		return false
+-	var shared_opportunities: Dictionary = {}
+-	for current: BoardData in battlefield.boards.values():
+-		current.movement_state.used_opportunities = shared_opportunities
+-		field_controllers[current.board_id] = FieldController.new(current)
+-		var config: Dictionary = encounter.get_board_config(current.board_id)
+-		var deploy: Array[Vector2i] = EncounterData.cells_from_json(config.deploy_cells)
+-		if deploy.is_empty():
+-			deploy = default_deploy_cells(current.board_id)
+-		for cell: Vector2i in deploy:
+-			if current.is_in_bounds(cell):
+-				current.get_cell(cell).is_deploy_zone = true
+-		var spawn: Array[Vector2i] = EncounterData.cells_from_json(config.spawn_zone_cells)
+-		if spawn.is_empty():
+-			for y: int in min(2, current.size.y):
+-				for x: int in current.size.x:
+-					spawn.append(Vector2i(x, y))
+-		for cell: Vector2i in spawn:
+-			if current.is_in_bounds(cell):
+-				current.get_cell(cell).is_spawn_zone = true
+-		for entry: Dictionary in config.initial_fields:
+-			var data: FieldData = Global.get_field_data(str(entry.get("field_id", "")))
+-			if data == null:
+-				continue
+-			for cell: Vector2i in EncounterData.cells_from_json(entry.get("cells", [])):
+-				field_controllers[current.board_id].create_field(data, cell, null, 0, int(entry.get("duration", -2)))
+-	var hero: BaseCombatant = UnitRegistry.get_hero()
+-	if hero != null:
+-		var home: String = battlefield.default_board_id(hero.faction)
+-		var deploy: Array[Vector2i] = EncounterData.cells_from_json(encounter.get_board_config(home).deploy_cells)
+-		if deploy.is_empty():
+-			deploy = default_deploy_cells(home)
+-		if not place_unit_nearest(hero, deploy[0], home):
+-			return false
+-	return true
+-
+-func clear() -> void:
+-	for controller: FieldController in field_controllers.values():
+-		controller.clear()
+-	field_controllers.clear()
+-	battlefield = null
+-	encounter = null
+-
+-func get_board_for_unit(unit: BaseCombatant) -> BoardData:
+-	return battlefield.get_board_for_unit(unit) if battlefield != null else null
+-
+-func get_spawn_board(unit: BaseCombatant, board_id: String = "") -> BoardData:
+-	if battlefield == null or not is_instance_valid(unit):
+-		return null
+-	if board_id != "":
+-		return battlefield.get_board(board_id)
+-	var existing: BoardData = get_board_for_unit(unit)
+-	return existing if existing != null else battlefield.get_board(battlefield.default_board_id(unit.faction))
+-
+-func default_deploy_cells(board_id: String = "") -> Array[Vector2i]:
+-	var current: BoardData = board if board_id == "" else battlefield.get_board(board_id)
+-	var cells: Array[Vector2i] = [Vector2i(int(current.size.x / 2), current.size.y - 1)]
+-	for y: int in range(current.size.y - 1, max(-1, current.size.y - 3), -1):
+-		for x: int in current.size.x:
+-			if not cells.has(Vector2i(x, y)):
+-				cells.append(Vector2i(x, y))
+-	return cells
+-
+-func default_spawn_origin(board_id: String = "") -> Vector2i:
+-	if board_id == "":
+-		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
+-	var current: BoardData = battlefield.get_board(board_id)
+-	return Vector2i(int(current.size.x / 2), 0) if current != null else BaseCombatant.BOARD_ANCHOR_NONE
+-
+-func place_unit_nearest(unit: BaseCombatant, cell: Vector2i, board_id: String = "") -> bool:
+-	var current: BoardData = get_spawn_board(unit, board_id)
+-	if current == null:
+-		return false
+-	# Repositioning an admitted unit is movement's responsibility, never faction deployment.
+-	var existing: BoardData = get_board_for_unit(unit)
+-	if existing != null and existing != current:
+-		return false
+-	if current.place(unit, cell):
+-		return true
+-	var anchor: Vector2i = current.nearest_empty_anchor(unit, cell)
+-	return anchor != BaseCombatant.BOARD_ANCHOR_NONE and current.place(unit, anchor)
+-
+-func reset_action_state(unit: BaseCombatant) -> void:
+-	for current: BoardData in battlefield.boards.values():
+-		current.reset_action_state(unit)
+-
+-func get_move_budget(unit: BaseCombatant) -> int:
+-	return unit.move_points + max(0, rules.paid_move_max_cells - unit.paid_cells_this_action) if unit != null else 0
+-
+-func move_party_unit(unit: BaseCombatant, cell: Vector2i) -> bool:
+-	var current: BoardData = get_board_for_unit(unit)
+-	if current == null:
+-		return false
+-	var reachable: Dictionary = current.reachable_active(unit)
+-	if not reachable.has(cell) or reachable[cell].is_empty():
+-		return false
+-	var path: Array = reachable[cell]
+-	var actions: Array[BaseAction] = ActionGenerator.create_actions(unit, null, [unit], [{
+-		Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": cell, "distance": path.size(), "consumes_move_points": true, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
+-	}], null)
+-	ActionHandler.add_actions(actions)
+-	return true
+-
+-## One sorted queue preserves cross-board tick chronology and generated child ordering.
+-func advance_fields(previous: int, current: int) -> void:
+-	var controllers: Array[FieldController] = []
+-	controllers.assign(field_controllers.values())
+-	if current > previous and not controllers.is_empty():
+-		ActionHandler.add_ordered_actions([FieldClockAction.new(controllers, previous, current)])
+diff --git a/scripts/combat/BoardController.gd.uid b/scripts/combat/BoardController.gd.uid
+deleted file mode 100644
+index 490338a656564d577820e1b7433a8df3457f60bc..0000000000000000000000000000000000000000
+--- a/scripts/combat/BoardController.gd.uid
++++ /dev/null
+@@ -1 +0,0 @@
+-uid://bu4h7gml718tt
+diff --git a/scripts/combat/CardPlayAdapter.gd b/scripts/combat/CardPlayAdapter.gd
+index abb193eac339d8655b8e7a80ec12682309a53889..49cae37e5bc24c94306b5bdbc0c5c22b31c5d20f 100644
+--- a/scripts/combat/CardPlayAdapter.gd
++++ b/scripts/combat/CardPlayAdapter.gd
+@@ -1,8 +1,24 @@
+-## Scene-supplied card policy. The default preserves ordinary unit-targeted card play.
+-## Hooks are synchronous and never reserve/refund energy or enqueue actions.
++## Scene-supplied card policy. The default preserves ordinary unit-targeted card play and refuses
++## content that needs an unmounted optional module (CombatContentRequirements) before any fee.
++## Hooks are synchronous and never reserve/refund energy or enqueue actions. A mounted
++## CombatModule may supply a subclass (CombatModule.get_card_play_adapter()).
+ extends RefCounted
+ class_name CardPlayAdapter
+ 
++## "" = the card can be played with the modules mounted now; otherwise the rejection reason
++## (e.g. "board_module_required"). Card.can_play_card greys such cards out in hand.
++func get_availability_error(card: CardData, request_values: Dictionary = {}) -> String:
++	if card == null:
++		return ""
++	return CombatContentRequirements.missing_rejection(CombatContentRequirements.card_requirements(card, request_values), mounted_module_ids())
++
++func mounted_module_ids() -> Array[StringName]:
++	var director: CombatDirector = Global.get_combat_director()
++	if director != null:
++		return director.get_mounted_module_ids()
++	var none: Array[StringName] = []
++	return none
++
+ func needs_selection(card: CardData) -> bool:
+ 	return card.card_requires_target
+ 
+@@ -11,10 +27,18 @@ func prepare_request(request: CardPlayRequest, selection: Dictionary = {}) -> St
+ 		request.selected_target = selection.target
+ 	if selection.has("actor"):
+ 		request.acting_unit = selection.actor
+-	return ""
++	return reject(request, get_availability_error(request.card_data, request.card_values))
+ 
+-func validate_request(_request: CardPlayRequest) -> String:
+-	return ""
++func validate_request(request: CardPlayRequest) -> String:
++	if request == null:
++		return ""
++	return reject(request, get_availability_error(request.card_data, request.card_values))
++
++## Records the reason on the request (never in card_values, which feed action values).
++func reject(request: CardPlayRequest, reason: String) -> String:
++	if reason != "" and request != null:
++		request.rejection_reason = reason
++	return reason
+ 
+ func resolve_play(request: CardPlayRequest, default_actor: BaseCombatant) -> Dictionary:
+ 	var targets: Array[BaseCombatant] = [request.selected_target]
+@@ -29,12 +53,6 @@ func bind_hand(_hand: Hand) -> void:
+ func unbind_hand() -> void:
+ 	pass
+ 
+-## Optional module input. Base implementations never reinterpret a cell as a unit target.
++## Module input may enrich a unit selection (e.g. with its position).
+ func selection_for_target(target: BaseCombatant) -> Dictionary:
+ 	return {"target": target}
+-
+-func handle_cell_clicked(_hand: Hand, _id: String, _cell: Vector2i) -> void:
+-	pass
+-
+-func handle_cell_hovered(_hand: Hand, _id: String, _cell: Vector2i) -> void:
+-	pass
+diff --git a/scripts/combat/CombatActionPhases.gd b/scripts/combat/CombatActionPhases.gd
+index 8d3953c25d9af7ba9c368fdeab0b1819c073ad36..f8700ad65a5dabf6f6e85b6b20ecaff30973f378 100644
+--- a/scripts/combat/CombatActionPhases.gd
++++ b/scripts/combat/CombatActionPhases.gd
+@@ -10,8 +10,8 @@ class_name CombatActionPhases
+ 
+ static func begin_party_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
+ 	HandManager.set_disable_hand(true)
+-	if director.board_module != null:
+-		director.board_module.on_action_reset(unit)
++	if director.combat_module != null:
++		director.combat_module.on_action_reset(unit)
+ 	if unit.is_hero():
+ 		StatsHandler.begin_hero_action()	# turn count = hero actions; before the overlay reads it
+ 	await play_combat_animation(director, CombatDirector.ANIMATION_ACTION_START)
+@@ -29,8 +29,8 @@ static func begin_party_action(director: CombatDirector, unit: BaseCombatant, ge
+ 	if director.is_aborted(generation):
+ 		return
+ 	Signals.unit_action_started.emit(unit)
+-	if director.board_module != null:
+-		director.board_module.on_action_started(unit)
++	if director.combat_module != null:
++		director.combat_module.on_action_started(unit)
+ 	await director.wait_actions(generation)
+ 	if director.is_aborted(generation) or not unit.is_alive():
+ 		return
+@@ -82,8 +82,8 @@ static func play_combat_animation(director: CombatDirector, animation_name: Stri
+ 	await animation_player.animation_finished
+ 
+ static func begin_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
+-	if director.board_module != null:
+-		director.board_module.on_action_reset(unit)
++	if director.combat_module != null:
++		director.combat_module.on_action_reset(unit)
+ 	Signals.enemy_turn_started.emit()	# legacy signal: one enemy's action begins
+ 	# both legacy pairs fire for this enemy's own action (old data stays valid)
+ 	unit.perform_status_effect_process_actions(StatusEffectData.STATUS_EFFECT_PROCESS_TIMES.PRE_ENEMY_TURN)
+@@ -96,8 +96,8 @@ static func begin_enemy_action(director: CombatDirector, unit: BaseCombatant, ge
+ 	if director.is_aborted(generation):
+ 		return
+ 	Signals.unit_action_started.emit(unit)
+-	if director.board_module != null:
+-		director.board_module.on_action_started(unit)
++	if director.combat_module != null:
++		director.combat_module.on_action_started(unit)
+ 	await director.wait_actions(generation)
+ 
+ static func end_enemy_action(director: CombatDirector, unit: BaseCombatant, generation: int) -> void:
+diff --git a/scripts/combat/CombatContentRequirements.gd b/scripts/combat/CombatContentRequirements.gd
+new file mode 100644
+index 0000000000000000000000000000000000000000..21d66311ea9a45f7c3a443970a7e7d68d08a0aea
+--- /dev/null
++++ b/scripts/combat/CombatContentRequirements.gd
+@@ -0,0 +1,99 @@
++## Data-only detection of content that needs an optional combat module (CombatModule). Uses plain
++## string / enum markers, never module classes, so an unmounted (or removed) module can still be
++## refused before fees, greyed out in hand and skipped by enemy intents.
++## Content may also declare requirements explicitly: card_values / action values
++## "requires_modules": ["board"].
++extends RefCounted
++class_name CombatContentRequirements
++
++const MODULE_BOARD: StringName = &"board"
++const REJECTION_SUFFIX: String = "_module_required"
++const MAX_DEPTH: int = 32
++
++## Board markers: module action / validator script folders and spatial target overrides.
++const BOARD_PATH_MARKERS: Array[String] = ["/board_actions/", "/validators/board/"]
++const BOARD_TARGET_OVERRIDES: Array[int] = [
++	BaseAction.TARGET_OVERRIDES.RESOLVED_SHAPE,
++	BaseAction.TARGET_OVERRIDES.UNITS_IN_RANGE,
++	BaseAction.TARGET_OVERRIDES.UNITS_ON_FIELD,
++]
++
++static func rejection_for(module_id: StringName) -> String:
++	return str(module_id) + REJECTION_SUFFIX
++
++## First missing module's rejection reason ("board_module_required"), "" when all are mounted.
++static func missing_rejection(required: Array[StringName], mounted: Array[StringName]) -> String:
++	for module_id: StringName in required:
++		if not mounted.has(module_id):
++			return rejection_for(module_id)
++	return ""
++
++## Modules a card needs: explicit declaration, legacy scalar board fields, card_values.board and
++## its action / validator payloads (request values may alias wrapper payloads).
++static func card_requirements(card: CardData, request_values: Dictionary = {}) -> Array[StringName]:
++	var found: Array[StringName] = []
++	if card == null:
++		return found
++	var context: Dictionary = card.card_values.duplicate()
++	context.merge(request_values, true)
++	_add_declared(found, context.get("requires_modules", []))
++	var board_options: Variant = context.get("board", {})
++	if (board_options is Dictionary and not board_options.is_empty()) or card.card_range != -1 or card.card_shape != 0 or card.card_target_faction != 0 or card.card_move_distance != 0:
++		_add(found, MODULE_BOARD)
++	_scan(card.card_play_actions, context, found, 0)
++	_scan(card.card_play_validators, context, found, 0)
++	_scan(context, context, found, 0)
++	return found
++
++static func card_requires(card: CardData, module_id: StringName, request_values: Dictionary = {}) -> bool:
++	return card_requirements(card, request_values).has(module_id)
++
++## Modules an action payload (Array / Dictionary of {script_path: values}) needs.
++static func payload_requirements(data: Variant, context: Dictionary = {}) -> Array[StringName]:
++	var found: Array[StringName] = []
++	_scan(data, context, found, 0)
++	return found
++
++static func payload_requires(data: Variant, module_id: StringName, context: Dictionary = {}) -> bool:
++	return payload_requirements(data, context).has(module_id)
++
++static func _add(found: Array[StringName], module_id: StringName) -> void:
++	if module_id != &"" and not found.has(module_id):
++		found.append(module_id)
++
++static func _add_declared(found: Array[StringName], declared: Variant) -> void:
++	if declared is Array or declared is PackedStringArray:
++		for value: Variant in declared:
++			_add(found, StringName(str(value)))
++	elif declared is String or declared is StringName:
++		_add(found, StringName(str(declared)))
++
++static func _scan(data: Variant, context: Dictionary, found: Array[StringName], depth: int) -> void:
++	if depth > MAX_DEPTH:
++		_add(found, MODULE_BOARD)	# malformed / deep payloads cannot silently bypass the guard
++		return
++	if data is Array:
++		for item: Variant in data:
++			_scan(item, context, found, depth + 1)
++	elif data is Dictionary:
++		var aliases: Dictionary = data.get("custom_key_names", {}) if data.get("custom_key_names", {}) is Dictionary else {}
++		_add_declared(found, data.get("requires_modules", []))
++		var override_key: String = str(aliases.get("target_override", "target_override"))
++		var override: Variant = data.get(override_key, context.get(override_key, -1))
++		if (override is int or override is float) and BOARD_TARGET_OVERRIDES.has(int(override)):
++			_add(found, MODULE_BOARD)
++		# A summon placed only by cells has no slot fallback without the board.
++		var spawn_cells: Variant = data.get("spawn_cells", [])
++		var spawn_slots: Variant = data.get("spawn_slots", [])
++		if spawn_cells is Array and not spawn_cells.is_empty() and not (spawn_slots is Array and not spawn_slots.is_empty()):
++			_add(found, MODULE_BOARD)
++		for key: Variant in data:
++			var text: String = str(key)
++			for marker: String in BOARD_PATH_MARKERS:
++				if text.contains(marker):
++					_add(found, MODULE_BOARD)
++			_scan(data[key], context, found, depth + 1)
++		# Wrapper action_data may itself be supplied only through a renamed request value.
++		for alias: Variant in aliases.values():
++			if context.has(alias):
++				_scan(context[alias], context, found, depth + 1)
+diff --git a/scripts/combat/CombatDirector.gd b/scripts/combat/CombatDirector.gd
+index 8b0767daf891e32155e2a34368e1222dcaf600c5..67fc0406f1f0cd92dde3487da55ff67ad38cd038 100644
+--- a/scripts/combat/CombatDirector.gd
++++ b/scripts/combat/CombatDirector.gd
+@@ -1,12 +1,13 @@
+ ## Runs one combat as an action timeline (CTB): pops the unit with the smallest next_action_tick,
+ ## performs its action (player input or enemy intent) and re-queues it after a delay scaled by its
+ ## speed (CombatRulesData). Replaces the AnimationPlayer-driven turn alternation of Combat.gd;
+-## Combat.gd keeps the HUD and composes the optional BoardCombatModule. UnitSpawner
++## Combat.gd keeps the HUD and composes an optional CombatModule (e.g. the board). UnitSpawner
+ ## spawns wave units / summons through the EnemyContainer unit layer and WaveController runs the wave
+ ## flow (wave_started / wave_cleared, next-wave scheduling, victory when the last wave is cleared,
+ ## which ends the combat through Combat.end_combat); CombatActionPhases holds the
+ ## fixed begin / end phases of an action and CombatStartActions the combat-start actions; enemy
+-## intents run in EnemyIntentController, delegating spatial behavior only when a board module exists.
++## intents run in EnemyIntentController, delegating only when a mounted module handles intents.
++## The core never names a module class: modules attach through the CombatModule hooks.
+ ## Child of RunScreen/Combat. Signals: player_turn_* = the hero's action (pre-draw / post-discard),
+ ## enemy_turn_* = one enemy's action, unit_action_started/ended for every unit, combat_tick_advanced,
+ ## timeline_changed. With equal speeds and the default rules the order equals the old turn flow.
+@@ -26,36 +27,41 @@ var rules: CombatRulesData = null
+ var acting_unit: BaseCombatant = null
+ var current_tick: int = 0
+ var is_running: bool = false
+-## Optional scene-composed component; compatibility getters expose its current resources.
+-var _board_module: BoardCombatModule = null
+-var board_module: BoardCombatModule:
++## Optional scene-composed component (CombatModule); null for an ordinary combat.
++var _module: CombatModule = null
++var combat_module: CombatModule:
+ 	get:
+-		if not is_instance_valid(_board_module) or _board_module.is_queued_for_deletion() or not _board_module.is_inside_tree():
++		if not is_instance_valid(_module) or _module.is_queued_for_deletion() or not _module.is_inside_tree():
+ 			return null
+-		return _board_module
++		return _module
+ 	set(value):
+-		_board_module = value
+-var board_controller: BoardController:
+-	get:
+-		return board_module.board_controller if board_module != null else null
++		_module = value
+ var unit_spawner: UnitSpawner = null
+-var battlefield: CombatBattlefield:
+-	get:
+-		return board_controller.battlefield if board_controller != null else null
+-var field_controller: FieldController:
+-	get:
+-		return board_controller.field_controller if board_controller != null else null
+ ## Wave progression of the current / last combat (kept after the combat stops for the victory check).
+ var waves: WaveController = null
+-## Board of the current combat (null outside combat) and the encounter it was built from.
+-var board: BoardData:
+-	get:
+-		return board_controller.board if board_controller != null else null
+-## Encounter and waves exist independently of the optional spatial component.
++## Encounter and waves exist independently of any optional module.
+ var encounter: EncounterData = null
+-var threat_preview: ThreatPreview:
++
++## Compatibility forwards (untyped, no module class dependency): the mounted board module and
++## its current resources, or null. Board-specific work belongs to the module itself.
++var board_module:
++	get:
++		return get_module(&"board")
++var board_controller:
++	get:
++		return _module_property(&"board", &"board_controller")
++var battlefield:
+ 	get:
+-		return board_module.threat_preview if board_module != null else null
++		return _module_property(&"board", &"battlefield")
++var field_controller:
++	get:
++		return _module_property(&"board", &"field_controller")
++var board:
++	get:
++		return _module_property(&"board", &"board")
++var threat_preview:
++	get:
++		return _module_property(&"board", &"threat_preview")
+ 
+ var _generation: int = 0	# invalidates suspended loops when combat/run ends
+ var _waiting_for_player: bool = false
+@@ -78,14 +84,39 @@ func _ready() -> void:
+ 	tree_exiting.connect(_stop)
+ 
+ #region Public queries
++## The mounted module with this id, or null.
++func get_module(module_id: StringName) -> CombatModule:
++	var module: CombatModule = combat_module
++	return module if module != null and module.get_module_id() == module_id else null
++
++func has_module(module_id: StringName) -> bool:
++	return get_module(module_id) != null
++
+ func has_board_module() -> bool:
+-	return board_module != null
++	return has_module(&"board")
++
++## Ids of the mounted modules (content requirements are checked against these).
++func get_mounted_module_ids() -> Array[StringName]:
++	var ids: Array[StringName] = []
++	var module: CombatModule = combat_module
++	if module != null:
++		ids.append(module.get_module_id())
++	return ids
++
++## Mounted module that places units (spawning, summons), or null.
++func get_placement_module() -> CombatModule:
++	var module: CombatModule = combat_module
++	return module if module != null and module.places_units() else null
++
++func _module_property(module_id: StringName, property: StringName) -> Variant:
++	var module: CombatModule = get_module(module_id)
++	return module.get(property) if module != null else null
+ 
+ ## Module exit may arrive after another module was composed. Detach only that exact instance.
+-## Ordinary CTB and queued non-spatial work continue after a board component is unmounted.
+-func detach_board_module(component: BoardCombatModule) -> void:
+-	if is_instance_valid(_board_module) and _board_module == component:
+-		_board_module = null
++## Ordinary CTB and queued non-module work continue after a component is unmounted.
++func detach_module(component: CombatModule) -> void:
++	if is_instance_valid(_module) and _module == component:
++		_module = null
+ 
+ func has_living_opponents() -> bool:
+ 	return not Global.get_alive_enemies().is_empty()
+@@ -136,8 +167,8 @@ func begin_combat(event_data: EventData = null) -> void:
+ 		event_data = Global.get_player_event_data()
+ 	encounter = Global.get_event_encounter_data(event_data)
+ 	# The scene composition owns the optional component; the core never creates it.
+-	board_module = get_parent().get("board_module") as BoardCombatModule
+-	if board_module != null and not board_module.setup(self, encounter):
++	combat_module = get_parent().get("combat_module") as CombatModule
++	if combat_module != null and not combat_module.setup(self, encounter):
+ 		_stop()
+ 		return
+ 	unit_spawner = UnitSpawner.new(self)
+@@ -155,9 +186,9 @@ func begin_combat(event_data: EventData = null) -> void:
+ 	for enemy: Enemy in Global.get_alive_enemies():
+ 		enemy.decide_next_intent()
+ 	is_running = true
+-	if board_module != null:
++	if combat_module != null:
+ 		for unit: BaseCombatant in UnitRegistry.get_all_units():
+-			board_module.on_unit_spawned(unit)
++			combat_module.on_unit_spawned(unit)
+ 	refresh_threats()
+ 	Signals.timeline_changed.emit()
+ 	waves.enter_wave(0)
+@@ -175,12 +206,12 @@ func _stop(preserve_presentation: bool = false) -> void:
+ 	_generation += 1
+ 	is_running = false
+ 	acting_unit = null
+-	var component: BoardCombatModule = board_module
++	var component: CombatModule = combat_module
+ 	if component == null and is_instance_valid(get_parent()):
+-		component = get_parent().get("board_module") as BoardCombatModule
++		component = get_parent().get("combat_module") as CombatModule
+ 	if component != null:
+ 		component.clear(preserve_presentation)
+-	board_module = null
++	combat_module = null
+ 	unit_spawner = null
+ 	reset_end_action()
+ 	_cards_played_this_action.clear()
+@@ -222,7 +253,7 @@ func _admit_spawned_unit(unit: BaseCombatant, generation: int) -> void:
+ 		return
+ 	if not unit.is_alive():
+ 		return
+-	if board_module != null and not board_module.prepare_spawned_unit(unit):
++	if combat_module != null and not combat_module.prepare_spawned_unit(unit):
+ 		return
+ 	_admit(unit, current_tick + timeline.wait_for(rules.default_action_delay, unit.speed))
+ 
+@@ -238,25 +269,26 @@ func _admit(unit: BaseCombatant, next_tick: int) -> void:
+ 	unit.last_action_tick = current_tick
+ 	unit.next_action_tick = next_tick
+ 	timeline.push(unit)
+-	if board_module != null:
+-		board_module.on_unit_spawned(unit)
++	if combat_module != null:
++		combat_module.on_unit_spawned(unit)
+ 	if unit is Enemy:
+ 		(unit as Enemy).decide_next_intent()
+ 	refresh_threats()
+ 	Signals.timeline_changed.emit()
+ 
+ func _on_unit_removed(unit: BaseCombatant) -> void:
+-	if board_module != null:
+-		board_module.on_unit_removed(unit)
++	if combat_module != null:
++		combat_module.on_unit_removed(unit)
+ 	if timeline != null and timeline.has(unit):
+ 		timeline.remove(unit)
+ 		Signals.timeline_changed.emit()
+ 
+-## Dead enemies leave the board (their node stays until the death animation / combat end).
++## Dead enemies leave the module's positions (their node stays until the death animation /
++## combat end); on_unit_removed refreshes module threats, the hero display is refreshed here.
+ func _on_enemy_killed(enemy: Enemy) -> void:
+-	if board_module != null:
+-		board_module.on_unit_removed(enemy)
+-	refresh_threats()
++	if combat_module != null:
++		combat_module.on_unit_removed(enemy)
++	_refresh_hero_incoming_damage()
+ 	if is_running and waves != null:
+ 		waves.queue_check()
+ 
+@@ -265,12 +297,17 @@ func _on_enemy_death_animation_finished(_enemy: Enemy) -> void:
+ 	if waves != null:
+ 		waves.on_death_animation_finished()
+ 
+-## Re-resolves enemy intents (ThreatPreview) and the hero's incoming damage display.
++## Re-resolves module threat previews and the hero's incoming damage display.
+ func refresh_threats() -> void:
+ 	if not is_running:
+ 		return
+-	if board_module != null:
+-		board_module.refresh_threats()
++	if combat_module != null:
++		combat_module.refresh_threats()
++	_refresh_hero_incoming_damage()
++
++func _refresh_hero_incoming_damage() -> void:
++	if not is_running:
++		return
+ 	var hero: Player = UnitRegistry.get_hero() as Player
+ 	if hero != null:
+ 		hero.update_incoming_damage_amount(false)
+@@ -352,8 +389,8 @@ func _advance_clock(tick: int, generation: int) -> void:
+ 	current_tick = tick
+ 	timeline.current_tick = tick
+ 	Signals.combat_tick_advanced.emit(previous_tick, tick)
+-	if board_module != null:
+-		board_module.advance_fields(previous_tick, tick)
++	if combat_module != null:
++		combat_module.on_clock_advanced(previous_tick, tick)
+ 	for unit: BaseCombatant in UnitRegistry.get_all_units():
+ 		if unit.is_alive():
+ 			unit.perform_tick_status_effects(previous_tick, tick)
+@@ -397,8 +434,8 @@ func _compute_action_delay(unit: BaseCombatant) -> int:
+ func _on_card_played(card_play_request: CardPlayRequest) -> void:
+ 	if is_running and card_play_request.card_data != null:
+ 		_cards_played_this_action.append(card_play_request.card_data)
+-		if board_module != null:
+-			board_module.on_card_played(acting_unit)
++		if combat_module != null:
++			combat_module.on_card_played(acting_unit)
+ #endregion
+ 
+ #region Party (hero) action
+@@ -449,45 +486,22 @@ func perform_enemy_intent(enemy: Enemy) -> void:
+ 	await EnemyIntentController.perform_intent(self, enemy)
+ 
+ func resolve_module_action_targets(action: BaseAction, override: int, force_dead: bool) -> Array[BaseCombatant]:
+-	if board_module != null:
+-		return board_module.resolve_action_targets(action, override, force_dead)
++	if combat_module != null:
++		return combat_module.resolve_action_targets(action, override, force_dead)
+ 	return []
+ #endregion
+ 
+-#region Board and spawning (delegated to BoardController / UnitSpawner)
+-## Places a unit at cell, or the nearest empty anchor (NEAREST_EMPTY). false = the board is full.
+-func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
+-	return board_module != null and board_module.place_unit_nearest(unit, cell)
+-
+-## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
+-## the nearest empty cell; it enters the timeline as if it had just acted.
++#region Spawning and input gating
++## Spawns an enemy mid-combat at a module position (ActionSummonEnemies with spawn cells): placed at
++## cell or the nearest free anchor; it enters the timeline as if it had just acted. null without a
++## placement module, unit layer or free anchor.
+ func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i, board_id: String = "") -> Enemy:
+ 	if unit_spawner == null:
+ 		return null
+ 	return unit_spawner.spawn_enemy_at_cell(enemy_object_id, cell, board_id)
+ 
+-## Cells the acting party unit can still move this action: free move points plus paid cells.
+-func get_move_budget(unit: BaseCombatant) -> int:
+-	return board_module.get_move_budget(unit) if board_module != null else 0
+-
+-## Player movement input (BoardView click on an empty cell): moves the acting party unit along the
+-## shortest path, spending free move points first, then paid cells (+extra_move_delay_per_cell each).
+-## false = not the player's action, busy, or the cell is not reachable within the budget.
+-func request_player_move(cell: Vector2i, board_id: String = "") -> bool:
+-	if board_module == null or not _can_request_player_input():
+-		return false
+-	return board_module.request_player_move(acting_unit, cell, board_id)
+-
+-func can_player_undo_move() -> bool:
+-	return board_module != null and _can_request_player_input() and board_module.can_player_undo_move(acting_unit)
+-
+-func request_player_undo_move() -> bool:
+-	if not can_player_undo_move():
+-		return false
+-	return board_module.request_player_undo_move(acting_unit)
+-
+-## Core input gating is shared by optional combat controls.
+-func _can_request_player_input() -> bool:
++## Core input gating shared by optional module controls (e.g. board movement and undo).
++func can_request_player_input() -> bool:
+ 	if not is_running or not is_instance_valid(acting_unit) or acting_unit.faction != BaseCombatant.FACTIONS.PARTY:
+ 		return false
+ 	if not _waiting_for_player or _end_action_request != null:
+diff --git a/scripts/combat/CombatModule.gd b/scripts/combat/CombatModule.gd
+new file mode 100644
+index 0000000000000000000000000000000000000000..41570dd25c738817718378d2d50850b720c1c071
+--- /dev/null
++++ b/scripts/combat/CombatModule.gd
+@@ -0,0 +1,100 @@
++## Optional combat component composed by the combat scene (Combat.gd) and attached to the CTB
++## core (CombatDirector). The core only calls these hooks and never names a module class, so a
++## module's files can be removed without breaking ordinary combat. Every hook defaults to the
++## behavior of an unmounted combat (no positions, no extra content rules).
++## Fees, queues, draw and card resolution stay in Hand / HandManager; a module only supplies data
++## (CardPlayAdapter hooks), positions and its own actions.
++extends Node
++class_name CombatModule
++
++## Stable id used by content requirements (CombatContentRequirements) and compatibility getters.
++func get_module_id() -> StringName:
++	return &""
++
++#region Lifetime
++## Builds the module's per-combat resources. false aborts the combat start.
++func setup(_director: CombatDirector, _encounter: EncounterData) -> bool:
++	return true
++
++## Releases per-combat resources; must be idempotent and re-entrant.
++func clear(_preserve_presentation: bool = false) -> void:
++	pass
++#endregion
++
++#region Timeline hooks
++## Admission of a mid-combat summon; false keeps it out of the timeline.
++func prepare_spawned_unit(_unit: BaseCombatant) -> bool:
++	return true
++
++func on_unit_spawned(_unit: BaseCombatant) -> void:
++	pass
++
++func on_unit_removed(_unit: BaseCombatant) -> void:
++	pass
++
++## Before the action's begin phase (movement allowances etc.).
++func on_action_reset(_unit: BaseCombatant) -> void:
++	pass
++
++## After unit_action_started.
++func on_action_started(_unit: BaseCombatant) -> void:
++	pass
++
++## The CTB clock advanced from previous_tick to current_tick.
++func on_clock_advanced(_previous_tick: int, _current_tick: int) -> void:
++	pass
++
++func on_card_played(_unit: BaseCombatant) -> void:
++	pass
++
++## Recompute derived previews (threats); the director refreshes the hero display afterwards.
++func refresh_threats() -> void:
++	pass
++#endregion
++
++#region Content
++## The scene-level card policy while this module is mounted; null keeps the core adapter.
++func get_card_play_adapter() -> CardPlayAdapter:
++	return null
++
++## true = this module executes enemy intents (perform_enemy_intent) instead of the core.
++func handles_enemy_intents() -> bool:
++	return false
++
++func perform_enemy_intent(_enemy: Enemy) -> void:
++	pass
++
++## Module-specific BaseAction.TARGET_OVERRIDES (e.g. UNITS_IN_RANGE).
++func resolve_action_targets(_action: BaseAction, _override: int, _force_dead: bool) -> Array[BaseCombatant]:
++	return []
++
++## Damage the hero will take before its next action; -1 = not provided (core sums intents).
++func incoming_damage_for(_hero: BaseCombatant, _recalculate: bool) -> int:
++	return -1
++#endregion
++
++#region Positions (spatial modules)
++## true = spawned / summoned units are placed by this module (zone id + cell anchor).
++func places_units() -> bool:
++	return false
++
++## {"board_id": String, "cell": Vector2i} for an encounter wave unit entry.
++func resolve_spawn_location(_unit_entry: Dictionary) -> Dictionary:
++	return {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE}
++
++func has_zone(_zone_id: String) -> bool:
++	return false
++
++func anchor_fits(_zone_id: String, _footprint: Vector2i, _cell: Vector2i) -> bool:
++	return false
++
++func nearest_free_anchor(_zone_id: String, _footprint: Vector2i, _cell: Vector2i) -> Vector2i:
++	return BaseCombatant.BOARD_ANCHOR_NONE
++
++func place_unit_at(_unit: BaseCombatant, _zone_id: String, _anchor: Vector2i) -> bool:
++	return false
++
++## Places at cell or the nearest free anchor of the zone (summons).
++func place_unit_nearest(_unit: BaseCombatant, _cell: Vector2i, _zone_id: String = "") -> bool:
++	return false
++#endregion
+diff --git a/scripts/combat/UnitSpawner.gd b/scripts/combat/UnitSpawner.gd
+index b6e574551e42771d70fa4e33ca916632b6084a5c..a13a1be806178b7d5dbf8ff9642773ab4bea007c 100644
+--- a/scripts/combat/UnitSpawner.gd
++++ b/scripts/combat/UnitSpawner.gd
+@@ -1,6 +1,7 @@
+ ## Unit spawning of one combat, owned by CombatDirector: spawns encounter wave units through the
+-## combat's unit layer (EnemyContainer), optionally placing them on a mounted board, and spawns
+-## board summons (ActionSummonEnemies with spawn cells). NONE retains ordinary enemy layout.
++## combat's unit layer (EnemyContainer), optionally placing them through a mounted placement
++## module (CombatModule.places_units, e.g. the board: zone id + anchor cell), and spawns positional
++## summons (ActionSummonEnemies with spawn cells). Without one, ordinary enemy layout is kept.
+ ## A RefCounted created per combat.
+ ## Wave 0 spawns when combat starts (units act at enter delay + stagger * index + spawn delay).
+ ## Later waves are scheduled by WaveController: a wave-start entry at the wave's start tick and one
+@@ -58,14 +59,16 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
+ 		if enemy_object_id == "":
+ 			index += 1
+ 			continue
+-		var board_id: String = _entry_board_id(unit_entry)
+-		var cell: Vector2i = _entry_cell(unit_entry)
++		var location: Dictionary = _entry_location(unit_entry)
++		var board_id: String = location.board_id
++		var cell: Vector2i = location.cell
+ 		var tick: int = _entry_tick(wave, 0, index, unit_entry)
+ 		var entry: Dictionary = _unit_entry(0, tick, enemy_object_id, cell, board_id)
+ 		var enemy: Enemy = unit_layer.spawn_event_enemy(event_data, enemy_object_id, index)
+ 		if enemy == null:
+ 			break	# positional events stop when their slots run out (legacy)
+-		if not director.has_board_module():
++		var placement: CombatModule = director.get_placement_module()
++		if placement == null:
+ 			if tick > 0:
+ 				spawn_delays[enemy.unit_uid] = tick
+ 			index += 1
+@@ -75,8 +78,7 @@ func spawn_first_wave(event_data: EventData, encounter: EncounterData) -> void:
+ 			_discard(enemy)
+ 			index += 1
+ 			continue
+-		var board: BoardData = _board(board_id)
+-		if board == null or not board.place(enemy, anchor):
++		if not placement.place_unit_at(enemy, board_id, anchor):
+ 			_discard(enemy)
+ 			if wave.wave_spawn_policy == EncounterWaveData.SPAWN_POLICIES.FAIL_SKIP or not _retry(entry, wave):
+ 				_skip(entry, "placement failed")
+@@ -101,7 +103,8 @@ func schedule_wave(wave_index: int, start_tick: int) -> void:
+ 	for unit_entry: Dictionary in wave.wave_units:
+ 		var enemy_object_id: String = _pick_enemy(unit_entry)
+ 		if enemy_object_id != "":
+-			_insert(_unit_entry(wave_index, start_tick + max(0, wave.wave_stagger_ticks) * index + max(0, int(unit_entry.get("spawn_delay_ticks", 0))), enemy_object_id, _entry_cell(unit_entry), _entry_board_id(unit_entry)))
++			var location: Dictionary = _entry_location(unit_entry)
++			_insert(_unit_entry(wave_index, start_tick + max(0, wave.wave_stagger_ticks) * index + max(0, int(unit_entry.get("spawn_delay_ticks", 0))), enemy_object_id, location.cell, location.board_id))
+ 		index += 1
+ 
+ func has_pending() -> bool:
+@@ -128,7 +131,8 @@ func enter_due(tick: int) -> void:
+ 			_enter_unit(entry)
+ 
+ func _enter_unit(entry: Dictionary) -> void:
+-	if not director.has_board_module():
++	var placement: CombatModule = director.get_placement_module()
++	if placement == null:
+ 		_enter_unpositioned_unit(entry)
+ 		return
+ 	var wave: EncounterWaveData = director.encounter.encounter_waves[entry["wave"]]
+@@ -136,20 +140,19 @@ func _enter_unit(entry: Dictionary) -> void:
+ 	var anchor: Vector2i = _placement_anchor(entry, wave, footprint)
+ 	if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
+ 		return
+-	var board: BoardData = _board(entry["board_id"])
+ 	var unit_layer: Node = get_unit_layer()
+ 	var enemy: Enemy = unit_layer.spawn_board_enemy(entry["enemy_object_id"]) if unit_layer != null else null
+ 	if enemy == null:
+ 		_skip(entry, "no unit layer")
+ 		return
+-	if board == null or not board.place(enemy, anchor):
++	if not placement.place_unit_at(enemy, entry["board_id"], anchor):
+ 		_discard(enemy)
+ 		if wave.wave_spawn_policy == EncounterWaveData.SPAWN_POLICIES.FAIL_SKIP or not _retry(entry, wave):
+ 			_skip(entry, "placement failed")
+ 		return
+ 	director.admit_wave_unit(enemy)
+ 
+-## NONE retains wave timing and unit registration without inventing board coordinates.
++## Without a placement module: wave timing and unit registration, no invented coordinates.
+ func _enter_unpositioned_unit(entry: Dictionary) -> void:
+ 	var unit_layer: Node = get_unit_layer()
+ 	var enemy: Enemy = unit_layer.spawn_board_enemy(entry["enemy_object_id"]) if unit_layer != null else null
+@@ -158,15 +161,16 @@ func _enter_unpositioned_unit(entry: Dictionary) -> void:
+ 		return
+ 	director.admit_wave_unit(enemy)
+ 
+-## Both initial and later waves use the same local retry policy. Never spill into another board.
++## Both initial and later waves use the same local retry policy. Never spill into another zone.
+ func _placement_anchor(entry: Dictionary, wave: EncounterWaveData, footprint: Vector2i) -> Vector2i:
+-	var board: BoardData = _board(entry["board_id"])
+-	if board == null:
++	var placement: CombatModule = director.get_placement_module()
++	var zone: String = entry["board_id"]
++	if placement == null or not placement.has_zone(zone):
+ 		_skip(entry, "unknown board")
+ 		return BaseCombatant.BOARD_ANCHOR_NONE
+ 	var cell: Vector2i = entry["cell"]
+ 	var anchor: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
+-	if board.footprint_fits(footprint, cell):
++	if placement.anchor_fits(zone, footprint, cell):
+ 		anchor = cell
+ 	else:
+ 		match wave.wave_spawn_policy:
+@@ -176,7 +180,7 @@ func _placement_anchor(entry: Dictionary, wave: EncounterWaveData, footprint: Ve
+ 			EncounterWaveData.SPAWN_POLICIES.WAIT_UNTIL_FREE:
+ 				if _retry(entry, wave):
+ 					return BaseCombatant.BOARD_ANCHOR_NONE
+-		anchor = board.nearest_empty_anchor_for_footprint(footprint, cell)
++		anchor = placement.nearest_free_anchor(zone, footprint, cell)
+ 		if anchor == BaseCombatant.BOARD_ANCHOR_NONE:
+ 			# full board: wait like WAIT_UNTIL_FREE (NEAREST_EMPTY), else give up
+ 			if wave.wave_spawn_policy != EncounterWaveData.SPAWN_POLICIES.NEAREST_EMPTY or not _retry(entry, wave):
+@@ -210,7 +214,7 @@ func _insert(entry: Dictionary) -> void:
+ 	pending.insert(position, entry)
+ 
+ func _unit_entry(wave_index: int, tick: int, enemy_object_id: String, cell: Vector2i, board_id: String = "") -> Dictionary:
+-	return {"kind": KIND_UNIT, "tick": tick, "wave": wave_index, "enemy_object_id": enemy_object_id, "board_id": _entry_board_id({"board_id": board_id}), "cell": cell, "retries": 0}
++	return {"kind": KIND_UNIT, "tick": tick, "wave": wave_index, "enemy_object_id": enemy_object_id, "board_id": board_id, "cell": cell, "retries": 0}
+ 
+ ## First action tick of a wave-0 unit: enter delay + stagger * index + spawn delay.
+ func _entry_tick(wave: EncounterWaveData, start_tick: int, index: int, unit_entry: Dictionary) -> int:
+@@ -224,29 +228,13 @@ func _pick_enemy(unit_entry: Dictionary) -> String:
+ 	var rng_enemy_spawning: RandomNumberGenerator = Global.player_data.get_player_rng("rng_enemy_spawning")
+ 	return Random.get_weighted_selection(rng_enemy_spawning, weights)
+ 
+-## Entry cell, or the default spawn origin when missing / off the board.
+-func _entry_cell(unit_entry: Dictionary) -> Vector2i:
+-	if not director.has_board_module():
+-		return BaseCombatant.BOARD_ANCHOR_NONE
+-	var board_id: String = _entry_board_id(unit_entry)
+-	var board: BoardData = _board(board_id)
+-	if board == null:
+-		return BaseCombatant.BOARD_ANCHOR_NONE
+-	var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
+-	if not board.is_in_bounds(cell):
+-		cell = director.board_controller.default_spawn_origin(board_id)
+-	return cell
+-
+-func _entry_board_id(unit_entry: Dictionary) -> String:
+-	if not director.has_board_module():
+-		return ""
+-	var board_id: String = str(unit_entry.get("board_id", ""))
+-	if board_id == "" and director.battlefield != null:
+-		return director.battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
+-	return board_id
+-
+-func _board(board_id: String) -> BoardData:
+-	return director.battlefield.get_board(board_id) if director.battlefield != null else null
++## Entry zone and cell from the placement module (default zone / spawn origin when missing or
++## off the board); no position without one.
++func _entry_location(unit_entry: Dictionary) -> Dictionary:
++	var placement: CombatModule = director.get_placement_module()
++	if placement == null:
++		return {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE}
++	return placement.resolve_spawn_location(unit_entry)
+ 
+ func _footprint_of(enemy_object_id: String) -> Vector2i:
+ 	var enemy_data: EnemyData = Global.get_enemy_data(enemy_object_id)
+@@ -255,15 +243,18 @@ func _footprint_of(enemy_object_id: String) -> Vector2i:
+ 	return Vector2i(max(1, enemy_data.enemy_footprint.x), max(1, enemy_data.enemy_footprint.y))
+ #endregion
+ 
+-## Spawns an enemy mid-combat on the board (ActionSummonEnemies with spawn cells): placed at cell or
+-## the nearest empty cell. null = no unit layer / board, or the board is full.
++## Spawns an enemy mid-combat at a module position (ActionSummonEnemies with spawn cells): placed
++## at cell or the nearest free anchor. null = no unit layer / placement module, or no free anchor.
+ func spawn_enemy_at_cell(enemy_object_id: String, cell: Vector2i, board_id: String = "") -> Enemy:
+ 	var unit_layer: Node = get_unit_layer()
+-	var board_controller: BoardController = director.board_controller
+-	if unit_layer == null or board_controller == null or _board(_entry_board_id({"board_id": board_id})) == null:
++	var placement: CombatModule = director.get_placement_module()
++	if unit_layer == null or placement == null:
++		return null
++	var zone: String = str(placement.resolve_spawn_location({"board_id": board_id}).board_id)
++	if not placement.has_zone(zone):
+ 		return null
+ 	var enemy: Enemy = unit_layer.spawn_board_enemy(enemy_object_id)
+-	if enemy != null and not board_controller.place_unit_nearest(enemy, cell, board_id):
++	if enemy != null and not placement.place_unit_nearest(enemy, cell, board_id):
+ 		_discard(enemy)
+ 		return null
+ 	return enemy
+diff --git a/scripts/combat/board/BoardCardAdapter.gd b/scripts/combat/board/BoardCardAdapter.gd
+index 2f84e760bd0e5cfc7cee80159e44e59322899524..a03a2faa352f62a9200e6f876a08b402c5ef0abc 100644
+--- a/scripts/combat/board/BoardCardAdapter.gd
++++ b/scripts/combat/board/BoardCardAdapter.gd
+@@ -1,60 +1,59 @@
+-## Optional spatial card policy, installed by the combat scene even when disabled so
+-## explicitly spatial content is rejected before payment rather than silently misplayed.
++## Spatial card policy supplied by the mounted BoardCombatModule (CombatModule.get_card_play_adapter).
++## Unmounted combat uses the core CardPlayAdapter, which refuses board content before fees through
++## CombatContentRequirements, so this class is never needed (or loaded) without the module.
+ extends CardPlayAdapter
+ class_name BoardCardAdapter
+ 
+-var combat_ref: WeakRef
++var module_ref: WeakRef
+ var input: BoardCardInput = null
+ 
+-func _init(combat: Node = null) -> void:
+-	combat_ref = weakref(combat) if combat != null else null
++func _init(module: Node = null) -> void:
++	module_ref = weakref(module) if module != null else null
++
++func _module() -> BoardCombatModule:
++	var module: Variant = module_ref.get_ref() if module_ref != null else null
++	return module as BoardCombatModule if is_instance_valid(module) else null
+ 
+ func _battlefield() -> CombatBattlefield:
+-	var combat: Node = combat_ref.get_ref() if combat_ref != null else null
+-	if not is_instance_valid(combat):
+-		return null
+-	var director: CombatDirector = combat.get("combat_director")
+-	return director.battlefield if director != null else null
++	var module: BoardCombatModule = _module()
++	return module.battlefield if module != null else null
+ 
+ ## Old serialized defaults stay ordinary; explicit spatial metadata/actions opt in.
+ static func uses_board(card: CardData, request_values: Dictionary = {}) -> bool:
+-	if card == null:
+-		return false
+-	var context: Dictionary = card.card_values.duplicate()
+-	context.merge(request_values, true)
+-	return not BoardCardOptions.options(card).is_empty() or BoardCardOptions.range_of(card) != -1 or BoardCardOptions.shape_of(card) != 0 or BoardCardOptions.faction_of(card) != 0 or card.card_move_distance != 0 or BoardContentPolicy.requires_board(card.card_play_actions, context) or BoardContentPolicy.requires_board(card.card_play_validators, context) or BoardContentPolicy.requires_board(context, context)
++	return BoardContentPolicy.card_uses_board(card, request_values)
+ 
+ func needs_selection(card: CardData) -> bool:
+ 	return BoardTargeting.card_needs_cell(card) if uses_board(card) else super.needs_selection(card)
+ 
+ func prepare_request(request: CardPlayRequest, selection: Dictionary = {}) -> String:
+-	super.prepare_request(request, selection)
++	var base_reason: String = super.prepare_request(request, selection)
++	if base_reason != "":
++		return base_reason
+ 	if not uses_board(request.card_data, request.card_values):
+ 		# Translate optional cell input back to the ordinary enemy-click contract.
+ 		# Empty/friendly cells cannot become a paid null-target play or self-attack.
+ 		if selection.get("cell", BaseCombatant.BOARD_ANCHOR_NONE) != BaseCombatant.BOARD_ANCHOR_NONE and request.card_data.card_requires_target:
+ 			var selected_board: BoardData = _selection_board(request, str(selection.get("id", "")))
+ 			if selected_board == null:
+-				return _reject(request, "board_module_required")
++				return reject(request, "board_module_required")
+ 			var target: BaseCombatant = selected_board.get_unit_at(selection.cell)
+ 			if not target is Enemy or not target.is_alive() or target.faction != BaseCombatant.FACTIONS.ENEMY:
+-				return _reject(request, "no_valid_target")
++				return reject(request, "no_valid_target")
+ 			request.selected_target = target
+ 		return ""
+ 	var battlefield: CombatBattlefield = _battlefield()
+ 	if battlefield == null:
+-		return _reject(request, "board_module_required")
++		return reject(request, "board_module_required")
+ 	var acting: BaseCombatant = request.acting_unit if is_instance_valid(request.acting_unit) else UnitRegistry.get_hero()
+ 	request.acting_unit = acting
+-	var cell: Vector2i = selection.get("cell", request.selected_cell)
+-	var id: String = selection.get("id", request.selected_board_id)
++	var cell: Vector2i = selection.get("cell", BoardCardOptions.selected_cell(request))
++	var id: String = selection.get("id", BoardCardOptions.selected_board_id(request))
+ 	if id == "" and is_instance_valid(acting):
+ 		id = acting.board_id
+ 	var board: BoardData = battlefield.get_board(id)
+ 	if board == null:
+-		return _reject(request, "invalid_board")
+-	request.selected_cell = cell
+-	request.selected_board_id = id
++		return reject(request, "invalid_board")
++	BoardCardOptions.set_selection(request, cell, id)
+ 	if cell != BaseCombatant.BOARD_ANCHOR_NONE:
+ 		match BoardCardOptions.faction_of(request.card_data):
+ 			BoardTargeting.TARGET_FACTIONS.EMPTY_CELL:
+@@ -71,7 +70,7 @@ func prepare_request(request: CardPlayRequest, selection: Dictionary = {}) -> St
+ 	if reason == "" and BoardContentPolicy.requires_board(request.card_data.card_play_validators, request.card_values):
+ 		var action: BaseAction = ActionGenerator.create_actions(acting, request, [request.selected_target], [{Scripts.ACTION_CARD_PLAY: {}}], null)[0]
+ 		if not Global.validate(request.card_data.card_play_validators, request.card_data, action):
+-			reason = _reject(request, BoardTargeting.REJECT_VALIDATORS)
++			reason = reject(request, BoardTargeting.REJECT_VALIDATORS)
+ 	return reason
+ 
+ func _selection_board(request: CardPlayRequest, id: String) -> BoardData:
+@@ -83,32 +82,28 @@ func _selection_board(request: CardPlayRequest, id: String) -> BoardData:
+ 		id = actor.board_id
+ 	return battlefield.get_board(id)
+ 
+-func _reject(request: CardPlayRequest, reason: String) -> String:
+-	request.card_values["board_rejection"] = reason
+-	return reason
+-
+ func validate_request(request: CardPlayRequest) -> String:
+-	if request == null or not uses_board(request.card_data, request.card_values):
+-		return ""
++	var base_reason: String = super.validate_request(request)
++	if base_reason != "" or request == null or not uses_board(request.card_data, request.card_values):
++		return base_reason
+ 	if _battlefield() == null:
+-		return _reject(request, "board_module_required")
++		return reject(request, "board_module_required")
+ 	var lifetime_error: String = _bind_or_check_lifetime(request)
+ 	if lifetime_error != "":
+-		return _reject(request, lifetime_error)
++		return reject(request, lifetime_error)
+ 	var reason: String = _validate_geometry(request)
+-	return _reject(request, reason) if reason != "" else ""
++	return reject(request, reason) if reason != "" else ""
+ 
+ ## A queued request belongs to one module instance and one director generation.
+ func _bind_or_check_lifetime(request: CardPlayRequest) -> String:
+-	var combat: Node = combat_ref.get_ref() if combat_ref != null else null
+-	var director: CombatDirector = combat.get("combat_director") if is_instance_valid(combat) else null
+-	var module: Node = director.get("board_module") if director != null else null
+-	if module == null:
++	var module: BoardCombatModule = _module()
++	var director: CombatDirector = module.attached_director() if module != null else null
++	if director == null or director.board_module != module:
+ 		return "board_module_required"
+ 	var context: Dictionary = request.module_contexts.get("board", {})
+ 	var identity: int = module.get_instance_id()
+ 	var generation: int = director.get_generation()
+-	var module_generation: int = int(module.get("generation"))
++	var module_generation: int = module.generation
+ 	if context.has("module_instance_id") and (context.module_instance_id != identity or context.get("generation", -1) != generation or context.get("module_generation", -1) != module_generation):
+ 		return "stale_board_context"
+ 	context["module_instance_id"] = identity
+@@ -124,8 +119,8 @@ func _validate_geometry(request: CardPlayRequest) -> String:
+ 	var acting: BaseCombatant = request.acting_unit if is_instance_valid(request.acting_unit) else UnitRegistry.get_hero()
+ 	if acting == null or battlefield.get_board_for_unit(acting) == null:
+ 		return "off_board"
+-	var cell: Vector2i = request.selected_cell
+-	var board_id: String = request.selected_board_id
++	var cell: Vector2i = BoardCardOptions.selected_cell(request)
++	var board_id: String = BoardCardOptions.selected_board_id(request)
+ 	if is_instance_valid(request.selected_target):
+ 		# A selected unit may have moved since the request was queued. Follow its actual position.
+ 		var current_board: BoardData = battlefield.get_board_for_unit(request.selected_target)
+@@ -145,8 +140,7 @@ func _validate_geometry(request: CardPlayRequest) -> String:
+ 		return "off_board"
+ 	var reason: String = BoardTargeting.check_card_target(board, acting, request.card_data, cell, request.card_values)
+ 	if reason == "":
+-		request.selected_board_id = board_id
+-		request.selected_cell = cell
++		BoardCardOptions.set_selection(request, cell, board_id)
+ 		request.resolved_targets = BoardTargeting.resolve_targets(board, acting, cell, BoardCardOptions.shape_of(request.card_data), BoardCardOptions.faction_of(request.card_data), BoardCardOptions.range_of(request.card_data))
+ 	return reason
+ 
+@@ -189,11 +183,3 @@ func unbind_hand() -> void:
+ 	if input != null:
+ 		input.unbind()
+ 	input = null
+-
+-func handle_cell_clicked(hand: Hand, id: String, cell: Vector2i) -> void:
+-	if _battlefield() != null:
+-		BoardCardInput.click(self, hand, id, cell)
+-
+-func handle_cell_hovered(hand: Hand, id: String, cell: Vector2i) -> void:
+-	if _battlefield() != null:
+-		BoardCardInput.hover(self, hand, id, cell)
+diff --git a/scripts/combat/board/BoardCardInput.gd b/scripts/combat/board/BoardCardInput.gd
+index 6557494135235dddbace7e778c33d19d00026bb1..4d95618f3f7f7949ee3ae44755563fc9fefe75a8 100644
+--- a/scripts/combat/board/BoardCardInput.gd
++++ b/scripts/combat/board/BoardCardInput.gd
+@@ -29,19 +29,19 @@ func _on_cell_hovered(cell: Vector2i) -> void:
+ func _on_board_cell_clicked(id: String, cell: Vector2i) -> void:
+ 	var adapter: BoardCardAdapter = adapter_ref.get_ref()
+ 	var hand: Hand = hand_ref.get_ref()
+-	if adapter != null and is_instance_valid(hand):
+-		adapter.handle_cell_clicked(hand, id, cell)
++	if adapter != null and is_instance_valid(hand) and adapter._battlefield() != null:
++		click(adapter, hand, id, cell)
+ 
+ func _on_board_cell_hovered(id: String, cell: Vector2i) -> void:
+ 	var adapter: BoardCardAdapter = adapter_ref.get_ref()
+ 	var hand: Hand = hand_ref.get_ref()
+-	if adapter != null and is_instance_valid(hand):
+-		adapter.handle_cell_hovered(hand, id, cell)
++	if adapter != null and is_instance_valid(hand) and adapter._battlefield() != null:
++		hover(adapter, hand, id, cell)
+ 
+ static func click(adapter: BoardCardAdapter, hand: Hand, id: String, cell: Vector2i) -> void:
+-	if hand.current_card_pick_action != null:
++	if hand.is_picking_cards():
+ 		return
+-	var acting: BaseCombatant = hand._get_acting_unit()
++	var acting: BaseCombatant = hand.get_acting_unit()
+ 	if id == "" and acting != null:
+ 		id = acting.board_id
+ 	if hand.current_selected_card != null:
+@@ -51,16 +51,16 @@ static func click(adapter: BoardCardAdapter, hand: Hand, id: String, cell: Vecto
+ 			return
+ 		hand.attempt_play_selected_card({"target": board.get_unit_at(cell), "cell": cell, "id": id})
+ 		return
+-	if hand.hand_disabled or hand.performing_card_right_click:
++	if hand.is_input_locked():
+ 		return
+-	var director: CombatDirector = Global.get_combat_director()
+-	if director != null and acting != null and acting.board_id == id:
+-		director.request_player_move(cell, id)
++	var module: BoardCombatModule = adapter._module()
++	if module != null and acting != null and acting.board_id == id:
++		module.request_acting_unit_move(cell, id)
+ 
+ static func hover(adapter: BoardCardAdapter, hand: Hand, id: String, cell: Vector2i) -> void:
+ 	if hand.current_selected_card == null:
+ 		return
+-	var acting: BaseCombatant = hand._get_acting_unit()
++	var acting: BaseCombatant = hand.get_acting_unit()
+ 	if id == "" and acting != null:
+ 		id = acting.board_id
+ 	var board: BoardData = adapter._battlefield().get_board(id)
+diff --git a/scripts/combat/board/BoardCardOptions.gd b/scripts/combat/board/BoardCardOptions.gd
+index 4d35b31834457b6506369585486343151d43ec05..f9e1e4e8c99e96f1f8374e2c36e1fd888ef839c4 100644
+--- a/scripts/combat/board/BoardCardOptions.gd
++++ b/scripts/combat/board/BoardCardOptions.gd
+@@ -17,3 +17,20 @@ static func shape_of(card: CardData) -> int:
+ 
+ static func faction_of(card: CardData) -> int:
+ 	return int(options(card).get("target_faction", card.card_target_faction))
++
++## Board selection of a card play, stored in the request's "board" module context.
++static func selected_cell(request: CardPlayRequest) -> Vector2i:
++	if request == null:
++		return BaseCombatant.BOARD_ANCHOR_NONE
++	return request.module_contexts.get("board", {}).get("cell", BaseCombatant.BOARD_ANCHOR_NONE)
++
++static func selected_board_id(request: CardPlayRequest) -> String:
++	if request == null:
++		return ""
++	return str(request.module_contexts.get("board", {}).get("id", ""))
++
++static func set_selection(request: CardPlayRequest, cell: Vector2i, board_id: String) -> void:
++	var context: Dictionary = request.module_contexts.get("board", {})
++	context["cell"] = cell
++	context["id"] = board_id
++	request.module_contexts["board"] = context
+diff --git a/scripts/combat/board/BoardCombatModule.gd b/scripts/combat/board/BoardCombatModule.gd
+index 2fb3502d38494836f7284f4f3ae5e3c3059e2ec4..c384624adf0f166f3b608d835b90f0213c256653 100644
+--- a/scripts/combat/board/BoardCombatModule.gd
++++ b/scripts/combat/board/BoardCombatModule.gd
+@@ -1,8 +1,11 @@
+-## Optional combat component, composed by Combat rather than by the CTB core.
+-## An unmounted combat has no BoardController, FieldController or ThreatPreview.
+-extends Node
++## Optional board module (CombatModule), composed by Combat rather than by the CTB core.
++## An unmounted combat has no BoardController, FieldController or ThreatPreview, and the core
++## never names any class of this folder: removing the module keeps ordinary combat working.
++extends CombatModule
+ class_name BoardCombatModule
+ 
++const MODULE_ID: StringName = &"board"
++
+ var director: CombatDirector = null
+ var board_controller: BoardController = null
+ var threat_preview: ThreatPreview = null
+@@ -11,11 +14,39 @@ var presentation: BoardCombatPresentation = null
+ var generation: int = 0
+ ## Retained weakly after clear so a later tree exit can detach the old instance safely.
+ var _director_ref: WeakRef = null
++## Spatial card policy; Combat exposes it as card_play_adapter while this module is mounted.
++var card_adapter: BoardCardAdapter = null
++var battlefield: CombatBattlefield:
++	get:
++		return board_controller.battlefield if board_controller != null else null
++## Legacy query seam: shared board in SINGLE, party board in DUAL.
++var board: BoardData:
++	get:
++		return board_controller.board if board_controller != null else null
++var field_controller: FieldController:
++	get:
++		return board_controller.field_controller if board_controller != null else null
++
++func _init() -> void:
++	card_adapter = BoardCardAdapter.new(self)
++
++func get_module_id() -> StringName:
++	return MODULE_ID
++
++func get_card_play_adapter() -> CardPlayAdapter:
++	return card_adapter
++
++## The director this module was last set up with (kept weakly across clear()).
++func attached_director() -> CombatDirector:
++	return _director_ref.get_ref() as CombatDirector if _director_ref != null else null
+ 
+ func setup(combat_director: CombatDirector, encounter: EncounterData) -> bool:
+ 	clear()
+ 	director = combat_director
+ 	_director_ref = weakref(combat_director)
++	return _setup_resources(encounter)
++
++func _setup_resources(encounter: EncounterData) -> bool:
+ 	board_controller = BoardController.new(director.rules)
+ 	if not board_controller.setup(encounter):
+ 		clear()
+@@ -67,7 +98,7 @@ func _exit_tree() -> void:
+ 	var attached_director: CombatDirector = _director_ref.get_ref() as CombatDirector if _director_ref != null else null
+ 	clear()
+ 	if is_instance_valid(attached_director):
+-		attached_director.detach_board_module(self)
++		attached_director.detach_module(self)
+ 	_director_ref = null
+ 
+ ## Admission of a regular summon. Missing board membership in mounted mode is not NONE.
+@@ -101,7 +132,7 @@ func on_action_started(unit: BaseCombatant) -> void:
+ 	if fields != null:
+ 		fields.on_unit_action_started(unit)
+ 
+-func advance_fields(previous_tick: int, current_tick: int) -> void:
++func on_clock_advanced(previous_tick: int, current_tick: int) -> void:
+ 	if board_controller != null:
+ 		board_controller.advance_fields(previous_tick, current_tick)
+ 
+@@ -132,18 +163,75 @@ func _refresh_display() -> void:
+ 	if director != null:
+ 		director.refresh_threats()
+ 
++func handles_enemy_intents() -> bool:
++	return true
++
++func incoming_damage_for(hero: BaseCombatant, recalculate: bool) -> int:
++	if threat_preview == null or director == null or not director.is_running:
++		return -1
++	if recalculate:
++		threat_preview.refresh()
++	return threat_preview.incoming_damage_for(hero)
++
+ func perform_enemy_intent(enemy: Enemy) -> void:
+ 	await BoardEnemyIntent.perform_intent(director, enemy)
+ 
+ func resolve_action_targets(action: BaseAction, override: int, force_dead: bool) -> Array[BaseCombatant]:
+ 	return BoardActionTargets.resolve(action, override, force_dead)
+ 
+-func place_unit_nearest(unit: BaseCombatant, cell: Vector2i) -> bool:
+-	return board_controller != null and board_controller.place_unit_nearest(unit, cell)
++#region Positions (CombatModule spatial hooks)
++func places_units() -> bool:
++	return board_controller != null and board_controller.battlefield != null
++
++func resolve_spawn_location(unit_entry: Dictionary) -> Dictionary:
++	var location: Dictionary = {"board_id": "", "cell": BaseCombatant.BOARD_ANCHOR_NONE}
++	if not places_units():
++		return location
++	var board_id: String = str(unit_entry.get("board_id", ""))
++	if board_id == "":
++		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
++	location.board_id = board_id
++	var current: BoardData = battlefield.get_board(board_id)
++	if current == null:
++		return location
++	var cell: Vector2i = EncounterData.cell_from_json(unit_entry.get("cell", null))
++	if not current.is_in_bounds(cell):
++		cell = board_controller.default_spawn_origin(board_id)
++	location.cell = cell
++	return location
++
++func has_zone(zone_id: String) -> bool:
++	return places_units() and battlefield.get_board(zone_id) != null
++
++func anchor_fits(zone_id: String, footprint: Vector2i, cell: Vector2i) -> bool:
++	var current: BoardData = battlefield.get_board(zone_id) if places_units() else null
++	return current != null and current.footprint_fits(footprint, cell)
++
++func nearest_free_anchor(zone_id: String, footprint: Vector2i, cell: Vector2i) -> Vector2i:
++	var current: BoardData = battlefield.get_board(zone_id) if places_units() else null
++	return current.nearest_empty_anchor_for_footprint(footprint, cell) if current != null else BaseCombatant.BOARD_ANCHOR_NONE
+ 
++func place_unit_at(unit: BaseCombatant, zone_id: String, anchor: Vector2i) -> bool:
++	var current: BoardData = battlefield.get_board(zone_id) if places_units() else null
++	return current != null and current.place(unit, anchor)
++
++func place_unit_nearest(unit: BaseCombatant, cell: Vector2i, zone_id: String = "") -> bool:
++	return board_controller != null and board_controller.place_unit_nearest(unit, cell, zone_id)
++#endregion
++
++#region Player movement (input gated by the core: CombatDirector.can_request_player_input)
++func _acting_party_unit() -> BaseCombatant:
++	if director == null or not director.can_request_player_input():
++		return null
++	return director.acting_unit
++
++## Cells the acting party unit can still move this action: free move points plus paid cells.
+ func get_move_budget(unit: BaseCombatant) -> int:
+ 	return board_controller.get_move_budget(unit) if board_controller != null else 0
+ 
++## Player movement input (BoardView click on an empty cell): moves the acting party unit along the
++## previewed path, spending free move points first, then paid cells (+extra_move_delay_per_cell).
++## false = not the player's action, busy, or the cell is not reachable within the budget.
+ func request_player_move(unit: BaseCombatant, cell: Vector2i, board_id: String = "") -> bool:
+ 	if board_controller == null or not is_instance_valid(unit) or unit.faction != BaseCombatant.FACTIONS.PARTY:
+ 		return false
+@@ -151,13 +239,23 @@ func request_player_move(unit: BaseCombatant, cell: Vector2i, board_id: String =
+ 		return false
+ 	return board_controller.move_party_unit(unit, cell)
+ 
+-func can_player_undo_move(unit: BaseCombatant) -> bool:
++## Input entry: only the acting party unit during its pending action.
++func request_acting_unit_move(cell: Vector2i, board_id: String = "") -> bool:
++	var unit: BaseCombatant = _acting_party_unit()
++	return unit != null and request_player_move(unit, cell, board_id)
++
++func can_player_undo_move(unit: BaseCombatant = null) -> bool:
++	if unit == null:
++		unit = _acting_party_unit()
+ 	if board_controller == null or not is_instance_valid(unit) or unit.faction != BaseCombatant.FACTIONS.PARTY:
+ 		return false
+ 	var current: BoardData = board_controller.get_board_for_unit(unit)
+ 	return current != null and current.can_undo_move(unit)
+ 
+-func request_player_undo_move(unit: BaseCombatant) -> bool:
++func request_player_undo_move(unit: BaseCombatant = null) -> bool:
++	if unit == null:
++		unit = _acting_party_unit()
+ 	if not can_player_undo_move(unit):
+ 		return false
+ 	return board_controller.get_board_for_unit(unit).undo_move(unit)
++#endregion
+diff --git a/scripts/combat/board/BoardContentPolicy.gd b/scripts/combat/board/BoardContentPolicy.gd
+index ed22769a235cd3f0c5e76522891b6c6bdf9d508b..fcf0cd3485de9ea27b8749fd633bb29c6d8c82fd 100644
+--- a/scripts/combat/board/BoardContentPolicy.gd
++++ b/scripts/combat/board/BoardContentPolicy.gd
+@@ -1,28 +1,11 @@
+-## Conservative detection for optional spatial content; shared by card and intent adapters.
+-## Values may contain nested wrapper payloads and aliases into request/card values.
++## Board-module view of the core content requirements (CombatContentRequirements), shared by the
++## card adapter and board intents. The detection itself lives in the core so it also works when
++## this module is unmounted or removed.
+ extends RefCounted
+ class_name BoardContentPolicy
+ 
+-static func requires_board(data: Variant, context: Dictionary = {}, depth: int = 0) -> bool:
+-	if depth > 32:
+-		return true # malformed/deep payloads cannot silently bypass the optional-module guard
+-	if data is Array:
+-		for item: Variant in data:
+-			if requires_board(item, context, depth + 1):
+-				return true
+-	elif data is Dictionary:
+-		var aliases: Dictionary = data.get("custom_key_names", {})
+-		var override_key: String = str(aliases.get("target_override", "target_override"))
+-		var override: Variant = data.get(override_key, context.get(override_key, -1))
+-		if override in [BaseAction.TARGET_OVERRIDES.RESOLVED_SHAPE, BaseAction.TARGET_OVERRIDES.UNITS_IN_RANGE, BaseAction.TARGET_OVERRIDES.UNITS_ON_FIELD]:
+-			return true
+-		for key: Variant in data:
+-			if str(key).contains("/board_actions/") or str(key).contains("/validators/board/"):
+-				return true
+-			if requires_board(data[key], context, depth + 1):
+-				return true
+-		# Wrapper action_data may itself be supplied only through a renamed request value.
+-		for alias: Variant in aliases.values():
+-			if context.has(alias) and requires_board(context[alias], context, depth + 1):
+-				return true
+-	return false
++static func requires_board(data: Variant, context: Dictionary = {}) -> bool:
++	return CombatContentRequirements.payload_requires(data, CombatContentRequirements.MODULE_BOARD, context)
++
++static func card_uses_board(card: CardData, request_values: Dictionary = {}) -> bool:
++	return CombatContentRequirements.card_requires(card, CombatContentRequirements.MODULE_BOARD, request_values)
+diff --git a/scripts/combat/board/BoardController.gd b/scripts/combat/board/BoardController.gd
+new file mode 100644
+index 0000000000000000000000000000000000000000..2cc61665a38c01f415b8178265281ad005bce742
+--- /dev/null
++++ b/scripts/combat/board/BoardController.gd
+@@ -0,0 +1,136 @@
++## Owns the boards, field controllers and movement state of one combat.
++## Initial faction selects a home board; all subsequent queries use actual board identity.
++extends RefCounted
++class_name BoardController
++
++var rules: CombatRulesData
++var encounter: EncounterData
++var battlefield: CombatBattlefield
++var field_controllers: Dictionary[String, FieldController] = {}
++## Legacy query seam: shared board in SINGLE, party board in DUAL.
++var board: BoardData:
++	get:
++		return battlefield.get_board(battlefield.default_board_id(BaseCombatant.FACTIONS.PARTY)) if battlefield != null else null
++var field_controller: FieldController:
++	get:
++		return FieldController.for_board(board)
++
++func _init(combat_rules: CombatRulesData) -> void:
++	rules = combat_rules
++
++func setup(encounter_data: EncounterData) -> bool:
++	encounter = encounter_data
++	battlefield = CombatBattlefield.new(encounter, rules)
++	if not battlefield.valid:
++		DebugLogger.log_error("BoardController: " + battlefield.error)
++		return false
++	var shared_opportunities: Dictionary = {}
++	for current: BoardData in battlefield.boards.values():
++		current.movement_state.used_opportunities = shared_opportunities
++		field_controllers[current.board_id] = FieldController.new(current)
++		var config: Dictionary = encounter.get_board_config(current.board_id)
++		var deploy: Array[Vector2i] = EncounterData.cells_from_json(config.deploy_cells)
++		if deploy.is_empty():
++			deploy = default_deploy_cells(current.board_id)
++		for cell: Vector2i in deploy:
++			if current.is_in_bounds(cell):
++				current.get_cell(cell).is_deploy_zone = true
++		var spawn: Array[Vector2i] = EncounterData.cells_from_json(config.spawn_zone_cells)
++		if spawn.is_empty():
++			for y: int in min(2, current.size.y):
++				for x: int in current.size.x:
++					spawn.append(Vector2i(x, y))
++		for cell: Vector2i in spawn:
++			if current.is_in_bounds(cell):
++				current.get_cell(cell).is_spawn_zone = true
++		for entry: Dictionary in config.initial_fields:
++			var data: FieldData = Global.get_field_data(str(entry.get("field_id", "")))
++			if data == null:
++				continue
++			for cell: Vector2i in EncounterData.cells_from_json(entry.get("cells", [])):
++				field_controllers[current.board_id].create_field(data, cell, null, 0, int(entry.get("duration", -2)))
++	var hero: BaseCombatant = UnitRegistry.get_hero()
++	if hero != null:
++		var home: String = battlefield.default_board_id(hero.faction)
++		var deploy: Array[Vector2i] = EncounterData.cells_from_json(encounter.get_board_config(home).deploy_cells)
++		if deploy.is_empty():
++			deploy = default_deploy_cells(home)
++		if not place_unit_nearest(hero, deploy[0], home):
++			return false
++	return true
++
++func clear() -> void:
++	for controller: FieldController in field_controllers.values():
++		controller.clear()
++	field_controllers.clear()
++	battlefield = null
++	encounter = null
++
++func get_board_for_unit(unit: BaseCombatant) -> BoardData:
++	return battlefield.get_board_for_unit(unit) if battlefield != null else null
++
++func get_spawn_board(unit: BaseCombatant, board_id: String = "") -> BoardData:
++	if battlefield == null or not is_instance_valid(unit):
++		return null
++	if board_id != "":
++		return battlefield.get_board(board_id)
++	var existing: BoardData = get_board_for_unit(unit)
++	return existing if existing != null else battlefield.get_board(battlefield.default_board_id(unit.faction))
++
++func default_deploy_cells(board_id: String = "") -> Array[Vector2i]:
++	var current: BoardData = board if board_id == "" else battlefield.get_board(board_id)
++	var cells: Array[Vector2i] = [Vector2i(int(current.size.x / 2), current.size.y - 1)]
++	for y: int in range(current.size.y - 1, max(-1, current.size.y - 3), -1):
++		for x: int in current.size.x:
++			if not cells.has(Vector2i(x, y)):
++				cells.append(Vector2i(x, y))
++	return cells
++
++func default_spawn_origin(board_id: String = "") -> Vector2i:
++	if board_id == "":
++		board_id = battlefield.default_board_id(BaseCombatant.FACTIONS.ENEMY)
++	var current: BoardData = battlefield.get_board(board_id)
++	return Vector2i(int(current.size.x / 2), 0) if current != null else BaseCombatant.BOARD_ANCHOR_NONE
++
++func place_unit_nearest(unit: BaseCombatant, cell: Vector2i, board_id: String = "") -> bool:
++	var current: BoardData = get_spawn_board(unit, board_id)
++	if current == null:
++		return false
++	# Repositioning an admitted unit is movement's responsibility, never faction deployment.
++	var existing: BoardData = get_board_for_unit(unit)
++	if existing != null and existing != current:
++		return false
++	if current.place(unit, cell):
++		return true
++	var anchor: Vector2i = current.nearest_empty_anchor(unit, cell)
++	return anchor != BaseCombatant.BOARD_ANCHOR_NONE and current.place(unit, anchor)
++
++func reset_action_state(unit: BaseCombatant) -> void:
++	for current: BoardData in battlefield.boards.values():
++		current.reset_action_state(unit)
++
++func get_move_budget(unit: BaseCombatant) -> int:
++	return unit.move_points + max(0, rules.paid_move_max_cells - unit.paid_cells_this_action) if unit != null else 0
++
++func move_party_unit(unit: BaseCombatant, cell: Vector2i) -> bool:
++	var current: BoardData = get_board_for_unit(unit)
++	if current == null:
++		return false
++	var reachable: Dictionary = current.reachable_active(unit)
++	if not reachable.has(cell) or reachable[cell].is_empty():
++		return false
++	# Execute exactly the previewed path (BoardView draws reachable_active); re-searching with a
++	# step-limited key could pick an equal-cost path through other fields / control zones.
++	var path: Array = reachable[cell]
++	var actions: Array[BaseAction] = ActionGenerator.create_actions(unit, null, [unit], [{
++		Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": cell, "planned_path": path.duplicate(), "distance": path.size(), "consumes_move_points": true, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
++	}], null)
++	ActionHandler.add_actions(actions)
++	return true
++
++## One sorted queue preserves cross-board tick chronology and generated child ordering.
++func advance_fields(previous: int, current: int) -> void:
++	var controllers: Array[FieldController] = []
++	controllers.assign(field_controllers.values())
++	if current > previous and not controllers.is_empty():
++		ActionHandler.add_ordered_actions([FieldClockAction.new(controllers, previous, current)])
+diff --git a/scripts/combat/board/BoardController.gd.uid b/scripts/combat/board/BoardController.gd.uid
+new file mode 100644
+index 0000000000000000000000000000000000000000..490338a656564d577820e1b7433a8df3457f60bc
+--- /dev/null
++++ b/scripts/combat/board/BoardController.gd.uid
+@@ -0,0 +1 @@
++uid://bu4h7gml718tt
+diff --git a/scripts/combat/board/BoardData.gd b/scripts/combat/board/BoardData.gd
+index 14e2aecfae09f160dcfe1f5758fbd5e02080cd47..da7577066836feb89e8561acc03430b94c634f5c 100644
+--- a/scripts/combat/board/BoardData.gd
++++ b/scripts/combat/board/BoardData.gd
+@@ -92,13 +92,6 @@ static func get_for_unit(unit: BaseCombatant) -> BoardData:
+ 		return director.battlefield.get_board_for_unit(unit)
+ 	return director.board if director.board != null and director.board.has_unit(unit) else null
+ 
+-## The board of the running combat, or null.
+-static func get_active() -> BoardData:
+-	var director: CombatDirector = Global.get_combat_director()
+-	if director == null:
+-		return null
+-	return director.board
+-
+ #region Cells
+ func is_in_bounds(cell: Vector2i) -> bool:
+ 	return cell.x >= 0 and cell.y >= 0 and cell.x < size.x and cell.y < size.y
+@@ -205,20 +198,6 @@ func move(unit: BaseCombatant, anchor: Vector2i) -> bool:
+ 	unit.board_id = board_id
+ 	return true
+ 
+-## Exchanges the anchors of two placed units with equal footprints.
+-func swap(unit_a: BaseCombatant, unit_b: BaseCombatant) -> bool:
+-	if not has_unit(unit_a) or not has_unit(unit_b) or unit_a.footprint != unit_b.footprint:
+-		return false
+-	var anchor_a: Vector2i = unit_a.board_anchor
+-	var anchor_b: Vector2i = unit_b.board_anchor
+-	if not can_teleport(unit_a, anchor_b, [unit_b]) or not can_teleport(unit_b, anchor_a, [unit_a]):
+-		return false
+-	remove(unit_a)
+-	remove(unit_b)
+-	place(unit_a, anchor_b)
+-	place(unit_b, anchor_a)
+-	return true
+-
+ ## Units in the given cells (each once, alive only), optionally filtered by faction (-1 = any).
+ func units_in_cells(cell_list: Array[Vector2i], faction_filter: int = -1) -> Array[BaseCombatant]:
+ 	var returned: Array[BaseCombatant] = []
+diff --git a/scripts/combat/board/BoardMovementState.gd b/scripts/combat/board/BoardMovementState.gd
+index a9fa7934c9fb99392dfebb0ae23e61ae83d4b896..db387d2c3c7d050106040b6ba870edbaaeb15099 100644
+--- a/scripts/combat/board/BoardMovementState.gd
++++ b/scripts/combat/board/BoardMovementState.gd
+@@ -81,8 +81,8 @@ func opportunity_actions_from_controllers(board: BoardData, unit: BaseCombatant,
+ 			continue
+ 		for child: BaseAction in ActionGenerator.create_actions(other, null, [unit], other.opportunity_actions, source):
+ 			# A field can cause the move, but the opportunity attack belongs to its controller.
+-			child.field_owner_bound = true
+-			child.field_owner_uid = other.unit_uid
++			child.owner_bound = true
++			child.owner_uid = other.unit_uid
+ 			result.append(child)
+ 	return result
+ 
+diff --git a/scripts/combat/board/BoardPathfinding.gd b/scripts/combat/board/BoardPathfinding.gd
+index dcaede1f4b38948551ae58275fee645ba890be8a..5214898304af7c6afcd07a450689e8fdde8536d7 100644
+--- a/scripts/combat/board/BoardPathfinding.gd
++++ b/scripts/combat/board/BoardPathfinding.gd
+@@ -84,6 +84,8 @@ static func reachable(board: BoardData, unit: BaseCombatant, budget: int, ignore
+ 
+ ## Paid movement buys a physical step, not each point of expensive terrain.
+ ## Keep resource states separately: a cheapest-cost path may consume more paid cells.
++## The chosen path per cell minimises paid cells (the real price: extra action delay) first,
++## then terrain cost; every resource state is explored, so the comparison is exhaustive.
+ static func reachable_active(board: BoardData, unit: BaseCombatant, ignore_zoc: bool = false, max_steps: int = -1) -> Dictionary:
+ 	var result: Dictionary = {}
+ 	if unit == null or not board.has_unit(unit):
+@@ -92,6 +94,7 @@ static func reachable_active(board: BoardData, unit: BaseCombatant, ignore_zoc:
+ 	var frontier: Array[Dictionary] = [start]
+ 	var seen: Dictionary = {}
+ 	var best_cost: Dictionary = {}
++	var best_paid: Dictionary = {}
+ 	while not frontier.is_empty():
+ 		var best: int = 0
+ 		for index: int in range(1, frontier.size()):
+@@ -103,9 +106,11 @@ static func reachable_active(board: BoardData, unit: BaseCombatant, ignore_zoc:
+ 		if seen.has(key):
+ 			continue
+ 		seen[key] = true
+-		if board.can_stand(unit, entry.cell) and (not best_cost.has(entry.cell) or entry.cost < best_cost[entry.cell]):
++		var paid_used: int = int(start.paid) - int(entry.paid)
++		if board.can_stand(unit, entry.cell) and (not best_cost.has(entry.cell) or paid_used < best_paid[entry.cell] or (paid_used == best_paid[entry.cell] and entry.cost < best_cost[entry.cell])):
+ 			result[entry.cell] = entry.path
+ 			best_cost[entry.cell] = entry.cost
++			best_paid[entry.cell] = paid_used
+ 		if max_steps >= 0 and entry.path.size() >= max_steps:
+ 			continue
+ 		for offset: Vector2i in neighbours(board):
+diff --git a/scripts/combat/board/BoardTargeting.gd b/scripts/combat/board/BoardTargeting.gd
+index 8172b9f3b66cdb411d80816178c009db871a6427..e1f33d2eb2ff0d5a8657303b35effd9c3315ae5d 100644
+--- a/scripts/combat/board/BoardTargeting.gd
++++ b/scripts/combat/board/BoardTargeting.gd
+@@ -220,15 +220,15 @@ static func context_unit(board: BoardData, action: BaseAction, parent: BaseComba
+ ## The explicitly selected board, otherwise the parent's actual board.
+ static func context_board(action: BaseAction, parent: BaseCombatant) -> BoardData:
+ 	var battlefield: CombatBattlefield = CombatBattlefield.get_active()
+-	if action != null and action.card_play_request != null and action.card_play_request.selected_board_id != "" and battlefield != null:
+-		return battlefield.get_board(action.card_play_request.selected_board_id)
++	if action != null and action.card_play_request != null and BoardCardOptions.selected_board_id(action.card_play_request) != "" and battlefield != null:
++		return battlefield.get_board(BoardCardOptions.selected_board_id(action.card_play_request))
+ 	return BoardData.get_for_unit(parent)
+ 
+ ## A validator cell value: "SELECTED_CELL" (BOARD_ANCHOR_NONE if unknown) or [x, y].
+ static func context_cell(action: BaseAction, value: Variant) -> Vector2i:
+ 	if value is String and value == "SELECTED_CELL":
+ 		if action != null and action.card_play_request != null:
+-			return action.card_play_request.selected_cell
++			return BoardCardOptions.selected_cell(action.card_play_request)
+ 		return BaseCombatant.BOARD_ANCHOR_NONE
+ 	return EncounterData.cell_from_json(value)
+ #endregion
+diff --git a/scripts/combat/board/CombatBattlefield.gd b/scripts/combat/board/CombatBattlefield.gd
+index 1e6458dd64efb4025aa79baa5affad75a417c6cc..9d2ee896def09c784d259da19b255e10e8e2e694 100644
+--- a/scripts/combat/board/CombatBattlefield.gd
++++ b/scripts/combat/board/CombatBattlefield.gd
+@@ -101,9 +101,6 @@ func transfer(unit: BaseCombatant, destination: BoardPosition) -> bool:
+ 	unit.board_id = destination.board_id
+ 	return true
+ 
+-func transfer_unit(unit: BaseCombatant, target_board_id: String, target_cell: Vector2i) -> bool:
+-	return transfer(unit, BoardPosition.new(target_board_id, target_cell))
+-
+ func can_swap(a: BaseCombatant, b: BaseCombatant) -> bool:
+ 	if a == null or b == null or not is_instance_valid(a) or not is_instance_valid(b):
+ 		return false
+@@ -145,9 +142,6 @@ func swap(a: BaseCombatant, b: BaseCombatant) -> bool:
+ 	b.board_id = old_a.board_id
+ 	return true
+ 
+-func swap_units(a: BaseCombatant, b: BaseCombatant) -> bool:
+-	return swap(a, b)
+-
+ ## Snapshot only geometry; rollback cannot replay or undo gameplay events because none run here.
+ static func _snapshot(board: BoardData) -> Dictionary:
+ 	var occupants: Dictionary = {}
+diff --git a/scripts/combat/board/FieldActionCells.gd b/scripts/combat/board/FieldActionCells.gd
+index a0eba941a8a3ba87882d0d615b58765bb30b6281..1fa624d1663143d4e394dff769d203764d9177f8 100644
+--- a/scripts/combat/board/FieldActionCells.gd
++++ b/scripts/combat/board/FieldActionCells.gd
+@@ -10,8 +10,8 @@ static func resolve_board(action: BaseAction, explicit_id: Variant = null) -> Bo
+ 		return null
+ 	if explicit_id != null:
+ 		return battlefield.get_board(str(explicit_id))
+-	if action.card_play_request != null and action.card_play_request.selected_board_id != "":
+-		return battlefield.get_board(action.card_play_request.selected_board_id)
++	if action.card_play_request != null and BoardCardOptions.selected_board_id(action.card_play_request) != "":
++		return battlefield.get_board(BoardCardOptions.selected_board_id(action.card_play_request))
+ 	if is_instance_valid(action.parent_combatant):
+ 		return battlefield.get_board_for_unit(action.parent_combatant)
+ 	return null
+@@ -29,14 +29,14 @@ static func resolve(action: BaseAction, board: BoardData, value: Variant, shape_
+ 	if value is String:
+ 		if value == "PARENT_CELL" and is_instance_valid(parent) and board.has_unit(parent):
+ 			cells.append(parent.board_anchor)
+-		elif value == "SELECTED_CELL" and request != null and (request.selected_board_id == "" or request.selected_board_id == board.board_id):
+-			cells.append(request.selected_cell)
++		elif value == "SELECTED_CELL" and request != null and (BoardCardOptions.selected_board_id(request) == "" or BoardCardOptions.selected_board_id(request) == board.board_id):
++			cells.append(BoardCardOptions.selected_cell(request))
+ 	elif value is Vector2i or value is Vector2:
+ 		cells.append(Vector2i(value))
+ 	elif value is Array:
+ 		cells = EncounterData.cells_from_json(value)
+ 	elif value == null and shape_default and request != null:
+-		var selected: Vector2i = request.selected_cell
++		var selected: Vector2i = BoardCardOptions.selected_cell(request)
+ 		if selected == BaseCombatant.BOARD_ANCHOR_NONE and is_instance_valid(request.selected_target):
+ 			selected = request.selected_target.board_anchor
+ 		var shape: int = BoardCardOptions.shape_of(request.card_data) if request.card_data != null else BoardTargeting.TARGET_SHAPES.SINGLE
+diff --git a/scripts/combat/board/FieldClockAction.gd b/scripts/combat/board/FieldClockAction.gd
+index 752c429f7c3941c4d8f869c31e31cc8cfd82de47..18ee92141cc5b10c21ba3fbf2e9e261fd99e0665 100644
+--- a/scripts/combat/board/FieldClockAction.gd
++++ b/scripts/combat/board/FieldClockAction.gd
+@@ -4,6 +4,8 @@
+ extends BaseAction
+ class_name FieldClockAction
+ 
++const MAX_INLINE_BOUNDARIES: int = 4096
++
+ var _controllers: Array[WeakRef] = []
+ var _generations: Array[int] = []
+ var previous_tick: int
+@@ -20,26 +22,44 @@ func _init(controllers: Array[FieldController], previous: int, target: int) -> v
+ func perform_action() -> void:
+ 	if target_tick <= previous_tick:
+ 		return
+-	var chosen: Dictionary = {}
+-	var controller: FieldController = null
+-	for index: int in _controllers.size():
+-		var candidate: FieldController = _controllers[index].get_ref()
+-		if candidate == null or not candidate.active or candidate.generation != _generations[index]:
+-			continue
+-		var boundary: Dictionary = candidate.next_tick_boundary(previous_tick, target_tick)
+-		# Equal ticks retain board insertion order; each controller retains field order.
+-		if not boundary.is_empty() and (chosen.is_empty() or boundary.tick < chosen.tick):
+-			chosen = boundary
+-			controller = candidate
+-	if chosen.is_empty():
++	# Boundaries that provably do nothing (a tick with no payload or no affected living
++	# occupant) are consumed inline: the ActionHandler waits at least one frame per queued
++	# action, so re-queueing for them stalled combat for ~2 frames per empty boundary.
++	# Only boundaries with an observable effect are queued; ordering is unchanged because a
++	# skipped boundary changes nothing but its own next_tick.
++	for _guard: int in MAX_INLINE_BOUNDARIES:
++		var chosen: Dictionary = {}
++		var controller: FieldController = null
++		for index: int in _controllers.size():
++			var candidate: FieldController = _controllers[index].get_ref()
++			if candidate == null or not candidate.active or candidate.generation != _generations[index]:
++				continue
++			var boundary: Dictionary = candidate.next_tick_boundary(previous_tick, target_tick)
++			# Equal ticks retain board insertion order; each controller retains field order.
++			if not boundary.is_empty() and (chosen.is_empty() or boundary.tick < chosen.tick):
++				chosen = boundary
++				controller = candidate
++		if chosen.is_empty():
++			return
++		var instance: FieldInstance = chosen.instance
++		if chosen.event == "tick":
++			var interval: int = instance.field_data.field_tick_interval
++			instance.next_tick = int(chosen.tick) + interval if interval > 0 else -1
++			if _tick_is_noop(controller, instance):
++				continue
++		var event := FieldEventAction.new(controller, chosen.event, instance.cell, null, instance)
++		event.scheduled_revision = instance.revision
++		event.scheduled_tick = chosen.tick
++		# This clock intentionally carries no one field's owner/cancellation scope. Individual
++		# events have their own scope; all boards' generations are rechecked on every iteration.
++		ActionHandler.add_ordered_actions([event, self])
+ 		return
+-	var instance: FieldInstance = chosen.instance
+-	if chosen.event == "tick":
+-		var interval: int = instance.field_data.field_tick_interval
+-		instance.next_tick = int(chosen.tick) + interval if interval > 0 else -1
+-	var event := FieldEventAction.new(controller, chosen.event, instance.cell, null, instance)
+-	event.scheduled_revision = instance.revision
+-	event.scheduled_tick = chosen.tick
+-	# This clock intentionally carries no one field's owner/cancellation scope. Individual
+-	# events have their own scope; all boards' generations are rechecked on every iteration.
+-	ActionHandler.add_ordered_actions([event, self])
++	# Pathological content (huge spans of empty boundaries): yield once and continue.
++	ActionHandler.add_ordered_actions([self])
++
++## Mirrors FieldEventAction's "tick" early returns without creating actions or signals.
++static func _tick_is_noop(controller: FieldController, instance: FieldInstance) -> bool:
++	if instance.field_data.field_tick_actions.is_empty():
++		return true
++	var unit: BaseCombatant = controller.board.get_unit_at(instance.cell) if controller.board != null else null
++	return not is_instance_valid(unit) or not unit.is_alive() or not instance.affects(unit)
+diff --git a/scripts/combat/board/FieldController.gd b/scripts/combat/board/FieldController.gd
+index b825b3173960ddae7d07481e2b43f98131192eb4..e975a54f21a3ebaabc7344b52f5caab600cf799f 100644
+--- a/scripts/combat/board/FieldController.gd
++++ b/scripts/combat/board/FieldController.gd
+@@ -14,8 +14,9 @@ func _init(combat_board: BoardData) -> void:
+ 	_board_ref = weakref(combat_board)
+ 	combat_board.field_controller = weakref(self)
+ 
+-static func get_active() -> FieldController:
+-	return for_board(BoardData.get_active())
++## BaseAction execution scope: expanded field payloads die with this controller generation.
++func is_execution_scope_active(scope_generation: int) -> bool:
++	return active and generation == scope_generation
+ 
+ static func for_board(current: BoardData) -> FieldController:
+ 	return current.field_controller.get_ref() if current != null and current.field_controller != null else null
+@@ -127,13 +128,6 @@ func advance_ticks(previous_tick: int, current_tick: int) -> void:
+ 	if active and current_tick > previous_tick:
+ 		ActionHandler.add_ordered_actions([FieldClockAction.new([self], previous_tick, current_tick)])
+ 
+-## Compatibility entry: collection no longer snapshots/consumes future boundaries.
+-## Multiple boards must share a FieldClockAction, not concatenate these single-board clocks.
+-func collect_tick_actions(previous_tick: int, current_tick: int) -> Array[Dictionary]:
+-	if not active or board == null or current_tick <= previous_tick:
+-		return []
+-	return [{"tick": previous_tick, "order": 0, "action": FieldClockAction.new([self], previous_tick, current_tick)}]
+-
+ ## Pure next-event query. A tick at the expiry boundary is excluded. Already consumed
+ ## boundaries are represented by next_tick, so equal-time events on other fields remain due.
+ func next_tick_boundary(previous_tick: int, current_tick: int) -> Dictionary:
+diff --git a/scripts/combat/board/FieldEventAction.gd b/scripts/combat/board/FieldEventAction.gd
+index ed80e35e6b829bfa0c2fd002e52b512e3581078c..2747756eaede034db72d37455a07ec8fba43aff4 100644
+--- a/scripts/combat/board/FieldEventAction.gd
++++ b/scripts/combat/board/FieldEventAction.gd
+@@ -19,8 +19,8 @@ func _init(controller: FieldController, event_name: String, at_cell: Vector2i,
+ 		unit: BaseCombatant = null, field: FieldInstance = null,
+ 		passing: bool = false, ancestor: BaseAction = null) -> void:
+ 	_controller_ref = weakref(controller)
+-	field_controller_ref = _controller_ref
+-	field_controller_generation = controller.generation
++	execution_scope_ref = _controller_ref
++	execution_scope_generation = controller.generation
+ 	_unit_ref = weakref(unit) if is_instance_valid(unit) else null
+ 	generation = controller.generation
+ 	event = event_name
+@@ -30,7 +30,7 @@ func _init(controller: FieldController, event_name: String, at_cell: Vector2i,
+ 	parent_action = ancestor
+ 	resolve_children_immediately = true
+ 	if ancestor != null:
+-		field_effective_tick = ancestor.field_effective_tick
++		effective_tick = ancestor.effective_tick
+ 	if is_instance_valid(unit) and event in ["enter", "leave"]:
+ 		expected_board_id = unit.board_id
+ 		expected_anchor = unit.board_anchor
+@@ -42,7 +42,7 @@ func perform_action() -> void:
+ 	if instance != null and (not controller.has_field(instance) or (scheduled_revision >= 0 and scheduled_revision != instance.revision)):
+ 		return
+ 	if scheduled_tick >= 0:
+-		field_effective_tick = scheduled_tick
++		effective_tick = scheduled_tick
+ 	if event == "expire":
+ 		controller.remove_field(instance)
+ 		return
+@@ -88,7 +88,7 @@ func perform_action() -> void:
+ 		controller.board.invalidate_undo(unit)
+ 		for stack: int in field.stacks:
+ 			for child: BaseAction in ActionGenerator.create_actions(field.get_owner(), null, [unit], payload, self):
+-				child.field_owner_bound = true
+-				child.field_owner_uid = field.owner_uid
++				child.owner_bound = true
++				child.owner_uid = field.owner_uid
+ 				actions.append(child)
+ 	ActionHandler.add_ordered_actions(actions)
+diff --git a/scripts/combat/controllers/EnemyIntentController.gd b/scripts/combat/controllers/EnemyIntentController.gd
+index 87daa1f2d7109298263da9ced4190f96a73a5724..14d6d95fcfa32ac70048d3ca9054cb523d5fc19f 100644
+--- a/scripts/combat/controllers/EnemyIntentController.gd
++++ b/scripts/combat/controllers/EnemyIntentController.gd
+@@ -1,4 +1,8 @@
+-## Executes the current enemy intent, delegating spatial behavior only when a board module is mounted.
++## Executes the current enemy intent. A mounted module that handles intents (the board: movement,
++## geometry) performs it; otherwise the core keeps ordinary attack/block/custom-action behavior.
++## Intents whose payload needs an unmounted module (CombatContentRequirements) are refused as a
++## whole and never become a permanent stall: the enemy rotates to its next intent after the action
++## and Enemy.decide_next_intent skips unavailable intents.
+ extends BaseUnitController
+ class_name EnemyIntentController
+ 
+@@ -9,19 +13,21 @@ func decide(director: CombatDirector, unit: BaseCombatant) -> Variant:
+ static func perform_intent(director: CombatDirector, enemy: Enemy) -> void:
+ 	if not is_instance_valid(enemy) or not enemy.is_alive():
+ 		return
+-	if director.board_module != null:
+-		await director.board_module.perform_enemy_intent(enemy)
++	var module: CombatModule = director.combat_module
++	if module != null and module.handles_enemy_intents():
++		await module.perform_enemy_intent(enemy)
+ 		return
+ 	await _perform_plain_intent(director, enemy)
+ 
+-## NONE keeps ordinary attack/block/custom-action behavior without spatial queries or plans.
++## Without an intent-handling module: no spatial queries or plans.
+ static func _perform_plain_intent(director: CombatDirector, enemy: Enemy) -> void:
+ 	var generation: int = director.get_generation()
+ 	var intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
+-	var rejection: String = get_plain_intent_error(enemy, intent)
++	var rejection: String = get_intent_module_error(enemy, intent)
+ 	if rejection != "":
+-		enemy.keep_intent_next_action = true
+-		push_warning("EnemyIntentController: %s for enemy '%s'" % [rejection, enemy.enemy_data.object_id])
++		# Rejected whole (no partial payload). Not kept: decide_next_intent rotates afterwards.
++		enemy.keep_intent_next_action = false
++		push_warning("EnemyIntentController: %s for enemy '%s'; rotating intent" % [rejection, enemy.enemy_data.object_id])
+ 		return
+ 	var target: BaseCombatant = UnitRegistry.get_hero()
+ 	if intent != null and intent.enemy_intent_target_rule == EnemyIntentData.TARGET_RULES.SELF:
+@@ -36,8 +42,20 @@ static func _perform_plain_intent(director: CombatDirector, enemy: Enemy) -> voi
+ 	ActionHandler.add_actions(actions)
+ 	await director.wait_actions(generation)
+ 
+-## Pure capability check shared with the ordinary incoming-damage display.
+-static func get_plain_intent_error(enemy: Enemy, intent: EnemyIntentData) -> String:
++## Pure capability check: "" when every module the intent's payload needs is mounted, else the
++## rejection ("board_module_required"). Shared by execution, intent choice and the damage display.
++static func get_intent_module_error(enemy: Enemy, intent: EnemyIntentData) -> String:
++	if enemy == null or intent == null:
++		return ""
+ 	var payload: Array[Dictionary] = enemy.build_intent_actions_data(intent, false, true)
+ 	var context: Dictionary = Global.player_data.player_values if Global.player_data != null else {}
+-	return "board_module_required" if BoardContentPolicy.requires_board(payload, context) else ""
++	var required: Array[StringName] = CombatContentRequirements.payload_requirements(payload, context)
++	if required.is_empty():
++		return ""
++	var director: CombatDirector = Global.get_combat_director()
++	var mounted: Array[StringName] = director.get_mounted_module_ids() if director != null else ([] as Array[StringName])
++	return CombatContentRequirements.missing_rejection(required, mounted)
++
++## Compatibility name (tests / older callers).
++static func get_plain_intent_error(enemy: Enemy, intent: EnemyIntentData) -> String:
++	return get_intent_module_error(enemy, intent)
+diff --git a/scripts/combatants/Enemy.gd b/scripts/combatants/Enemy.gd
+index fb410566a369e252656e13ca03bc8dfea8d8f884..9a522ac85aee084e96c76b1d732bb0791f611361 100644
+--- a/scripts/combatants/Enemy.gd
++++ b/scripts/combatants/Enemy.gd
+@@ -189,13 +189,20 @@ func cycle_enemy_intent():
+ 
+ ## Decides and displays the intent for the enemy's next action. Called by CombatDirector when the
+ ## enemy enters the timeline (combat start / spawn) and after each of its actions.
++## Intents needing an unmounted combat module are skipped (bounded by the intent count), so such
++## an enemy keeps acting with its ordinary intents instead of stalling on a refused one.
+ func decide_next_intent() -> void:
+ 	if keep_intent_next_action:
+ 		keep_intent_next_action = false
+-		update_enemy_intent()
+-		Signals.enemy_intent_changed.emit()
+-		return
++		if EnemyIntentController.get_intent_module_error(self, enemy_data.get_current_intent()) == "":
++			update_enemy_intent()
++			Signals.enemy_intent_changed.emit()
++			return
+ 	cycle_enemy_intent()
++	for _attempt: int in max(1, enemy_data.enemy_intents.size()):
++		if EnemyIntentController.get_intent_module_error(self, enemy_data.get_current_intent()) == "":
++			return
++		cycle_enemy_intent()
+ 
+ ## Stores the board plan of the current intent (ThreatPreview.refresh()).
+ func apply_intent_plan(plan: Dictionary) -> void:
+diff --git a/scripts/combatants/Player.gd b/scripts/combatants/Player.gd
+index 18b8f67f194dd9e9f934b0987689a696eefd5b65..85bdab6338d68158f90604ca4e5b3710b195901d 100644
+--- a/scripts/combatants/Player.gd
++++ b/scripts/combatants/Player.gd
+@@ -167,15 +167,14 @@ func update_incoming_damage_amount(recalculate_enemy_intent: bool = true) -> voi
+ 		_intent_is_updating = false
+ 	
+ 	var incoming_damage_amount = 0 # totaled value
+-	# in combat the board-aware ThreatPreview resolves targets, ranges and timing
++	# a mounted module (the board's ThreatPreview) may resolve targets, ranges and timing
+ 	var director: CombatDirector = Global.get_combat_director()
+-	if director != null and director.is_running and director.threat_preview != null:
+-		if recalculate_enemy_intent:
+-			director.threat_preview.refresh()
+-		incoming_damage_amount = director.threat_preview.incoming_damage_for(self)
+-		incoming_damage_amount_text.text = str(incoming_damage_amount)
+-		incoming_damage.visible = incoming_damage_amount > 0
+-		return
++	if director != null and director.is_running and director.combat_module != null:
++		var module_amount: int = director.combat_module.incoming_damage_for(self, recalculate_enemy_intent)
++		if module_amount >= 0:
++			incoming_damage_amount_text.text = str(module_amount)
++			incoming_damage.visible = module_amount > 0
++			return
+ 	for enemy: Enemy in Global.get_alive_enemies():
+ 		var intent: EnemyIntentData = enemy.enemy_data.get_current_intent()
+ 		var targets_self: bool = intent != null and intent.enemy_intent_target_rule == EnemyIntentData.TARGET_RULES.SELF
+@@ -184,7 +183,7 @@ func update_incoming_damage_amount(recalculate_enemy_intent: bool = true) -> voi
+ 			enemy.intended_target = enemy if targets_self else self
+ 			enemy.update_enemy_intent()
+ 		
+-		if not targets_self and EnemyIntentController.get_plain_intent_error(enemy, intent) == "":
++		if not targets_self and EnemyIntentController.get_intent_module_error(enemy, intent) == "":
+ 			incoming_damage_amount += enemy.enemy_intent_attack_damage * enemy.enemy_intent_number_of_attacks
+ 
+ 	incoming_damage_amount_text.text = str(incoming_damage_amount)
+diff --git a/scripts/ui/BoardActorPresentation.gd b/scripts/ui/BoardActorPresentation.gd
+index dff2346c6c7517a6fed0a096d3ff481c11e0984d..dcfe57e1c8feffa2fabf4c4d24b566063daab7c4 100644
+--- a/scripts/ui/BoardActorPresentation.gd
++++ b/scripts/ui/BoardActorPresentation.gd
+@@ -8,8 +8,18 @@ var views: Dictionary[String, BoardView] = {}
+ var _actors: Dictionary = {}
+ var _tweens: Dictionary = {}
+ var _retired: Dictionary = {}
++## Last synced layout signature; per-frame work is a cheap comparison, the full sync (tooltips,
++## markers, tweens) runs only when units, anchors, views or presentation signals changed.
++var _sync_signature: String = ""
++var _sync_dirty: bool = true
++## Number of full sync passes (headless contract checks).
++var sync_count: int = 0
+ 
+ func _ready() -> void:
++	for changed: Signal in [Signals.field_created, Signals.field_removed, Signals.field_changed, Signals.board_changed, Signals.unit_spawned, Signals.unit_removed]:
++		changed.connect(_mark_dirty.unbind(1))
++	Signals.enemy_intent_changed.connect(_mark_dirty)
++	Signals.timeline_changed.connect(_mark_dirty)
+ 	Signals.unit_board_moved.connect(_on_position_committed)
+ 	Signals.enemy_killed.connect(_on_actor_killed)
+ 	Signals.player_killed.connect(_on_actor_killed)
+@@ -27,8 +37,34 @@ func _on_actor_killed(unit: BaseCombatant) -> void:
+ 		_stop_tween(unit.unit_uid)
+ 		unit.global_position = _actors[unit.unit_uid]["target"]
+ 
++## Presentation stop on hero death: dead actors keep their committed board target.
++func snap_dead_actors() -> void:
++	for state: Dictionary in _actors.values():
++		var unit: Variant = state["unit"]
++		if is_instance_valid(unit) and not unit.is_alive():
++			_on_actor_killed(unit)
++
+ func _process(_delta: float) -> void:
+-	sync_positions(true)
++	var signature: String = _layout_signature()
++	if _sync_dirty or signature != _sync_signature:
++		sync_positions(true)
++
++func _mark_dirty() -> void:
++	_sync_dirty = true
++
++func _layout_signature() -> String:
++	var director: CombatDirector = Global.get_combat_director()
++	if director == null or not director.is_running or director.battlefield == null:
++		return "" if _actors.is_empty() else "stopped"
++	var parts: PackedStringArray = []
++	for id: String in views:
++		var view: BoardView = views[id]
++		if is_instance_valid(view):
++			parts.append("%s:%s:%s:%s" % [id, view.global_position, view.cell_size, view.visible])
++	for unit: BaseCombatant in director.battlefield.get_units():
++		if is_instance_valid(unit):
++			parts.append("%s:%s:%s:%s:%s" % [unit.unit_uid, unit.board_id, unit.board_anchor, unit.footprint, unit.is_inside_tree()])
++	return "|".join(parts)
+ 
+ func target_position_for(unit: BaseCombatant) -> Vector2:
+ 	var view: BoardView = views.get(unit.board_id)
+@@ -70,6 +106,9 @@ func _authored_sprite_origin(unit: BaseCombatant) -> Vector2:
+ 	return unit.animated_sprite_2d.position
+ 
+ func sync_positions(animate: bool = false) -> void:
++	sync_count += 1
++	_sync_dirty = false
++	_sync_signature = _layout_signature()
+ 	var director: CombatDirector = Global.get_combat_director()
+ 	if director == null or not director.is_running or director.battlefield == null:
+ 		clear()
+diff --git a/scripts/ui/BoardCombatPresentation.gd b/scripts/ui/BoardCombatPresentation.gd
+index 684aa85e8c9719b1f72d29d3a167a2bed3746714..4f5e2fdb0e635e88c8c3dcd8f10aceb23107fefe 100644
+--- a/scripts/ui/BoardCombatPresentation.gd
++++ b/scripts/ui/BoardCombatPresentation.gd
+@@ -4,7 +4,7 @@ class_name BoardCombatPresentation
+ 
+ var director: CombatDirector = null
+ var module: BoardCombatModule = null
+-var combat: Variant = null
++var combat: Control = null
+ var board_view: BoardView = null
+ var board_views: Dictionary[String, BoardView] = {}
+ var actor_presentation: BoardActorPresentation = null
+@@ -30,8 +30,7 @@ func setup(value: CombatDirector, board_module: BoardCombatModule) -> void:
+ 	undo_move_button.visible = false
+ 	undo_move_button.button_up.connect(_on_undo_move_button_up)
+ 	combat.add_child(undo_move_button)
+-	if combat.card_play_adapter != null:
+-		combat.card_play_adapter.bind_hand(combat.hand)
++	module.card_adapter.bind_hand(combat.get_node("Hand") as Hand)
+ 	set_process(true)
+ 	sync_board_views()
+ 
+@@ -59,7 +58,7 @@ func sync_board_views() -> void:
+ 		view.name = "BoardView_" + ids[index]
+ 		combat.add_child(view)
+ 		# Grid hit surfaces precede real actor subtrees in Control input tree order.
+-		combat.move_child(view, combat.player.get_index())
++		combat.move_child(view, combat.get_node("Player").get_index())
+ 		view._resize(battlefield.get_board(ids[index]))
+ 		board_views[ids[index]] = view
+ 		if index == 0:
+@@ -73,18 +72,18 @@ func _process(_delta: float) -> void:
+ 	if director.is_running:
+ 		sync_board_views()
+ 	undo_move_button.visible = director.is_running and director.rules != null and director.rules.move_undo_allowed
+-	undo_move_button.disabled = not director.can_player_undo_move()
++	undo_move_button.disabled = module == null or not module.can_player_undo_move()
+ 
+ func _on_undo_move_button_up() -> void:
+-	if not _stopped and director != null:
+-		director.request_player_undo_move()
++	if not _stopped and module != null:
++		module.request_player_undo_move()
+ 
+ ## Runtime may stop on hero death before the death animation ends. Retain its final pose.
+ func stop() -> void:
+ 	_stopped = true
+ 	set_process(false)
+-	if is_instance_valid(combat) and combat.card_play_adapter != null:
+-		combat.card_play_adapter.unbind_hand()
++	if module != null and module.card_adapter != null:
++		module.card_adapter.unbind_hand()
+ 	if is_instance_valid(undo_move_button):
+ 		undo_move_button.visible = false
+ 		undo_move_button.disabled = true
+@@ -96,10 +95,7 @@ func stop() -> void:
+ 		actor_presentation.set_process(false)
+ 		# Director handles player_killed before actor signal subscribers. Snap dead actors
+ 		# to their already committed target before releasing them into the retired set.
+-		for state: Dictionary in actor_presentation._actors.values():
+-			var unit: Variant = state["unit"]
+-			if is_instance_valid(unit) and not unit.is_alive():
+-				actor_presentation._on_actor_killed(unit)
++		actor_presentation.snap_dead_actors()
+ 		actor_presentation.clear()
+ 
+ func _on_display_ended() -> void:
+diff --git a/scripts/ui/BoardView.gd b/scripts/ui/BoardView.gd
+index 922f8f4f141035c182db811428f303f252bc0853..f4ee62b019515994d1f1f3b9c92e0642dba4eb47 100644
+--- a/scripts/ui/BoardView.gd
++++ b/scripts/ui/BoardView.gd
+@@ -30,6 +30,13 @@ var cell_size: float = CELL_SIZE_MAX
+ var hovered_cell: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
+ var _last_selected_card: Variant = null
+ var _field_textures: Dictionary[String, Texture2D] = {}
++## Movement preview cache: reachable_active is a weighted state search, so it is recomputed only
++## after a gameplay signal or when the acting unit's movement state differs, never every frame.
++var _movement_cache: Dictionary = {}
++var _movement_cache_key: String = ""
++var _movement_dirty: bool = true
++## Number of reachable_active searches run for the movement preview (headless contract checks).
++var movement_query_count: int = 0
+ 
+ func _ready() -> void:
+ 	position = panel_position
+@@ -48,6 +55,7 @@ func _ready() -> void:
+ 	Signals.unit_action_ended.connect(_on_board_changed.unbind(1))
+ 	Signals.enemy_killed.connect(_on_board_changed.unbind(1))
+ 	Signals.unit_removed.connect(_on_board_changed.unbind(1))
++	Signals.card_played.connect(_on_board_changed.unbind(1))
+ 	Signals.combat_ended.connect(_on_combat_ended)
+ 	Signals.run_ended.connect(_on_combat_ended)
+ 
+@@ -61,27 +69,37 @@ func _process(_delta: float) -> void:
+ 	var should_show: bool = board != null and director != null and director.is_running
+ 	if should_show != visible:
+ 		visible = should_show
+-		_resize(board)
++		_movement_dirty = true
++		_resize(board, true)
+ 	if visible:
++		# Cheap layout check only; redraws are driven by signals, hover and selection changes.
+ 		_resize(board)
+ 		var selected: Variant = HandManager.hand.current_selected_card if HandManager.hand != null else null
+ 		if selected != _last_selected_card:
+ 			_last_selected_card = selected
+ 			queue_redraw()
+ 
+-func _resize(board: BoardData) -> void:
++func _resize(board: BoardData, force_redraw: bool = false) -> void:
+ 	if board == null:
+ 		return
+-	cell_size = min(CELL_SIZE_MAX, min(PANEL_MAX_SIZE.x / board.size.x, PANEL_MAX_SIZE.y / board.size.y))
+-	size = Vector2(board.size) * cell_size
++	var new_cell_size: float = min(CELL_SIZE_MAX, min(PANEL_MAX_SIZE.x / board.size.x, PANEL_MAX_SIZE.y / board.size.y))
++	var new_size: Vector2 = Vector2(board.size) * new_cell_size
++	if not force_redraw and is_equal_approx(new_cell_size, cell_size) and new_size.is_equal_approx(size):
++		return
++	cell_size = new_cell_size
++	size = new_size
+ 	queue_redraw()
+ 
+ func _on_board_changed() -> void:
++	_movement_dirty = true
+ 	if visible:
+-		_resize(get_board())
++		_resize(get_board(), true)
+ 		_update_field_tooltip()
+ 
+ func _on_combat_ended() -> void:
++	_movement_cache = {}
++	_movement_cache_key = ""
++	_movement_dirty = true
+ 	hovered_cell = BaseCombatant.BOARD_ANCHOR_NONE
+ 	_preview_cell = BaseCombatant.BOARD_ANCHOR_NONE
+ 	_preview_board_id = ""
+@@ -154,20 +172,20 @@ func _draw_cells(cell_list: Array[Vector2i], color: Color) -> void:
+ 
+ ## Reachable cells of the acting party unit: free (filled) and paid (hatched, "+N" extra ticks).
+ func _draw_movement(board: BoardData, director: CombatDirector, unit: BaseCombatant) -> void:
+-	var budget: int = director.get_move_budget(unit)
++	var module: Variant = director.board_module
++	var budget: int = module.get_move_budget(unit) if module != null else 0
+ 	if budget <= 0:
+ 		return
+-	var reachable: Dictionary = board.reachable_active(unit)
++	var reachable: Dictionary = movement_preview(board, unit)
+ 	var font: Font = get_theme_default_font()
+ 	for cell: Vector2i in reachable:
+-		var length: int = board.path_cost(unit, reachable[cell])
+-		if length == 0:
++		if (reachable[cell] as Array).is_empty():
+ 			continue
+ 		var rect: Rect2 = cell_rect(cell)
+-		if length <= unit.move_points:
++		var paid: int = _paid_steps(board, unit, reachable[cell])
++		if paid == 0:
+ 			draw_rect(rect, COLOR_FREE_MOVE, true)
+ 		else:
+-			var paid: int = _paid_steps(board, unit, reachable[cell])
+ 			for offset: float in [0.25, 0.5, 0.75]:
+ 				draw_line(rect.position + Vector2(rect.size.x * offset, 0), rect.position + Vector2(0, rect.size.y * offset), COLOR_PAID_MOVE, 1.5)
+ 			var extra_ticks: int = director.timeline.wait_for(paid * director.rules.extra_move_delay_per_cell, unit.speed) if director.rules.extra_move_delay_per_cell > 0 else 0
+@@ -175,6 +193,16 @@ func _draw_movement(board: BoardData, director: CombatDirector, unit: BaseCombat
+ 	if reachable.has(hovered_cell):
+ 		_draw_path(unit.board_anchor, reachable[hovered_cell], COLOR_PATH)
+ 
++## Cached reachable_active of the acting unit; the same paths are executed on click.
++func movement_preview(board: BoardData, unit: BaseCombatant) -> Dictionary:
++	var key: String = "%d|%s|%s|%d|%d" % [unit.get_instance_id(), board.board_id, unit.board_anchor, unit.move_points, unit.paid_cells_this_action]
++	if _movement_dirty or key != _movement_cache_key:
++		_movement_cache = board.reachable_active(unit)
++		_movement_cache_key = key
++		_movement_dirty = false
++		movement_query_count += 1
++	return _movement_cache
++
+ ## Hovered enemy: hit cells, planned path and a ghost token at its planned move cell.
+ func _draw_enemy_preview(board: BoardData, director: CombatDirector) -> void:
+ 	if director.threat_preview == null:
+diff --git a/scripts/ui/Combat.gd b/scripts/ui/Combat.gd
+index 9d28e96b2aa905ebabcac139352b0ebbc8602fc0..c6511faa0108466334ecb1595c5a2edc53adbff5 100644
+--- a/scripts/ui/Combat.gd
++++ b/scripts/ui/Combat.gd
+@@ -21,21 +21,35 @@ extends Control
+ @onready var enemy_container = $EnemyContainer
+ @onready var combat_director: CombatDirector = $CombatDirector
+ @onready var timeline_bar: Control = $TimelineBar
++## Scene-level mount switch of the optional board module (also needs CombatRulesData.board_enabled).
+ @export var board_module_enabled: bool = true
+-var board_module: BoardCombatModule = null
+-var card_play_adapter: CardPlayAdapter = null
+-var board_view: BoardView:
++## Optional board module script; composed only when the file exists, so the core runs without it.
++const BOARD_MODULE_SCRIPT: String = "res://scripts/combat/board/BoardCombatModule.gd"
++## The composed optional module (a CombatModule), or null for an ordinary combat.
++var combat_module: CombatModule = null
++## Core card policy used whenever no module supplies one.
++var _core_card_play_adapter: CardPlayAdapter = CardPlayAdapter.new()
++var card_play_adapter: CardPlayAdapter:
+ 	get:
+-		return board_module.presentation.board_view if _has_board_presentation() else null
+-var board_views: Dictionary[String, BoardView]:
++		var supplied: CardPlayAdapter = combat_module.get_card_play_adapter() if is_instance_valid(combat_module) else null
++		return supplied if supplied != null else _core_card_play_adapter
++## Compatibility forwards (untyped; no module class dependency).
++var board_module:
+ 	get:
+-		return board_module.presentation.board_views if _has_board_presentation() else {}
+-var actor_presentation: BoardActorPresentation:
++		return combat_module if is_instance_valid(combat_module) and combat_module.get_module_id() == &"board" else null
++var board_view:
+ 	get:
+-		return board_module.presentation.actor_presentation if _has_board_presentation() else null
+-var undo_move_button: Button:
++		return _presentation_property(&"board_view")
++var board_views:
+ 	get:
+-		return board_module.presentation.undo_move_button if _has_board_presentation() else null
++		var views: Variant = _presentation_property(&"board_views")
++		return views if views != null else {}
++var actor_presentation:
++	get:
++		return _presentation_property(&"actor_presentation")
++var undo_move_button:
++	get:
++		return _presentation_property(&"undo_move_button")
+ 
+ @onready var player = $Player
+ @onready var hand = $Hand
+@@ -49,7 +63,6 @@ var undo_move_button: Button:
+ var _combat_ending: bool = false	# end_combat() runs once per combat
+ 
+ func _ready():
+-	card_play_adapter = BoardCardAdapter.new(self)
+ 	_compose_board_module()
+ 	Signals.player_money_changed.connect(_on_player_money_changed)
+ 	Signals.player_health_changed.connect(_on_player_health_changed)
+@@ -221,7 +234,8 @@ func _on_combat_started(event_id: String):
+ 	set_combat_display_visibility(true)
+ 	update_combat_display()
+ 
+-	# the director builds the board, spawns the encounter's units and runs the action timeline
++	# compose / drop the optional module, then the director sets it up, spawns the encounter's
++	# units and runs the action timeline
+ 	_compose_board_module()
+ 	combat_director.begin_combat(current_event)
+ 	timeline_bar.visible = true
+@@ -278,30 +292,37 @@ func end_combat() -> void:
+ 
+ 	Signals.combat_ended.emit()
+ 
+-## Scene composition owns the optional board feature; core combat only sees its interface.
++## Scene composition owns the optional board feature; core combat only sees CombatModule.
++## Loaded by path when present, so deleting the module's files leaves ordinary combat intact.
+ func _compose_board_module() -> void:
+-	var enabled: bool = board_module_enabled and Global.get_combat_rules().board_enabled
+-	if enabled and not is_instance_valid(board_module):
+-		board_module = BoardCombatModule.new()
+-		board_module.name = "BoardCombatModule"
+-		add_child(board_module)
+-	elif not enabled and is_instance_valid(board_module):
+-		board_module.clear()
+-		board_module.queue_free()
+-		board_module = null
+-
+-func _has_board_presentation() -> bool:
+-	return is_instance_valid(board_module) and is_instance_valid(board_module.presentation)
++	var enabled: bool = board_module_enabled and Global.get_combat_rules().board_enabled and ResourceLoader.exists(BOARD_MODULE_SCRIPT)
++	if enabled and not is_instance_valid(combat_module):
++		var script: Script = load(BOARD_MODULE_SCRIPT) as Script
++		combat_module = script.new() as CombatModule if script != null else null
++		if combat_module != null:
++			combat_module.name = "BoardCombatModule"
++			add_child(combat_module)
++	elif not enabled and is_instance_valid(combat_module):
++		combat_module.clear()
++		combat_module.queue_free()
++		combat_module = null
++
++func _presentation_property(property: StringName) -> Variant:
++	if not is_instance_valid(combat_module):
++		return null
++	var presentation: Variant = combat_module.get(&"presentation")
++	return presentation.get(property) if is_instance_valid(presentation) else null
+ 
+ ## Compatibility query; board UI work belongs to the optional module's presentation.
+ func sync_board_views() -> void:
+-	if _has_board_presentation():
+-		board_module.presentation.sync_board_views()
++	var presentation: Variant = combat_module.get(&"presentation") if is_instance_valid(combat_module) else null
++	if is_instance_valid(presentation):
++		presentation.sync_board_views()
+ 
+ func _exit_tree() -> void:
+-	if card_play_adapter != null:
+-		card_play_adapter.unbind_hand()
+-	card_play_adapter = null
+-	if is_instance_valid(board_module):
+-		board_module.clear()
+-	board_module = null
++	if is_instance_valid(combat_module):
++		var adapter: CardPlayAdapter = combat_module.get_card_play_adapter()
++		if adapter != null:
++			adapter.unbind_hand()
++		combat_module.clear()
++	combat_module = null
+diff --git a/scripts/ui/EnemyContainer.gd b/scripts/ui/EnemyContainer.gd
+index bf7d2962d3c51e6fa2fdddf9b8372cee08b48acd..14ca818c6d555f1818f0281c464945a7affa5e6b 100644
+--- a/scripts/ui/EnemyContainer.gd
++++ b/scripts/ui/EnemyContainer.gd
+@@ -89,7 +89,8 @@ func _spawn_enemy(enemy_object_id: String, container: Control = automatic_enemy_
+ 	enemy_data.randomize_health(true)
+ 	
+ 	# Board actors keep this parent for their entire lifetime, including transfers.
+-	if CombatBattlefield.get_active() != null:
++	var director: CombatDirector = Global.get_combat_director()
++	if director != null and director.get_placement_module() != null:
+ 		container = board_actor_container
+ 	container.add_child(enemy)
+ 	enemy.init(enemy_data)
+diff --git a/scripts/ui/Hand.gd b/scripts/ui/Hand.gd
+index 9f89b5bb13d3dfb0b7dc4333067c05549e5ea224..3df7b8dac192eb1780606171ceba8f4a72751bb2 100644
+--- a/scripts/ui/Hand.gd
++++ b/scripts/ui/Hand.gd
+@@ -31,9 +31,8 @@ var current_card_pick_action: ActionBasePickCards = null	# an action currently r
+ @onready var background_button: TextureButton = $%BackgroundButton
+ @onready var select_target_label: Label = $%SelectTargetLabel
+ var current_selected_card: Card = null	# used for cards with targeting
+-## Why an optional targeting policy rejected the last selection; empty means accepted.
++## Why the scene's card policy rejected the last selection; empty means accepted.
+ var last_target_rejection: String = ""
+-var selected_board_id: String = ""
+ 
+ # Card Play Queue
+ var hand_disabled: bool = false	# the player cannot play additional cards manually
+@@ -220,7 +219,7 @@ func _on_card_selected(card: Card):
+ 			if card_play_request.card_data == card.card_data:
+ 				return
+ 		
+-		# check if autoplaying card based on targeting type (board cards may need a cell)
++		# check if autoplaying card based on targeting type (the scene's card policy decides)
+ 		if HandManager.get_card_play_adapter().needs_selection(card.card_data):
+ 			current_selected_card = card
+ 			_prompt_target(card)
+@@ -263,19 +262,7 @@ func _on_enemy_clicked(enemy: Enemy):
+ 	if current_selected_card != null:
+ 		attempt_play_selected_card(HandManager.get_card_play_adapter().selection_for_target(enemy))
+ 
+-## Compatibility entry points; optional scene policy owns their meaning and subscriptions.
+-func _on_cell_clicked(cell: Vector2i) -> void:
+-	HandManager.get_card_play_adapter().handle_cell_clicked(self, "", cell)
+-
+-func _on_board_cell_clicked(id: String, cell: Vector2i) -> void:
+-	HandManager.get_card_play_adapter().handle_cell_clicked(self, id, cell)
+-
+-func _on_cell_hovered(cell: Vector2i) -> void:
+-	HandManager.get_card_play_adapter().handle_cell_hovered(self, "", cell)
+-
+-func _on_board_cell_hovered(id: String, cell: Vector2i) -> void:
+-	HandManager.get_card_play_adapter().handle_cell_hovered(self, id, cell)
+-
++## Deprecated compatibility wrapper (examples/board-lab tests); use attempt_play_selected_card.
+ func attempt_play_selected_card_at_cell(cell: Vector2i, clicked_unit: BaseCombatant = null, target_board_id: String = "") -> bool:
+ 	return attempt_play_selected_card({"target": clicked_unit, "cell": cell, "id": target_board_id})
+ 
+@@ -299,8 +286,15 @@ func attempt_play_selected_card(selection: Dictionary) -> bool:
+ 	current_selected_card = null
+ 	return true
+ 
+-func _play_selected_card(target: BaseCombatant, cell: Vector2i, target_board_id: String = "") -> void:
+-	attempt_play_selected_card({"target": target, "cell": cell, "id": target_board_id})
++## Public input state for module input handlers (no private member access).
++func get_acting_unit() -> BaseCombatant:
++	return _get_acting_unit()
++
++func is_picking_cards() -> bool:
++	return current_card_pick_action != null
++
++func is_input_locked() -> bool:
++	return hand_disabled or performing_card_right_click
+ 
+ func _get_acting_unit() -> BaseCombatant:
+ 	var director: CombatDirector = Global.get_combat_director()
+@@ -316,7 +310,6 @@ func _prompt_target(_card: Card):
+ 	select_target_label.visible = true
+ 
+ func _unprompt_target():
+-	selected_board_id = ""
+ 	select_target_label.visible = false
+ 
+ func _perform_card_right_click_actions(card: Card) -> void:
+diff --git a/scripts/ui/card/Card.gd b/scripts/ui/card/Card.gd
+index 609e5e319b3281ccd79ee14ed469421886d01d21..2bbe8a808441b02e1ad22dd91b8fccfd8cfb7ae6 100644
+--- a/scripts/ui/card/Card.gd
++++ b/scripts/ui/card/Card.gd
+@@ -156,6 +156,12 @@ func can_play_card(selected_enemy: Enemy = null, display_player_messages: bool =
+ 	if not card_is_playable:
+ 		return false
+ 	
++	# content needing an unmounted optional combat module (e.g. board-only cards) is unplayable
++	if HandManager.get_card_play_adapter().get_availability_error(card_data) != "":
++		if display_player_messages:
++			ActionGenerator.generate_player_speech_bubble("I can't use that here!")
++		return false
++	
+ 	# check energy
+ 	if Global.player_data.player_energy < card_energy_cost:
+ 		if display_player_messages:
+diff --git a/scripts/validators/board/ValidatorPathExists.gd b/scripts/validators/board/ValidatorPathExists.gd
+index dfead571bafada4ca52369bdea14b8f70e909d71..9118f6d32ea256c9eb098e856f2923e81e220ef4 100644
+--- a/scripts/validators/board/ValidatorPathExists.gd
++++ b/scripts/validators/board/ValidatorPathExists.gd
+@@ -1,7 +1,9 @@
+ ## The parent can move to a cell (combat framework Phase 2). Values: to "SELECTED_CELL" (default) or
+-## [x, y]; max_length (-1 = unlimited); teleport (true = no path needed). Fails when the parent cannot
+-## move at all (a preview ActionMoveUnit is intercepted to distance 0, e.g. rooted). Without a known
+-## cell only the mobility check runs.
++## [x, y]; max_length (-1 = unlimited); teleport (true = no path needed); consumes_move_points (false =
++## card movement limited by physical steps, true = free/paid movement budget). Uses the same
++## reachability query as ActionMoveUnit, so max_length counts steps, never weighted terrain cost.
++## Fails when the parent cannot move at all (a preview ActionMoveUnit is intercepted to distance 0,
++## e.g. rooted). Without a known cell only the mobility check runs.
+ extends BaseValidator
+ 
+ func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[String, Variant]) -> bool:
+@@ -22,7 +24,9 @@ func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[St
+ 		return false
+ 	if bool(_get_validator_value("teleport", values, action, false)):
+ 		return board.can_teleport(parent, cell)
+-	return not board.find_path(parent, cell, move_distance).is_empty()
++	var consumes: bool = bool(_get_validator_value("consumes_move_points", values, action, false))
++	var reachable: Dictionary = board.reachable_active(parent, false, move_distance) if consumes else board.reachable_steps(parent, move_distance)
++	return not (reachable.get(cell, []) as Array).is_empty()
+ 
+ ## Move distance after interceptors (preview): -1 = unlimited, 0 = cannot move.
+ static func _preview_move_distance(unit: BaseCombatant, max_length: int) -> int:
