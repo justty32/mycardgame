@@ -32,7 +32,7 @@
 
 區分三種限制：免費點數吃地形／ZOC 成本，付費額度按實際格數，卡牌 `distance` 是實際步數上限。不要把同一個 budget 參數傳遍所有入口。
 
-<!-- TODO(程式 agent)：M1「移動預檢步數／費用」修正中（ValidatorPathExists 的 `max_length` 與 `consumes_move_points`、BoardPathfinding.reachable_active 的付費格優先）；完成後依新程式補述出牌預檢與實際移動如何共用同一可達查詢。 -->測高成本一格、八向但曼哈頓射程、穿友不准停、撤銷被出牌／場域事件失效；強制位移另驗抗性、多格與碰撞 tick。
+出牌預檢 [ValidatorPathExists](../../../game/scripts/validators/board/ValidatorPathExists.gd) 與實際 ActionMoveUnit 共用同一可達查詢：`max_length` 是步數（取 ActionMoveUnit 被攔截後的 `distance`），不是加權地形成本；`consumes_move_points` 為 true 時查 `reachable_active`（付費格優先走最少付費路徑），否則查 `reachable_steps`。點格執行的路徑必須等於預覽路徑，回歸在 [review_regression_cases](../../../tests/review_regression_cases.gd)（Field suite）。測高成本一格、八向但曼哈頓射程、穿友不准停、撤銷被出牌／場域事件失效；強制位移另驗抗性、多格與碰撞 tick。
 
 ## 驗證與交接
 

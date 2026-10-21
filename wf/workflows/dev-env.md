@@ -26,7 +26,9 @@ python3 tools/test_game.py --suite Smoke --accept-engine-version '^4\.6\.'
 ./tools/test-game.ps1 -Suite Smoke -GodotPath 'C:/path/to/Godot_v4.7.2-stable_win64_console.exe'
 ```
 
-引擎探測順序：`--godot-path` → `.tools/` 下版本符合 `accepted_version_patterns` 者 → PATH 上的 godot／godot4／godot-mono／godot4-mono；版本再以 `--version` 核對，探測方式寫入 results.json。
+引擎探測順序：`--godot-path` → `.tools/` 下版本符合 `accepted_version_patterns` 者 → PATH 上的 godot／godot4／godot-mono／godot4-mono；版本再以 `--version` 核對，探測方式寫入 results.json。runner 只接受本平台可執行的引擎：`.zip` 封存檔與 Windows GUI（非 console）exe 都會被拒絕。
+
+**WSL**：本機只有 Windows 版 Godot，WSL 的 Linux `python3` 不會啟動 Windows `.exe`；在 WSL 裡要用 Windows Python 跑 `python.exe tools/test_game.py …`，或改用 `tools/test-game.ps1`，這樣 console build 才會帶 CREATE_NO_WINDOW 與 APPDATA／LOCALAPPDATA／TEMP 隔離。隔離副本與 artifacts 不可放在 UNC 路徑（`\\wsl$\…`、`\\wsl.localhost\…`），要放在 Windows 磁碟（如 `/mnt/c/...` 對應的 `C:\...`）。
 
 各平台的隔離方式：Linux 把 HOME、XDG_*、DOTNET_CLI_HOME、NUGET_PACKAGES 導到 run 目錄，並移除 DISPLAY／WAYLAND_DISPLAY；Windows 把 APPDATA、LOCALAPPDATA、TEMP／TMP 導到 run 目錄（`--no-isolate-appdata` 可關閉），以 CREATE_NO_WINDOW 啟動、逾時用 taskkill /T。Windows 官方 4.7.2 Mono 已完成隔離 All，最新結果見 [可攜證據](../../analysis/slay-the-robot/evidence/README.md)；程序樹逾時另以假引擎驗證，平台細節見 [Windows 報告](../../analysis/slay-the-robot/architecture/06_windows_validation.md)。
 

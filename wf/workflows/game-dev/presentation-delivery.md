@@ -23,7 +23,7 @@
 
 Hand 通過 [互動狀態](ui/interaction-states.md#戰鬥-hud-與出牌) 所列檢查後，直接送出或選目標；HandManager 再核能量並先扣／保留能量、更新 HUD。排入佇列不等於開始執行，失效目標會退款。
 
-選目標、驗證與執行資料由場景提供的 [CardPlayAdapter](../../../game/scripts/combat/CardPlayAdapter.gd) 決定：未掛棋盤時是基底 adapter（點敵人選目標）；掛棋盤時是 [BoardCardAdapter](../../../game/scripts/combat/board/BoardCardAdapter.gd)（選格、跨盤、盤面專屬效果在費用前拒絕）。adapter 不扣費也不入列，演出事件要在兩種模式下都有觸發點，不能只掛在 BoardView 或格子節點上。
+選目標、驗證與執行資料由場景提供的 [CardPlayAdapter](../../../game/scripts/combat/CardPlayAdapter.gd) 決定：未掛棋盤時是核心 adapter（點敵人選目標）；掛棋盤時是模組提供的 [BoardCardAdapter](../../../game/scripts/combat/board/BoardCardAdapter.gd)（選格、跨盤、盤面專屬效果在費用前拒絕）。adapter 不扣費也不入列，演出事件要在兩種模式下都有觸發點，不能只掛在 BoardView 或格子節點上。
 
 `_play_card()` 移卡到 limbo 後發 `Signals.card_play_started`；完成 action 為 [ActionCardPlayEnd](../../../game/scripts/actions/card_actions/card_play_actions/ActionCardPlayEnd.gd) 的 `card_played`。後者仍在 action 處理中，目的牌堆移動在 HandManager 等待 actions_ended 之後；不要把 card_played 說成卡已入棄牌堆。預覽、選目標與按下卡片都不是成功。成功音選開始或完成其中一個信號；若卡片 `card_play_actions` 已有 ACTION_PLAY_SOUND，就不再在同一成功 signal 或 CardButton 重複播放。
 

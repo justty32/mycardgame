@@ -24,8 +24,8 @@ EndTurnButton 在主角抽牌後才啟用；結束行動的流程見 [戰鬥畫�
 
 選目標有兩條入口，都經場景的 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd)：
 
-- **未掛棋盤**時 Enemy 發 enemy_clicked，Hand._on_enemy_clicked 以 adapter.selection_for_target(enemy) 出牌。這是普通出牌路徑，不能拿掉。
-- **已掛棋盤**時 BoardView 的格子點擊經 adapter.handle_cell_clicked 交 BoardCardAdapter 建 request（未選牌則移動）；基底 adapter 對格子點擊不做事。
+- **未掛棋盤**時 Enemy 發 enemy_clicked，Hand._on_enemy_clicked 以 adapter.selection_for_target(enemy) 出牌。這是普通出牌路徑，不能拿掉。核心 adapter 以 CombatContentRequirements 判定需要模組的牌：手牌變灰（Card.can_play_card）、點擊時提示，入隊／出隊費用前回 `board_module_required`，原因寫在 `request.rejection_reason`。
+- **已掛棋盤**時由模組提供 BoardCardAdapter；BoardView 的格子訊號經模組的 BoardCardInput（Hand 的相容入口亦同）呼叫 adapter.handle_cell_clicked 建 request（未選牌則移動），選格存於 request 的 `module_contexts.board`。核心 adapter 對格子點擊不做事。
 
 改到這兩條入口要同時驗兩種模式，見 [validation 的棋盤開關](../validation.md#棋盤開關兩種模式都要驗)。enemy_hovered（離開時為 null）要求卡面重算預覽。
 

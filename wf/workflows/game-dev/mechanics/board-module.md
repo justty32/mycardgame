@@ -14,9 +14,7 @@
 
 先定義改動是在開局前切換內容設定，還是要支援戰鬥中真正卸載 Node。後者必須涵蓋排隊請求、await 恢復、舊實例延遲 exit 與新實例身份；不要在未完成相關驗收前把「可選掛載」擴稱成任意時刻熱切換。
 
-場景負責組裝元件，Director 保留普通 CTB、Encounter、waves 與行動流程。棋盤幾何、場域、移動、undo、盤面威脅與呈現歸模組；需要相容 getter 可以保留，但不能讓核心在缺模組時偷偷 new 棋盤來補洞。新需求先用現有 hooks，不為單一棋盤元件建立通用 plugin 系統。
-
-<!-- TODO(程式 agent)：棋盤模組化進行中（例如移除 `BoardData.get_active()` 這類由 director 取盤的全域 getter）；完成後核對本節「相容 getter」與模組 owner 的描述。 -->
+場景負責組裝元件：Combat 只在兩個旗標都開且 `BOARD_MODULE_SCRIPT` 檔案存在時以路徑 load BoardCombatModule。Director 保留普通 CTB、Encounter、waves 與行動流程，只經核心 [CombatModule](../../../../game/scripts/combat/CombatModule.gd) 介面的 hooks（setup／clear、單位進出、行動開始、時鐘、出牌、目標解析、敵人意圖、威脅、放置）呼叫模組，不引用任何棋盤類別；缺模組內容由 [CombatContentRequirements](../../../../game/scripts/combat/CombatContentRequirements.gd) 以資料標記判定。棋盤幾何、場域、移動、undo、盤面威脅與呈現歸模組。核心的 `board_*` 查詢只是無型別相容轉送，未掛載回 null；不能讓核心在缺模組時偷偷 new 棋盤來補洞，也不能在核心新增棋盤類別引用（會讓 BoardRemoved 失敗）。新需求先加在 CombatModule hooks，不為單一棋盤元件建立通用 plugin 系統。完整介面與刻意保留的殘留耦合見 [架構分析](../../../../analysis/slay-the-robot/design/board-module.md)。
 
 搬動呈現節點時，先搜尋程式與全部測試裡的硬路徑：呈現搬進模組後，直取 `Combat/BoardView` 的舊 Board 回歸就曾因此失敗。擴充改走 Combat 相容 getter 或模組 owner，並保留節點有效、在樹內與可見性的斷言；不能只刪掉失效的檢查。
 

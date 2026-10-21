@@ -34,8 +34,7 @@
 
 入口 [wave_flow.gd](../../../tests/wave_flow.gd)，cases [wave_cases.gd](../../../tests/wave_cases.gd)，fixture [wave_fixture.gd](../../../tests/wave_fixture.gd)，標記 `WAVE PASS:`。驗三波遭遇：wave_started／wave_cleared 的刻數；波與波之間的格擋牌不被短路；登場延遲與錯開；WAIT_UNTIL_FREE 重試後改用最近空格；FAIL_SKIP 跳過；雜兵不擋清波；每波 wave_on_cleared_actions 加錢；最後一波清空才 combat_ended。
 
-Board／Wave 既有的單盤案例以顯式 SINGLE 保持距離契約，DUAL 為正常新局的預設。
-<!-- TODO(程式 agent)：棋盤改為可選掛載模組後，「DUAL 為正常新局預設」是否仍成立（或預設為未掛棋盤）請依程式確認後改寫。 -->
+Board／Wave 既有的單盤案例以顯式 SINGLE 保持距離契約。棋盤掛載時 `CombatRulesData.board_mode` 預設為 DUAL；場景與規則的 `board_enabled` 旗標預設都開，所以正常新局是掛載的雙盤，未掛棋盤要由 Boardless 明確關閉旗標。
 
 ## Field 與 DualBoard
 
@@ -46,3 +45,7 @@ Board／Wave 既有的單盤案例以顯式 SINGLE 保持距離契約，DUAL 為
 ## Boardless
 
 入口 [boardless_flow.gd](../../../tests/boardless_flow.gd)。四個程序共用同一隔離副本，以 `--boardless-phase=write/read/defeat/scene_off` 分別驗關閉棋盤時的戰鬥、存讀、死亡，以及場景開關。每個階段都要求整行 `BOARDLESS PASS: <phase>`，任一失敗即停止。棋盤相關改動須與 DualBoard 一起跑，見 [validation](../game-dev/validation.md#棋盤開關兩種模式都要驗)。
+
+## BoardRemoved
+
+與 Boardless 共用 [boardless_flow.gd](../../../tests/boardless_flow.gd)，但 runner 先在隔離副本**刪除棋盤模組檔**（`scripts/combat/board/`、`scripts/actions/board_actions/`、`scripts/validators/board/`、`scripts/ui/Board{View,ActorPresentation,CombatPresentation}.gd`，清單以 runner 的 `BOARD_MODULE_PATHS` 為準），再以 `--boardless-phase=removed／defeat` 兩階段驗：import 無錯，規則與場景都要求棋盤時仍以普通戰鬥完成出牌、意圖輪替與勝敗。它證明核心不依賴棋盤類別；動到 CombatModule 介面、核心與模組邊界時必跑。標記同為 `BOARDLESS PASS: <phase>`。

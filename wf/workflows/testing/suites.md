@@ -14,12 +14,12 @@
 
 ```bash
 python3 tools/test_game.py --suite All
-# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb、Board、Wave、Field、DualBoard、Boardless
+# 可選 Dictionary、Smoke、Combat、SaveLoad、ResourceLifecycle、CombatVictory、CombatDefeat、Ctb、Board、Wave、Field、DualBoard、Boardless、BoardRemoved
 python3 tools/test_game.py --suite SaveLoad
 # Windows 包裝：./tools/test-game.ps1 -Suite SaveLoad
 ```
 
-`All` 依序執行 ResourceLifecycle → Dictionary → Smoke → CombatVictory → CombatDefeat → Ctb → Board → Wave → Field → DualBoard → Boardless → SaveLoad（以 runner 的 `ALL_SUITES` 為準）。PackScenario 不在 All 內，見下方專節。
+`All` 依序執行 ResourceLifecycle → Dictionary → Smoke → CombatVictory → CombatDefeat → Ctb → Board → Wave → Field → DualBoard → Boardless → BoardRemoved → SaveLoad（以 runner 的 `ALL_SUITES` 為準）。PackScenario 不在 All 內，見下方專節。
 
 退出碼：0 為通過，1 為驗證失敗（含強制失敗），2 為找不到引擎等執行前錯誤。
 

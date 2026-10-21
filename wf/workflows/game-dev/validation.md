@@ -16,6 +16,7 @@
 
 ```bash
 python3 tools/test_game.py --suite Boardless   # 未掛棋盤：普通出牌／意圖／波次／勝敗，盤面專屬效果費用前拒絕
+python3 tools/test_game.py --suite BoardRemoved  # 隔離副本刪除棋盤模組檔後仍可匯入並打完普通戰鬥：動到核心與模組邊界時必跑
 python3 tools/test_game.py --suite DualBoard   # 雙盤 A：跨盤移動／交換、方向型拒絕、本體站格
 python3 tools/test_game.py --suite Board       # 動到單盤幾何、移動、射程時加跑
 python3 tools/test_game.py --suite Field       # 動到場域格／控制區時加跑

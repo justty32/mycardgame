@@ -28,7 +28,7 @@ Dictionary merge 已由本地修復修正，Smoke 的四種策略由最初的診
 
 ## 隔離回歸 runner 與 suite
 
-runner 是 `python3 tools/test_game.py --suite <名稱>`。怎麼跑、隔離與判定、新內容／新 suite 怎麼接進 runner 見 [testing/suites](testing/suites.md)；各 suite 實際驗了什麼見 [suite-coverage](testing/suite-coverage.md)。棋盤相關改動兩種模式都要驗，見 [validation](game-dev/validation.md#棋盤開關兩種模式都要驗)。
+runner 是 `python3 tools/test_game.py --suite <名稱>`（WSL 下改用 Windows 的 `python.exe` 或 ps1，副本不可放 UNC 路徑，見 [dev-env](dev-env.md#背景驗證)）。怎麼跑、隔離與判定、新內容／新 suite 怎麼接進 runner 見 [testing/suites](testing/suites.md)；各 suite 實際驗了什麼見 [suite-coverage](testing/suite-coverage.md)。棋盤相關改動兩種模式都要驗，見 [validation](game-dev/validation.md#棋盤開關兩種模式都要驗)。
 
 ## 文件檢查（修改後必跑）
 
