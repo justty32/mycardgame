@@ -84,6 +84,8 @@ static func reachable(board: BoardData, unit: BaseCombatant, budget: int, ignore
 
 ## Paid movement buys a physical step, not each point of expensive terrain.
 ## Keep resource states separately: a cheapest-cost path may consume more paid cells.
+## The chosen path per cell minimises paid cells (the real price: extra action delay) first,
+## then terrain cost; every resource state is explored, so the comparison is exhaustive.
 static func reachable_active(board: BoardData, unit: BaseCombatant, ignore_zoc: bool = false, max_steps: int = -1) -> Dictionary:
 	var result: Dictionary = {}
 	if unit == null or not board.has_unit(unit):
@@ -92,6 +94,7 @@ static func reachable_active(board: BoardData, unit: BaseCombatant, ignore_zoc: 
 	var frontier: Array[Dictionary] = [start]
 	var seen: Dictionary = {}
 	var best_cost: Dictionary = {}
+	var best_paid: Dictionary = {}
 	while not frontier.is_empty():
 		var best: int = 0
 		for index: int in range(1, frontier.size()):
@@ -103,9 +106,11 @@ static func reachable_active(board: BoardData, unit: BaseCombatant, ignore_zoc: 
 		if seen.has(key):
 			continue
 		seen[key] = true
-		if board.can_stand(unit, entry.cell) and (not best_cost.has(entry.cell) or entry.cost < best_cost[entry.cell]):
+		var paid_used: int = int(start.paid) - int(entry.paid)
+		if board.can_stand(unit, entry.cell) and (not best_cost.has(entry.cell) or paid_used < best_paid[entry.cell] or (paid_used == best_paid[entry.cell] and entry.cost < best_cost[entry.cell])):
 			result[entry.cell] = entry.path
 			best_cost[entry.cell] = entry.cost
+			best_paid[entry.cell] = paid_used
 		if max_steps >= 0 and entry.path.size() >= max_steps:
 			continue
 		for offset: Vector2i in neighbours(board):

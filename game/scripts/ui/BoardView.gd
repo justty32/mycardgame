@@ -30,6 +30,13 @@ var cell_size: float = CELL_SIZE_MAX
 var hovered_cell: Vector2i = BaseCombatant.BOARD_ANCHOR_NONE
 var _last_selected_card: Variant = null
 var _field_textures: Dictionary[String, Texture2D] = {}
+## Movement preview cache: reachable_active is a weighted state search, so it is recomputed only
+## after a gameplay signal or when the acting unit's movement state differs, never every frame.
+var _movement_cache: Dictionary = {}
+var _movement_cache_key: String = ""
+var _movement_dirty: bool = true
+## Number of reachable_active searches run for the movement preview (headless contract checks).
+var movement_query_count: int = 0
 
 func _ready() -> void:
 	position = panel_position
@@ -48,6 +55,7 @@ func _ready() -> void:
 	Signals.unit_action_ended.connect(_on_board_changed.unbind(1))
 	Signals.enemy_killed.connect(_on_board_changed.unbind(1))
 	Signals.unit_removed.connect(_on_board_changed.unbind(1))
+	Signals.card_played.connect(_on_board_changed.unbind(1))
 	Signals.combat_ended.connect(_on_combat_ended)
 	Signals.run_ended.connect(_on_combat_ended)
 
@@ -61,27 +69,37 @@ func _process(_delta: float) -> void:
 	var should_show: bool = board != null and director != null and director.is_running
 	if should_show != visible:
 		visible = should_show
-		_resize(board)
+		_movement_dirty = true
+		_resize(board, true)
 	if visible:
+		# Cheap layout check only; redraws are driven by signals, hover and selection changes.
 		_resize(board)
 		var selected: Variant = HandManager.hand.current_selected_card if HandManager.hand != null else null
 		if selected != _last_selected_card:
 			_last_selected_card = selected
 			queue_redraw()
 
-func _resize(board: BoardData) -> void:
+func _resize(board: BoardData, force_redraw: bool = false) -> void:
 	if board == null:
 		return
-	cell_size = min(CELL_SIZE_MAX, min(PANEL_MAX_SIZE.x / board.size.x, PANEL_MAX_SIZE.y / board.size.y))
-	size = Vector2(board.size) * cell_size
+	var new_cell_size: float = min(CELL_SIZE_MAX, min(PANEL_MAX_SIZE.x / board.size.x, PANEL_MAX_SIZE.y / board.size.y))
+	var new_size: Vector2 = Vector2(board.size) * new_cell_size
+	if not force_redraw and is_equal_approx(new_cell_size, cell_size) and new_size.is_equal_approx(size):
+		return
+	cell_size = new_cell_size
+	size = new_size
 	queue_redraw()
 
 func _on_board_changed() -> void:
+	_movement_dirty = true
 	if visible:
-		_resize(get_board())
+		_resize(get_board(), true)
 		_update_field_tooltip()
 
 func _on_combat_ended() -> void:
+	_movement_cache = {}
+	_movement_cache_key = ""
+	_movement_dirty = true
 	hovered_cell = BaseCombatant.BOARD_ANCHOR_NONE
 	_preview_cell = BaseCombatant.BOARD_ANCHOR_NONE
 	_preview_board_id = ""
@@ -157,23 +175,32 @@ func _draw_movement(board: BoardData, director: CombatDirector, unit: BaseCombat
 	var budget: int = director.get_move_budget(unit)
 	if budget <= 0:
 		return
-	var reachable: Dictionary = board.reachable_active(unit)
+	var reachable: Dictionary = movement_preview(board, unit)
 	var font: Font = get_theme_default_font()
 	for cell: Vector2i in reachable:
-		var length: int = board.path_cost(unit, reachable[cell])
-		if length == 0:
+		if (reachable[cell] as Array).is_empty():
 			continue
 		var rect: Rect2 = cell_rect(cell)
-		if length <= unit.move_points:
+		var paid: int = _paid_steps(board, unit, reachable[cell])
+		if paid == 0:
 			draw_rect(rect, COLOR_FREE_MOVE, true)
 		else:
-			var paid: int = _paid_steps(board, unit, reachable[cell])
 			for offset: float in [0.25, 0.5, 0.75]:
 				draw_line(rect.position + Vector2(rect.size.x * offset, 0), rect.position + Vector2(0, rect.size.y * offset), COLOR_PAID_MOVE, 1.5)
 			var extra_ticks: int = director.timeline.wait_for(paid * director.rules.extra_move_delay_per_cell, unit.speed) if director.rules.extra_move_delay_per_cell > 0 else 0
 			draw_string(font, rect.position + Vector2(2, rect.size.y - 3), "+%d" % extra_ticks, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, COLOR_PAID_MOVE)
 	if reachable.has(hovered_cell):
 		_draw_path(unit.board_anchor, reachable[hovered_cell], COLOR_PATH)
+
+## Cached reachable_active of the acting unit; the same paths are executed on click.
+func movement_preview(board: BoardData, unit: BaseCombatant) -> Dictionary:
+	var key: String = "%d|%s|%s|%d|%d" % [unit.get_instance_id(), board.board_id, unit.board_anchor, unit.move_points, unit.paid_cells_this_action]
+	if _movement_dirty or key != _movement_cache_key:
+		_movement_cache = board.reachable_active(unit)
+		_movement_cache_key = key
+		_movement_dirty = false
+		movement_query_count += 1
+	return _movement_cache
 
 ## Hovered enemy: hit cells, planned path and a ghost token at its planned move cell.
 func _draw_enemy_preview(board: BoardData, director: CombatDirector) -> void:

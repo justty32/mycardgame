@@ -8,8 +8,18 @@ var views: Dictionary[String, BoardView] = {}
 var _actors: Dictionary = {}
 var _tweens: Dictionary = {}
 var _retired: Dictionary = {}
+## Last synced layout signature; per-frame work is a cheap comparison, the full sync (tooltips,
+## markers, tweens) runs only when units, anchors, views or presentation signals changed.
+var _sync_signature: String = ""
+var _sync_dirty: bool = true
+## Number of full sync passes (headless contract checks).
+var sync_count: int = 0
 
 func _ready() -> void:
+	for changed: Signal in [Signals.field_created, Signals.field_removed, Signals.field_changed, Signals.board_changed, Signals.unit_spawned, Signals.unit_removed]:
+		changed.connect(_mark_dirty.unbind(1))
+	Signals.enemy_intent_changed.connect(_mark_dirty)
+	Signals.timeline_changed.connect(_mark_dirty)
 	Signals.unit_board_moved.connect(_on_position_committed)
 	Signals.enemy_killed.connect(_on_actor_killed)
 	Signals.player_killed.connect(_on_actor_killed)
@@ -28,7 +38,26 @@ func _on_actor_killed(unit: BaseCombatant) -> void:
 		unit.global_position = _actors[unit.unit_uid]["target"]
 
 func _process(_delta: float) -> void:
-	sync_positions(true)
+	var signature: String = _layout_signature()
+	if _sync_dirty or signature != _sync_signature:
+		sync_positions(true)
+
+func _mark_dirty() -> void:
+	_sync_dirty = true
+
+func _layout_signature() -> String:
+	var director: CombatDirector = Global.get_combat_director()
+	if director == null or not director.is_running or director.battlefield == null:
+		return "" if _actors.is_empty() else "stopped"
+	var parts: PackedStringArray = []
+	for id: String in views:
+		var view: BoardView = views[id]
+		if is_instance_valid(view):
+			parts.append("%s:%s:%s:%s" % [id, view.global_position, view.cell_size, view.visible])
+	for unit: BaseCombatant in director.battlefield.get_units():
+		if is_instance_valid(unit):
+			parts.append("%s:%s:%s:%s:%s" % [unit.unit_uid, unit.board_id, unit.board_anchor, unit.footprint, unit.is_inside_tree()])
+	return "|".join(parts)
 
 func target_position_for(unit: BaseCombatant) -> Vector2:
 	var view: BoardView = views.get(unit.board_id)
@@ -70,6 +99,9 @@ func _authored_sprite_origin(unit: BaseCombatant) -> Vector2:
 	return unit.animated_sprite_2d.position
 
 func sync_positions(animate: bool = false) -> void:
+	sync_count += 1
+	_sync_dirty = false
+	_sync_signature = _layout_signature()
 	var director: CombatDirector = Global.get_combat_director()
 	if director == null or not director.is_running or director.battlefield == null:
 		clear()

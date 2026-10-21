@@ -12,7 +12,7 @@ func _scenario() -> bool:
 		return false
 	var ordered: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join("ordered_action_cases.gd")).new()
 	await ordered.run(flow, _check, player, board.get_unit_at(Vector2i(0, 0)))
-	for script: String in ["field_action_cases.gd", "field_query_cases.gd", "field_movement_cases.gd", "field_intent_cases.gd", "field_reaction_cases.gd", "field_lifetime_cases.gd", "field_clock_cases.gd"]:
+	for script: String in ["field_action_cases.gd", "field_query_cases.gd", "field_movement_cases.gd", "field_intent_cases.gd", "field_reaction_cases.gd", "field_lifetime_cases.gd", "review_regression_cases.gd", "field_clock_cases.gd"]:
 		var group: RefCounted = load(flow.get_script().resource_path.get_base_dir().path_join(script)).new()
 		await group.run(self)
 		if is_instance_valid(game_root):

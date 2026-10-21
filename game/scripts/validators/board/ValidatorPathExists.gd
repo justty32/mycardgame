@@ -1,7 +1,9 @@
 ## The parent can move to a cell (combat framework Phase 2). Values: to "SELECTED_CELL" (default) or
-## [x, y]; max_length (-1 = unlimited); teleport (true = no path needed). Fails when the parent cannot
-## move at all (a preview ActionMoveUnit is intercepted to distance 0, e.g. rooted). Without a known
-## cell only the mobility check runs.
+## [x, y]; max_length (-1 = unlimited); teleport (true = no path needed); consumes_move_points (false =
+## card movement limited by physical steps, true = free/paid movement budget). Uses the same
+## reachability query as ActionMoveUnit, so max_length counts steps, never weighted terrain cost.
+## Fails when the parent cannot move at all (a preview ActionMoveUnit is intercepted to distance 0,
+## e.g. rooted). Without a known cell only the mobility check runs.
 extends BaseValidator
 
 func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[String, Variant]) -> bool:
@@ -22,7 +24,9 @@ func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[St
 		return false
 	if bool(_get_validator_value("teleport", values, action, false)):
 		return board.can_teleport(parent, cell)
-	return not board.find_path(parent, cell, move_distance).is_empty()
+	var consumes: bool = bool(_get_validator_value("consumes_move_points", values, action, false))
+	var reachable: Dictionary = board.reachable_active(parent, false, move_distance) if consumes else board.reachable_steps(parent, move_distance)
+	return not (reachable.get(cell, []) as Array).is_empty()
 
 ## Move distance after interceptors (preview): -1 = unlimited, 0 = cannot move.
 static func _preview_move_distance(unit: BaseCombatant, max_length: int) -> int:

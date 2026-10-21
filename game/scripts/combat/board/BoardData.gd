@@ -92,13 +92,6 @@ static func get_for_unit(unit: BaseCombatant) -> BoardData:
 		return director.battlefield.get_board_for_unit(unit)
 	return director.board if director.board != null and director.board.has_unit(unit) else null
 
-## The board of the running combat, or null.
-static func get_active() -> BoardData:
-	var director: CombatDirector = Global.get_combat_director()
-	if director == null:
-		return null
-	return director.board
-
 #region Cells
 func is_in_bounds(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.y >= 0 and cell.x < size.x and cell.y < size.y
@@ -203,20 +196,6 @@ func move(unit: BaseCombatant, anchor: Vector2i) -> bool:
 		covered.append(cell)
 	unit.board_anchor = anchor
 	unit.board_id = board_id
-	return true
-
-## Exchanges the anchors of two placed units with equal footprints.
-func swap(unit_a: BaseCombatant, unit_b: BaseCombatant) -> bool:
-	if not has_unit(unit_a) or not has_unit(unit_b) or unit_a.footprint != unit_b.footprint:
-		return false
-	var anchor_a: Vector2i = unit_a.board_anchor
-	var anchor_b: Vector2i = unit_b.board_anchor
-	if not can_teleport(unit_a, anchor_b, [unit_b]) or not can_teleport(unit_b, anchor_a, [unit_a]):
-		return false
-	remove(unit_a)
-	remove(unit_b)
-	place(unit_a, anchor_b)
-	place(unit_b, anchor_a)
 	return true
 
 ## Units in the given cells (each once, alive only), optionally filtered by faction (-1 = any).

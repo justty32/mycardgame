@@ -119,9 +119,11 @@ func move_party_unit(unit: BaseCombatant, cell: Vector2i) -> bool:
 	var reachable: Dictionary = current.reachable_active(unit)
 	if not reachable.has(cell) or reachable[cell].is_empty():
 		return false
+	# Execute exactly the previewed path (BoardView draws reachable_active); re-searching with a
+	# step-limited key could pick an equal-cost path through other fields / control zones.
 	var path: Array = reachable[cell]
 	var actions: Array[BaseAction] = ActionGenerator.create_actions(unit, null, [unit], [{
-		Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": cell, "distance": path.size(), "consumes_move_points": true, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
+		Scripts.ACTION_MOVE_UNIT: {"mode": ActionMoveUnit.MODE_TO_CELL, "target_cell": cell, "planned_path": path.duplicate(), "distance": path.size(), "consumes_move_points": true, "target_override": BaseAction.TARGET_OVERRIDES.PARENT}
 	}], null)
 	ActionHandler.add_actions(actions)
 	return true

@@ -101,9 +101,6 @@ func transfer(unit: BaseCombatant, destination: BoardPosition) -> bool:
 	unit.board_id = destination.board_id
 	return true
 
-func transfer_unit(unit: BaseCombatant, target_board_id: String, target_cell: Vector2i) -> bool:
-	return transfer(unit, BoardPosition.new(target_board_id, target_cell))
-
 func can_swap(a: BaseCombatant, b: BaseCombatant) -> bool:
 	if a == null or b == null or not is_instance_valid(a) or not is_instance_valid(b):
 		return false
@@ -144,9 +141,6 @@ func swap(a: BaseCombatant, b: BaseCombatant) -> bool:
 	a.board_id = old_b.board_id
 	b.board_id = old_a.board_id
 	return true
-
-func swap_units(a: BaseCombatant, b: BaseCombatant) -> bool:
-	return swap(a, b)
 
 ## Snapshot only geometry; rollback cannot replay or undo gameplay events because none run here.
 static func _snapshot(board: BoardData) -> Dictionary:

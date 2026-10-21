@@ -14,9 +14,6 @@ func _init(combat_board: BoardData) -> void:
 	_board_ref = weakref(combat_board)
 	combat_board.field_controller = weakref(self)
 
-static func get_active() -> FieldController:
-	return for_board(BoardData.get_active())
-
 static func for_board(current: BoardData) -> FieldController:
 	return current.field_controller.get_ref() if current != null and current.field_controller != null else null
 
@@ -126,13 +123,6 @@ func _enqueue_unit_cells(unit: BaseCombatant, event: String) -> void:
 func advance_ticks(previous_tick: int, current_tick: int) -> void:
 	if active and current_tick > previous_tick:
 		ActionHandler.add_ordered_actions([FieldClockAction.new([self], previous_tick, current_tick)])
-
-## Compatibility entry: collection no longer snapshots/consumes future boundaries.
-## Multiple boards must share a FieldClockAction, not concatenate these single-board clocks.
-func collect_tick_actions(previous_tick: int, current_tick: int) -> Array[Dictionary]:
-	if not active or board == null or current_tick <= previous_tick:
-		return []
-	return [{"tick": previous_tick, "order": 0, "action": FieldClockAction.new([self], previous_tick, current_tick)}]
 
 ## Pure next-event query. A tick at the expiry boundary is excluded. Already consumed
 ## boundaries are represented by next_tick, so equal-time events on other fields remain due.

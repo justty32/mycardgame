@@ -163,7 +163,9 @@ func get_adjusted_action_targets() -> Array[BaseCombatant]:
 					if target.is_alive() or force_dead_targets:
 						returned_targets.append(target)
 		TARGET_OVERRIDES.PARENT:
-			if is_instance_valid(parent_combatant) and (parent_combatant.is_alive() or force_dead_targets):
+			# Upstream contract: the parent itself, alive or dead (force_dead_targets is not consulted).
+			# Only a missing / freed parent (e.g. a field payload whose owner died) yields no target.
+			if is_instance_valid(parent_combatant):
 				return [parent_combatant]
 		TARGET_OVERRIDES.PLAYER:
 			for player in Global.get_tree().get_nodes_in_group("players"):
