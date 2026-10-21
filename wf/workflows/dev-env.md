@@ -14,11 +14,9 @@
 
 ## 背景驗證
 
-從專案根使用 [隔離 runner](../../tools/test_game.py)；Windows 也可用參數相同於舊版的 [ps1 包裝](../../tools/test-game.ps1)：
+從專案根使用 [隔離 runner](../../tools/test_game.py)；Windows 也可用參數相同於舊版的 [ps1 包裝](../../tools/test-game.ps1)。suite 清單、判定與日常命令見 [testing/suites](testing/suites.md)；本節只記引擎與平台相關的部分：
 
 ```bash
-python3 tools/test_game.py --suite All
-python3 tools/test_game.py --suite ResourceLifecycle
 # 指定引擎、或重放舊基準
 python3 tools/test_game.py --suite Smoke --godot-path /path/to/godot
 python3 tools/test_game.py --suite Smoke --accept-engine-version '^4\.6\.'
@@ -30,9 +28,9 @@ python3 tools/test_game.py --suite Smoke --accept-engine-version '^4\.6\.'
 
 引擎探測順序：`--godot-path` → `.tools/` 下版本符合 `accepted_version_patterns` 者 → PATH 上的 godot／godot4／godot-mono／godot4-mono；版本再以 `--version` 核對，探測方式寫入 results.json。
 
-每次在 artifacts/verification/ 建立獨立副本與 user://，程序一律 headless、不開視窗。Linux 把 HOME、XDG_*、DOTNET_CLI_HOME、NUGET_PACKAGES 導到 run 目錄，並移除 DISPLAY／WAYLAND_DISPLAY；Windows 把 APPDATA、LOCALAPPDATA、TEMP／TMP 導到 run 目錄（`--no-isolate-appdata` 可關閉），以 CREATE_NO_WINDOW 啟動、逾時用 taskkill /T。2026-10-20 Windows 官方 4.7.2 Mono 已完成隔離 All，最新結果見 [可攜證據](../../analysis/slay-the-robot/evidence/README.md)；程序樹逾時另以假引擎驗證，平台細節見 [Windows 報告](../../analysis/slay-the-robot/architecture/06_windows_validation.md)。`--source-game` 可指定候選原始碼目錄；來源鎖仍是本專案基準，候選版本須另核對 checkout 與 hashes。驗證規則、歷史紅測開關及套件範圍見 testing，正式綠測不容許資源殘留。
+各平台的隔離方式：Linux 把 HOME、XDG_*、DOTNET_CLI_HOME、NUGET_PACKAGES 導到 run 目錄，並移除 DISPLAY／WAYLAND_DISPLAY；Windows 把 APPDATA、LOCALAPPDATA、TEMP／TMP 導到 run 目錄（`--no-isolate-appdata` 可關閉），以 CREATE_NO_WINDOW 啟動、逾時用 taskkill /T。Windows 官方 4.7.2 Mono 已完成隔離 All，最新結果見 [可攜證據](../../analysis/slay-the-robot/evidence/README.md)；程序樹逾時另以假引擎驗證，平台細節見 [Windows 報告](../../analysis/slay-the-robot/architecture/06_windows_validation.md)。
 
-[game.ps1](../../tools/game.ps1) 是 Windows 專用的舊 Run／Import／Smoke 入口，預設路徑已改指 4.7 但未實測。Run 會開 GUI，且會讀寫 game/external 的設定／存檔，不在 agent 的 [操作邊界](common/user.md#桌面與程序邊界) 內；需要 GUI 的部分記為未驗證。
+[game.ps1](../../tools/game.ps1) 是 Windows 專用的舊 Run／Import／Smoke 入口，預設路徑已改指 4.7 但未實測。Run 會開 GUI，且會讀寫 game/external 的設定／存檔，不在 agent 的 [操作邊界](common/user.md#桌面與程序邊界) 內。
 
 ## 換機與重建
 
@@ -53,21 +51,15 @@ test -f game/project.godot && echo ok
 git rev-parse --show-toplevel
 ```
 
-Windows 取得引擎、PowerShell 檢查與 Git Bash/WSL 文件檢查的步驟見 [Windows 補充](dev-env/windows.md)；Linux 主路徑以上述 `godot-mono` 為準。
+Windows 取得引擎、PowerShell 檢查與 WSL／Git Bash 文件檢查執行器見 [Windows 補充](dev-env/windows.md)；Linux 主路徑以上述 `godot-mono` 為準。環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
 
-環境就緒後，第一個內容變更接 [mod 起步](game-dev/content/bootstrap.md)，不要為了學習範例直接開 GUI 或修改個人存檔。
-
-只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 雜湊，按照列出順序先 apply --check 再 apply；補丁清單以來源鎖為唯一順序依據。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)。
-
-`.tools/`、artifacts/、Godot cache、個人 profile／settings／saves 不屬於發布原始碼。必要的歷史驗證已另選入 analysis/slay-the-robot/evidence/；發布副本記錄原件與副本 hash 及路徑遮罩，不能當成未處理的原始日誌。
-
-Windows 的文件檢查執行器（WSL／Git Bash）見 [Windows 補充](dev-env/windows.md#windows-文件檢查執行器)。
+只有從純上游另建乾淨 checkout 時，才依來源鎖 repository／commit 取得版本，逐一核對 local_patches 的 git diff 與 SHA-256，按照列出順序先 apply --check 再 apply（並可做反向檢查）；補丁清單、順序、用途與驗證報告以來源鎖為唯一依據。已套用與未套用的目錄分開辨認，不能重複套用。上游更新走 [upstream](game-dev/upstream.md)；哪些檔不屬於發布原始碼見 [版本控制](version-control.md#保留來源與可攜證據)。
 
 ## 存檔與環境限制
 
 框架除錯模式會使用 game/external/profile.json、user_settings.json 與 saves/。game.ps1 的舊 Smoke 只在 Global 首次 ready 後轉移其後寫入，不能用它直接測使用者存檔；流程驗證一律走隔離 runner。發布省略個人設定，由框架在新環境依預設值建立。
 
-Windows 沙箱（2026-10-19 公司機）曾阻擋 Godot 寫入 user://、編輯器設定，以及 Git Bash 建立 signal pipe（Win32 error 5）；後者改用已驗 WSL lint 入口，其他錯誤依執行環境核准流程處理。不能由權限差異推定遊戲根因，也不能只依 exit 0 宣稱無錯。原生崩潰調查目前依使用者要求擱置。
+Windows 沙箱（2026-10-19 公司機）曾阻擋 Godot 寫入 user://、編輯器設定，以及 Git Bash 建立 signal pipe（Win32 error 5）；後者改用已驗 WSL lint 入口，其他錯誤依執行環境核准流程處理。不能由權限差異推定遊戲根因，也不能只依 exit 0 宣稱無錯。
 
 ## Done when
 

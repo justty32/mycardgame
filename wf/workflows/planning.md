@@ -10,7 +10,7 @@
 ## Done when
 
 - idea / roadmap：對應表多一列，或既有列狀態欄更新。
-- 詳規：spec 有「方案 / 取捨」段、plan 有「步驟 / 驗證」段，位於下方「任務規格與 plan 落點」的路徑；動工完成後移 `games/<game>/design/archive/`。
+- 詳規：spec 有「方案 / 取捨」段、plan 有「步驟 / 驗證」段，位於下方「任務規格與 plan 落點」的路徑（完成後的封存位置同節）。
 - 遊戲規劃：`games/<game>/design/core-loop.md`、`games/<game>/design/content-scope.md` 的必問項已填使用者答案或仍標「待定」並說明卡在哪；取捨在該題材樹的 decisions.json 有對應列。
 
 ## 階段
@@ -19,7 +19,7 @@
 |------|-----------|------|
 | **idea** | 要不要做？ | 下方「想法」表 |
 | **roadmap** | 會做，何時？ | 下方「roadmap」表 |
-| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），各一檔放該題材樹的 `games/<game>/design/specs/`、`games/<game>/design/plans/`；框架級放 `wf/specs/`、`wf/plans/`（見下節）。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
+| **詳規** | 怎麼做？ | 開發：**spec**（方案）→ **plan**（動工前詳規），落點見下節。非開發：目前未導入對應流程，先在 idea／roadmap 記錄|
 | **執行** | — | 遊戲：game-dev；tools／wf：feature-dev；非開發：未導入 |
 
 ## 任務規格與 plan 落點
@@ -29,7 +29,7 @@
 - spec（方案、取捨、設計 brief）：`games/<game>/design/specs/YYYY-MM-DD-<slug>.md`。
 - plan（步驟、驗證、實際驗收記錄）：`games/<game>/design/plans/YYYY-MM-DD-<slug>.md`，與 spec 同名。
 - 框架級 spec：`wf/specs/<topic>/README.md` 為入口，依 lint 大小拆成多檔（大表走資料檔）；plan：`wf/plans/<topic>/`，按階段一檔記錄實際驗收。框架 spec 不放 `games/`，題材樹只放需求與驗收一頁連回框架 spec。
-- 小改不開 spec／plan：任務記錄寫在 commit 訊息與交付回報。
+- 小改不開 spec／plan（跨系統或長任務才建立）：任務記錄寫在 commit 訊息與交付回報。
 - 目錄在第一份出現時建立；動工完成移 `games/<game>/design/archive/`（框架級移 `wf/specs/archive/`、`wf/plans/archive/`）。題材樹導航由根 AGENTS.md 路由。
 
 ## 遊戲規劃
@@ -70,7 +70,7 @@
 
 ## 交接
 
-遊戲詳規由 agent 依目前需求維護，至少說清楚玩家可觀察的行為、影響資料／機制／UI、既有存檔影響、實作範圍與驗收證據。簡單改動可直接記在任務；跨系統或長任務才建立 spec／plan，不為一般工程決策新增確認關卡。
+遊戲詳規由 agent 依目前需求維護，至少說清楚玩家可觀察的行為、影響資料／機制／UI、既有存檔影響、實作範圍與驗收證據；不為一般工程決策新增確認關卡。
 
 執行時接 [game-dev](game-dev/README.md)；完成後將穩定操作與可重複經驗整理到 [learning](learning.md) 指定的位置，規劃筆記不取代現行工作流。
 

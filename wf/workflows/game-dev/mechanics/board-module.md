@@ -10,7 +10,7 @@
 
 ## 先確定裝配與範圍
 
-讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd)、[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)、[BoardCombatModule.gd](../../../../game/scripts/combat/board/BoardCombatModule.gd)，確認場景 `board_module_enabled` 與 rules `board_enabled` 的實際值。兩者都開啟才掛載；任一關閉為 NONE。不要把 SINGLE、隱藏 BoardView、空棋盤或零移動點當作關閉功能。
+讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd)、[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)、[BoardCombatModule.gd](../../../../game/scripts/combat/board/BoardCombatModule.gd)，確認場景 `board_module_enabled` 與 rules `board_enabled` 的實際值（兩者都開才掛載，見 [架構分析的裝配與責任](../../../../analysis/slay-the-robot/design/board-module.md#裝配與責任)）。不要把 SINGLE、隱藏 BoardView、空棋盤或零移動點當作關閉功能。
 
 先定義改動是在開局前切換內容設定，還是要支援戰鬥中真正卸載 Node。後者必須涵蓋排隊請求、await 恢復、舊實例延遲 exit 與新實例身份；不要在未完成相關驗收前把「可選掛載」擴稱成任意時刻熱切換。
 
@@ -22,17 +22,17 @@
 
 ## 實作時保留普通流程
 
-先追一場 NONE 的新局到結束：敵人從 EnemyContainer 正常生成，UnitSpawner 保留首波／後續波次與延遲，EnemyIntentController 執行普通意圖，普通狀態、能量、抽棄牌與行動時鐘照常。Encounter 不能由 board getter 間接取得。掛載模式若落格失敗，按原拒絕／重試處理，不能退回無盤出生繞過碰撞檢查。
+先追一場 NONE 的新局到結束，確認 [普通戰鬥與棋盤戰鬥](../../../../analysis/slay-the-robot/design/board-module.md#普通戰鬥與棋盤戰鬥) 所列的生成、波次、普通意圖、狀態、能量、抽棄牌與行動時鐘照常。Encounter 不能由 board getter 間接取得；掛載模式落格失敗不能退回無盤出生繞過碰撞檢查。
 
-改卡牌接線時先讀 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd)、[BoardCardAdapter](../../../../game/scripts/combat/board/BoardCardAdapter.gd) 及 [HandManager](../../../../game/autoload/HandManager.gd)。adapter hooks 只選擇、驗證及提供執行資料；扣費、保留能量、退款與牌堆去向仍由原流程管理。入隊前拒絕不扣費；已入隊後因盤改變或模組失效而拒絕，沿既有出隊退款，不再退第二次。
+改卡牌接線時先讀 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd)、[BoardCardAdapter](../../../../game/scripts/combat/board/BoardCardAdapter.gd) 及 [HandManager](../../../../game/autoload/HandManager.gd)。adapter hooks 只選擇、驗證及提供執行資料，扣費、保留能量、退款與牌堆去向仍歸原流程（見 [出牌接點與費用原義](../../../../analysis/slay-the-robot/design/board-module.md#出牌接點與費用原義)）；入隊前拒絕不扣費，出隊拒絕沿既有退款，不再退第二次。
 
 對盤面專用 actions、validators、目標 override 與巢狀 payload 做能力檢查；普通牌不能被一律拒絕。自動出牌與複製出牌也必須經過同一檢查。敵人意圖若含盤面專用效果，整份意圖的接受／拒絕要明確，避免普通傷害先發生再跳過位移。來源、別名與巢狀 payload 的解析以實際 BoardContentPolicy 為準。
 
 ## 停止、死亡與再次開始
 
-維護 setup／clear 的成對責任。停止時解除 Hand 輸入、停 presentation process，再清模組擁有的 occupancy／anchor、失效 field generation 並釋放控制器。不要清掉別的場景 registry；不要讓下一場 NONE 的主角保留上一場有效格位。
+維護 setup／clear 的成對責任；清理次序、死亡時保留呈現目的位置與實例身份的解除，見 [停止與重建](../../../../analysis/slay-the-robot/design/board-module.md#停止與重建)。不要清掉別的場景 registry，也不要讓下一場 NONE 的主角保留上一場有效格位。
 
-死亡停止先保存已提交的呈現目的位置，再清空間狀態；combat ended／run ended／scene exit 才完成呈現釋放。若新增 await、回指或延遲 callback，依 [資源生命週期](../resource-lifecycle.md) 檢查停止後復原、同步停止與重複 clear。直接卸載實例時也要清核心引用，且舊實例的 exit 不能把新實例清掉。
+若新增 await、回指或延遲 callback，依 [資源生命週期](../resource-lifecycle.md) 檢查停止後復原、同步停止與重複 clear。直接卸載實例時也要清核心引用，且舊實例的 exit 不能把新實例清掉。
 
 ## 驗證與交付
 

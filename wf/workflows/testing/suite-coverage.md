@@ -2,7 +2,7 @@
 
 [testing](../testing.md)｜[runner 與 suite](suites.md)
 
-逐一列出 runner 各 suite 的入口、完成標記與涵蓋範圍，供選 suite 與寫報告時對照。怎麼跑、怎麼判定見 [suites](suites.md)；執行順序以 runner 的 `ALL_SUITES` 為準。
+逐一列出 runner 各 suite 的入口、完成標記與涵蓋範圍，供選 suite 與寫報告時對照；執行順序以 runner 的 `ALL_SUITES` 為準。
 
 **何時用**：要判斷某個改動會被哪個 suite 抓到，或報告裡要寫清楚某次 PASS 涵蓋到哪裡。
 

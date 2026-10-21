@@ -18,4 +18,4 @@
 
 `upgrade_card()` 第一次升級先套 `card_first_upgrade_value_changes`、`card_first_upgrade_property_changes`，之後每次才加 `card_upgrade_value_improvements`。分別列出基礎、首升、上限時的有效值與敘述。
 
-戰鬥中的牌是永久牌的副本，`parent_card` 指回原牌；永久升級與僅本場戰鬥的升級不能混用。現有 UpgradeCards 的 count／bypass 對副本與 parent 的傳遞不一致；需要多次升級時，依核實筆記先補專項測試。
+戰鬥中的牌是永久牌的副本（`parent_card` 指回原牌），永久升級與僅本場戰鬥的升級不能混用。UpgradeCards 的 count／bypass 對副本與 parent 傳遞不一致（見 [核實筆記](../../../../analysis/slay-the-robot/design/cards.md#原型執行值與升級)）；需要多次升級時先補專項測試。

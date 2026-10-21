@@ -14,13 +14,13 @@
 
 記下強參照方向：誰建立並使用誰、誰只是回看來源。Node 不因局部變數消失而自動銷毀；未掛樹的 Node 必須有明確生命週期。RefCounted 可以隨引用計數釋放，但雙向強參照或容器／快取形成的循環仍會保留。只有前向所有權確實存在、反向只是查詢時，才把回指改成 WeakRef；不能讓必須跨等待存活的真正擁有者一併變弱。
 
-本地 processor 的 `parent_action` getter 在 owner 消失後回傳 null，但取值／攔截方法仍要求有效 action；呼叫端必須在使用期間持有它。不要把「可讀弱參照」誤解成「可在 owner 消失後執行」。新增 fallback 的值與 target 行為屬公開契約，須另驗，不能悄悄改效果。
+本地 processor 的弱回指契約見 [05 報告的本地實作契約](../../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md#本地實作契約)：呼叫端必須在使用期間持有 action，不要把「可讀弱參照」誤解成「可在 owner 消失後執行」。新增 fallback 的值與 target 行為屬公開契約，須另驗，不能悄悄改效果。
 
 ## 非同步與快取
 
 等待中的 action 由執行者持有；若它快取 processor，而 processor 回指 action，需明確打斷循環。列出完成、拒絕、強制取消、run 結束各出口，確認快取／signal／callback 不在出口後仍延長行動生命。
 
-本地 BaseAsyncAction 以 `begin_async_action()` 重設狀態、`finish_async_action()` 保證完成一次；完成訊號清 cache。預覽不得寫入實際執行 cache，也不得因此略過真正執行的攔截。呼叫端／handler 跨 await 持有 action；清理 processor 不等於刪掉 child 尚需的選牌資料。
+本地 BaseAsyncAction 以 `begin_async_action()` 重設狀態、`finish_async_action()` 保證完成一次；完成訊號清 cache，新子類沿用此契約。預覽不得寫入實際執行 cache，也不得因此略過真正執行的攔截。呼叫端／handler 跨 await 持有 action；清理 processor 不等於刪掉 child 尚需的選牌資料。
 
 取消先設 `async_cancelled`，再解除 confirmed／timer 等等待；恢復後先檢查取消或 generation，再執行效果／派發 child。訊號 callback 可能同步呼叫 clear，需在送出請求後、安裝 await 前再次檢查。測 handler 等待與取消，不能只直接呼叫 action；完成後仍收到 callback 也不得重複效果。
 

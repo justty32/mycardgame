@@ -12,7 +12,7 @@
 
 交付可玩流程時，再跑 `--suite PackScenario --content-profile pack --pack DIR --pack-tests DIR`；依 [scenario 契約](../../testing/suites.md#packscenario) 宣告跨程序階段與真實行為斷言，每階段均通過。載入 probe 不代替流程驗收。結果矩陣放在 tests 目錄外，避免填入 PASS 後改變已驗輸入 hash（[案例](../../../../examples/board-lab/README.md)）。
 
-驗 [可玩副本](playable-copy.md) 時，以 `--source-game <prepared>/game` 代替 `--pack` 並指定 pack profile；runner 須通過 prepare manifest 身分、完整輸出／安裝包 hash 與設定核對，再驗複製快照。任意來源不能豁免，來源副本有新增／變動的非排除內容就重新準備。
+驗 [可玩副本](playable-copy.md) 時，以 `--source-game <prepared>/game` 代替 `--pack` 並指定 pack profile；runner 對副本的身分與 hash 核對見該篇，來源副本有新增／變動的非排除內容就重新準備。
 
 ## 包的形狀
 
@@ -43,7 +43,7 @@ pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容
 
 ## 題材包須自備的基礎資料清單
 
-題材包不依賴框架範例內容（pack 側寫下範例 id 不存在）。包內每個被引用的 id 都要自己提供，並帶題材前綴；mod_info 的 `mod_folder_to_load_data` 要登記對應資料夾與 `class_name`／`table_name`。每個資料夾 key 必須以 `/` 結尾：FileLoader 直接拼接 key 與檔名，少了斜線會把兩者黏成不存在的路徑。啟動前以實際 JSON 檔名逐項檢查拼接結果，不能只驗資料夾存在；首度踩坑與檢查方法見 [bootstrap](bootstrap.md#第一批應寫檔案)。
+題材包不依賴框架範例內容（pack 側寫下範例 id 不存在）。包內每個被引用的 id 都要自己提供，並帶題材前綴；mod_info 的 `mod_folder_to_load_data` 要登記對應資料夾與 `class_name`／`table_name`。每個資料夾 key 必須以 `/` 結尾，原因與逐檔檢查方法見 [bootstrap](bootstrap.md#第一批應寫檔案)。
 
 - 顏色（`ColorData`，`colors/`，表 `_id_to_color_data`）：每張卡的 `card_color_id` 指向的顏色；最小一筆即可，`color` 為 `#rrggbbaa` 字串，圖示路徑可留空。
 - 卡牌（`CardData`，`cards/`）：不得引用框架範例的卡、關鍵字或顏色 id。
@@ -53,13 +53,9 @@ pack 側寫通過只代表載入與主選單初始化不靠範例內容；內容
 
 戰鬥規則（`CombatRulesData`，`combat_rules/`，表 `_id_to_combat_rules_data`）選填；缺省由 `Global.get_combat_rules()` 供應預設。提供 `combat_rules_default`（列入 `allowed_unprefixed_ids`）可覆寫欄位：test 側寫 patch，pack 側寫以類別預設新建。消費端已涵蓋抽牌／能量、CTB、棋盤／位移、波次與 ZOC；場域另用 FieldData。欄位支援與驗收依 [戰鬥框架 spec](../../../specs/combat-framework/README.md)，不可將 schema 存在當作實際流程已覆蓋。
 
-## 編輯器載入（本機）
-
-以 symlink／junction 讓本機編輯器載入內容包的工具與限制，見 [編輯器載入與邊界檢查](pack-tools.md#編輯器載入本機)；runner 驗包一律用 `--pack`。
-
 ## 邊界檢查
 
-`python3 tools/boundary_lint.py` 與文件 lint 一起跑，`violations=0` 才通過；R1–R4 規則見 [編輯器載入與邊界檢查](pack-tools.md#邊界檢查)。
+本機編輯器以 symlink／junction 載入內容包的工具，以及與文件 lint 一起跑的 `python3 tools/boundary_lint.py`（`violations=0` 才通過，R1–R4 規則），見 [pack-tools](pack-tools.md)；runner 驗包一律用 `--pack`。
 
 ## 限制
 

@@ -8,7 +8,7 @@
 
 ## 先保留比較基準
 
-讀取 [upstream.json](../../../tools/upstream.json)，依 [環境佈局](../dev-env.md) 區分上游 checkout 與外層 snapshot。snapshot 中的 game HEAD 是專案提交，不能拿來驗上游 SHA；上游版本應由來源鎖與隔離的純上游 checkout 核對。記錄本地改動及未提交檔案歸屬；不在有未知改動的 checkout 執行 pull、reset 或覆寫。
+讀取 [upstream.json](../../../tools/upstream.json)，依 [環境佈局](../dev-env.md) 區分上游 checkout 與外層 snapshot；上游版本由來源鎖與隔離的純上游 checkout 核對，不用 snapshot 的 game HEAD。記錄本地改動及未提交檔案歸屬；不在有未知改動的 checkout 執行 pull、reset 或覆寫。
 
 先在隔離 checkout 評估候選 commit，避免改掉目前可啟動版本。原始版本、候選版本、Godot 版本、授權／addons 變動與比較結果寫在 analysis/slay-the-robot/ 的升級筆記，第一份出現時才建檔。來源內容以實際 commit 為準，README 版本宣告只是核對入口。
 

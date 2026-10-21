@@ -39,21 +39,19 @@
 2. 依既有自訂內容位置增量修改；新模組須登記資料夾、class 與 Global table，並在 mod 清單啟用與設定優先順序。使用新 ID 區隔新內容；使用相同 ID 時逐欄說明補丁意圖。
 3. 完成下列適用的接線與驗證，完整重啟以重建載入與卡包快取。測試起始配置使用新 run；不要把舊存檔未出現新起手牌誤判為載入失敗。
 
-卡牌需核對 action 路徑、參數、目標、能量、升級及 `card_values`。抽牌參數是 `draw_count`，多段 action 有 stack 順序，必要時接 mechanics。除了「資料已註冊」，還要檢查 [CardPackData](../../../game/data/readonly/CardPackData.gd) 的顏色、稀有度、類型、validator 與 `card_appears_in_card_packs`；起始牌組和獎勵卡包是不同入口。
-
-敵人需有 `enemy_intents` 的初始狀態、可到達後續狀態、血量上下界與適用難度。以 `EventData.event_weighted_enemy_object_ids` 引用敵人，並核對位置／數量。事件需透過 [EventPoolData](../../../game/data/readonly/EventPoolData.gd)、[ActData](../../../game/data/readonly/ActData.gd) 或指定位置接入地圖；對話事件另核對 dialogue ID、選項與結束路徑。
+卡牌的 schema 與數值讀取依 [卡牌設計](card-design.md#用實際-schema-寫最小版本)，卡包篩選與起手／獎勵兩種入口依 [取得入口](card-design/acquisition.md)。敵人的意圖圖、血量與難度依 [enemy-design](enemy-design.md)；遭遇、事件與對話的池／Act／位置接線依 [關卡設計](level-design.md) 的子流程。
 
 新角色同時需要 `CharacterData` 與 `PlayerData` prototype，透過 `character_player_id`／`player_character_object_id` 接線；核對角色選擇、血量、起手牌、遺物與各類卡包。遺物資料需有取得入口；新增腳本則核對 `artifact_script_path`、signal 生命周期、重開局與移除效果，參考 [BaseArtifact.gd](../../../game/scripts/artifacts/BaseArtifact.gd)。
 
 ## 補丁、池與存檔
 
-[SerializableData.gd](../../../game/data/SerializableData.gd) 的普通 JSON Dictionary 合併已由本地修復寫回 `patched_dictionary`，並以 [公開 API 回歸](../../../tests/dictionary_regression.gd) 驗證 `merge_keep`／`merge_overwrite`。這是淺合併，Dictionary 不支援 append；從純上游重建必須套用本地補丁。Array append 已有基準驗證，recursive/native 巢狀物件仍需按實際分支測試，不能推定所有字典都套同樣策略。
+JSON patch 策略（[SerializableData](../../../game/data/SerializableData.gd) 的本地修復、淺合併、Dictionary 不支援 append、recursive/native 分支另測）見 [RNG 與資料契約](mechanics/rng-data.md#序列化與-patch-策略)；從純上游重建必須套用本地補丁。
 
 改名／刪除內容 ID、改可存欄位或池生成方式時，沿 [PlayerData.gd](../../../game/data/prototype/PlayerData.gd) 的 deck、artifact、event pool 與 RNG 狀態及 FileLoader 存讀函式追蹤。先複製測試存檔，在隔離目錄做載入—保存—再載入；明列舊存檔是維持相容、需轉換或無法繼續。不要直接修改玩家唯一存檔，也不要把起始資料修改當成存檔遷移。
 
 ## 驗收與同步
 
-現有 [framework_smoke.gd](../../../tests/framework_smoke.gd) 涵蓋基準場景、角色起手牌 ID、Array append 與 example_mod 載入／腳本替換；它沒有開始 run，也未驗證本次新增內容的戰鬥、出現機率或存讀往返。
+Smoke 的涵蓋範圍見 [validation](validation.md#現有基準與命令)；它沒有開始 run，也未驗證本次新增內容的戰鬥、出現機率或存讀往返。
 
 由 agent 依 [validation](validation.md) 選擇本次檢查：新增資料先斷言 ID／引用可解析，再進指定入口觀察結果；卡牌測目標和資源變化，敵人測意圖與回合，事件測到達與離開，角色測新局配置，遺物測觸發與結束。只有涉及存檔／池的變更才擴及相應往返／抽樣驗證；不要以跑全套無關檢查替代核心效果驗收。
 

@@ -2,11 +2,11 @@
 
 [testing](../testing.md)｜[環境](../dev-env.md)｜[各 suite 涵蓋範圍](suite-coverage.md)
 
-本檔是 runner 的操作細則：怎麼跑、怎麼判定、怎麼把新內容或新 suite 接進去。執行邊界、Smoke 契約、文件檢查與 Done when 留在父檔 [testing](../testing.md)；每個 suite 實際驗了什麼見 [suite-coverage](suite-coverage.md)。
+本檔是 runner 的操作細則：怎麼跑、怎麼判定、怎麼把新內容或新 suite 接進去。執行邊界、Smoke 契約、文件檢查與 Done when 留在父檔 [testing](../testing.md)；引擎探測與各平台的環境變數隔離見 [dev-env](../dev-env.md#背景驗證)。
 
 **何時用**：要跑背景回歸、讀懂 runner 的退出碼與日誌，或替新內容／新 suite 接上 runner。
 
-**何時不用**：決定某類變更該補哪些測試 → [validation](../game-dev/validation.md)；引擎探測與各平台隔離 → [dev-env](../dev-env.md)。
+**何時不用**：決定某類變更該補哪些測試 → [validation](../game-dev/validation.md)；查某個 suite 涵蓋什麼 → [suite-coverage](suite-coverage.md)。
 
 ## 怎麼跑
 
@@ -52,7 +52,7 @@ runner 本身用假引擎程序做 [合成測試](../../../tests/test_runner_dia
 
 新增 suite 時，要同時改 runner 的選單、入口、標記與隔離契約，並同步 ps1 的 `ValidateSet` 與合成測試案例（Ctb 就是照此加入的）；不能只在文件裡寫出新命令。
 
-`--source-game`（ps1 為 `-SourceGame`）只換遊戲來源，不換 tests。完整的候選演練要把 tools 與 tests 一起放到獨立的候選根目錄，再以 `--project-root` 指向它。source_hashes 涵蓋來源修復與雙盤／場域核心檔（實際清單見 runner 的 `SOURCE_HASH_PATHS`），新內容要另記檔案雜湊。
+`--source-game`（ps1 為 `-SourceGame`）只換遊戲來源，不換 tests；來源鎖仍是本專案基準，候選版本須另核對 checkout 與 hashes。完整的候選演練要把 tools 與 tests 一起放到獨立的候選根目錄，再以 `--project-root` 指向它。source_hashes 涵蓋來源修復與雙盤／場域核心檔（實際清單見 runner 的 `SOURCE_HASH_PATHS`），新內容要另記檔案雜湊。
 
 Combat 與 Ctb 的五張原生牌 fixture 會覆寫角色起手牌（含 append），SaveLoad 也有自己的語意情境。所以這些 suite 通過，不等於新增的卡、敵人、事件或音效已被實際執行；報告須列明新增的 assertion 與到達入口。
 

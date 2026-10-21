@@ -18,7 +18,7 @@
 
 ### 建立角色到第一場戰鬥
 
-依 [content](../content.md) 建 CharacterData 與 PlayerData 配對、起始牌組、獎勵卡包與資料載入。NewRunMenu 目前列出全部角色；起始幕由 PlayerData prototype 的 player_act_id 指定（缺欄預設 act_1），Global.start_run 會在新局副作用前拒絕空或未登記的 Act。起點仍需 location_0；自訂短幕可用既有 act_action_script_path 產生完整路線，不改 Continue 存檔的當前幕。
+依 [content](../content.md) 建 CharacterData 與 PlayerData 配對、起始牌組、獎勵卡包與資料載入。角色列表、起始幕來源（PlayerData 的 player_act_id）與 start_run 的前置拒絕見[核實的新局段](../../../../analysis/slay-the-robot/design/game-flow.md#啟動角色設定與新局)；自訂短幕可用既有 act_action_script_path 產生完整路線。
 
 先驗角色設定 → 新局 → 起點選項 → 相鄰地圖按鈕 → 一場戰鬥勝利 → 領獎 → 可旅行地圖，再走真實傷害造成敗北 → 摘要 → End Run。利用現有 fixture 的做法補原創內容斷言，核對牌組、費用、HP、金錢與取得入口；範例 fixture 通過不代表新增內容通過。
 
@@ -26,19 +26,17 @@
 
 沿 [level-design](../level-design.md) 與對應節點工作流接每種需求中的節點。每種至少驗進入、合法／拒絕選擇、資源改變、完成、離開；有死亡可能的選項另驗敗北。確認 modal 完成、action queue 結束與 can_travel 的實際狀態，不能只看 overlay 關閉。
 
-在小圖先驗這些出口，再增加隨機池與分支。固定 seed、同操作序列做重現；路線檢查使用真正鄰接與 Map 選點入口，任意強制訪問不能證明可達。修改樓層數要重審固定 shop／miniboss／treasure／rest 層索引，不能以縮短數字替代完整短幕生成方案。
+在小圖先驗這些出口，再增加隨機池與分支。固定 seed、同操作序列做重現；路線檢查使用真正鄰接與 Map 選點入口。修改樓層數依 [map-act](../level-design/map-act.md#定義旅程再選生成方式) 重審固定設施層，不以縮短數字替代完整短幕生成方案。
 
 ### 接跨幕、終局與再開
 
-先用短而有效的兩幕圖驗非終局 Boss → 獎勵 Continue → 下一幕地圖，核對 act 編號、act ID、舊圖清除與新圖入口。act_next_act_ids 與 player_act_max 要同時一致；空後繼幕但尚未到最大幕數會出錯，需有明確失敗結果。
+先用短而有效的兩幕圖驗非終局 Boss → 獎勵 Continue → 下一幕地圖，核對 act 編號、act ID、舊圖清除與新圖入口；act_next_act_ids 與 player_act_max 的一致性要求見 [map-act](../level-design/map-act.md#指定跨幕終局與保存邊界)，不一致時需有明確失敗結果。
 
-再驗最後 Boss 真實勝利 → 勝利摘要 → End Run → profile 寫入／run save 移除 → 再開新 run。最後 Boss 預設不展示一般戰鬥獎勵；若產品要求領獎後才結算，這是流程修改。另驗敗北、主選單放棄及 Pause 放棄，確認結果只記一次、舊卡牌／暫存選擇／訊號不污染下一局。
+再驗最後 Boss 真實勝利 → 勝利摘要 → End Run → profile 寫入／run save 移除 → 再開新 run（最後 Boss 預設不展示一般獎勵，要求先領獎屬流程修改）。另驗敗北、主選單放棄及 Pause 放棄，確認結果只記一次、舊卡牌／暫存選擇／訊號不污染下一局。
 
 ### 驗中斷與局外保留
 
-依 persistence 建立保存→另一程序載入→下一步的比較。至少覆蓋起點、戰鬥進入、節點完成尚未移動、跨幕前後、勝敗摘要尚未結算、返回標題與已結算再啟動；只驗本次採用的分支。預期回退是契約的一部分，測試要核對回退到哪裡，不把任何可載入 JSON 都算續玩成功。
-
-Profile 的統計／歷史和 run 牌組成長分開驗；若新增永久解鎖或能力成長，先設計資料模型、寫入時機與重複結算保護。現成最高難度欄位不保證選單遞進正常，依核實筆記列出的程式缺口先補回歸，或明確把難度成長排除在最小範圍。
+依 [persistence](persistence.md#驗證合法回退及拒絕路徑) 建立保存→另一程序載入→下一步的比較。至少覆蓋起點、戰鬥進入、節點完成尚未移動、跨幕前後、勝敗摘要尚未結算、返回標題與已結算再啟動；只驗本次採用的分支，並核對預期回退到哪裡。Profile 統計與 run 牌組成長分開驗；永久解鎖與難度遞進的前置條件見 [persistence 的三種資料](persistence.md#分開三種資料)，做不到就明確排除在最小範圍。
 
 ## 交接
 

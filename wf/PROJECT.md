@@ -15,7 +15,7 @@
 | wf/ | 工作流（kernel + dev 非侵入式佈局），遊戲修改從 [game-dev](workflows/game-dev/README.md) 進 |
 | games/ | 各款遊戲的題材樹 |
 
-發布為 `justty32/mycardgame` 的外層 snapshot：公開 checkout 的 game/ 是一般追蹤檔案，原本固定版本的獨立 game checkout 只保留在開發機；佈局見 [dev-env](workflows/dev-env.md)。協作採平台原生 sub-agent（[decisions](workflows/decisions.md) 第 1 列）。目前沒有自動平衡模擬器或額外 MCP，只有日後反覆任務與穩定工具介面確實需要時才評估。
+發布為 `justty32/mycardgame` 的外層 snapshot，佈局見 [dev-env](workflows/dev-env.md#環境與來源)。協作採平台原生 sub-agent（[decisions](workflows/decisions.md) 第 1 列）。目前沒有自動平衡模擬器或額外 MCP，只有日後反覆任務與穩定工具介面確實需要時才評估。
 
 ## 上游框架
 

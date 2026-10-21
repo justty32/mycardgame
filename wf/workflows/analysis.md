@@ -23,7 +23,7 @@
 
 ## 產物結構
 
-本專案的 Slay-The-Robot 知識已收在 [analysis/slay-the-robot](../../analysis/slay-the-robot/README.md)。後續分析直接在此維護，不回 PAS 讀寫；既有教學的匯入不代表完成上方 Level 分析與執行驗證。
+本專案的 Slay-The-Robot 知識已收在 [analysis/slay-the-robot](../../analysis/slay-the-robot/README.md)。後續分析直接在此維護；既有教學的匯入不代表完成上方 Level 分析與執行驗證。
 
 建議放在 `analysis/<project>/`：
 

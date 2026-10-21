@@ -53,7 +53,7 @@ python3 <candidateRoot>/tools/test_game.py --suite Smoke --project-root <candida
 
 runner 的 source_hashes 涵蓋 SOURCE_HASH_PATHS 指定的框架核心檔，並非所有內容檔；另記 mod 三檔、mod_list 及修改 tests 的 SHA-256、候選根與日誌。候選與正式檔不一致時不能沿用證據。實作後依內容入口同步文件及 lint；只演練則保留未落地標記。
 
-已有 Combat fixture 會把起始牌組覆寫為五張原生牌，不能證明重擊被使用。出牌需求須在專屬情境中保留新牌，沿 combat_flow 的 `_play()`／等待 idle 檢查費用、合法與拒絕目標、HP／格擋、手牌移動及預覽，再由所接 suite 執行；改牌組後不可照用原生卡 20 傷害的固定勝敗斷言。SaveLoad 同理須明確讓新卡進入存讀快照。完整效果設計與驗收接 [卡牌評量](../card-evaluation.md)。
+既有 Combat fixture 會覆寫起始牌組（見 [實跑分析](../../../../analysis/slay-the-robot/design/mod-bootstrap.md#測試真正執行哪裡)），不能證明重擊被使用。出牌需求須在專屬情境中保留新牌，沿 combat_flow 的 `_play()`／等待 idle 檢查費用、合法與拒絕目標、HP／格擋、手牌移動及預覽，再由所接 suite 執行；改牌組後不可照用原生卡 20 傷害的固定勝敗斷言。SaveLoad 同理須明確讓新卡進入存讀快照。完整效果設計與驗收接 [卡牌評量](../card-evaluation.md)。
 
 圖像／UI／音訊 fixture 另依領域流程。headless 不證明畫面正確或音訊無實體輸出；播放測試先隔離音訊裝置。教學的手動驗收需要 GUI，未執行時標為未驗。
 

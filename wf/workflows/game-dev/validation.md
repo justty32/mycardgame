@@ -4,7 +4,9 @@
 
 ## 現有基準與命令
 
-從專案根使用 [隔離 runner](../../../tools/test_game.py)，例如 `python3 tools/test_game.py --suite Smoke`；先隔離匯入，再查 exit、完成標記及錯誤。[Smoke](../../../tests/framework_smoke.gd) 涵蓋主場景／選單、資料解析、Array／Dictionary patch 與 example_mod 載入／script takeover，沒有出牌或存讀往返。戰鬥與存讀由 Combat／SaveLoad 驗證；最新狀態見 [05 報告](../../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。
+從專案根使用 [隔離 runner](../../../tools/test_game.py)，例如 `python3 tools/test_game.py --suite Smoke`；先隔離匯入，再查 exit、完成標記及錯誤。[Smoke](../../../tests/framework_smoke.gd) 涵蓋主場景／選單、資料解析（含角色起手牌 ID）、Array／Dictionary patch 與 example_mod 載入／script takeover，沒有出牌或存讀往返。戰鬥與存讀由 Combat／SaveLoad 驗證；最新狀態見 [05 報告](../../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。
+
+設計類流程（卡牌、評量、敵人、第一個 mod）的靜態核對基準是上游 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加本地修復（2026-10-19 核對），各領域的核實筆記列出實際來源。換版本或更動 schema 後要重新追呼叫鏈，不以分析取代程式。
 
 操作邊界見 [user.md](../common/user.md#桌面與程序邊界)：可跑 headless，不做 GUI。歷史主選單 capture 只證明該次 viewport 渲染，不證明按鈕互動，也不是可重跑的步驟。headless 場景斷言不涵蓋 GPU 或視窗呈現；需要這些證據的部分明列尚未驗證。
 
@@ -52,4 +54,4 @@ python3 tools/test_game.py --suite Field       # 動到場域格／控制區時�
 
 涉及 run、刪檔或存讀的測試，先建立獨立工作副本與測試資料目錄，確認所有 autosave／delete 路徑都在該範圍；不要在使用者既有存檔上試驗。備份與 fixture 不作為待清理雜檔自動刪除。測試產物留在 artifacts，避免提交個人進度。
 
-正常測試須 exit 0、完成標記且無 SCRIPT ERROR／FAIL；45 秒 timer 不能攔同步卡死，外層仍需期限。修復後預設拒絕 ObjectDB／resource 保留，不沿用舊退出白名單。icon UID fallback 與外部 image 警告仍存在；cold import 的指定 UID 須重驗，SaveLoad 壞檔只容許已核對的拒絕訊息，詳見 testing。
+日誌判讀（exit 0、完成標記、SCRIPT ERROR／FAIL、外層期限、預設拒絕 ObjectDB／resource 保留、已知警告與冷匯入 UID 重驗）以 [testing](../testing.md) 與 [suite 說明](../testing/suites.md) 為準；SaveLoad 壞檔階段只容許已核對的拒絕訊息。

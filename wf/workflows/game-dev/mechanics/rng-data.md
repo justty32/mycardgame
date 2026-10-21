@@ -12,6 +12,6 @@
 
 ## 序列化與 patch 策略
 
-序列化須分別檢查普通值、typed collections、遞迴 embedded objects 的分支；新增欄位要核對預設值與舊檔缺欄位的情況。`patch_dictionary()` 支援 `merge_keep`、`merge_overwrite`；普通 Dictionary 的 JSON 分支已由本地修復寫回合併結果，Smoke 與 [專項回歸](../../../../tests/dictionary_regression.gd) 都有斷言。這是淺合併，不代表 recursive/native 分支共用相同策略。
+序列化須分別檢查普通值、typed collections、遞迴 embedded objects 的分支；新增欄位要核對預設值與舊檔缺欄位的情況。`patch_dictionary()` 支援 `merge_keep`、`merge_overwrite`；普通 Dictionary JSON 分支的本地修復、淺合併語意與固定案例見 [validation 的 Dictionary 回歸契約](../validation.md#dictionary-回歸契約)，Smoke 也有斷言。recursive/native 分支不共用相同策略，Dictionary 沒有 append。
 
-修改這類契約時，保留舊 key、新 key 與重複 key 策略的 regression，經公開 JSON patch 入口驗證，不只測 helper；依影響補嵌套與存讀案例。未知策略目前走 overwrite；是否改為錯誤屬行為決策，要連同所有引用一起處理。修復後同步所有現行指引；歷史報告保留當時結果，並連到新證據。Dictionary 回歸的固定案例見 [validation](../validation.md#dictionary-回歸契約)。
+修改這類契約時，保留舊 key、新 key 與重複 key 策略的 regression，經公開 JSON patch 入口驗證，不只測 helper；依影響補嵌套與存讀案例。未知策略目前走 overwrite；是否改為錯誤屬行為決策，要連同所有引用一起處理。修復後同步所有現行指引；歷史報告保留當時結果，並連到新證據。

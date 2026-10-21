@@ -47,7 +47,7 @@
 }
 ```
 
-原檔另有動畫、貼圖、速度、站格大小與 `enemy_intent_range` 等欄位；接入遊戲時以原檔與 [EnemyData](../../../game/data/prototype/EnemyData.gd) 為準，並依 content 登記 enemies 資料夾。新增敵人一律依 [validation 的棋盤開關](validation.md#棋盤開關兩種模式都要驗) 同時跑 `--suite Boardless`（普通意圖可打完一場）與 `--suite DualBoard`（移動意圖與射程）。
+原檔另有動畫、貼圖、速度、站格大小與 `enemy_intent_range` 等欄位；接入遊戲時以原檔與 [EnemyData](../../../game/data/prototype/EnemyData.gd) 為準，並依 content 登記 enemies 資料夾。新增敵人一律依 [validation 的棋盤開關](validation.md#棋盤開關兩種模式都要驗) 跑兩種模式。
 
 ## Done when
 
@@ -57,7 +57,7 @@
 
 ### 先建立可檢驗的敵人角色
 
-讀 [EnemyData](../../../game/data/prototype/EnemyData.gd)、[EnemyIntentData](../../../game/data/readonly/embedded/EnemyIntentData.gd)，沿核實來源追到執行者，不從教學註解推定能力。核對基準為上游 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加本地修復（2026-10-19 核對）；版本改變先重查。
+讀 [EnemyData](../../../game/data/prototype/EnemyData.gd)、[EnemyIntentData](../../../game/data/readonly/embedded/EnemyIntentData.gd)，沿核實來源追到執行者，不從教學註解推定能力；核對基準與重查時機見 [validation](validation.md#現有基準與命令)。
 
 以下是設計建議，並非框架自動規則：用一句話說玩家應學會什麼決策，例如「在蓄力回合留資源防守」，再指定可反制的方法與錯誤決策的代價。記下預期可用的牌組、費用、抽牌、生命與前置遭遇；普通／精英／boss 的定位不能只靠血量區分。boss 階段、血量觸發或反覆使用限制不是現成的狀態機欄位，需求出現時先確認需要哪個自訂 action／validator。
 
@@ -65,15 +65,15 @@
 
 ### 將意圖寫成完整狀態圖
 
-從 `intent_initial` 指向第一輪可用意圖，每個可到達狀態寫出傷害×次數、格擋、custom actions、下一狀態權重與預告內容。權重須非負、總和大於零，目標 ID 全部存在；需要停留時明確寫自迴圈，不用空權重代表「維持原狀」。目前空權重實際回傳 null，不能相信程式旁的停留註解。
+從 `intent_initial` 指向第一輪可用意圖，每個可到達狀態寫出傷害×次數、格擋、custom actions、下一狀態權重與預告內容。權重須非負、總和大於零，目標 ID 全部存在；需要停留時明確寫自迴圈，不用空權重代表「維持原狀」（空權重實際行為與程式旁註解不符，見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人能力的現有缺口)）。
 
-敵人進入時間軸等待時（開戰、生成、自身行動後），由 [CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 呼叫 `Enemy.decide_next_intent()` 切換意圖。EnemyIntentController 依是否掛載 board_module 分派：有模組由 BoardEnemyIntent 處理移動、射程與命中；未掛（NONE）走普通 hero／SELF 目標，不查距離或移動。兩路都以 `Enemy.build_intent_actions_data` 組出 stack：重設格擋（依 rules）、加格擋、攻擊、custom actions；custom actions 也受逆序影響。每次行動依序處理 PRE_ENEMY_TURN → PRE_ENEMY_INTENT → 意圖 → POST_ENEMY_INTENT → POST_ENEMY_TURN；「先上易傷再攻擊」須測實際次序。
+意圖切換時點（[CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 在敵人進入時間軸等待時呼叫 `decide_next_intent()`）、`build_intent_actions_data` 的 stack 次序（reset → block → attack → 逆序 custom actions）與 PRE／POST 回合時點見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人資料與意圖時序)；有無棋盤模組的分派見 [棋盤意圖核實](../../../analysis/slay-the-robot/design/board-intents.md#可選模組與普通戰鬥)。「先上易傷再攻擊」須測實際次序。
 
 意圖在執行前被拒絕（例如未掛棋盤時的盤面專屬 payload）時，目前程式設 `keep_intent_next_action`，下次行動保留同一意圖。
 
 <!-- TODO(程式 agent)：H1「敵人意圖停擺」修正後，依新程式改寫上一句（拒絕後意圖如何推進），並註明對應回歸位置。 -->
 
-預告用 attack／attack-generator 的 preview interception 算數字，圖示來自 `enemy_intent_display_types`。custom action 的視覺推導只涵蓋部分已知腳本；新腳本須同步描述／圖示契約。純防禦或召喚意圖要明確把傷害與攻擊次數設為 0。重複預覽前後比較狀態、RNG 與資源，證明預覽不改遊戲；數字斷言不等於玩家已看得懂。
+預告數字與圖示推導的限制見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人資料與意圖時序)：新 custom action 腳本須同步描述／圖示契約，純防禦或召喚意圖要明確把傷害與攻擊次數設為 0。重複預覽前後比較狀態、RNG 與資源，證明預覽不改遊戲；數字斷言不等於玩家已看得懂。
 
 ### 棋盤意圖與模組開關
 
@@ -81,9 +81,9 @@
 
 ### 難度與遭遇接線
 
-血量用上下界與 `add_health_bounds()`；一般屬性難度表的實際拼字為 `enemy_difficulty_to_enemy_modfiers`。`add_intent_state()` 可保存同原始 ID 的難度版本，但目前 override cache 未依玩家難度篩選，會挑最高版本。設計依賴此能力時，先建立最低、門檻前、門檻及最高難度的失敗測例並接 mechanics 修正，不宣稱現成的難度切換可用。
+血量用上下界與 `add_health_bounds()`。難度表欄位的實際拼字，以及 `add_intent_state()` 難度版本的 override cache 未依玩家難度篩選的缺口，見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人能力的現有缺口)。設計依賴此能力時，先建立最低、門檻前、門檻及最高難度的失敗測例並接 mechanics 修正，不宣稱現成的難度切換可用。
 
-依 content 註冊 mod 資料，沿 `EnemyData → EventData.event_weighted_enemy_object_ids → EventPoolData → ActData／LocationData` 接入可到達的遭遇。每個敵群欄位是一個生成槽的加權候選，不是「整隊二選一」；各槽組合可能產生單體設計未遇到的連鎖壓力。指定位置需覆蓋初始與召喚槽；確認敵人種類、minion、初始狀態、動畫與死亡 action。
+依 content 註冊 mod 資料；接入可到達遭遇的 ID 鏈、生成槽語意與指定位置見 [戰鬥遭遇](level-design/combat.md#完成-id-鏈)。各槽組合可能產生單體設計未遇到的連鎖壓力；確認敵人種類、minion、初始狀態、動畫與死亡 action。
 
 ### 建立專項回歸與評量
 

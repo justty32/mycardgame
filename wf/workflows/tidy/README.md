@@ -14,14 +14,16 @@
 <!-- wf-nav -->
 1. **過時的就封存，連結當它不存在**——「過時」的判準：文件自述歷史／被取代／前提作廢；文件描述的目標（計畫、批次、環境配置）已不存在；結論已整份被某現役文件吸收。
 2. **一個資料夾別擠太多檔**，同類檔案放鬆。
-3. **小檔（<1 KB）太多就合併**。找法：`find <dir> -type f -size -1024c | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn`。
-4. **給人點的留 md、給 AI 讀的進資料檔**；整檔 > 8 KB 另按語意拆資料夾，兩個門檻各自獨立觸發。格式契約與 A／B 兩種拆法在 [common/data-files.md](../common/data-files.md)。掃描：`wf/tools/find_big_lists.py`、`find … -size +8192c`。
+3. **小檔（<1 KB）太多就合併**。
+4. **給人點的留 md、給 AI 讀的進資料檔**；整檔 > 8 KB 另按語意拆資料夾，兩個門檻各自獨立觸發，對應下方第 3 步的 A／B 拆法；資料檔格式見 [common/data-files.md](../common/data-files.md)。
+
+各條的掃描命令見流程第 1 步。
 
 ## Done when
 
 - 目標資料夾根層只剩入口 README ＋ 語意子資料夾（或同類檔案集合），每個子資料夾有 `README.md`。
 - 每個被封存檔：`grep -rn --include='*.md' '<檔名>' <repo> | grep -v archive/` → 0 行；`archive/README.md` 有它那一列。
-- `wf/tools/wf-lint.sh --strict .` → `TOTAL broken=0 residue=0 oversize=0 biglist=0`（`biglist` 只算同質記錄表；連結表超標印 `BIGLIST-LINKS`，只 warning 不計入）。
+- 文件 lint 通過（見 [testing](../testing.md#文件檢查修改後必跑)；`BIGLIST` 判讀見 [data-files](../common/data-files.md#其他工具怎麼對待資料檔)）。
 - `find <repo> -name '*.md' -not -path '*/archive/*' -size +8192c | wc -l` → 0。
 - 報告附 `moves.tsv`（`舊路徑<TAB>新路徑`）。
 - 子資料夾 `README.md` ≤ 300 行、入口 `README.md` ≤ 100 行；名冊／登記表 ≤ 8192 bytes；`SESSION-LOG.md` ≤ 4096 bytes 且只列 open。
@@ -43,7 +45,7 @@
    把病灶寫成編號清單，直接放進交接書；不要讓線自己找範圍。
 <!-- wf-nav -->
 2. **交接書**固定寫：分類方案（類別數 5–7，一張表列每類收什麼）、**檔名一律不改**（外部連結靠檔名對映修）、一律 `git mv`、每個子資料夾要 README、封存規則與四條原則、禁區（不 commit／不進交接書以外的範圍／不刪／不碰 kernel 檔與 `AGENTS.md` 實質內容）、**固定條數**的驗收命令、報告要附 `moves.tsv`。
-3. **線跑**：按檔案性質選 A／B 拆法（見 [common/data-files.md](../common/data-files.md)：A 法把同質大表抽成資料檔並在 md 端留摘要、對帳列數；B 法把過長散文按語意拆進同名資料夾，原路徑保留當入口）；共通：一律 `git mv`／新檔 `git add`，不留副本，不改內容實質，不重新判定任何狀態。多批可平行，因為各批只動自己範圍內的檔案。
+3. **線跑**：按檔案性質選 A／B 拆法——A 法把同質大表抽成資料檔並照 [data-files](../common/data-files.md#md-端留什麼) 在 md 端留摘要、對帳列數；B 法把過長散文按語意拆進同名資料夾，原路徑保留當入口；共通：一律 `git mv`／新檔 `git add`，不留副本，不改內容實質，不重新判定任何狀態。多批可平行，因為各批只動自己範圍內的檔案。
 4. **核驗（調度者）**：不信報告，自己跑一次 Done when 的命令；看 `git diff --cached --name-status -M` 確認是 R（rename）不是 D+A；`archive/` 與 `AGENTS.md` 若被動到，只准是連結路徑那種修改。
 5. **搬檔後修連結**：用各批的 `moves.tsv` 跑 `wf/tools/fix_moved_links.py`（先 dry-run 再 `--apply`；它跳過 code fence、解析相對路徑後重算）。**指向被封存檔的連結不重寫**——照第 1 條原則拿掉。跨資料夾／跨 repo 的壞連結留給調度者收尾。
 6. **收尾**：確認 Done when 全過，commit 由使用者或調度者決定。

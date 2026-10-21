@@ -22,7 +22,7 @@
 
 ### 先固定意圖與證據
 
-先讀本任務適用的 wf 規矩與 [使用者邊界](../common/user.md)。核對基準是上游 `4dac5abe0d19382f8ace2cec5ed3fd77e2a0e11d` 加本地修復（2026-10-19 核對），核實筆記列出實際來源。換版本或更動 schema 後要重新追呼叫鏈，不以分析取代程式。
+核對基準與重查時機見 [validation](validation.md#現有基準與命令)，核實筆記列出實際來源。
 
 將設計 brief 填在該任務的 spec（`games/<game>/design/specs/`），內容欄位已抽到 [card-design-fields.json](card-design-fields.json)（9 列）。`id` 為欄位代號，`record` 是必填內容，`check` 是完成檢查，`basis` 區分設計要求與框架契約。它是填寫規格，不是已完成的設計；長卡表依 [資料契約](../common/data-files.md) 存資料檔。
 
@@ -55,9 +55,9 @@
 }
 ```
 
-需要升級或加成的數值放 `card_values`，action 只放確實要蓋過它的參數。[BaseAction.get_action_value](../../../game/scripts/actions/BaseAction.gd) 先讀 action 自己的值，再讀出牌 request 的快照；因此 action 若寫死 `damage`／`draw_count`，同名 `card_values` 的升級就不會生效。重複同類 action 但使用不同數值時用 `custom_key_names`，同時核對描述預覽的映射。抽牌參數為 `draw_count`，攻擊用 AttackGenerator；不要把建構成功當作效果成功。
+需要升級或加成的數值放 `card_values`，action 只放確實要蓋過它的參數：[BaseAction.get_action_value](../../../game/scripts/actions/BaseAction.gd) 優先讀 action 自己的值（優先序見 [核實筆記](../../../analysis/slay-the-robot/design/cards.md#原型執行值與升級)），action 若寫死 `damage`／`draw_count`，同名 `card_values` 的升級就不會生效。重複同類 action 但使用不同數值時用 `custom_key_names`，同時核對描述預覽的映射。抽牌參數為 `draw_count`，攻擊用 AttackGenerator；不要把建構成功當作效果成功。
 
-多效果要明寫自然語言的執行順序，再沿 [ActionGenerator](../../../game/autoload/ActionGenerator.gd) 和 [HandManager](../../../game/autoload/HandManager.gd) 核實 stack 順序；預設是陣列後項先執行。先抽再打、先上狀態再打、擊殺追加，都要用能區分順序的狀態來測。需要新 action／validator 時先交 mechanics，不用描述文字假裝已有行為。
+多效果要明寫自然語言的執行順序，再沿 [ActionGenerator](../../../game/autoload/ActionGenerator.gd) 和 [HandManager](../../../game/autoload/HandManager.gd) 核實 stack 順序（規則見 [mechanics 的順序與等待](mechanics.md#順序與等待)）。先抽再打、先上狀態再打、擊殺追加，都要用能區分順序的狀態來測。需要新 action／validator 時先交 mechanics，不用描述文字假裝已有行為。
 
 ### 費用、升級、取得與測試
 

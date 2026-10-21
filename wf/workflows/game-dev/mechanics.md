@@ -28,17 +28,15 @@
 
 預設 `add_actions([A, B])` 將每個 action 推成獨立 queue，stack 的 `pop_back()` 使 B 先於 A；`enqueue = true` 使用 queue，queue `pop_front()` 保持加入順序。已有 stack／current queue 時須追蹤實際插入位置，測試子行動與完成 sentinel；勿只換陣列順序就宣稱所有情境已正確。
 
-固定延遲用 `time_delay`；普通 action 內的 `await` 不會自動讓 handler 等完。目前 BaseAsyncAction 由 `begin_async_action()` 開始、`finish_async_action()` 完成並清快取；新子類沿用此契約。取消先設定 `async_cancelled` 再解除等待，await 恢復後不得套效果或新增 child。驗正常、取消與同步 callback 立即取消，確認不懸掛或重複完成；直接呼叫會繞過 handler 管理。
-
-新增 processor、回指或 async cache 時，追蹤強參照與釋放出口；RefCounted 不會解開循環，WeakRef 不代替擁有者。依 [resource-lifecycle](resource-lifecycle.md) 驗正常、拒絕、取消及預覽路徑。
+固定延遲用 `time_delay`；普通 action 內的 `await` 不會自動讓 handler 等完。需要等待時沿用 BaseAsyncAction，其開始／完成／取消契約與驗法（含同步 callback 立即取消、不得繞過 handler）見 [資源生命週期的非同步與快取](resource-lifecycle.md#非同步與快取)；新增 processor、回指或 async cache 時，同檔追蹤強參照與釋放出口，驗正常、拒絕、取消及預覽路徑。
 
 ### 攔截與 validators
 
 核對攔截腳本、被攔截 action 路徑、來源／目標端及 priority。以 `set_shadowed_action_values()` 寫入，保留自訂 key 映射。`preview_mode` 下不得消耗充能、抽 RNG、改牌組或送出有遊戲效果的訊號；重複預覽前後比較狀態，再比較一次真正執行的結果。
 
-預覽也不能回 REJECTED：Card 描述直接取 processor `[0]`。只有需顯示自訂攔截值時，才配置 `card_description_preview_overrides`；非空會取代預設 damage／block 預覽。新 action 不一律需要它。依 [卡面預覽契約](../../../analysis/slay-the-robot/design/cards.md#卡面攔截預覽的消費端契約) 核對 key、空 payload 與 null 目標；專項驗無缺鍵／空結果、基礎／升級／加成顯示及狀態不變。第三欄自訂映射目前未被消費，不能照 schema 註解假定有效。
+預覽也不能回 REJECTED（Card 描述直接取 processor `[0]`）。何時需要 `card_description_preview_overrides`、非空陣列取代預設表、空 payload／null 目標與未被消費的第三欄，見 [卡面預覽契約](../../../analysis/slay-the-robot/design/cards.md#卡面攔截預覽的消費端契約)；專項驗無缺鍵／空結果、基礎／升級／加成顯示及狀態不變。
 
-只有 ActionInterceptorData 入表還不會生效。狀態用 `StatusEffectData.status_effect_interceptor_ids`，由 [BaseCombatant](../../../game/scripts/combatants/BaseCombatant.gd) 在首次建立／最後移除時註冊／撤銷；其他 owner 須追到 `ActionHandler.register_action_interceptor(combatant, id)` 與對應 unregister。同 ID 不重複註冊，不應由多個 owner 各自擁有。Interceptor 覆寫 `process_action_interception(processor, preview_mode)`：CONTINUE 繼續，STOPPED 保留本目標但停止後續鏈，REJECTED 捨棄本目標。priority 由大到小，同值以 object_id 反向排序。上述接線為 2026-10-19 的靜態核實結果，新增機制仍需自己的執行證據。
+只有 ActionInterceptorData 入表還不會生效。狀態用 `StatusEffectData.status_effect_interceptor_ids`，由 [BaseCombatant](../../../game/scripts/combatants/BaseCombatant.gd) 在首次建立／最後移除時註冊／撤銷；其他 owner 須追到 `ActionHandler.register_action_interceptor(combatant, id)` 與對應 unregister。同 ID 不重複註冊，不應由多個 owner 各自擁有。Interceptor 覆寫 `process_action_interception(processor, preview_mode)`，回傳碼（CONTINUE／STOPPED／REJECTED）與 priority 排序見 [擴充契約](../../../analysis/slay-the-robot/architecture/02_extension_points.md#攔截狀態與條件驗證)。上述接線為 2026-10-19 的靜態核實結果，新增機制仍需自己的執行證據。
 
 Validator 覆寫 `_validation()`，呼叫者使用 `validate()` 以保留反轉等包裝契約；依呼叫情境處理 null card／action。新增條件至少檢查一個允許、一個拒絕及邊界值。若條件只是阻擋玩家出牌，核對是否也該限制自動出牌或 action；不要因掛在 `card_play_validators` 就假設涵蓋所有路徑。
 
@@ -48,7 +46,7 @@ Validator 覆寫 `_validation()`，呼叫者使用 `validate()` 以保留反轉�
 
 ## 驗收與同步
 
-現有 [framework_smoke.gd](../../../tests/framework_smoke.gd) 驗啟動、部分資料載入與 example_mod action 建立；不是完整戰鬥、取消或存讀驗收。依 [validation](validation.md) 選能辨識本次錯誤的專項檢查，以完成訊號與 timeout 判定，不用任意 sleep 當作完成。
+Smoke 不是完整戰鬥、取消或存讀驗收（涵蓋範圍見 [validation](validation.md#現有基準與命令)）；依 validation 選能辨識本次錯誤的專項檢查，以完成訊號與 timeout 判定，不用任意 sleep 當作完成。
 
 機制／資料格式／載入流程變更依 [testing](../testing.md) 跑 Smoke；資源變更加 Import。regression 保留觸發條件與失敗訊息，區分既有及新增問題；公開契約變更同步 [code-map](../common/code-map.md)、分析／教學及驗證指令。
 

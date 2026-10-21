@@ -25,6 +25,15 @@
 
 開始前寫下玩家在何時、以何種牌組／生命／金錢面對什麼決策，以及完成後回到哪個流程。機制不能表達的需求先明列，交 mechanics 以失敗測例修復；不把設計 budget、難度目標或任意 JSON 欄位當引擎能力。
 
+## 共同驗收
+
+三篇子流程共用以下規則，子篇只寫各自要斷言的內容：
+
+- 現有 `python3 tools/test_game.py` 只有 Smoke／Combat／SaveLoad 等框架基準，沒有遭遇、非戰鬥或全幕 suite；新專項由 runner owner 接入 [隔離 runner](../../../tools/test_game.py) 後才有本次命令，依 [validation](validation.md) 串行安排並回報命令與完成標記，不以舊 fixture 綠燈交付。
+- [combat_flow](../../../tests/combat_flow.gd) 的隔離場景、等待 action、`Global.get_next_locations()` 找相鄰點再觸發真正地圖按鈕 signal 的模式可重用；直接呼叫訪問 action 或傳遠處 location ID 不能證明玩家路線可達。
+- 同 seed 加相同操作才可比較；記錄版本、seed、樣本與策略，區分可達性及平衡假說。
+- 背景檢查不涵蓋地圖可讀性、視窗呈現、點擊命中與視聽節奏，這些需要 GUI 驗收，未執行時列為未驗。
+
 ## 交接
 
-交付設計、ID／修改點、專項測例、seed／策略／樣本、日誌與未驗部分。單體調整回 enemy-design，載入與 mod 回 content，全局開始／續玩／結算回 game-flow。大量同質評量依 [資料契約](../common/data-files.md) 存資料檔；驗證方式見 [validation](validation.md)。背景檢查不涵蓋視窗呈現、點擊命中與視聽節奏，這些仍須獨立證據。
+交付設計、ID／修改點、專項測例、seed／策略／樣本、日誌與未驗部分。單體調整回 enemy-design，載入與 mod 回 content，全局開始／續玩／結算回 game-flow。大量同質評量依 [資料契約](../common/data-files.md) 存資料檔。
