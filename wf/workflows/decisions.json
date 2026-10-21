@@ -140,6 +140,18 @@
    "decision": "框架級設計契約（雙盤 A、棋盤模組、棋盤意圖）的正式落點是 wf/specs/<topic>/（第 17 列）；目前位於 analysis/slay-the-robot/design/ 的 dual-board/、board-module.md、board-intents.md 視為待搬，wf 側先以連結指向現址並註明（狀態：2026-10-21 已搬遷完成——dual-board/ → wf/specs/dual-board/；board-module.md、board-module-verification.json、board-intents.md → wf/specs/board-module/ 的 README.md、verification.json、intents.md；引用已全數改寫）",
    "rejected_and_why": "不讓 analysis/ 長期承載設計契約：第 7 列已否決（analysis 只記已核實事實）；不由文件整理 agent 直接搬：該目錄屬程式 agent 所有，搬移需同步程式側引用",
    "premise": "程式 agent 釋出 analysis/slay-the-robot/design/ 所有權時，搬回 wf/specs/dual-board/ 等並改所有引用；若改判此類契約屬已核實事實，則改寫第 7 列"
+  },
+  {
+   "date": "2026-10-21",
+   "decision": "wf 文件總量（md+json 約 713 KB）不再為縮量而刪除只出現一處的內容（含呈現類文件）；去重已完成，維持現狀（來源：使用者 2026-10-21 當場決定）",
+   "rejected_and_why": "不再縮量：剩餘內容多為獨有規則，刪除會丟規則，使用者決定不用再縮",
+   "premise": "剩餘內容仍多為獨有規則；若總量造成實際載入或維護問題再重看"
+  },
+  {
+   "date": "2026-10-21",
+   "decision": "不新增「每場戰鬥（per-encounter）各自決定是否掛棋盤」的開關；維持現有全域開關（來源：使用者 2026-10-21 當場決定）",
+   "rejected_and_why": "per-encounter 開關：增加複雜度與組合狀態，使用者決定不做",
+   "premise": "全域開關足以涵蓋現有需求；若出現必須逐場戰鬥不同棋盤設定的玩法再重看"
   }
  ]
 }
