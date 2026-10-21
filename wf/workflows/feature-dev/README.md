@@ -26,7 +26,7 @@
   → 全數通過後：更新 code map → 補文檔 → 交付（commit 依使用者指示）
 ```
 
-- 自動驗證由 agent 執行；缺少環境時先補齊或明列限制，只有需要使用者親自操作時才交使用者。現階段 workflow lint 不代表遊戲驗證。
+- 自動驗證由 agent 執行；缺少環境時先補齊或明列限制，只有需要使用者親自操作時才交使用者。文件 lint 不代表遊戲驗證。
 - 迭代期間 code map / 文檔可暫時落後，**commit 前必須對齊**。
 - 交付前先核對受影響的操作指引、教學與測試命令；依 [learning](../learning.md) 將已驗證且可重用的經驗直接納入現有流程。
 - 跨 session 時在 hub [SESSION-LOG](../../SESSION-LOG.md) 補一行 `[功能名] 文檔 / code map 待同步`，下個 session 才不會誤判已同步。

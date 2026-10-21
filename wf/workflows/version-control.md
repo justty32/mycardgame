@@ -8,15 +8,15 @@
 
 ## Done when
 
-提交包含本次授權的程式、測試、分析與工作流；index 檢查沒有意外 gitlink、個人資料或生成快取。驗證紀錄存在，commit／push 指令回傳成功，遠端 ref 與已驗提交 SHA 一致。首次發布另有 fresh clone／提交樹讀回的檔案、補丁雜湊及文件連結檢查結果。
+提交包含已授權範圍內的程式、測試、分析與工作流；index 檢查沒有意外 gitlink、個人資料或生成快取。驗證紀錄存在，commit／push 指令回傳成功，遠端 ref 與已驗提交 SHA 一致。首次發布另有 fresh clone／提交樹讀回的檔案、補丁雜湊及文件連結檢查結果。
 
 ## 流程
 
 ### 確認身份與範圍
 
-本專案已獲使用者正常 commit／push 授權，使用 Git 全域身份 justty32 與既有 SSH 認證：公司 Windows 經 WSL，家中 Manjaro 用原生 git。2026-10-19 已分別核實 WSL 與 Manjaro 的全域 user.name 為 justty32；作業系統登入帳號與 Git 作者身份分開辨認。執行前只讀核對 `git config --global --get user.name`、`user.email` 與 origin，不列印完整 credential 設定、不改全域身份。遠端為 `git@github.com:justty32/mycardgame.git`；目前既有 SSH 認證對應 justty32，認證失效時報具體阻礙，不開登入 UI。
+commit／push 授權、Git 全域身份 justty32 與各機器的執行環境見 [user](common/user.md#版本控制與授權)；作業系統登入帳號與 Git 作者身份分開辨認。執行前只讀核對 `git config --global --get user.name`、`user.email` 與 origin，不列印完整 credential 設定、不改全域身份。遠端為 `git@github.com:justty32/mycardgame.git`；既有 SSH 認證對應 justty32，認證失效時報具體阻礙，不開登入 UI。
 
-以下 Git 提交操作均在上述環境的專案根目錄執行。先看 `git status --short`、本次 diff 與遠端 refs，辨認使用者及其他 agent 的變更；不要因本機有工作就覆寫遠端。多人變更由整合 owner 確認歸屬後一起驗收，正常推送不包含強制重寫或刪除歷史。
+以下 Git 提交操作均在上述環境的專案根目錄執行。先看 `git status --short`、待提交的 diff 與遠端 refs，辨認使用者及其他 agent 的變更；不要因本機有工作就覆寫遠端。多人變更由整合 owner 確認歸屬後一起驗收，正常推送不包含強制重寫或刪除歷史。
 
 ### 辨認 snapshot 與內層 checkout
 
@@ -38,10 +38,10 @@
 
 首次發布在獨立 clone 或 archive 讀回檔案，核對 game 不是 gitlink、來源補丁與證據 hashes、來源 metadata 的 snapshot 分支，以及文件 lint。若與已驗來源完全一致，這些發布檢查不需要重跑所有遊戲場景；發現內容差異才回到對應驗證。
 
-2026-10-20 中性示範包驗證留下的 ignored 遊戲副本含安裝後不成立的作者樹文件連結，直接掃工作根目錄會把歷史副本也列為 broken。保留原始失敗日誌與副本；以全部 tracked 現檔加明確核准的非 ignored 新檔建立完整待發布 snapshot，逐檔核對雜湊後，在其根目錄執行相同 `bash wf/tools/wf-lint.sh --strict .` 與 `python3 tools/boundary_lint.py`。不得縮成只驗 wf/，也不得刪除歷史副本、放寬 broken 規則或宣稱原工作根目錄通過；交付需記錄 snapshot 範圍與檢查結果。
+artifacts/ 下 ignored 的歷史驗證副本可能含安裝後不成立的連結；文件 lint 在 git 工作樹內不掃 .gitignore 路徑（見 [文件檢查](testing.md#文件檢查修改後必跑)），因此不影響結果。在非 git 目錄（staging、archive 讀回）跑 lint 時，只放入全部 tracked 現檔加明確核准的非 ignored 新檔，逐檔核對雜湊後在其根目錄執行相同的 `bash wf/tools/wf-lint.sh --strict .` 與 `python3 tools/boundary_lint.py`。不得縮成只驗 wf/，也不得為過關刪除歷史副本或放寬 broken 規則；交付需記錄檢查範圍與結果。
 
-2026-10-19 發布預檢曾發現 Git Bash 可跑的 workflow shell 檔，在 WSL 因 CRLF 出現 `set: -\r: invalid option`。目前以 `.gitattributes` 的 `*.sh text eol=lf` 保持 shell 檔 LF；遇到同類錯誤先查檔案換行與實際執行器，再在 staging／fresh clone 跑相同 lint。此修正只處理 shell 可攜性，不證明遊戲或其他環境已驗收。
+shell 檔以 `.gitattributes` 的 `*.sh text eol=lf` 保持 LF：CRLF 的 shell 檔在 Git Bash 可跑，在 WSL 會出現 `set: -\r: invalid option`。遇到同類錯誤先查檔案換行與實際執行器，再在 staging／fresh clone 跑相同 lint。此修正只處理 shell 可攜性，不證明遊戲或其他環境已驗收。
 
 ## 交接
 
-回報分支、commit、遠端連結、實際驗證與限制。更新 SESSION-LOG 的 open 狀態；可重用的發布經驗留在本流程。所有過程只使用檔案與背景指令，禁止桌面／視窗操作與改動既有遊戲程序。
+回報分支、commit、遠端連結、實際驗證與限制。更新 SESSION-LOG 的 open 狀態；可重用的發布經驗留在本流程。操作邊界見 [user.md](common/user.md#桌面與程序邊界)。

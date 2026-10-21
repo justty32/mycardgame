@@ -2,7 +2,7 @@
 
 [WORKFLOWS](../WORKFLOWS.md)｜[INDEX](../INDEX.md)
 
-建立一包可被 agent 套用到原專案的獨立 patch，交給沒有聊天上下文的接手者套用與驗證。
+建立一包可被 agent 套用到原專案的獨立 patch，交給沒有聊天上下文的接手者套用與驗證。本專案目前沒有 patch 產物；上游框架的本地修復補丁由來源鎖管理，走 [upstream](game-dev/upstream.md)，不走本流程。
 
 **何時用**：修改需跨 repo 交付、原專案無法直接推送，或要交給冷啟動 agent 套用。
 **何時不用**：能在同一 repo 直接改碼、跑測試、commit → [game-dev](game-dev/README.md)（遊戲）或 [feature-dev](feature-dev/README.md)（tools／wf）；只交付設計方案 → [planning](planning.md)；原專案有正常 PR 流程且會直接開 PR → 使用該 repo 的既有流程。
@@ -45,7 +45,7 @@
 | 修改類型 | 功能增強、bug 修正、重構或實驗 |
 | 影響範圍 | 受影響的模組或檔案 |
 | 預期結果 | 可量測或可觀察的變化 |
-| 分析依據 | 主要參考的 analysis／research 文件 |
+| 分析依據 | 主要參考的 analysis 文件 |
 
 ## src/ 策略
 

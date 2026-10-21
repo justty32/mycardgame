@@ -4,9 +4,11 @@
 
 **何時用**：換機、匯入資源、執行背景檢查或工具無法執行。
 
+**何時不用**：要決定跑哪些驗證、判讀結果 → [testing](testing.md)；commit／push 與發布 → [版本控制](version-control.md)。
+
 ## 環境與來源
 
-開發跨平台：公司 Windows、家中 Manjaro Linux 原生。共同需求為 Python 3.10+（runner 只用標準函式庫）與 Godot 4.7.x（2026-10-19 起的基準；4.6 為歷史基準）。引擎政策、官方 4.7.2 四平台 SHA-512、本機已驗 build 與 4.6 遷移比對見 [upstream.json](../../tools/upstream.json) 的 `engine_policy`。文件 lint 需 bash 與 python3，見 [文件檢查](testing.md#文件檢查修改後必跑)；Git 身份見 [版本控制](version-control.md)。
+開發跨平台：公司 Windows、家中 Manjaro Linux 原生。共同需求為 Python 3.10+（runner 只用標準函式庫）與 Godot 4.7.x（4.6 為歷史基準）。引擎政策、官方 4.7.2 四平台 SHA-512、本機已驗 build 與 4.6 遷移比對見 [upstream.json](../../tools/upstream.json) 的 `engine_policy`。文件 lint 需 bash 與 python3，見 [文件檢查](testing.md#文件檢查修改後必跑)；Git 身份見 [版本控制](version-control.md)。
 
 發布 repository 為 `justty32/mycardgame`，外層 snapshot 包含 game 普通檔案與本地修復。原開發機另外保留 game/.git 作上游固定版本 checkout；fresh clone 沒有內層 repository。因此 `git -C game rev-parse HEAD` 可能是外層專案 commit；上游基準須讀來源鎖，不能混用。runner 分開記錄上游、checkout 及實際來源檔雜湊。
 
@@ -30,7 +32,7 @@ python3 tools/test_game.py --suite Smoke --accept-engine-version '^4\.6\.'
 
 每次在 artifacts/verification/ 建立獨立副本與 user://，程序一律 headless、不開視窗。Linux 把 HOME、XDG_*、DOTNET_CLI_HOME、NUGET_PACKAGES 導到 run 目錄，並移除 DISPLAY／WAYLAND_DISPLAY；Windows 把 APPDATA、LOCALAPPDATA、TEMP／TMP 導到 run 目錄（`--no-isolate-appdata` 可關閉），以 CREATE_NO_WINDOW 啟動、逾時用 taskkill /T。2026-10-20 Windows 官方 4.7.2 Mono 已完成隔離 All，最新結果見 [可攜證據](../../analysis/slay-the-robot/evidence/README.md)；程序樹逾時另以假引擎驗證，平台細節見 [Windows 報告](../../analysis/slay-the-robot/architecture/06_windows_validation.md)。`--source-game` 可指定候選原始碼目錄；來源鎖仍是本專案基準，候選版本須另核對 checkout 與 hashes。驗證規則、歷史紅測開關及套件範圍見 testing，正式綠測不容許資源殘留。
 
-[game.ps1](../../tools/game.ps1) 是 Windows 專用的舊 Run／Import／Smoke 入口，預設路徑已改指 4.7 但未實測。Run 會開 GUI，且會讀寫 game/external 的設定／存檔；不適用目前的 agent 操作授權，需要 GUI 的部分記為未驗證。完整限制見 [user](common/user.md)。
+[game.ps1](../../tools/game.ps1) 是 Windows 專用的舊 Run／Import／Smoke 入口，預設路徑已改指 4.7 但未實測。Run 會開 GUI，且會讀寫 game/external 的設定／存檔，不在 agent 的 [操作邊界](common/user.md#桌面與程序邊界) 內；需要 GUI 的部分記為未驗證。
 
 ## 換機與重建
 
@@ -39,6 +41,8 @@ clone 本專案即包含已修復的 game，不要再次套用補丁。不需 PA
 Linux（2026-10-19 Manjaro 已驗）：發行版套件 godot 或 godot-mono 經 PATH 探測即可；套件 build 不是官方 archive，upstream.json 的 SHA-512 不描述它，以 runner 版本探測與隔離 All 為證據。
 
 直接開遊戲（非 headless）的已驗事實（2026-10-19 Manjaro KDE Wayland、Godot 4.7.2 godot-mono 套件版）：Wayland 下視窗收不到滑鼠點擊，所有按鈕無反應；加 `--display-driver x11`（走 XWayland）即正常，headless runner 不受影響。新建的 worktree 或乾淨副本第一次開前，先 `godot-mono --headless --path <dir>/game --editor --import` 建 class cache，否則大量 "Could not find type" parse error。
+
+試玩用的暫存 worktree（例：session scratchpad 下的 `playtest`，detached 於 c662729）不是 agent 可清理的對象，勿刪；不再使用時由建立者 `git worktree remove <path>`，目錄已消失則 `git worktree prune`。
 
 換到新平台時，先用 headless 加導向 HOME／XDG_*（Windows 為 APPDATA 等）的最小探針確認引擎可跑，再改 runner；探針不得寫入使用者的 ~/.config/godot（2026-10-19 Manjaro 實證）。
 
@@ -67,4 +71,4 @@ Windows 沙箱（2026-10-19 公司機）曾阻擋 Godot 寫入 user://、編輯�
 
 ## Done when
 
-對應背景套件有完成標記、預期退出碼及完整日誌；必要文件 strict lint 回傳 0。來源與 checkout 身份分開記錄，個人資料未被測試或發布涵蓋；未驗 GUI、聽感、實際輸入與匯出範圍明列於交付。
+對應背景套件有完成標記、預期退出碼及完整日誌；文件 lint 通過（見 [testing](testing.md#文件檢查修改後必跑)）。來源與 checkout 身份分開記錄，個人資料未被測試或發布涵蓋；未驗 GUI、聽感、實際輸入與匯出範圍明列於交付。

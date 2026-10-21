@@ -5,7 +5,7 @@
 用於初次接觸外部 repo、開源專案、舊系統或大型資料夾時，建立可延續、可搬移、可被後續 patch／planning 使用的分析產物。
 
 **何時用**：初次接觸陌生專案，需要建立可供後續工作延續的架構與能力分析。
-**何時不用**：只回答一個窄問題 → [investigation](investigation.md)；只是閱讀論文／規格／文章 → research 包（若有導入）；已在目標 repo 內實作功能 → [game-dev](game-dev/README.md) 或 [feature-dev](feature-dev/README.md)。
+**何時不用**：只回答一個窄問題 → [investigation](investigation.md)；只是閱讀論文／規格／文章 → 直接讀（research 包未導入），需留筆記時走 [investigation](investigation.md)；已在目標 repo 內實作功能 → [game-dev](game-dev/README.md) 或 [feature-dev](feature-dev/README.md)。
 
 ## Done when
 
@@ -51,7 +51,7 @@
 
 ## 寫作規則
 
-- 技術結論附來源位置：`path:line`、函式名、URL、論文 id 或命令摘要。
+- 技術結論附來源位置：`path:line`、函式名、URL 或命令摘要。
 - 教學文件要包含：前置知識、原始碼導航、實作步驟、驗證方式。
 - 圖表用 Mermaid、表格、列點；不要用 ASCII 框線圖。
 

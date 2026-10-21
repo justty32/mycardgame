@@ -2,13 +2,17 @@
 
 [WORKFLOWS](../WORKFLOWS.md)｜[INDEX](../INDEX.md)｜[環境](dev-env.md)
 
-驗證基於上游 `4dac5abe` 加本地修復、Godot 4.7.x（2026-10-19 起；4.6 為歷史基準，引擎政策與遷移比對見 [upstream.json](../../tools/upstream.json) 的 `engine_policy`）。最新狀態見 [資源生命週期報告](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)；[04 報告](../../analysis/slay-the-robot/architecture/04_regression_validation.md) 保留前次功能與資源限制，不代表所有玩法或發行版已通過。
+**何時用**：改完要驗證、選要跑的 suite、判讀 runner 或文件 lint 的結果。
 
-新任務依 [變更類型選驗證](game-dev/validation.md) 決定現有檢查與需補的測試；原生崩潰、記憶體讀取錯誤或異常退出走 [native-crash](game-dev/native-crash.md)。
+**何時不用**：決定某類變更該補哪些測試 → [validation](game-dev/validation.md)；安裝環境與引擎探測 → [dev-env](dev-env.md)。
 
-## 目前執行邊界
+驗證基於上游 `4dac5abe` 加本地修復、Godot 4.7.x（4.6 為歷史基準，引擎政策與遷移比對見 [upstream.json](../../tools/upstream.json) 的 `engine_policy`）。最新狀態見 [資源生命週期報告](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)；[04 報告](../../analysis/slay-the-robot/architecture/04_regression_validation.md) 保留前次功能與資源限制，不代表所有玩法或發行版已通過。
 
-目前有效授權只允許檔案修改與不開視窗的背景檢查；不得操作 UI／桌面、截圖、切換焦點、開啟 GUI，或干預既有程序。原生崩潰調查已依使用者要求擱置。後續依當時授權判斷；`game.ps1 -Mode Run` 會開視窗，不自動跑，歷史 capture 命令亦不適用。
+新任務依 [變更類型選驗證](game-dev/validation.md) 決定現有檢查與需補的測試；原生崩潰、記憶體讀取錯誤或異常退出見 [原生崩潰調查](../notes/investigations/godot-native-crash.md)（已依使用者要求擱置）。
+
+## 執行邊界
+
+操作邊界見 [user.md](common/user.md#桌面與程序邊界)。需要 GUI 的驗收（`game.ps1 -Mode Run`、歷史 capture 命令）標記為未執行，不自動跑。
 
 背景驗證優先使用 [suites](testing/suites.md) 的 `test_game.py`，選擇與變更相關的 suite；它使用隔離副本及 headless 引擎，避免直接在 `game/` 建立遊戲進度。純文件修改只跑文件 lint，不為更新流程而啟動 Godot。
 
@@ -20,11 +24,11 @@ Smoke 必須 exit 0、有 SMOKE PASS 標記、無 SCRIPT ERROR 或 FAIL。腳本
 
 [file_loader_probe.gd](../../tests/file_loader_probe.gd) 在兩種 content profile 共用執行，使用隔離 fixture 走真實 mod_list／mod_info／資料載入，驗 `.json`／`.JSON`、排序 patch、非 JSON／備份排除、非遞迴與 Global 表還原。只看最後 PASS 不足：載入佔位檔的 ERROR 即使 assertions 通過，runner 仍須拒絕。
 
-Dictionary merge 已修正，Smoke 的四種策略現在是會使測試失敗的 assertions。完整 JSON patch 邊界由 [suites](testing/suites.md) 的 Dictionary 回歸涵蓋，不能只靠 Smoke 代表所有序列化契約。
+Dictionary merge 已修正，Smoke 的四種策略現在是會使測試失敗的 assertions。完整 JSON patch 邊界由 [Dictionary 回歸](testing/suite-coverage.md#dictionarycombatsaveloadresourcelifecycle) 涵蓋，不能只靠 Smoke 代表所有序列化契約。
 
 ## 隔離回歸 runner 與 suite
 
-runner `python3 tools/test_game.py --suite <名稱>`（Windows 包裝 `./tools/test-game.ps1 -Suite <名稱>`）的 suite 清單（含 CTB 時間軸的 Ctb、單盤的 Board、波次的 Wave、場域的 Field、雙盤的 DualBoard、未掛棋盤的 Boardless；棋盤相關改動兩種模式都要驗，見 [validation](game-dev/validation.md#棋盤開關兩種模式都要驗)）、隔離副本、期限與退出碼判定、合成測試，以及新內容／新 suite 怎麼接進 runner，見 [testing/suites](testing/suites.md)。
+runner 是 `python3 tools/test_game.py --suite <名稱>`（Windows 包裝 `./tools/test-game.ps1 -Suite <名稱>`）。suite 清單與執行順序、隔離副本、期限與退出碼判定、runner 的合成測試，以及新內容／新 suite 怎麼接進 runner，見 [testing/suites](testing/suites.md)；各 suite（含 CTB 時間軸的 Ctb、單盤的 Board、波次的 Wave、場域的 Field、雙盤的 DualBoard、未掛棋盤的 Boardless）實際驗了什麼見 [suite-coverage](testing/suite-coverage.md)。棋盤相關改動兩種模式都要驗，見 [validation](game-dev/validation.md#棋盤開關兩種模式都要驗)。
 
 ## 文件檢查（修改後必跑）
 

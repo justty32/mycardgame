@@ -24,7 +24,7 @@
 
 ## 任務規格與 plan 落點
 
-題材級每款遊戲一個落點（`<game>` 由派工指定），框架級（題材中立的框架能力）另有 `wf/specs/`、`wf/plans/`（使用者 2026-10-19 核准）。各工作流 Done when 的「任務 spec／plan」都指這裡：
+題材級每款遊戲一個落點（`<game>` 由派工指定），框架級（題材中立的框架能力）另有 `wf/specs/`、`wf/plans/`（[decisions](decisions.md) 第 17 列）。各工作流 Done when 的「任務 spec／plan」都指這裡：
 
 - spec（方案、取捨、設計 brief）：`games/<game>/design/specs/YYYY-MM-DD-<slug>.md`。
 - plan（步驟、驗證、實際驗收記錄）：`games/<game>/design/plans/YYYY-MM-DD-<slug>.md`，與 spec 同名。
@@ -64,7 +64,7 @@
 |------|------------|---------|
 | 定義各款遊戲的原創玩法與最小可玩內容 | 各題材的進度與順序記在該題材樹的 wf/ roadmap | 決定核心玩法，再依 game-flow 建立新局、選擇、戰鬥／非戰鬥、結算與續玩的最小閉環 |
 | 框架戰鬥系統（隊伍制 CTB；棋盤為可選模組，掛載時雙盤 A） | Phase 0–3、2b 已完成；下一步 Phase 4–6，見 [spec](../specs/combat-framework/README.md) | 題材中立；需求樣本來自各題材樹 |
-| 第二款原創題材（異能戰鬥卡牌遊戲） | 使用者 2026-10-19 表示要做，尚未建樹；開始時用 `tools/new_pack.py` 建樹並走「遊戲規劃」提問 | 與現有題材共用框架，題材間互不連結 |
+| 第二款原創題材（異能戰鬥卡牌遊戲） | 使用者已表示要做，尚未建樹；開始時用 `tools/new_pack.py` 建樹並走「遊戲規劃」提問 | 與現有題材共用框架，題材間互不連結 |
 
 框架已匯入、修復 Dictionary 與資源生命週期並建立流程回歸，見 [當前驗證](../../analysis/slay-the-robot/architecture/05_resource_lifecycle.md)。上表仍屬後續玩法方向，基準測試通過不代表原創內容已完成；落地順序見 [整體遊戲流程](game-dev/game-flow.md)。
 

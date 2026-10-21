@@ -1,12 +1,16 @@
 # testing/suites — 隔離回歸 runner 與 suite
 
-[testing](../testing.md)｜[環境](../dev-env.md)｜[WORKFLOWS](../../WORKFLOWS.md)
+[testing](../testing.md)｜[環境](../dev-env.md)｜[各 suite 涵蓋範圍](suite-coverage.md)
 
-從 testing 抽出的 runner 細則與 suite 清單；執行邊界、Smoke 契約、文件檢查與 Done when 留在父檔。
+本檔是 runner 的操作細則：怎麼跑、怎麼判定、怎麼把新內容或新 suite 接進去。執行邊界、Smoke 契約、文件檢查與 Done when 留在父檔 [testing](../testing.md)；每個 suite 實際驗了什麼見 [suite-coverage](suite-coverage.md)。
 
-## 隔離回歸與流程驗證
+**何時用**：要跑背景回歸、讀懂 runner 的退出碼與日誌，或替新內容／新 suite 接上 runner。
 
-從專案根執行跨平台 runner [test_game.py](../../../tools/test_game.py)（Python 3.10+）；Windows 也可用沿用舊參數的薄包裝 [test-game.ps1](../../../tools/test-game.ps1)，判定規則相同。
+**何時不用**：決定某類變更該補哪些測試 → [validation](../game-dev/validation.md)；引擎探測與各平台隔離 → [dev-env](../dev-env.md)。
+
+## 怎麼跑
+
+從專案根執行跨平台 runner [test_game.py](../../../tools/test_game.py)（Python 3.10+）。Windows 也可用沿用舊參數的薄包裝 [test-game.ps1](../../../tools/test-game.ps1)，判定規則相同。
 
 ```bash
 python3 tools/test_game.py --suite All
@@ -15,38 +19,53 @@ python3 tools/test_game.py --suite SaveLoad
 # Windows 包裝：./tools/test-game.ps1 -Suite SaveLoad
 ```
 
-exit 0 為通過、1 為驗證失敗（含強制失敗）、2 為找不到引擎等執行前錯誤。引擎探測與各平台隔離見 [dev-env](../dev-env.md)。
+`All` 依序執行 ResourceLifecycle → Dictionary → Smoke → CombatVictory → CombatDefeat → Ctb → Board → Wave → Field → DualBoard → Boardless → SaveLoad（以 runner 的 `ALL_SUITES` 為準）。PackScenario 不在 All 內，見下方專節。
 
-每個 suite 建立唯一 artifacts/verification/ 副本，排除 Git/cache 與既有 profile、settings、saves，另隔離 user://。來源與測試先保存快照／hash，包含尚未提交的修復，再 Import 並執行。SaveLoad 的 write／read／rejected 三個程序共用同一副本；其他 suite 及戰鬥勝敗分開。不需清理使用者存檔，也不直接在 game/ 跑流程測試。
+退出碼：0 為通過，1 為驗證失敗（含強制失敗），2 為找不到引擎等執行前錯誤。
 
-runner 為每個程序設外層期限（預設 180 秒，`--timeout-seconds` 可調），只停止本次程序樹；檢查 exit、完成標記、SCRIPT ERROR／FAIL 與引擎錯誤。預設不放行退出 resource 或 ObjectDB leak。冷匯入若遇指定 SoundManager UID，建立快取後必須再次匯入通過（4.6 每次冷匯入都出現，2026-10-19 Linux 4.7.2 未出現，規則仍保留）；rejected 分支只放行十個逐項核對的預期拒絕訊息。日誌、命令及 results.json 留於唯一輸出目錄，不覆蓋舊證據。歷史重現開關不作修復後通過標準。
+## 隔離與判定
 
-runner 逐階段落盤 PID／時間／退出碼、來源與測試 hash、crash 標記，啟動前確認 log 可寫；欄位與 wrapper PID 限制見 [native-crash](../game-dev/native-crash.md)。[合成測試](../../../tests/test_runner_diagnostics.py)（`python3 tests/test_runner_diagnostics.py`；2026-10-20 Windows 為 141 項，依平台可不同）以假引擎程序驗 runner，包含資源訊息即使 exit 0 也須失敗；Windows 驗無窗啟動、APPDATA 隔離、逾時清理本次程序樹及引擎路徑探測，不啟動 Godot，也不證明使用者 crash 已重現／修復。另跑 `python3 tests/test_link_pack.py` 驗 CRLF／BOM 逐位元組還原與 Windows 真實 junction；2026-10-20 Windows 6 tests 全通過。沙箱拒絕建立 junction 時保留失敗日誌並走環境核准，不跳過後宣稱通過。
+每個 suite 建立唯一的 artifacts/verification/ 副本，排除 Git、cache 與既有 profile、settings、saves，另外隔離 user://。來源與測試先保存快照與 hash（包含尚未提交的修復），再 Import 並執行。SaveLoad 的 write／read／rejected 三個程序共用同一副本；其他 suite 以及戰鬥勝、敗兩場各自分開。因此不需要清理使用者存檔，也不要直接在 game/ 跑流程測試。
 
-[Dictionary](../../../tests/dictionary_regression.gd) 走 JSON patch API；[Combat](../../../tests/combat_flow.gd) 跑單場戰鬥及獎勵；[Ctb](../../../tests/ctb_flow.gd)（fixture [ctb_fixture.gd](../../../tests/ctb_fixture.gd)，標記 `CTB PASS:`，在 All 中排在 CombatDefeat 與 SaveLoad 之間）驗 CTB 時間軸：不同速度的行動順序與刻數、`combat_tick_advanced`、EVERY_N_TICKS 狀態、行動開始清格擋、turn_count＝主角行動數、TimelineBar／TurnOverlay 文字與中途離樹後 Director 停止；[Board](../../../tests/board_flow.gd)（cases [board_cases.gd](../../../tests/board_cases.gd)、fixture [board_fixture.gd](../../../tests/board_fixture.gd)，標記 `BOARD PASS:`，在 All 中排在 Ctb 與 SaveLoad 之間）驗 7×5 棋盤：移動點與付費移動延遲、障礙與繞路、射程／CROSS／LINE_PIERCE／2×2 佔格、突進／推／拉近／交換／閃現、定身、召喚最近空格、KEEP_RANGE／CHARGE／APPROACH 移動與 ThreatPreview 等於實際受傷；[Wave](../../../tests/wave_flow.gd)（cases [wave_cases.gd](../../../tests/wave_cases.gd)、fixture [wave_fixture.gd](../../../tests/wave_fixture.gd)，標記 `WAVE PASS:`，在 All 中排在 Board 與 SaveLoad 之間）驗三波遭遇：wave_started／wave_cleared 的刻數、波間格擋牌不被短路、登場延遲與錯開、WAIT_UNTIL_FREE 重試後改最近空格、FAIL_SKIP 跳過、雜兵不擋清波、每波 wave_on_cleared_actions 加錢，以及最後一波清空才 combat_ended；[SaveLoad](../../../tests/save_load_flow.gd) 驗跨程序語意還原與續玩；[ResourceLifecycle](../../../tests/resource_lifecycle.gd) 驗 processor、async／取消與 Root 清理。fixture 與結果見報告；不代表所有卡牌／遭遇或自訂內容已驗證。
+runner 為每個程序設外層期限（預設 180 秒，可用 `--timeout-seconds` 調整），逾時只停止本次建立的程序樹。判定時檢查 exit、完成標記、SCRIPT ERROR／FAIL 與引擎錯誤；預設不放行退出時的 resource 或 ObjectDB leak。
 
-[Field](../../../tests/field_flow.gd) 與 [DualBoard](../../../tests/dual_board_flow.gd) 分別使用 `FIELD PASS:`／`DUAL_BOARD PASS:`，依序在 Wave 後、SaveLoad 前執行。前者驗場域、ZOC、位移、位置條件與 ordered lifecycle；後者從正常新局走預設雙盤、A targeting、原子 transfer/swap、兩盤場域與本體站格。各自的實際 assertions／執行結果見 [雙盤驗收表](../../../analysis/slay-the-robot/design/dual-board/verification.json)；工程仍在整合時不可引用舊 All 代替新增 suite。Board／Wave 的既有單盤案例以顯式 SINGLE 保持距離契約，DUAL 為正常新局預設。
+兩個特例：
 
-[Boardless](../../../tests/boardless_flow.gd) 在 All 的 DualBoard 後執行；四個程序共用隔離副本，以 `--boardless-phase=write/read/defeat/scene_off` 分別驗關閉棋盤的戰鬥、存讀、死亡及場景開關。逐階段要求整行 `BOARDLESS PASS: <phase>`，任一失敗停止。
+- 冷匯入若遇到指定的 SoundManager UID 訊息，建立快取後必須再次匯入通過。Godot 4.6 每次冷匯入都會出現；2026-10-19 Linux 4.7.2 未出現，但規則保留。
+- SaveLoad 的 rejected 分支只放行十個逐項核對過的預期拒絕訊息。
+
+日誌、命令及 results.json 留在唯一輸出目錄，不覆蓋舊證據。歷史重現開關不能當作修復後的通過標準。
+
+## 診斷紀錄與 runner 自身的測試
+
+runner 逐階段落盤 PID、時間、退出碼、來源與測試 hash、crash 標記，啟動前先確認 log 可寫；欄位與 wrapper PID 的限制見 [原生崩潰調查](../../notes/investigations/godot-native-crash.md)。
+
+runner 本身用假引擎程序做 [合成測試](../../../tests/test_runner_diagnostics.py)：`python3 tests/test_runner_diagnostics.py`（2026-10-20 Windows 為 141 項，依平台可能不同）。它驗證資源訊息即使 exit 0 也必須判失敗；在 Windows 另驗無窗啟動、APPDATA 隔離、逾時只清理本次程序樹，以及引擎路徑探測。這組測試不啟動 Godot，也不證明使用者遇到的 crash 已重現或修復。
+
+`python3 tests/test_link_pack.py` 驗 CRLF／BOM 逐位元組還原與 Windows 真實 junction（2026-10-20 Windows 6 tests 全通過）。沙箱拒絕建立 junction 時，保留失敗日誌並走環境核准，不能跳過後宣稱通過。
 
 ## 新內容如何接到 runner
 
-框架 suite 使用固定入口；內容包可用 Smoke probe 或下述 PackScenario，見 [題材內容包](../game-dev/content/pack.md)。runner 複製框架 `tests/` 頂層所有 `.gd`；新增 helper 必須由入口呼叫才有驗證。
+框架 suite 使用固定入口；內容包可以用 Smoke probe 或下方的 PackScenario，見 [題材內容包](../game-dev/content/pack.md)。runner 會複製框架 `tests/` 頂層所有 `.gd`，但新增的 helper 必須由入口呼叫才算有驗證。
 
-新 mod 的可操作範例見 [第一個 mod](../game-dev/content/bootstrap.md)：將專屬 helper 放 tests，以執行中腳本的相鄰路徑載入，於 Smoke 的 autoload ready 後、example_mod probe 前呼叫，交由既有 `_check()` 累計及退出。保留失敗傳遞、timeout、資源清理與完成標記。新 suite 需另改 runner 的選單、入口、標記與隔離契約，並同步 ps1 的 `ValidateSet` 與合成測試案例（Ctb 即照此加入），不可僅在文件寫出新命令。
+新 mod 的可操作範例見 [第一個 mod](../game-dev/content/bootstrap.md)：把專屬 helper 放在 tests，以執行中腳本的相鄰路徑載入，在 Smoke 的 autoload ready 之後、example_mod probe 之前呼叫，交由既有的 `_check()` 累計結果並退出。要保留失敗傳遞、timeout、資源清理與完成標記。
 
-`--source-game`（ps1 `-SourceGame`）只換遊戲來源，不換 tests；完整候選演練須把 tools 與 tests 一併放到獨立候選根，再以 `--project-root` 指向它。source_hashes 涵蓋來源修復與雙盤／場域核心檔（實際清單見 runner 的 SOURCE_HASH_PATHS），新內容另記檔案雜湊。Combat 與 Ctb 的五張原生牌 fixture 會覆寫角色起手牌（含 append）；SaveLoad 也有自己的語意情境。這些 suite 通過不等於新增卡／敵人／事件／音效已被實際執行，報告須列明新 assertion 及到達入口。
+新增 suite 時，要同時改 runner 的選單、入口、標記與隔離契約，並同步 ps1 的 `ValidateSet` 與合成測試案例（Ctb 就是照此加入的）；不能只在文件裡寫出新命令。
+
+`--source-game`（ps1 為 `-SourceGame`）只換遊戲來源，不換 tests。完整的候選演練要把 tools 與 tests 一起放到獨立的候選根目錄，再以 `--project-root` 指向它。source_hashes 涵蓋來源修復與雙盤／場域核心檔（實際清單見 runner 的 `SOURCE_HASH_PATHS`），新內容要另記檔案雜湊。
+
+Combat 與 Ctb 的五張原生牌 fixture 會覆寫角色起手牌（含 append），SaveLoad 也有自己的語意情境。所以這些 suite 通過，不等於新增的卡、敵人、事件或音效已被實際執行；報告須列明新增的 assertion 與到達入口。
 
 ## PackScenario
 
-`--suite PackScenario --content-profile pack --pack DIR --pack-tests DIR` 不在 All 內；多包可疊載，但只接受一個 tests 目錄，其 `scenario.json` 格式固定：
+`--suite PackScenario --content-profile pack --pack DIR --pack-tests DIR` 不在 All 內。可以疊載多個包，但只接受一個 tests 目錄，其中的 `scenario.json` 格式固定：
 
 ```json
 {"schema":"pack-scenario/1","entry":"entry.gd","phases":["write","read","defeat"]}
 ```
 
-只允這三個鍵；entry 為目錄內 POSIX 相對 `.gd` 路徑，拒絕絕對路徑、穿越、連結與缺檔。phases 為 1–64 個唯一識別字，符合 `[a-z][a-z0-9_-]{0,63}`。全部 tests 檔複製至 `res://pack_tests/`，manifest 保存 scenario 與包／測試 hash。入口須拒絕未知 phase，失敗印 FAIL 並非零退出。
+只允許這三個鍵。entry 是目錄內 POSIX 相對 `.gd` 路徑，絕對路徑、路徑穿越、連結與缺檔都會被拒絕。phases 為 1–64 個不重複的識別字，須符合 `[a-z][a-z0-9_-]{0,63}`。全部 tests 檔會複製到 `res://pack_tests/`，manifest 保存 scenario 與包／測試的 hash。入口必須拒絕未知 phase，失敗時印 FAIL 並以非零值退出。
 
-依序以 `--scenario-phase=<id>` 啟動全新 headless 程序，共用隔離 game／user://／appdata，每階段有獨立 deadline、log、exit 與錯誤檢查。成功須獨立整行 `PACK SCENARIO PASS: <id>`；任一失敗停止後續。不得使用 historical-baseline 或 no-isolate-appdata；沒有 SaveLoad 預期拒絕的例外。
+runner 依序以 `--scenario-phase=<id>` 啟動全新的 headless 程序，共用隔離的 game、user:// 與 appdata；每個階段各有 deadline、log、exit 與錯誤檢查。成功須印出獨立整行 `PACK SCENARIO PASS: <id>`，任一階段失敗就停止後續階段。不得使用 historical-baseline 或 no-isolate-appdata，也沒有 SaveLoad 那種預期拒絕的例外。
 
-已準備副本的輸入條件見 [內容包](../game-dev/content/pack.md)。純 Python 合成回歸：`python3 -I tests/test_pack_scenario.py`，不啟 Godot。
+已準備副本的輸入條件見 [內容包](../game-dev/content/pack.md)。純 Python 的合成回歸為 `python3 -I tests/test_pack_scenario.py`，不啟動 Godot。
