@@ -11,6 +11,7 @@
 
 ## 最新進度
 
+- [agent-session] 2026-10-21 審查 Codex 成果並修正：程式（H1 敵人停擺、M1 移動預檢、棋盤模組化）、工具（wf-lint 掃 artifacts／strict 退出碼、boundary_lint 漏 examples）、wf 方向同步與去重、analysis 過時事實 → 各子 agent 分檔進行，報告在 session scratchpad review/
 - [dev-env] scratchpad 的 `playtest` worktree（detached c662729）是暫存，勿刪；不用後 `git worktree remove` 或目錄消失後 `git worktree prune`
 
 ## 各工作流 session-log
