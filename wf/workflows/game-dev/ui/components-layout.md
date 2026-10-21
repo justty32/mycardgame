@@ -18,7 +18,7 @@
 
 [KeywordTooltip.tscn](../../../../game/scenes/ui/general/KeywordTooltip.tscn) 是 PanelContainer + RichLabelAutoSizer；KeywordContainer 以 keyword ID 建立多個 tooltip。要顯示一般說明先用 Tooltips.display_tooltip；要顯示資料關鍵字走 KeywordData／KeywordContainer，不複製另一套查表。KeywordTooltip 程式以 BBCode 固定 FONT_SIZE=14 與 image=24，theme 的 12 不一定是最後顯示字級。
 
-[BaseRewardButton.tscn](../../../../game/scenes/ui/rewards/BaseRewardButton.tscn) 及其 Money／Card／Artifact 變體是帶 Action 的領獎元件，適合沿原契約擴充；CardRewardButton 另覆寫為等待選取完成，Skip 保留獎勵；詳 [獎勵流程](screens/rewards-selection.md)。一般確認按鈕不能照搬立即入列的行為。DialogueOption 有自己的 gui_input 與選項契約，也不是通用按鈕控制器。Root 中 overlay 多為內嵌節點，沒有既成通用 modal API。
+[BaseRewardButton.tscn](../../../../game/scenes/ui/rewards/BaseRewardButton.tscn) 及其 Money／Card／Artifact 變體是帶 Action 的領獎元件（行為見 [獎勵流程](screens/rewards-selection.md)）；一般確認按鈕不能照搬立即入列的行為。DialogueOption 有自己的 gui_input 與選項契約，也不是通用按鈕控制器；沒有既成通用 modal API（見 [互動狀態](interaction-states.md#新-modal-與鍵盤手把)）。
 
 動態戰鬥元件由 [CustomUIData](../../../../game/data/readonly/modding/CustomUIData.gd) 指向 PackedScene，BaseCombatant.register_custom_ui 加到 `Visible/CustomUIContainer` 再 init。BaseCustomUI 在 combat_ended 請 owner unregister，owner 無效時 queue_free；新元件要驗 owner 死亡、戰鬥結束、移除及重進。這條生命週期不能代替整個 RunScreen modal 的完成契約。
 
@@ -42,8 +42,8 @@ CardSelectionOverlay 固定五欄 GridContainer 與 20 間距；draft 用居中 
 
 RichLabelAutoSizer 的 `_min_size=1`，Card 未覆寫；先定最低可讀字級，再依序處理換行、增高／捲動、摘要與完整說明。不截斷規則數值、不將正文烘進卡圖。測最長卡名、升級後名稱、負數／多段數值、X 費用、BBCode 圖示、空描述和多關鍵字；同時核對 locale／enum 字串／tooltip 固定文字，字型與翻譯流程接 menus-localization。
 
-可用／不可用、選中／focus、增益／減益至少保留文字或形狀差異；目前費用紅色、預覽紅綠和 alpha 不是完整無障礙方案。鍵盤焦點要可見、順序可預期，重要說明不能只在 hover 出現；手把接互動狀態。最小字級、對比、目標命中大小及減少動態效果需求以本次產品規格記錄，不宣稱既有螢幕閱讀器或平台無障礙支援。字型 cmap、幾何與背景 property 值都不能證明視覺可讀性。
+可用／不可用、選中／focus、增益／減益至少保留文字或形狀差異；目前費用紅色、預覽紅綠和 alpha 不是完整無障礙方案。鍵盤焦點要可見、順序可預期，重要說明不能只在 hover 出現；手把接互動狀態。最小字級、對比、目標命中大小及減少動態效果需求以本次產品規格記錄，不宣稱既有螢幕閱讀器或平台無障礙支援。
 
 ## 交接
 
-交 scene／script／theme 及全部消費者、規格值、override 原因、長文與 viewport fixture。共享改動用目標斷言檢查多個消費場景；視覺、DPI、控制器及命中證據缺漏明列。核實來源回寫呈現分析，測試接 [verification](verification.md)。
+交 scene／script／theme 及全部消費者、規格值、override 原因、長文與 viewport fixture。共享改動用目標斷言檢查多個消費場景，證據層級依 [verification](verification.md#證據層級與判讀)；核實來源回寫呈現分析。

@@ -1,6 +1,6 @@
 # 商店畫面 — 比較、交易與離開
 
-[場景目錄](README.md)｜[休息服務](rest-services.md)｜[共用元件](../components-layout.md)｜[互動契約](../interaction-states.md)｜[驗證接線](../verification.md)｜[設施內容規則](../../level-design/noncombat.md)
+[場景目錄](README.md)｜[休息服務](rest-services.md)｜[驗證接線](../verification.md)｜[設施內容規則](../../level-design/noncombat.md)
 
 本篇管商店完整畫面，並是商店程式事實的單一來源（[商店的程式事實](#商店的程式事實)）；休息營地的完整畫面在 [休息服務](rest-services.md)。
 
@@ -12,7 +12,6 @@
 
 - 規格／結果檔記錄資料、資源差值、正常／拒絕／取消／退出斷言及未驗項。
 - fixture 已接到 caller 並有結果；文件 lint 通過（見 [testing](../../../testing.md)）。
-- Smoke／Combat 綠燈不代表設施已驗，交付時分開列出。
 
 ## 流程
 
@@ -50,16 +49,16 @@
 
 ### 聲音、動畫與生命週期
 
-設施腳本沒有專屬播放接線。[商店 cue](../../audio/shop-cues.md) 在扣款／入庫完成後播成功聲，拒絕要有明確結果事件；入庫標記動畫需新增，時序見 [對話與商店動態](../../art-assets/motion/dialogue-shop.md)。關閉時停止自建 tween／音訊／timer，await actions_ended 之後先確認 owner 仍有效。
+設施腳本沒有專屬播放接線；成功／拒絕 cue 的時點見 [商店聲包](../../audio/shop-cues.md)，入庫標記等演出見 [對話與商店動態](../../art-assets/motion/dialogue-shop.md)。關閉時停止自建 tween／音訊／timer，await actions_ended 之後先確認 owner 仍有效。
 
 ### 專項 fixture 與驗收
 
-依 [verification](../verification.md)，在 autoload ready 後 runtime load 建議的 tests/ui_shop_rest_probe.gd（尚未建立）。節點／素材檢查接在 Smoke 的 Root ready 之後；互動另建設施情境，沿 Combat `_scenario()` 的起局／固定 seed／map button 模式，配置可達的 SHOP→REST_SITE→下一節點，呼叫 Shop.button_up 進商店。新 suite 由 runner owner 接 SUITE_CHOICES（及 ps1 的 ValidateSet）、分支、mapping、PASS marker／結果。
+建議 tests/ui_shop_rest_probe.gd（尚未建立），接線依 [verification](../verification.md#把新增-helper-真正接上)。節點／素材檢查接在 Smoke 的 Root ready 之後；互動另建設施情境，配置可達的 SHOP→REST_SITE→下一節點，呼叫 Shop.button_up 進商店。
 
 ShopData fixture 固定商品及價格並標 shop_is_visited，避免重開時隨機重生。分別用 price−1、price、足額／滿槽，記錄交易前後的 money、永久牌組／遺物／消耗品、庫存與按鈕數；售罄、全空、外部金錢改變、重複點擊與 Continue／重開各有斷言。零價 stale action 是待修的失敗案例，不作為正常預期。
 
-同一情境接續的休息專項見 [休息 fixture](rest-services.md#四種-fixture-的具體接法)。背景引擎執行前先排除 [Map 自動焦點](map.md#演出焦點與離場) 這類會動到真實焦點的分支；視覺、命中與聽感另列未驗。
+同一情境接續的休息專項見 [休息 fixture](rest-services.md#四種-fixture-的具體接法)；焦點／音訊攔截與證據層級依 verification。
 
 ## 交接
 
-交付商品 payload、素材顯示框、fixture／caller、資料差值與缺口。依 2026-10-19 固定上游及本地補丁靜態核實；runtime／視覺／輸入／聽感未驗。
+交付商品 payload、素材顯示框、fixture／caller、資料差值與缺口。本篇依 2026-10-19 固定上游及本地補丁靜態核實。

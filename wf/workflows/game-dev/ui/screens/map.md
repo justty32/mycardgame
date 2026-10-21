@@ -1,6 +1,6 @@
 # 地圖畫面 — 辨認路線、選擇與返回
 
-[場景目錄](README.md)｜[UI 入口](../../ui.md)｜[共用元件](../components-layout.md)｜[互動契約](../interaction-states.md)｜[驗證接線](../verification.md)｜[地圖內容規則](../../level-design/map-act.md)
+[場景目錄](README.md)｜[地圖 fixture](map-fixture.md)｜[互動契約](../interaction-states.md)｜[地圖內容規則](../../level-design/map-act.md)
 
 **何時用**：完整地圖畫面、節點狀態與導航。
 
@@ -18,7 +18,7 @@
 
 玩家要辨認目前位置、可達節點與後續風險，再決定前往或返回。完整畫面包含幕／樓層標題、節點圖文、連線、圖例、目前／已訪／可達／不可達／隱藏狀態、捲動與 Back；其中標題、連線、圖例及完整的狀態圖層目前都還沒有，需要新增。
 
-素材包含各 LOCATION_TYPES 的圖示、問號、位置／已訪／鎖定／可達／選取標記、路線與背景，並附上顯示框和文字尺寸；狀態不可只靠閃色區分。圖像接 [介面素材](../../art-assets/interface-assets.md)，動態接 [獎勵與地圖動態](../../art-assets/motion/rewards-map.md)，聲音接 [畫面音訊](../../audio/screen-cues.md)；不要填寫不存在的資料欄位。
+素材包含各 LOCATION_TYPES 的圖示、問號、位置／已訪／鎖定／可達／選取標記、路線與背景，並附上顯示框和文字尺寸；狀態不可只靠閃色區分。圖像接 [介面素材](../../art-assets/interface-assets.md)，動態接 [獎勵與地圖動態](../../art-assets/motion/rewards-map.md)，聲音接 [畫面聲包](../../audio/screen-cues.md)；不要填寫不存在的資料欄位。
 
 ### 真實 scene、資料與導航契約
 
@@ -42,16 +42,16 @@
 
 重要的既有問題：MapLocation._on_button_up 在發訊號**之前**就把 location_visited 設為 true，父層之後才驗 can_travel／鄰接。因此點擊不可達節點、在查看模式點擊或其他被拒絕的目標，仍可能把 visited 改掉，重開地圖後揭露隱藏名稱。這是靜態確認的副作用，應先寫拒絕路徑的失敗測例，再把標記移到合法提交路徑或建立同等保護。
 
-Back 只呼叫 hide_map，底層既有畫面仍在，不會反向 visit 或自動消耗節點。再次按 MapButton 會重建。travel 的開關分散在各畫面：shop_opened／chest_opened／combat_ended 開啟，戰鬥開始關閉；dialogue_ended 且玩家存活時開啟並展開地圖，玩家死亡則隱藏；休息的 Continue 也另外設定 travel。狀態責任跨畫面，不能為了讓按鈕亮起而在 show_map 裡無條件開 travel。
+show_map／hide_map 沒有專用的全域顯示事件。Back 只呼叫 hide_map，底層既有畫面仍在，不會反向 visit 或自動消耗節點。再次按 MapButton 會重建。travel 的開關分散在各畫面：shop_opened／chest_opened／combat_ended 開啟，戰鬥開始關閉；dialogue_ended 且玩家存活時開啟並展開地圖，玩家死亡則隱藏；休息的 Continue 也另外設定 travel。狀態責任跨畫面，不能為了讓按鈕亮起而在 show_map 裡無條件開 travel。
 
 ### 演出、焦點與離場
 
 AnimationPlayer 已有 `flash_map_location`：2 秒循環，self_modulate 白→藍→白，用來提示可達。節點 hover、拒絕、旅程音效與移動動畫都尚未接線。新增的成功 cue 要跟隨已被接受的 visit，不能跟原始 button_up；動畫不得延後必要的提交，隱藏或重建時要停掉自建的循環、tween 與音訊。
 
-本地補丁把 layout 後的捲動做成一次 process_frame callback，以 WeakRef 指向最後一個可達節點；它會 grab_focus，沒有節點時才直接設定 scroll_vertical。這不等於聚焦目前位置，也不保證鍵盤順序沿著路線。clear_locations 與 _exit_tree 會取消 pending callback。背景 fixture 不得操作真實焦點：排程前須以測試 adapter 截斷焦點分支，或把該檢查保留待驗；不能直接跑 show_map 後任它 grab_focus。
+本地補丁把 layout 後的捲動做成一次 process_frame callback，以 WeakRef 指向最後一個可達節點；它會 grab_focus，沒有節點時才直接設定 scroll_vertical。這不等於聚焦目前位置，也不保證鍵盤順序沿著路線。clear_locations 與 _exit_tree 會取消 pending callback。背景 fixture 須在排程前以測試 adapter 截斷這個焦點分支，或把該檢查保留待驗；不能直接跑 show_map 後任它 grab_focus。
 
 要支援鍵盤／手把，依 [互動契約](../interaction-states.md#新-modal-與鍵盤手把) 定義可達節點順序、圖上方向、捲動與 Back／Confirm，補上可見的焦點樣式及返回原 opener 的行為；不能依賴 child 順序和 follow_focus 就假定已可用。實際導航與命中另列未驗。
 
 ## 交接
 
-交付圖的不變條件、ID／邊、圖示／狀態／連線素材，以及 [地圖 fixture](map-fixture.md) 的 caller。依 2026-10-19 固定上游加本地補丁靜態查核；runtime／視覺／實際輸入／聽感未驗。
+交付圖的不變條件、ID／邊、圖示／狀態／連線素材，以及 [地圖 fixture](map-fixture.md) 的 caller。本篇依 2026-10-19 固定上游加本地補丁靜態查核。

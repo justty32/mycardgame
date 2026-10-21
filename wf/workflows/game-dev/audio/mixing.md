@@ -11,21 +11,19 @@
 
 ## 流程
 
-### 先核實聲音路由與設定生命週期
+### 路由、設定與併發
 
-[layout](../../../../game/sounds/default_bus_layout.tres) 只有 Master、Music、Sounds；UI／環境音與一般音效共享 Sounds。新增 UI／Ambient bus 同時改預設選擇、控制器、設定 schema、缺欄預設及舊設定回讀；override_bus 不存在時可能回落 Master，應先斷言 index >= 0 與實際 player.bus，不以有聲音判定路由。
+bus layout（只有 Master、Music、Sounds）、四池預設與回收、音量 setter 單位、SettingsMenu 套量／保存與失焦 mute 的現況見 [核實分析](../../../../analysis/slay-the-robot/design/audio.md#播放池與混音) 及其「設定與未驗邊界」「池的額外生命週期風險」兩節。修改時：
 
-SoundManager 音量 setter 接線性 0–1，轉 dB 寫 bus；`play_music_at_volume()` 卻是 player dB。現行 SettingsMenu 將 music×master、effects×master 寫至子 bus，沒有直接調 Master volume。修改架構時避免 Master 與子 bus 重複乘 master。0 值轉 dB 的無限負值不能用一般等值容差判斷，優先轉回線性量比對。
+新增 UI／Ambient bus 要同時改預設選擇、控制器、設定 schema、缺欄預設及舊設定回讀；override_bus 不存在時可能回落 Master，先斷言 index >= 0 與實際 player.bus，不以有聲音判定路由。
 
-設定路徑為 Global ready → FileLoader.load_user_settings（只反序列化）→ SettingsMenu.populate_menu 可能經 slider signal 套量 → slider 即時套量 →離開 menu 保存。冷啟動不開設定頁目前缺少統一套用。修復應由單一 apply 函式供啟動及設定頁使用，先讀值再套 bus；不要靠 populate 副作用。驗 0／中間值／1，保存後全新程序冷啟動不開設定頁，確認三值與兩 bus 相符；現有 SaveLoad suite 是 run 存讀，不代表 settings 已驗。
+避免 Master 與子 bus 重複乘 master；0 值轉 dB 的無限負值不能用一般等值容差，轉回線性量比對。
 
-失焦設定只控制 Master 臨時 mute；focus in 無條件 unmute。若加入持久手動 mute，要分開使用者 mute 與臨時失焦狀態並合成有效值。隔離測試直接呼叫 notification handler 只能證明 handler，不證明 OS 事件抵達。
+冷啟動套量由單一 apply 函式供啟動及設定頁共用，先讀值再套 bus，不靠 populate 的 slider 副作用。驗 0／中間值／1，保存後全新程序冷啟動不開設定頁，確認三值與兩 bus 相符；SaveLoad suite 是 run 存讀，不代表 settings 已驗。
 
-### 再定併發與回收
+持久手動 mute 要與臨時失焦狀態分開再合成有效值；直接呼叫 notification handler 只證明 handler，不證明 OS 事件抵達。
 
-四池預建 sound/UI/ambient/music = 8/8/1/2，空閒耗盡會增長，不是硬上限。先定連按冷卻、同 cue 最大併發、超限丟新音／替換舊音等政策；實作在哪就測哪，不把混音餘量當池管理。
-
-prepare 會重設 bus、volume、pitch；播放 deferred，同 frame player 尚未 playing。increase_pool 嘗試回收 not playing 的 busy player，因此大量同 frame 觸發要查是否重用尚待播放者。自然 finished 回池；sound.stop 只有 deferred stop，未立即 mark available，不能只等 finished（stop 不發它）。ambient/music fade 至 -80 dB 才 stop／回池，最低停止時間 0.01 秒。記 available／busy 數量、節點與 tween，驗重播不殘留舊 pitch／fade／暫停狀態；超額節點回收與基準預建池保留分開。
+併發先定連按冷卻、同 cue 最大併發、超限丟新音或替換舊音；實作在哪就測哪，不把混音餘量當池管理。池測試記 available／busy 數量、節點與 tween，驗重播不殘留舊 pitch／fade／暫停狀態，超額節點回收與預建池保留分開。
 
 ### 現在可執行的靜態檢查
 
@@ -71,7 +69,7 @@ func check_loaded(file_loader: Node) -> Dictionary:
         _check(audio_results[label], label)
 ```
 
-保留原 tab 縮排及 SMOKE PASS；缺檔負例應另設受控情境，不能讓預期 error 污染正式綠測。runner 複製 tests 頂層 `.gd`，但不自動呼叫 helper；只有檔案沒有接入就零覆蓋。正式接入後命令為 `python3 tools/test_game.py --suite Smoke`；候選 runner 與 user:// 隔離照 bootstrap。檢查這五個 `PASS: AUDIO:`、SMOKE PASS、results.json 完成／PASS 與禁止錯誤，不只 exit 0。不要執行不存在的 `--suite Audio`。
+保留原 tab 縮排及 SMOKE PASS；缺檔負例應另設受控情境，不能讓預期 error 污染正式綠測。helper 須由既有測試呼叫才有覆蓋（見 [UI 驗證](../ui/verification.md#把新增-helper-真正接上)）。正式接入後命令為 `python3 tools/test_game.py --suite Smoke`；候選 runner 與 user:// 隔離照 bootstrap。檢查這五個 `PASS: AUDIO:`、SMOKE PASS、results.json 完成／PASS 與禁止錯誤，不只 exit 0。不要執行不存在的 `--suite Audio`。
 
 ### 播放、bus 與池的後續橋接
 
@@ -79,7 +77,7 @@ func check_loaded(file_loader: Node) -> Dictionary:
 
 替身策略須在任何觸發前攔截播放出口，記錄呼叫與參數；僅在播放後設音量 0 不是隔離。現框架沒有可直接切換的全域 mock 開關，新增 seam 或候選腳本替換要獨立設計並斷言確實生效。替身可驗事件及切曲參數，不能驗真實 bus、解碼、tween／pool。Dummy 可驗邏輯狀態，也不能證明聽感。
 
-按 sfx／music 在既有 Combat／Smoke 建 helper，針對 settings 增加全新程序階段；固定 suite 不會自動涵蓋新情境。記源檔 hash、斷言標籤、日誌及超時，池測試至少包含同 frame 超過預建量、自然完結、手動停止、循環離場及 A→B→A。目前尚無這些音訊專項通過證據。
+按 sfx／music 在既有 Combat／Smoke 建 helper，針對 settings 增加全新程序階段。記源檔 hash、斷言標籤、日誌及超時，池測試至少包含同 frame 超過預建量、自然完結、手動停止、循環離場及 A→B→A。目前尚無這些音訊專項通過證據。
 
 ## 交接
 

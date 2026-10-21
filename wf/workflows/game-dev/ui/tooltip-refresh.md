@@ -9,7 +9,7 @@
 ## Done when
 
 - 任務 spec 記有觸發來源（hover／focus）、隱藏與清理時點、刷新策略。
-- [專項驗證](verification.md) 的 tooltip 斷言回傳預期結果；文件 lint 通過（見 [testing](../../testing.md)）。
+- tooltip 專項斷言回傳預期結果；文件 lint 通過（見 [testing](../../testing.md)）。
 
 ## 流程
 
@@ -27,4 +27,4 @@ update_card_display 以 `_card_is_rerendering` 合併到下一個 process_frame�
 
 ## 交接
 
-tooltip 與預覽的副作用斷言交 [專項驗證](verification.md)；字型、視覺遮擋與真實 hover／focus 仍需另一層證據。
+tooltip 與預覽的副作用斷言見 [互動狀態的 fixture](interaction-states.md#hud目標與-tooltip-的最小專項)；字型、視覺遮擋與真實 hover／focus 仍需另一層證據。

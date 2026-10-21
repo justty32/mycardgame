@@ -33,9 +33,7 @@
 | 獎勵列＋draft＋牌庫選牌：暫選、確認／Skip／Back及取得結果 | [獎勵選牌](ui/screens/rewards-selection.md) | [卡牌](art-assets/cards.md)、[介面](art-assets/interface-assets.md) | [畫面聲包](audio/screen-cues.md) | [獎勵演出](art-assets/motion/rewards-map.md)、[牌庫選牌演出](art-assets/motion/rest-selection.md) |
 | 選角起局→地圖選點→勝／敗結算返回，三畫面均交付 | [地圖](ui/screens/map.md)、[選角與結算](ui/screens/menus-collection.md) | [人物](art-assets/combatants.md)、[介面](art-assets/interface-assets.md) | [畫面聲包](audio/screen-cues.md) | [選角與結算轉場](art-assets/motion/menus.md)、[地圖演出](art-assets/motion/rewards-map.md) |
 
-卡牌／戰鬥包用同一 CardPlayRequest 串資料結果和媒體；成功、命中與取消按出牌時序定義。敵人包分戰鬥身體與圖鑑、UI選取區；頭目未定的轉階段規則不因素材需求而新增。
-
-對話、商店、休息各有不同的結果／重建／退出 owner，選項或交易接受不等於效果完成；不要由通用按鈕音取代領域結果。獎勵選牌須區分暫選、取得與返回，既有 Skip／Back 的資料結果依 action 配置，不能假定取消一律效果零次。相關來源陷阱和 fixture 前提集中在上述子篇。
+卡牌／戰鬥包用同一 CardPlayRequest 串資料結果和媒體，成功、命中與取消按出牌時序定義；敵人包分戰鬥身體與圖鑑、UI 選取區。對話、商店、休息、獎勵選牌各有不同的結果／重建／退出 owner，接受不等於效果完成，取消不一定效果零次；程式事實與 fixture 前提以 UI 場景篇為單一來源，不要由通用按鈕音取代領域結果。
 
 最後一包以完整旅程驗三畫面，不能只驗地圖便整包通過。商店／休息也必須兩者各自具備完整的七項交付內容，也就是 Done when 所列的 UI 組成、圖像包、聲音 cue、動畫時序、資料來源、退出責任與驗收結果，不能由其中一個畫面代表另一個。各畫面的空資料、不可用、等待、退出及重入要分別列結果，跨畫面音樂和持續效果則由整合 owner 確認接手／停止，不讓兩個 owner 同播。
 
@@ -43,7 +41,7 @@
 
 先交代表資產與接線，由場景 owner 用同一 fixture 串玩家任務，驗結果唯一發生再擴變體。缺素材指定已驗回退或停用純呈現接點；MISSING fallback 不是完成。UI 重建不得重複 connect／cue，持續音效、Tween、timer、listener 都需離場 owner。
 
-先驗來源／hash／解碼／ID／scene 引用；實作後按 [UI 驗證](ui/verification.md) 與 [validation](validation.md) 接 helper，驗資料、播放計數、狀態和清理。背景斷言不等於視覺驗收：視覺、聽感與實際輸入需要 GUI，未執行時明列未驗（操作邊界見 [user.md](../common/user.md#桌面與程序邊界)）。
+先驗來源／hash／解碼／ID／scene 引用；實作後按 [UI 驗證](ui/verification.md) 與 [validation](validation.md) 接 helper，驗資料、播放計數、狀態和清理；證據層級見 [verification](ui/verification.md#證據層級與判讀)。
 
 ## 交接
 

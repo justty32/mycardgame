@@ -1,10 +1,10 @@
 # 地圖畫面的最小 fixture 與具體接入
 
-[地圖畫面](map.md)｜[驗證接線](../verification.md)｜[場景目錄](README.md)
+[地圖畫面](map.md)｜[驗證接線](../verification.md)
 
 **何時用**：為 [地圖畫面](map.md) 的節點、可達、拒絕、返回與重建寫背景專項。
 
-**何時不用**：地圖生成或跨幕規則的測試走 [地圖內容規則](../../level-design/map-act.md)；一般 helper 接線原則見 [驗證接線](../verification.md)。
+**何時不用**：地圖生成或跨幕規則的測試走 [地圖內容規則](../../level-design/map-act.md)。
 
 ## Done when
 
@@ -15,7 +15,7 @@
 
 ### 靜態檢查的接點
 
-依 verification，建議新增 tests/ui_map_probe.gd（尚未建立），由 Smoke `_run()` 在 Root ready 後 runtime load，做節點路徑、scene、animation、素材與尺寸檢查。若需要 populate／show_map，先提供 [地圖畫面](map.md#演出焦點與離場) 所述的無焦點 adapter。純讀靜態 scene 可以先做，但不能拿它替代導航結果。
+建議新增 tests/ui_map_probe.gd（尚未建立），依 [verification](../verification.md#把新增-helper-真正接上) 由 Smoke `_run()` 在 Root ready 後 runtime load，做節點路徑、scene、animation、素材與尺寸檢查。若需要 populate／show_map，先提供 [地圖畫面](map.md#演出焦點與離場) 所述的無焦點 adapter。純讀靜態 scene 可以先做，但不能拿它替代導航結果。
 
 ### 旅程情境
 
@@ -27,7 +27,7 @@
 
 合法點擊後有界等待 action idle，驗 location_id、visited、shop 清除、訊號恰好一次及 Map 關閉；連點、Back／重開與幕尾另列。測 populate 後同 frame 重建／釋放，確認舊節點已 queue_free、pending callback 已取消且不指向新 scene。若改 travel 時序，補上 combat／dialogue／shop／rest 的返回情境。
 
-新增 suite 要同步 runner 的 SUITE_CHOICES、分支、mapping、PASS marker／manifest；現有 Combat 的單條路徑不是全圖驗收。
+現有 Combat 的單條路徑不是全圖驗收。
 
 ## 交接
 
