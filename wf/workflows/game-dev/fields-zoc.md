@@ -12,7 +12,7 @@
 
 ## 流程
 
-先讀 [雙棋盤契約](../../../analysis/slay-the-robot/design/dual-board/README.md) 與 [場域規格](../../specs/combat-framework/13-movement-fields-position.md)，查 source／tests 的當前行為。記錄一個具體事件：誰在何盤何格，何時進入／離開、站著不動或跨越刻邊界，目標是誰、生命週期在哪中止。
+先讀 [雙棋盤契約](../../specs/dual-board/README.md) 與 [場域規格](../../specs/combat-framework/13-movement-fields-position.md)，查 source／tests 的當前行為。記錄一個具體事件：誰在何盤何格，何時進入／離開、站著不動或跨越刻邊界，目標是誰、生命週期在哪中止。
 
 資料用 `fields/` 的 FieldData；內容包依 [內容入口](content.md) 接載入。不為單張場域牌新建控制器。堆疊策略、到期與 interval、中途經過／生成觸發、每格各自觸發與 owner 陣營 filter 的語意見 [場域資料與生命週期](../../../analysis/slay-the-robot/architecture/07_fields_zoc.md#場域資料與生命週期)；設計時逐項明確指定，不假設同 id 自動合成一片區域，入侵者也不能被誤判成該盤的原陣營。
 

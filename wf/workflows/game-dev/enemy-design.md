@@ -67,9 +67,9 @@
 
 從 `intent_initial` 指向第一輪可用意圖，每個可到達狀態寫出傷害×次數、格擋、custom actions、下一狀態權重與預告內容。權重須非負、總和大於零，目標 ID 全部存在；需要停留時明確寫自迴圈，不用空權重代表「維持原狀」（空權重實際行為與程式旁註解不符，見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人能力的現有缺口)）。
 
-意圖切換時點（[CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 在敵人進入時間軸等待時呼叫 `decide_next_intent()`）、`build_intent_actions_data` 的 stack 次序（reset → block → attack → 逆序 custom actions）與 PRE／POST 回合時點見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人資料與意圖時序)；有無棋盤模組的分派見 [棋盤意圖核實](../../../analysis/slay-the-robot/design/board-intents.md#可選模組與普通戰鬥)。「先上易傷再攻擊」須測實際次序。
+意圖切換時點（[CombatDirector](../../../game/scripts/combat/CombatDirector.gd) 在敵人進入時間軸等待時呼叫 `decide_next_intent()`）、`build_intent_actions_data` 的 stack 次序（reset → block → attack → 逆序 custom actions）與 PRE／POST 回合時點見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人資料與意圖時序)；有無棋盤模組的分派見 [棋盤意圖核實](../../specs/board-module/intents.md#可選模組與普通戰鬥)。「先上易傷再攻擊」須測實際次序。
 
-意圖在執行前被拒絕（例如未掛棋盤時的盤面專屬 payload）時不保留該意圖，下次行動照常輪替；`Enemy.decide_next_intent` 也會跳過需要未掛模組的意圖（嘗試次數以意圖數為上限）。回歸在 [boardless_intent_cases](../../../tests/boardless_intent_cases.gd)，核實見 [棋盤模組分析](../../../analysis/slay-the-robot/design/board-module.md)。設計敵人時，NONE 模式下至少要有一個不需模組的可到達意圖，否則該敵人在未掛棋盤時只會反覆跳過。
+意圖在執行前被拒絕（例如未掛棋盤時的盤面專屬 payload）時不保留該意圖，下次行動照常輪替；`Enemy.decide_next_intent` 也會跳過需要未掛模組的意圖（嘗試次數以意圖數為上限）。回歸在 [boardless_intent_cases](../../../tests/boardless_intent_cases.gd)，核實見 [棋盤模組分析](../../specs/board-module/README.md)。設計敵人時，NONE 模式下至少要有一個不需模組的可到達意圖，否則該敵人在未掛棋盤時只會反覆跳過。
 
 預告數字與圖示推導的限制見 [核實來源](../../../analysis/slay-the-robot/design/encounters.md#敵人資料與意圖時序)：新 custom action 腳本須同步描述／圖示契約，純防禦或召喚意圖要明確把傷害與攻擊次數設為 0。重複預覽前後比較狀態、RNG 與資源，證明預覽不改遊戲；數字斷言不等於玩家已看得懂。
 

@@ -40,4 +40,4 @@ tick 使用動態邊界排程：每個邊界的子行動完成後重新找下一
 
 [Field](../../../tests/field_flow.gd) 用真實 Root／New Run／Map 啟動，資料 fixture 明確選 SINGLE，保留局部 Phase 2b 規則的可觀察案例；其 actions 走公開 handler，只有安排起點使用直接 BoardData 放置。[DualBoard](../../../tests/dual_board_flow.gd) 不覆寫 production DUAL 預設，驗雙盤位置、A 的費用前拒絕、實際 sprite 節點定位、轉移／交換與場域交錯時序。測試專用故障注入只放在 tests，沒有改生產預設讓測試通過。
 
-Field／DualBoard、SaveLoad 與其餘 All 套件已通過；精確來源與日誌見 [本輪證據](../evidence/2026-10-20/dual-board/README.md)，測試映射見 [雙盤分析](../design/dual-board/verification.json)。headless 仍不驗 GUI 觀感、硬體輸入、音訊或 GPU。
+Field／DualBoard、SaveLoad 與其餘 All 套件已通過；精確來源與日誌見 [本輪證據](../evidence/2026-10-20/dual-board/README.md)，測試映射見 [雙盤分析](../../../wf/specs/dual-board/verification.json)。headless 仍不驗 GUI 觀感、硬體輸入、音訊或 GPU。

@@ -1,6 +1,6 @@
 # 棋盤意圖、位置條件與雙盤目標
 
-[敵人分析](encounters.md)｜[敵人工作流](../../../wf/workflows/game-dev/enemy-design.md)｜[雙棋盤契約](dual-board/README.md)
+[敵人分析](../../../analysis/slay-the-robot/design/encounters.md)｜[敵人工作流](../../workflows/game-dev/enemy-design.md)｜[雙棋盤契約](../dual-board/README.md)
 
 2026-10-20 靜態核對本輪原始碼與新增測例；headless 執行結果由整合 owner 的交付報告記錄，本頁不以測試檔存在代替通過證據。既有上游意圖輪替、難度與圖示限制仍見敵人分析。
 

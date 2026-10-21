@@ -2,6 +2,8 @@
  "contract": "wf-table/1",
  "source": "01-goals-current-state.md",
  "extracted": "2026-10-19",
+ "archived": "2026-10-21",
+ "replaced_by": "開工前（2026-10-19）回合制現況快照，Phase 1 起改為 CTB；現況見 wf/workflows/common/code-map/combat-framework.md",
  "columns": [
   "假設",
   "出處",

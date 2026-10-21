@@ -20,9 +20,9 @@
 | UI 元件、版面、狀態與輸入 | [呈現](presentation.md) | [UI 子流程](../../../wf/workflows/game-dev/ui.md) |
 | 聲音載入、播放、bus 與設定 | [音訊](audio.md) | [聲音](../../../wf/workflows/game-dev/audio.md) |
 
-雙棋盤 A、跨盤位置與人物站格見 [雙棋盤分析](dual-board/README.md)。
+雙棋盤 A、跨盤位置與人物站格見 [雙棋盤分析](../../../wf/specs/dual-board/README.md)。
 
-場景掛載與普通卡邊界見 [可選棋盤模組](board-module.md)；完整中性短流程見 [棋盤示範包](../../../examples/board-lab/README.md)。
+場景掛載與普通卡邊界見 [可選棋盤模組](../../../wf/specs/board-module/README.md)；完整中性短流程見 [棋盤示範包](../../../examples/board-lab/README.md)。
 
 ## 如何採用
 

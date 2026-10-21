@@ -1,6 +1,6 @@
 # board-module — 棋盤掛載、關閉與普通戰鬥
 
-[機制入口](../mechanics.md)｜[架構分析](../../../../analysis/slay-the-robot/design/board-module.md)｜[場域與控制區](../fields-zoc.md)｜[資源生命週期](../resource-lifecycle.md)
+[機制入口](../mechanics.md)｜[架構分析](../../../specs/board-module/README.md)｜[場域與控制區](../fields-zoc.md)｜[資源生命週期](../resource-lifecycle.md)
 
 **何時用**：改棋盤可選裝配、模組生命週期、無棋盤戰鬥、棋盤出牌接點，或把新增空間機制掛回 Combat。只新增既有原語可表達的卡牌／場域內容，先走 [content](../content.md)。
 
@@ -10,25 +10,25 @@
 
 ## 先確定裝配與範圍
 
-讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd)、[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)、[BoardCombatModule.gd](../../../../game/scripts/combat/board/BoardCombatModule.gd)，確認場景 `board_module_enabled` 與 rules `board_enabled` 的實際值（兩者都開才掛載，見 [架構分析的裝配與責任](../../../../analysis/slay-the-robot/design/board-module.md#裝配與責任)）。不要把 SINGLE、隱藏 BoardView、空棋盤或零移動點當作關閉功能。
+讀 [Combat.gd](../../../../game/scripts/ui/Combat.gd)、[CombatDirector.gd](../../../../game/scripts/combat/CombatDirector.gd)、[BoardCombatModule.gd](../../../../game/scripts/combat/board/BoardCombatModule.gd)，確認場景 `board_module_enabled` 與 rules `board_enabled` 的實際值（兩者都開才掛載，見 [架構分析的裝配與責任](../../../specs/board-module/README.md#裝配與責任)）。不要把 SINGLE、隱藏 BoardView、空棋盤或零移動點當作關閉功能。
 
 先定義改動是在開局前切換內容設定，還是要支援戰鬥中真正卸載 Node。後者必須涵蓋排隊請求、await 恢復、舊實例延遲 exit 與新實例身份；不要在未完成相關驗收前把「可選掛載」擴稱成任意時刻熱切換。
 
-場景負責組裝元件：Combat 只在兩個旗標都開且 `BOARD_MODULE_SCRIPT` 檔案存在時以路徑 load BoardCombatModule。Director 保留普通 CTB、Encounter、waves 與行動流程，只經核心 [CombatModule](../../../../game/scripts/combat/CombatModule.gd) 介面的 hooks（setup／clear、單位進出、行動開始、時鐘、出牌、目標解析、敵人意圖、威脅、放置）呼叫模組，不引用任何棋盤類別；缺模組內容由 [CombatContentRequirements](../../../../game/scripts/combat/CombatContentRequirements.gd) 以資料標記判定。棋盤幾何、場域、移動、undo、盤面威脅與呈現歸模組。核心的 `board_*` 查詢只是無型別相容轉送，未掛載回 null；不能讓核心在缺模組時偷偷 new 棋盤來補洞，也不能在核心新增棋盤類別引用（會讓 BoardRemoved 失敗）。新需求先加在 CombatModule hooks，不為單一棋盤元件建立通用 plugin 系統。完整介面與刻意保留的殘留耦合見 [架構分析](../../../../analysis/slay-the-robot/design/board-module.md)。
+場景負責組裝元件：Combat 只在兩個旗標都開且 `BOARD_MODULE_SCRIPT` 檔案存在時以路徑 load BoardCombatModule。Director 保留普通 CTB、Encounter、waves 與行動流程，只經核心 [CombatModule](../../../../game/scripts/combat/CombatModule.gd) 介面的 hooks（setup／clear、單位進出、行動開始、時鐘、出牌、目標解析、敵人意圖、威脅、放置）呼叫模組，不引用任何棋盤類別；缺模組內容由 [CombatContentRequirements](../../../../game/scripts/combat/CombatContentRequirements.gd) 以資料標記判定。棋盤幾何、場域、移動、undo、盤面威脅與呈現歸模組。核心的 `board_*` 查詢只是無型別相容轉送，未掛載回 null；不能讓核心在缺模組時偷偷 new 棋盤來補洞，也不能在核心新增棋盤類別引用（會讓 BoardRemoved 失敗）。新需求先加在 CombatModule hooks，不為單一棋盤元件建立通用 plugin 系統。完整介面與刻意保留的殘留耦合見 [架構分析](../../../specs/board-module/README.md)。
 
 搬動呈現節點時，先搜尋程式與全部測試裡的硬路徑：呈現搬進模組後，直取 `Combat/BoardView` 的舊 Board 回歸就曾因此失敗。擴充改走 Combat 相容 getter 或模組 owner，並保留節點有效、在樹內與可見性的斷言；不能只刪掉失效的檢查。
 
 ## 實作時保留普通流程
 
-先追一場 NONE 的新局到結束，確認 [普通戰鬥與棋盤戰鬥](../../../../analysis/slay-the-robot/design/board-module.md#普通戰鬥與棋盤戰鬥) 所列的生成、波次、普通意圖、狀態、能量、抽棄牌與行動時鐘照常。Encounter 不能由 board getter 間接取得；掛載模式落格失敗不能退回無盤出生繞過碰撞檢查。
+先追一場 NONE 的新局到結束，確認 [普通戰鬥與棋盤戰鬥](../../../specs/board-module/README.md#普通戰鬥與棋盤戰鬥) 所列的生成、波次、普通意圖、狀態、能量、抽棄牌與行動時鐘照常。Encounter 不能由 board getter 間接取得；掛載模式落格失敗不能退回無盤出生繞過碰撞檢查。
 
-改卡牌接線時先讀 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd)、[BoardCardAdapter](../../../../game/scripts/combat/board/BoardCardAdapter.gd) 及 [HandManager](../../../../game/autoload/HandManager.gd)。adapter hooks 只選擇、驗證及提供執行資料，扣費、保留能量、退款與牌堆去向仍歸原流程（見 [出牌接點與費用原義](../../../../analysis/slay-the-robot/design/board-module.md#出牌接點與費用原義)）；入隊前拒絕不扣費，出隊拒絕沿既有退款，不再退第二次。
+改卡牌接線時先讀 [CardPlayAdapter](../../../../game/scripts/combat/CardPlayAdapter.gd)、[BoardCardAdapter](../../../../game/scripts/combat/board/BoardCardAdapter.gd) 及 [HandManager](../../../../game/autoload/HandManager.gd)。adapter hooks 只選擇、驗證及提供執行資料，扣費、保留能量、退款與牌堆去向仍歸原流程（見 [出牌接點與費用原義](../../../specs/board-module/README.md#出牌接點與費用原義)）；入隊前拒絕不扣費，出隊拒絕沿既有退款，不再退第二次。
 
 對盤面專用 actions、validators、目標 override 與巢狀 payload 做能力檢查；普通牌不能被一律拒絕。自動出牌與複製出牌也必須經過同一檢查。敵人意圖若含盤面專用效果，整份意圖的接受／拒絕要明確，避免普通傷害先發生再跳過位移。來源、別名與巢狀 payload 的解析以實際 BoardContentPolicy 為準。
 
 ## 停止、死亡與再次開始
 
-維護 setup／clear 的成對責任；清理次序、死亡時保留呈現目的位置與實例身份的解除，見 [停止與重建](../../../../analysis/slay-the-robot/design/board-module.md#停止與重建)。不要清掉別的場景 registry，也不要讓下一場 NONE 的主角保留上一場有效格位。
+維護 setup／clear 的成對責任；清理次序、死亡時保留呈現目的位置與實例身份的解除，見 [停止與重建](../../../specs/board-module/README.md#停止與重建)。不要清掉別的場景 registry，也不要讓下一場 NONE 的主角保留上一場有效格位。
 
 若新增 await、回指或延遲 callback，依 [資源生命週期](../resource-lifecycle.md) 檢查停止後復原、同步停止與重複 clear。直接卸載實例時也要清核心引用，且舊實例的 exit 不能把新實例清掉。
 

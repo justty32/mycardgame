@@ -1,8 +1,8 @@
 # 雙棋盤 A：已核實契約與擴充接點
 
-[設計分析](../README.md)｜[呈現](presentation.md)｜[驗證映射](verification.json)｜[場域與控制區](../../architecture/07_fields_zoc.md)
+[設計分析](../../../analysis/slay-the-robot/design/README.md)｜[呈現](presentation.md)｜[驗證映射](verification.json)｜[場域與控制區](../../../analysis/slay-the-robot/architecture/07_fields_zoc.md)
 
-2026-10-20：本輪雙棋盤 A、本體站格與完整 Phase 2b 已通過隔離 All；來源與各 suite 原始日誌的可攜副本見 [執行證據](../../evidence/2026-10-20/dual-board/README.md)。本頁記實作契約，操作流程留在 [fields-zoc](../../../../wf/workflows/game-dev/fields-zoc.md)。headless 不代表 GUI、鍵鼠、GPU 或最終美術驗收。
+2026-10-20：本輪雙棋盤 A、本體站格與完整 Phase 2b 已通過隔離 All；來源與各 suite 原始日誌的可攜副本見 [執行證據](../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/README.md)。本頁記實作契約，操作流程留在 [fields-zoc](../../workflows/game-dev/fields-zoc.md)。headless 不代表 GUI、鍵鼠、GPU 或最終美術驗收。
 
 ## 位置、陣營與戰鬥
 
@@ -26,7 +26,7 @@ Hand 將目標盤寫入 CardPlayRequest.selected_board_id，出隊前再驗；�
 
 Battlefield 預檢兩端盤、邊界、footprint、障礙、禁傳送及佔格，成功才一次提交。預檢或第二端提交失敗，兩端位置均維持；提交成功後發帶盤移動訊號，再處理來源借機、leave 與目的 enter。反應傷害不回滾幾何，致死、scope clear 或再次轉移須停掉失效 continuation，不可重建死者或留下半個交換。
 
-普通 transfer 累計一次移動，強制 swap 累計一次位移，不捏造盤間距離。局部 ZOC 按敵對陣營判斷，強制位移預設豁免，可由規則明確開啟；來源控制者的 owner 與 target override 不因場域建立者而錯綁。場域的動態時鐘、生命週期與預覽邊界見 [專項分析](../../architecture/07_fields_zoc.md)。
+普通 transfer 累計一次移動，強制 swap 累計一次位移，不捏造盤間距離。局部 ZOC 按敵對陣營判斷，強制位移預設豁免，可由規則明確開啟；來源控制者的 owner 與 target override 不因場域建立者而錯綁。場域的動態時鐘、生命週期與預覽邊界見 [專項分析](../../../analysis/slay-the-robot/architecture/07_fields_zoc.md)。
 
 ## 擴充邊界與證據
 

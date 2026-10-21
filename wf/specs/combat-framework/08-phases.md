@@ -2,7 +2,7 @@
 
 [README](README.md)
 
-本檔是 §5 的索引：共同驗證命令、各階段分檔、移動增補的分配與時序。各階段的改動、規模、風險、Done when 與 agent 分工寫在下表的分檔裡；與原文的偏差以「**修訂（實作 Phase N）**」段落標在該階段內，實際驗收見 [plans/combat-framework](../../plans/combat-framework/phase-3.md)（最新為 Phase 3，前一階段由檔頭連過去）。
+本檔是 §5 的索引：共同驗證命令、各階段分檔、移動增補的分配與時序。未動工階段的改動、規模、風險、Done when 與 agent 分工寫在下表的分檔裡；已完成階段（0–3、2b）的分檔、實作修訂與驗收 plan 已封存，現況見 [README](README.md#方向更新雙盤-a-與可選棋盤模組取代-g4-原文)。
 
 ## 共同驗證命令（每階段 Done when 都要）
 
@@ -18,18 +18,18 @@ agent 分級依 [user.md](../../workflows/common/user.md) 現行指定（普通�
 <!-- wf-nav -->
 | 階段 | 可玩 | 狀態 | 檔 |
 |---|---|---|---|
-| Phase 0：基礎重構——combatant 抽象化、單位註冊表、規則物件 | 與現在完全相同 | 已完成 | [08a](08a-phase-0.md) |
-| Phase 1：CTB + 單一主角 | 一名主角 vs 多敵，依速度排隊 | 已完成 | [08b](08b-phase-1.md) |
-| Phase 2：棋盤 + 移動 + 範圍／形狀卡 | 主角在 5×5 移動並用射程卡 | 已完成；後由雙盤 A 與可選模組延伸，見 [README](README.md#方向更新雙盤-a-與可選棋盤模組取代-g4-原文) | [08c](08c-phase-2.md)、Done when [08d](08d-phase-2-done-when.md) |
-| Phase 3：波次 | 一場遭遇兩波 | 已完成 | [08e](08e-phase-3-2b.md#phase-3波次) |
-| Phase 2b：場域格與控制區（移動增補，排在 Phase 3 之後） | 戰鬥中場域與控制區可觸發 | 已完成（9ced42f，suite `Field`） | [08e](08e-phase-3-2b.md#phase-2b場域格與控制區) |
+| Phase 0：基礎重構——combatant 抽象化、單位註冊表、規則物件 | 與現在完全相同 | 已完成 | 已封存 |
+| Phase 1：CTB + 單一主角 | 一名主角 vs 多敵，依速度排隊 | 已完成 | 已封存 |
+| Phase 2：棋盤 + 移動 + 範圍／形狀卡 | 主角在 5×5 移動並用射程卡 | 已完成；後由雙盤 A 與可選模組延伸，見 [README](README.md#方向更新雙盤-a-與可選棋盤模組取代-g4-原文) | 已封存 |
+| Phase 3：波次 | 一場遭遇兩波 | 已完成 | 已封存 |
+| Phase 2b：場域格與控制區（移動增補，排在 Phase 3 之後） | 戰鬥中場域與控制區可觸發 | 已完成（9ced42f，suite `Field`） | 已封存 |
 | Phase 4：多主角資料模型 + AI 隊員戰鬥行動 | 主角 + 2 名 AI 隊員 | 未動工 | [08f](08f-phase-4-6.md#phase-4多主角資料模型--ai-隊員戰鬥行動) |
 | Phase 5：招募／培養／AI 選牌獎與購卡／升階 | 局中招募、戰後各自選牌 | 未動工 | [08f](08f-phase-4-6.md#phase-5招募培養ai-選牌獎與購卡升階) |
 | Phase 6：存檔版本拒絕與收尾 | 舊存檔被拒絕並提示；proxy 清除 | 未動工 | [08f](08f-phase-4-6.md#phase-6存檔版本拒絕與收尾) |
 
 ## 移動增補的階段分配（原移動草案 §9）
 
-移動規則增補（[11](11-movement-active.md)–[15](15-movement-cards.md)）的「Phase 2 增補」已併入 [Phase 2](08c-phase-2.md) 的改動、規模、風險與 Done when（以「移動增補」標示）；新增的 Phase 2b 寫在 [08e](08e-phase-3-2b.md#phase-2b場域格與控制區)，排在 Phase 3（波次）之後、Phase 4（AI 隊員）之前；「題材包補列」已併入 [10-pack-requirements.md](10-pack-requirements.md) 的 [pack-requirements.json](pack-requirements.json)。
+移動規則增補（[11](11-movement-active.md)–[15](15-movement-cards.md)）的「Phase 2 增補」已併入 Phase 2（以「移動增補」標示）；新增的 Phase 2b 排在 Phase 3（波次）之後、Phase 4（AI 隊員）之前；「題材包補列」已併入 [10-pack-requirements.md](10-pack-requirements.md) 的 [pack-requirements.json](pack-requirements.json)。
 
 各移動項目屬 Phase 2 或之後的分配表已抽到 [movement-phasing.json](movement-phasing.json)（8 列）。欄位：項目（對應移動草案節號）、Phase 2（棋盤）（✔＝Phase 2 做）、之後（延到哪個階段）。
 

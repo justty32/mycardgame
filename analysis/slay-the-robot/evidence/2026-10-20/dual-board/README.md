@@ -1,6 +1,6 @@
 # 雙棋盤 A 與 Phase 2b：最終驗證證據
 
-[證據入口](../../README.md)｜[雙盤契約](../../../design/dual-board/README.md)｜[場域分析](../../../architecture/07_fields_zoc.md)｜[轉換清單](manifest.json)
+[證據入口](../../README.md)｜[雙盤契約](../../../../../wf/specs/dual-board/README.md)｜[場域分析](../../../architecture/07_fields_zoc.md)｜[轉換清單](manifest.json)
 
 2026-10-20，公司 Windows、官方 Godot `4.7.2.stable.mono.official.ed1daf0bf`，僅隔離 headless。正常新局使用雙棋盤與實際角色站格；舊局部規則測試明確採 SINGLE。
 
@@ -8,7 +8,7 @@
 
 [results](final-all-results.json) 對應 `20261020-095502-c16de721`：**1470 checks、零失敗，25 個程序階段均 exit 0**。Field 355、DualBoard 344；其餘為 ResourceLifecycle 127、Dictionary 47、Smoke 110、CombatVictory 90、CombatDefeat 48、Ctb 53、Board 88、Wave 48，以及 SaveLoad write／read／rejected 28／59／73。
 
-各 suite 的 import 與引擎日誌保留於 `final-all/`；11 份相同的 import 日誌只留 `Board/import.log`，另有 5 份主日誌與棋盤模組 run 相同而只留該處。manifest 的 `published_path` 指向保留副本，原位置記在 `removed_copy`，另見 [去重索引](../../dedup-index.json)；需求與具體測試對照見 [驗證映射](../../../design/dual-board/verification.json)。SaveLoad rejected 保留十個刻意損毀／缺失存檔的 ERROR 診斷，runner 明確識別預期拒絕；沒有未預期錯誤、ObjectDB leak 或退出資源殘留。此結論限當次 freeze，不表示任何未來改動自動通過。
+各 suite 的 import 與引擎日誌保留於 `final-all/`；11 份相同的 import 日誌只留 `Board/import.log`，另有 5 份主日誌與棋盤模組 run 相同而只留該處。manifest 的 `published_path` 指向保留副本，原位置記在 `removed_copy`，另見 [去重索引](../../dedup-index.json)；需求與具體測試對照見 [驗證映射](../../../../../wf/specs/dual-board/verification.json)。SaveLoad rejected 保留十個刻意損毀／缺失存檔的 ERROR 診斷，runner 明確識別預期拒絕；沒有未預期錯誤、ObjectDB leak 或退出資源殘留。此結論限當次 freeze，不表示任何未來改動自動通過。
 
 [雙盤日誌](final-all/DualBoard/dualboard.log) 包含正常新局、跨盤與交換、費用前拒絕、NEAREST／FARTHEST、第二 run 及真實 sprite 腳底檢查。動畫庫的唯讀 track 診斷證實 run_start 使用 offset -150→0；首次 ready 保存 position＋offset 後，第二 run 的腳底與首次一致。headless 的虛擬 viewport 依正式設定為 1200×700，保留畫面範圍與祖先裁切斷言，未操作實體視窗。
 

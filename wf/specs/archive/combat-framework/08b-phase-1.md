@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（Phase 1）；現況見 wf/specs/combat-framework/README.md 與 wf/workflows/common/code-map/combat-framework.md 取代
+
 # 分階段計畫（§5）：Phase 1 CTB + 單一主角
 
 [README](README.md)｜[分階段索引](08-phases.md)

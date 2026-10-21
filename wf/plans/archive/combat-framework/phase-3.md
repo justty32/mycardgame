@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（4c386e0）；現況見 wf/specs/dual-board/README.md 取代
+
 # plan：戰鬥框架 Phase 3 波次（已完成 2026-10-19）
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[Phase 2](phase-2.md)｜[INDEX](../../INDEX.md)
@@ -96,4 +98,4 @@ Phase 1～3 的實機檢查合併在此（各 plan 末節保留原文）。Linux
 
 ## 後續決議
 
-上方保留 Phase 3 當時驗收狀態；第 7 項已由使用者確認（[decisions.json](../../workflows/decisions.json) 第 20 列）：角色與敵人本體直接站在棋盤上、移動時跟隨，採雙方對峙的日式 RPG 回合戰鬥感。現行工程與未定美術細節見 [雙棋盤呈現分析](../../../analysis/slay-the-robot/design/dual-board/presentation.md)。本體站格已完成工程接線與 headless 回歸；最終 All 證據見現行分析，人工觀感仍未驗。第 1–6 項人工驗收仍未完成。
+上方保留 Phase 3 當時驗收狀態；第 7 項已由使用者確認（[decisions.json](../../workflows/decisions.json) 第 20 列）：角色與敵人本體直接站在棋盤上、移動時跟隨，採雙方對峙的日式 RPG 回合戰鬥感。現行工程與未定美術細節見 [雙棋盤呈現分析](../../specs/dual-board/presentation.md)。本體站格已完成工程接線與 headless 回歸；最終 All 證據見現行分析，人工觀感仍未驗。第 1–6 項人工驗收仍未完成。

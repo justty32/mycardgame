@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（ef33568）；現況見 wf/specs/combat-framework/README.md 取代
+
 # plan：戰鬥框架 Phase 1 CTB + 單一主角（已完成 2026-10-19）
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[Phase 0](phase-0.md)｜[INDEX](../../INDEX.md)

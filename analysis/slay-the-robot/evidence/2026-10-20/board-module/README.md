@@ -1,6 +1,6 @@
 # 可選棋盤模組：最終驗證
 
-[證據入口](../../README.md)｜[架構與責任](../../../design/board-module.md)｜[驗收映射](../../../design/board-module-verification.json)｜[轉換清單](manifest.json)
+[證據入口](../../README.md)｜[架構與責任](../../../../../wf/specs/board-module/README.md)｜[驗收映射](../../../../../wf/specs/board-module/verification.json)｜[轉換清單](manifest.json)
 
 2026-10-20 Windows、Godot `4.7.2.stable.mono.official.ed1daf0bf`，僅隔離 headless。[最終 All](final-all-results.json) 對應 `20261020-113027-4ebd60e5`：30 個程序階段全部 exit 0，1809 checks、0 failures；沒有未預期 ERROR、資源保留或原生崩潰訊號。
 

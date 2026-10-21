@@ -26,25 +26,25 @@
       "file": "tools/patches/combat-framework-phase0.patch",
       "sha256": "465a53f2a159c61feb16d16e426545dbaf815156578cc7e9d9841ccfbf0a4e43",
       "description": "Combat framework Phase 0 (wf/specs/combat-framework): BaseCombatant unit identity fields and _on_own_action_* hooks, UnitRegistry autoload (Global.get_player/get_alive_enemies delegate), CombatRulesData schema + combat_rules_default with original-behavior defaults (draw/energy read it), unit/timeline/party signal declarations, hero unit_action_started/ended in the legacy turn flow.",
-      "validation": "wf/plans/combat-framework/phase-0.md"
+      "validation": "wf/plans/archive/combat-framework/phase-0.md"
     },
     {
       "file": "tools/patches/combat-framework-phase1.patch",
       "sha256": "3c58636adf85c4919da0051b74686461e527bb8ca367d8b04ae17c9b5237d359",
       "description": "Combat framework Phase 1 (wf/specs/combat-framework): CombatDirector + CombatTimeline action timeline (CTB) replaces Combat.gd's turn alternation; BaseUnitController/PlayerInputController/EnemyIntentController; CombatEndTurn renamed CombatEndAction; enemies decide intent on entering the timeline; rules reset_block_on_action_start/discard_hand_on_action_end/hand_limit consumed; enemy_speed/character_speed/card_action_delay/enemy_intent_action_delay fields; StatusEffectData UNIT_ACTION_START/END + EVERY_N_TICKS; StatsHandler turn_count = hero actions, combat_tick; TimelineBar HUD; Root.tscn director/timeline nodes and animation tracks.",
-      "validation": "wf/plans/combat-framework/phase-1.md"
+      "validation": "wf/plans/archive/combat-framework/phase-1.md"
     },
     {
       "file": "tools/patches/combat-framework-phase2.patch",
       "sha256": "fcacb75f5f1e601d57ab6bac7cd01ece1c67d6907da4ff1e4eca8a0b29b8fa2f",
       "description": "Combat framework Phase 2 (wf/specs/combat-framework): BoardData/BoardTargeting/IntentResolver/ThreatPreview, EncounterData + EncounterWaveData with legacy-event synthesis, CombatDirector board setup / wave-0 spawning / movement / enemy intent movement, board card/intent/unit fields, ActionMoveUnit/ActionDisplaceUnit/ActionGrantMovePoints/ActionComputeBoardValue, board validators, InterceptorRooted, Hand cell targeting and BoardView, ThreatPreview-based incoming damage, Board suite.",
-      "validation": "wf/plans/combat-framework/phase-2.md"
+      "validation": "wf/plans/archive/combat-framework/phase-2.md"
     },
     {
       "file": "tools/patches/combat-framework-phase3.patch",
       "sha256": "43dbfc56077667cb839eb26799431998644388afe24463cbdbedf51296e7c068",
       "description": "Combat framework Phase 3 (wf/specs/combat-framework): CombatDirector split into BoardController / UnitSpawner / CombatActionPhases / CombatStartActions (intent execution in EnemyIntentController); WaveController wave flow (wave_started/wave_cleared, wave_on_*_actions, next-wave scheduling, victory on last wave cleared replacing Combat.gd's minion check); UnitSpawner pending entries with enter delay / stagger / spawn delay and NEAREST_EMPTY / WAIT_UNTIL_FREE / FAIL_SKIP; Global.are_remaining_enemies delegates to CombatDirector.has_remaining_opponents; CombatTimeline.peek_next_tick; BoardData footprint helpers; TimelineBar WaveLabel.",
-      "validation": "wf/plans/combat-framework/phase-3.md"
+      "validation": "wf/plans/archive/combat-framework/phase-3.md"
     },
     {
       "file": "tools/patches/json-data-files.patch",
@@ -68,13 +68,13 @@
       "file": "tools/patches/optional-board-module.patch",
       "sha256": "5c02889c919ee0729bb380ee62d40f5cb620303f5a697e46dce799821376d5c3",
       "description": "Optional scene-composed BoardCombatModule and generic card adapter preserve ordinary no-board combat, card costs and queues; board-only content fails before fees, module generations and copied request contexts preserve lifetime safety. Initial Act is configurable with side-effect-free invalid-input rejection. Fix duplicate-play logging argument. Includes all game source changes relative to 9ced42f.",
-      "validation": "analysis/slay-the-robot/design/board-module.md"
+      "validation": "wf/specs/board-module/README.md"
     },
     {
       "file": "tools/patches/board-module-decoupling.patch",
       "sha256": "b2c323defab28437da7411a8c5b77318a475dcaf8f25225aaee85f3273a5b268",
       "description": "Board as a removable CombatModule: core (CombatDirector, Combat, UnitSpawner, BaseAction, Signals, CardPlayAdapter, EnemyIntentController) references no board class; CombatContentRequirements refuses / greys out / skips board-only content by data markers; scene composes the module by path when present; refused boardless intents rotate instead of stalling; step-limited ValidatorPathExists, paid-cell-minimal active paths, executed path == preview, event-driven board previews, inline empty field-clock boundaries, upstream PARENT targeting restored; BoardController moved into combat/board/. Includes all game source changes relative to 2757e06; applies after optional-board-module.patch.",
-      "validation": "analysis/slay-the-robot/design/board-module.md"
+      "validation": "wf/specs/board-module/README.md"
     }
   ],
   "layout": "published game directory is a source snapshot with local patches applied; original development workspace may retain an independent upstream game checkout",

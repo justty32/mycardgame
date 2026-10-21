@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（Phase 2）；後續由 wf/specs/dual-board/README.md、wf/specs/board-module/README.md 延伸 取代
+
 # 分階段計畫（§5）：Phase 2 棋盤 + 移動 + 範圍／形狀卡
 
 [README](README.md)｜[分階段索引](08-phases.md)

@@ -1,6 +1,6 @@
 # code-map／戰鬥框架 — 檔案導航（Phase 3）
 
-[code-map](../code-map.md)｜[spec](../../../specs/combat-framework/README.md)｜[Phase 2 plan](../../../plans/combat-framework/phase-2.md)｜[Phase 3 plan](../../../plans/combat-framework/phase-3.md)
+[code-map](../code-map.md)｜[spec](../../../specs/combat-framework/README.md)
 
 從 code-map 抽出的戰鬥框架段；維護鏈與真相層優先序照父檔。
 
@@ -33,8 +33,8 @@ Smoke 呼叫 [unit_registry_probe.gd](../../../../tests/unit_registry_probe.gd)�
 
 [FieldController](../../../../game/scripts/combat/board/FieldController.gd) 每盤一個；[FieldClockAction](../../../../game/scripts/combat/board/FieldClockAction.gd) 全盤動態補刻，[FieldEventAction](../../../../game/scripts/combat/board/FieldEventAction.gd) 管進出／停留與 owner／generation，[FieldPreview](../../../../game/scripts/combat/board/FieldPreview.gd) 提供純傷害與收益估值。ActionHandler 的 ordered 子樹保留 legacy queue/stack，外部重入與真正子動作分開。
 
-[BoardPathfinding](../../../../game/scripts/combat/board/BoardPathfinding.gd) 管 Dijkstra，[BoardMovementState](../../../../game/scripts/combat/board/BoardMovementState.gd) 管 ZOC 與 undo；[BoardMoveSequence](../../../../game/scripts/actions/board_actions/BoardMoveSequence.gd) 逐格反應，[BoardTransferAction](../../../../game/scripts/actions/board_actions/BoardTransferAction.gd) 原子轉移後發事件。意圖位置接點見 [board-intents](../../../../analysis/slay-the-robot/design/board-intents.md)。
+[BoardPathfinding](../../../../game/scripts/combat/board/BoardPathfinding.gd) 管 Dijkstra，[BoardMovementState](../../../../game/scripts/combat/board/BoardMovementState.gd) 管 ZOC 與 undo；[BoardMoveSequence](../../../../game/scripts/actions/board_actions/BoardMoveSequence.gd) 逐格反應，[BoardTransferAction](../../../../game/scripts/actions/board_actions/BoardTransferAction.gd) 原子轉移後發事件。意圖位置接點見 [board-intents](../../../specs/board-module/intents.md)。
 
-[BoardActorPresentation](../../../../game/scripts/ui/BoardActorPresentation.gd) 映射實際 sprite/HUD/hitbox 到兩盤，保留父節點與 UID，動畫位置不回寫資料格。專項為 [Field](../../../../tests/field_flow.gd)、[DualBoard](../../../../tests/dual_board_flow.gd)；需求／測試／證據依 [雙盤矩陣](../../../../analysis/slay-the-robot/design/dual-board/verification.json)。開發流程見 [fields-zoc](../../game-dev/fields-zoc.md)。
+[BoardActorPresentation](../../../../game/scripts/ui/BoardActorPresentation.gd) 映射實際 sprite/HUD/hitbox 到兩盤，保留父節點與 UID，動畫位置不回寫資料格。專項為 [Field](../../../../tests/field_flow.gd)、[DualBoard](../../../../tests/dual_board_flow.gd)；需求／測試／證據依 [雙盤矩陣](../../../specs/dual-board/verification.json)。開發流程見 [fields-zoc](../../game-dev/fields-zoc.md)。
 
-可選模組責任及相容界線見 [架構分析](../../../../analysis/slay-the-robot/design/board-module.md)。真正未掛模組由 [Boardless](../../../../tests/boardless_flow.gd) 四階段驗證，刪除模組檔的副本由 suite BoardRemoved（同一 boardless 測例的 removed／defeat 階段）驗證；審查回歸在 [review_regression_cases](../../../../tests/review_regression_cases.gd)（Field suite）；中性包的自然三場流程由 [PackScenario](../../../../examples/board-lab/tests/scenario.json) 驗證。
+可選模組責任及相容界線見 [架構分析](../../../specs/board-module/README.md)。真正未掛模組由 [Boardless](../../../../tests/boardless_flow.gd) 四階段驗證，刪除模組檔的副本由 suite BoardRemoved（同一 boardless 測例的 removed／defeat 階段）驗證；審查回歸在 [review_regression_cases](../../../../tests/review_regression_cases.gd)（Field suite）；中性包的自然三場流程由 [PackScenario](../../../../examples/board-lab/tests/scenario.json) 驗證。

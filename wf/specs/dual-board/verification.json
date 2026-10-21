@@ -1,0 +1,203 @@
+{
+ "contract": "wf-table/1",
+ "source": "README.md",
+ "extracted": "2026-10-20",
+ "link_columns": [
+  "test_file",
+  "run_path"
+ ],
+ "columns": [
+  "id",
+  "scope",
+  "retain",
+  "add_or_change",
+  "gate",
+  "test_file",
+  "assertion_ids",
+  "status",
+  "run_path"
+ ],
+ "rows": [
+  {
+   "id": "identity",
+   "scope": "位置與資料",
+   "retain": "unit uid/faction與局部footprint",
+   "add_or_change": "同(2,2)不同盤不碰撞；board_id與faction分離；neutral/spawn盤明確；舊Encounter預設",
+   "gate": "正負schema與占格查詢",
+   "test_file": [
+    "../../../../tests/dual_board_cases.gd",
+    "../../../../tests/dual_board_atomic_cases.gd"
+   ],
+   "assertion_ids": [
+    "same coordinates on distinct boards have independent occupants",
+    "different entity with duplicate UID cannot occupy another board",
+    "changing board_id cannot duplicate an already placed identity"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "movement",
+   "scope": "局部移動",
+   "retain": "Dijkstra/八向/成本/友軍穿越",
+   "add_or_change": "普通步行無跨盤路徑；入侵者同盤敵對；undo驗board identity與舊位置",
+   "gate": "Board/Field局部與拒絕案例",
+   "test_file": [
+    "../../../../tests/field_movement_cases.gd",
+    "../../../../tests/field_reaction_cases.gd",
+    "../../../../tests/dual_board_transfer_cases.gd"
+   ],
+   "assertion_ids": [
+    "ordinary TO_CELL walking cannot enter another board",
+    "paid movement charges one physical cell even when terrain costs four points",
+    "card distance one limits physical steps rather than terrain cost"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "transfer",
+   "scope": "跨盤特殊移動與交換",
+   "retain": "現有傷害及取消生命週期",
+   "add_or_change": "雙端footprint/禁入/佔格預驗；預檢或佔格提交拒絕時兩端位置不變；成功原子提交，依正式轉移事件契約驗leave/enter與致死中斷，不承諾傷害等副作用回滾",
+   "gate": "專項原子性/取消/多格回歸",
+   "test_file": [
+    "../../../../tests/dual_board_transfer_cases.gd",
+    "../../../../tests/dual_board_atomic_cases.gd",
+    "../../../../tests/dual_board_lifetime_cases.gd"
+   ],
+   "assertion_ids": [
+    "transfer retains UID/faction/controller/timeline and registry identity",
+    "second endpoint failure rolls back both multi-cell occupancies atomically",
+    "cancellation before transfer commit leaves both boards unchanged",
+    "swap commits both endpoints before source leave kills one participant",
+    "lethal post-swap continuation neither recreates dead unit nor rolls back survivor"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "fields",
+   "scope": "場域與ZOC",
+   "retain": "stack/filter/tick/expiry局部邏輯",
+   "add_or_change": "同座標場域不串盤；owner跨盤仍按uid；同盤入侵者ZOC；跨盤轉移field事件與forced豁免",
+   "gate": "Field完整正負/owner釋放/順序",
+   "test_file": [
+    "../../../../tests/field_action_cases.gd",
+    "../../../../tests/field_query_cases.gd",
+    "../../../../tests/field_clock_cases.gd",
+    "../../../../tests/dual_board_field_cases.gd",
+    "../../../../tests/dual_board_clock_equivalence_cases.gd",
+    "../../../../tests/field_lifetime_cases.gd"
+   ],
+   "assertion_ids": [
+    "same coordinates do not share field storage",
+    "transfer dispatches source-board leave before destination-board enter",
+    "same-created-tick refresh revision suppresses old tick and expiry work",
+    "field bulk/stepwise equivalence for refresh",
+    "field bulk/stepwise equivalence for death",
+    "field bulk/stepwise equivalence for cross",
+    "following already-expanded payload resolves a dead creator to null at execution",
+    "controller clear cancels expanded movement continuation and following generated attack"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "targeting",
+   "scope": "射程與形狀",
+   "retain": "盤內形狀與位置helpers",
+   "add_or_change": "A按目標盤展開SINGLE/ROW/COLUMN/CROSS/SQUARE_3；SELF_AREA施法者盤；ALL局部shape與全戰場override分開；跨盤LINE/LINE_PIERCE及方向推拉在費用前拒絕；同盤原契約保留；入侵後依board_id重新判斷；preview/敵意圖一致且無副作用",
+   "gate": "A合法及拒絕結果=實際；入侵後同盤方向型合法；沒有CONE/CIRCLE新增承諾",
+   "test_file": [
+    "../../../../tests/dual_board_policy_cases.gd",
+    "../../../../tests/dual_board_cases.gd",
+    "../../../../tests/field_intent_cases.gd",
+    "../../../../tests/dual_board_transfer_cases.gd",
+    "../../../../tests/dual_board_intent_reaction_cases.gd",
+    "../../../../tests/dual_board_lifetime_cases.gd"
+   ],
+   "assertion_ids": [
+    "target rejection preserves piles/energy/RNG/positions before cleanup",
+    "nested/aliased directional payload rejected before payment",
+    "invader same-board LINE keeps ordinary direction and range semantics",
+    "post-movement hit query uses actual new board range and skips out-of-range attack",
+    "move_after re-resolves retreat on the board entered by attack custom actions",
+    "ALL_OPPONENTS override independently spans both boards"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "flow",
+   "scope": "CTB/波次/勝敗",
+   "retain": "單CTB與Wave/SaveLoad主流程",
+   "add_or_change": "雙盤全域存活判斷；入侵者不變陣營/控制者；spawn/召喚正確盤；存讀重建兩盤",
+   "gate": "Ctb/Wave/Combat/SaveLoad",
+   "test_file": [
+    "../../../../tests/dual_board_wave_cases.gd",
+    "../../../../tests/save_load_flow.gd"
+   ],
+   "assertion_ids": [
+    "both board wave units join the single timeline",
+    "enemy faction on party board still prevents victory",
+    "two-board waves clear before exactly one combat_ended",
+    "post-load combat rebuilds two boards from production defaults"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "presentation",
+   "scope": "本體站盤／選格／呈現",
+   "retain": "現有2D sprites與部分BoardView查詢；不代表已接盤位置",
+   "add_or_change": "實際sprite依board_id+anchor/footprint定位；普通移動/特卡transfer/swap跟隨；資料與動畫位置分離；draw order/血條/意圖/hitbox/預覽同owner；雙盤同座標不串；死亡/波次/取消/跨盤引用更新且退出釋放",
+   "gate": "headless座標/節點/handler/生命週期回歸；視角、格線、遮擋、節奏及鍵鼠命中人工另驗；不假定3D",
+   "test_file": [
+    "../../../../tests/dual_board_presentation_cases.gd"
+   ],
+   "assertion_ids": [
+    "lethal destination field displays the committed destination before the death callback",
+    "same Root starts a new run with the same hero identity and no cumulative board scaling"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "integration",
+   "scope": "交付與框架相容",
+   "retain": "既有隔離runner與來源補丁",
+   "add_or_change": "All/必要pack、無resource leak；更新來源hash/analysis/wf；strict lint/boundary",
+   "gate": "所有命令實際結果，未驗限制明示",
+   "test_file": [
+    "../../../../tests/field_flow.gd",
+    "../../../../tests/dual_board_flow.gd",
+    "../../../../tests/ordered_action_cases.gd"
+   ],
+   "assertion_ids": [
+    "complete Field scenario returned",
+    "complete DualBoard scenario returned",
+    "ordered mixed queue/stack/front batches preserve E,D,C,A,B before continuation"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  },
+  {
+   "id": "policy_version",
+   "scope": "A入口與C演進邊界",
+   "retain": "BoardPosition與同盤range不攙入政策",
+   "add_or_change": "v1僅A；雙盤缺policy採A；未知id/version明確拒絕；舊單盤模式相容；未來C每policy另補schema/validator/preview/intent/AI且不改A舊卡語義",
+   "gate": "版本/缺欄/未知值負例；所有consumer同入口；C未實作不宣稱支援",
+   "test_file": [
+    "../../../../tests/dual_board_policy_cases.gd"
+   ],
+   "assertion_ids": [
+    "old patch missing policy fields inherits explicit v1 A defaults",
+    "unknown policy version fails closed",
+    "unimplemented future policy is rejected rather than guessed"
+   ],
+   "status": "PASS",
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/dual-board/final-all-results.json"
+  }
+ ]
+}

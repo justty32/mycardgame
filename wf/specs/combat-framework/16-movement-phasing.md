@@ -2,4 +2,4 @@
 
 [README](README.md)
 
-本節已併入 [08-phases.md 的「移動增補的階段分配」](08-phases.md#移動增補的階段分配原移動草案-9)；Phase 2b 的內容見 [08e](08e-phase-3-2b.md#phase-2b場域格與控制區)。本檔只為外部連結保留。
+本節已併入 [08-phases.md 的「移動增補的階段分配」](08-phases.md#移動增補的階段分配原移動草案-9)；Phase 2b 已完成，現況見 [雙盤契約](../dual-board/README.md)。本檔只為外部連結保留。

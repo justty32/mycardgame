@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（Phase 2 Done when 全數驗收）；現況見 wf/specs/board-module/README.md 取代
+
 # 分階段計畫（§5）：Phase 2 Done when
 
 [README](README.md)｜[分階段索引](08-phases.md)

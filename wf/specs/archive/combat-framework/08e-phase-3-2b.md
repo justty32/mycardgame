@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（Phase 3 與 Phase 2b）；現況見 wf/specs/dual-board/README.md 取代
+
 # 分階段計畫（§5）：Phase 3 波次與 Phase 2b 場域格／控制區
 
 [README](README.md)｜[分階段索引](08-phases.md)

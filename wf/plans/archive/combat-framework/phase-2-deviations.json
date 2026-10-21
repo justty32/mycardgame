@@ -2,6 +2,8 @@
  "contract": "wf-table/1",
  "source": "phase-2.md",
  "extracted": "2026-10-19",
+ "archived": "2026-10-21",
+ "replaced_by": "隨 Phase 2 plan 已完成封存；現況見 wf/specs/board-module/README.md",
  "columns": [
   "id",
   "說明"

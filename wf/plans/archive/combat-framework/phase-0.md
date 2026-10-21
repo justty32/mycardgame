@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（91f3655）；現況見 wf/specs/combat-framework/README.md 取代
+
 # plan：戰鬥框架 Phase 0 基礎重構（已完成 2026-10-19）
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[INDEX](../../INDEX.md)

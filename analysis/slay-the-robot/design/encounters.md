@@ -6,7 +6,7 @@
 
 ## 敵人資料與意圖時序
 
-2026-10-20 雙盤與 Phase 2b 的當前接點、位置條件、費用前拒絕及預覽限制另見 [棋盤意圖](board-intents.md)；以下保留上游與早期框架的來源核對脈絡。
+2026-10-20 雙盤與 Phase 2b 的當前接點、位置條件、費用前拒絕及預覽限制另見 [棋盤意圖](../../../wf/specs/board-module/intents.md)；以下保留上游與早期框架的來源核對脈絡。
 
 [EnemyData.gd](../../../game/data/prototype/EnemyData.gd) 是 prototype，保存血量範圍、初始格擋／狀態、種類、minion 與死亡 actions；`enemy_intents` 是嵌入式 EnemyIntentData 字典，`enemy_intent_current_id` 初值為 `intent_initial`。[EnemyContainer.gd](../../../game/scripts/ui/EnemyContainer.gd) 複製 prototype、套難度、以 `rng_enemy_health` 隨機 HP，再實例化 Enemy。修改唯讀 prototype 不等於修改場上已生成敵人。
 

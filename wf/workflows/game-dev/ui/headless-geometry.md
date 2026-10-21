@@ -1,6 +1,6 @@
 # headless-geometry — 版面與動畫定位驗證
 
-[UI 專項驗證](verification.md)｜[雙盤呈現](../../../../analysis/slay-the-robot/design/dual-board/presentation.md)
+[UI 專項驗證](verification.md)｜[雙盤呈現](../../../specs/dual-board/presentation.md)
 
 **何時用**：修改人物站位、格面、HUD、動畫與 viewport 幾何。
 

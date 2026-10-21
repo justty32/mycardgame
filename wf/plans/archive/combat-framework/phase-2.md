@@ -1,3 +1,5 @@
+> 封存 2026-10-21，由 已完成（0196e91）；現況見 wf/specs/board-module/README.md 取代
+
 # plan：戰鬥框架 Phase 2 棋盤 + 移動 + 範圍／形狀卡（已完成 2026-10-19）
 
 [spec](../../specs/combat-framework/README.md)｜[分階段](../../specs/combat-framework/08-phases.md)｜[Phase 1](phase-1.md)｜[INDEX](../../INDEX.md)

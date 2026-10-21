@@ -50,6 +50,6 @@ Smoke 不是完整戰鬥、取消或存讀驗收（涵蓋範圍見 [validation](
 
 機制／資料格式／載入流程變更依 [testing](../testing.md) 跑 Smoke；資源變更加 Import。regression 保留觸發條件與失敗訊息，區分既有及新增問題；公開契約變更同步 [code-map](../common/code-map.md)、分析／教學及驗證指令。
 
-場域、ZOC、位移與有序反應改動先讀 [fields-zoc](fields-zoc.md)；雙盤定位與跨盤拒絕沿 [A 契約](../../../analysis/slay-the-robot/design/dual-board/README.md)。範圍含 UI/預覽、生命週期與動態時間等價，不能只驗數值 helper。
+場域、ZOC、位移與有序反應改動先讀 [fields-zoc](fields-zoc.md)；雙盤定位與跨盤拒絕沿 [A 契約](../../specs/dual-board/README.md)。範圍含 UI/預覽、生命週期與動態時間等價，不能只驗數值 helper。
 
 棋盤掛載、普通卡解耦與未掛模組戰鬥沿 [可選棋盤模組](mechanics/board-module.md)。不要把空間規則加回 Hand／HandManager；新卡只透過效果與 `card_values.board` 表達模組選項。

@@ -34,7 +34,7 @@ run save、profile 與 settings 各存什麼見[核實的存讀段](../../../../
 
 先記錄不中斷基準的關鍵資料與後續 RNG／事件，再保存，在另一程序載入並執行下一步。比較語意、UID、引用、下一事件與資源，並核對契約要求的回退；JSON 相同或 load_game 沒報錯都不夠。比較完整快照以外的項目時，要把 runtime 重建產物與真正保存欄位分開。
 
-跨程序比較保存欄位時，先保留原始差值，再把記憶體的完整選定欄位經 `JSON.parse_string(JSON.stringify(value))` 轉成與檔案相同的 JSON 語意後比較；牌組仍比每張牌的所有保存屬性、UID、順序與數量，不能退化成只比 ID。原生 Dictionary 內整數與 JSON 浮點數可能讓直接深層相等失敗，例如升級值 `{damage: 1}` 對 `{damage: 1.0}`。失敗時印卡牌索引／欄位／值／型別，確認差異後才判定是否只是表示形式；正規化後仍不同必須失敗。這不適用於要求原生型別、引用身分或逐位元組一致的契約，這些另設斷言。2026-10-20 Windows Godot 4.7.2 的 [Boardless 四程序](../../../../tests/boardless_campaign.gd) 已觀察六張牌的 `card_upgrade_value_improvements` 整數 1／3 與 JSON 1.0／3.0 差異；完整語意與續玩均通過，沿用既有 [SaveLoad 快照](../../../../tests/save_load_flow.gd) 的處理方式，驗收映射見 [棋盤模組回歸](../../../../analysis/slay-the-robot/design/board-module-verification.json)。
+跨程序比較保存欄位時，先保留原始差值，再把記憶體的完整選定欄位經 `JSON.parse_string(JSON.stringify(value))` 轉成與檔案相同的 JSON 語意後比較；牌組仍比每張牌的所有保存屬性、UID、順序與數量，不能退化成只比 ID。原生 Dictionary 內整數與 JSON 浮點數可能讓直接深層相等失敗，例如升級值 `{damage: 1}` 對 `{damage: 1.0}`。失敗時印卡牌索引／欄位／值／型別，確認差異後才判定是否只是表示形式；正規化後仍不同必須失敗。這不適用於要求原生型別、引用身分或逐位元組一致的契約，這些另設斷言。2026-10-20 Windows Godot 4.7.2 的 [Boardless 四程序](../../../../tests/boardless_campaign.gd) 已觀察六張牌的 `card_upgrade_value_improvements` 整數 1／3 與 JSON 1.0／3.0 差異；完整語意與續玩均通過，沿用既有 [SaveLoad 快照](../../../../tests/save_load_flow.gd) 的處理方式，驗收映射見 [棋盤模組回歸](../../../specs/board-module/verification.json)。
 
 依變更覆蓋缺檔、壞 JSON、無效角色、舊 ID、缺欄位、版本或 mod 不相容。load_game 只做部分前置拒絕、沒有通用遷移，主選單 Continue 只看檔案存在；壞檔存在時的錯誤呈現、可重開路徑和 Forfeit 應另驗，不由底層拒絕通過推出整體 UI 可恢復。
 

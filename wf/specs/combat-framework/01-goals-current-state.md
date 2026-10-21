@@ -37,11 +37,11 @@
 
 ### 2.1 單玩家實體（一個 `Player` 節點 + `Global.player_data` 即角色）
 
-（表）已抽到 [current-single-player.json](current-single-player.json)（9 列）。欄位：假設、出處、影響。
+（表）開工前現況快照已隨 Phase 0–3 完成而封存；現況見 [code map](../../workflows/common/code-map/combat-framework.md)。
 
 ### 2.2 回合交替（玩家回合 → 敵方回合 → …）
 
-（表）已抽到 [current-turn-based.json](current-turn-based.json)（18 列）。欄位：假設、出處、影響。
+（表）開工前現況快照已隨 Phase 1 改為 CTB 而封存；現況見 [code map](../../workflows/common/code-map/combat-framework.md)。
 
 ### 2.3 可以不動的部分（沿用）
 

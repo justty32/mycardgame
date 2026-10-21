@@ -1,6 +1,6 @@
 {
  "contract": "wf-table/1",
- "source": "board-module.md",
+ "source": "README.md",
  "extracted": "2026-10-20",
  "link_columns": [
   "test_file",
@@ -25,7 +25,7 @@
     "ordinary units retain registry identities and real CTB timeline membership"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   },
   {
    "id": "ordinary_cards",
@@ -37,7 +37,7 @@
     "disabled spatial rejection preserves fee pile target and queue: geometry"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   },
   {
    "id": "none_intents",
@@ -48,7 +48,7 @@
     "NONE rejection queues no ordinary attack or partial action payload"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   },
   {
    "id": "none_waves",
@@ -59,7 +59,7 @@
     "NONE waves retain start-clear-final-victory ordering"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   },
   {
    "id": "none_campaign",
@@ -72,7 +72,7 @@
     "loaded ordinary card damages actual selected enemy"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   },
   {
    "id": "run_preflight",
@@ -84,7 +84,7 @@
     "rejected run preserves checkpoint existence and bytes: preflight_missing_act"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   },
   {
    "id": "mounted_duplicate",
@@ -95,7 +95,7 @@
     "real DuplicateAttacks preserves column shape and damages both enemies twice"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   },
   {
    "id": "mounted_lifecycle",
@@ -107,7 +107,7 @@
     "old request remains stale after a different module is mounted"
    ],
    "status": "PASS",
-   "run_path": "../evidence/2026-10-20/board-module/final-all-results.json"
+   "run_path": "../../../analysis/slay-the-robot/evidence/2026-10-20/board-module/final-all-results.json"
   }
  ]
 }

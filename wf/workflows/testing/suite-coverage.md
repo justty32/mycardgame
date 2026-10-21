@@ -40,7 +40,7 @@ Board／Wave 既有的單盤案例以顯式 SINGLE 保持距離契約。棋盤�
 
 [Field](../../../tests/field_flow.gd)（標記 `FIELD PASS:`）驗場域、ZOC、位移、位置條件與 ordered lifecycle。[DualBoard](../../../tests/dual_board_flow.gd)（標記 `DUAL_BOARD PASS:`）從正常新局走預設雙盤、A targeting、原子 transfer／swap、兩盤場域與本體站格。
 
-兩者各自的 assertions 與實際執行結果見 [雙盤驗收表](../../../analysis/slay-the-robot/design/dual-board/verification.json)。工程仍在整合時，不能拿舊的 All 結果代替新增 suite。
+兩者各自的 assertions 與實際執行結果見 [雙盤驗收表](../../specs/dual-board/verification.json)。工程仍在整合時，不能拿舊的 All 結果代替新增 suite。
 
 ## Boardless
 
