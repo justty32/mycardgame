@@ -11,6 +11,7 @@
 
 ## 最新進度
 
+- [game-dev] 多棋盤（N 盤）可行性已調查，推薦 M1（一我方盤+多敵方盤），待使用者決定玩法語意與排法 → [調查](notes/investigations/2026-10-21-multi-board-feasibility.md)
 
 ## 各工作流 session-log
 
