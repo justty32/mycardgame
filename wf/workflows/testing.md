@@ -24,7 +24,7 @@ Dictionary merge 已修正，Smoke 的四種策略現在是會使測試失敗的
 
 ## 隔離回歸 runner 與 suite
 
-runner `python3 tools/test_game.py --suite <名稱>`（Windows 包裝 `./tools/test-game.ps1 -Suite <名稱>`）的 suite 清單（含 CTB 時間軸的 Ctb、棋盤的 Board、波次的 Wave）、隔離副本、期限與退出碼判定、合成測試，以及新內容／新 suite 怎麼接進 runner，見 [testing/suites](testing/suites.md)。
+runner `python3 tools/test_game.py --suite <名稱>`（Windows 包裝 `./tools/test-game.ps1 -Suite <名稱>`）的 suite 清單（含 CTB 時間軸的 Ctb、單盤的 Board、波次的 Wave、場域的 Field、雙盤的 DualBoard、未掛棋盤的 Boardless；棋盤相關改動兩種模式都要驗，見 [validation](game-dev/validation.md#棋盤開關兩種模式都要驗)）、隔離副本、期限與退出碼判定、合成測試，以及新內容／新 suite 怎麼接進 runner，見 [testing/suites](testing/suites.md)。
 
 ## 文件檢查（修改後必跑）
 
