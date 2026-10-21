@@ -2,7 +2,9 @@
 
 [UI 專項驗證](verification.md)｜[雙盤呈現](../../../../analysis/slay-the-robot/design/dual-board/presentation.md)
 
-**何時用**：修改人物站位、格面、HUD、動畫與 viewport 幾何。**何時不用**：只驗數值規則不需要畫面節點；視覺觀感或硬體操作不能由本流程替代。
+**何時用**：修改人物站位、格面、HUD、動畫與 viewport 幾何。
+
+**何時不用**：只驗數值規則不需要畫面節點；視覺觀感或硬體操作不能由本流程替代。
 
 ## 流程
 
@@ -14,7 +16,7 @@
 
 ## Done when
 
-對應專項有實際 assertion／來源 hash 與通過日誌；保留 clip、footpoint、viewport、資料／動畫分離與退出重開證據。背景字型 cmap 只驗字元存在，節點 rect 只驗幾何；字形可讀、遮擋、alpha／對比、DPI、GPU、鍵鼠與手把仍需另一層實證。目前禁止桌面與螢幕鍵鼠，不建立 screenshot PASS。
+對應專項有實際 assertion／來源 hash 與通過日誌；保留 clip、footpoint、viewport、資料／動畫分離與退出重開證據。背景字型 cmap 只驗字元存在，節點 rect 只驗幾何；字形可讀、遮擋、alpha／對比、DPI、GPU、鍵鼠與手把仍需另一層實證。需要 GUI 或截圖的驗收標記為未執行，不建立 screenshot PASS（操作邊界見 [user.md](../../common/user.md#桌面與程序邊界)）。
 
 ## 交接
 

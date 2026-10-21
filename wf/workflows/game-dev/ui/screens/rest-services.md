@@ -1,12 +1,16 @@
 # 休息服務畫面 — 接受、選牌、完成與返回
 
-[設施入口](shop-rest.md)｜[內容規則](../../level-design/noncombat.md)｜[牌庫選取](card-selection.md)｜[驗證接線](../verification.md)
+[場景目錄](README.md)｜[商店](shop-rest.md)｜[內容規則](../../level-design/noncombat.md)｜[牌庫選取](card-selection.md)｜[驗證接線](../verification.md)
 
-**何時用**：休息服務的完整 UI／音畫呈現，尤其升級／移除開選牌後的確認、Back 及中斷。**何時不用**：恢復值、互斥或限次規則交內容流程；商店付費服務不能直接套此契約。
+本篇是休息營地完整畫面的單一來源（商店篇只連過來）。
+
+**何時用**：休息服務的完整 UI／音畫呈現，尤其升級／移除開選牌後的確認、Back 及中斷。
+
+**何時不用**：恢復值、互斥或限次規則交內容流程；商店付費服務不能直接套此契約。
 
 ## Done when
 
-規格有 rest action ID、opener／location／generation、狀態、Continue 政策、cue 及退出 owner；成功、Back、等待中退出、重入四種 fixture 有 caller 和預期資料差異，適用檢查通過。以下缺口是待工程驗收，不表示已修復或已播放／渲染驗證。
+規格有 rest action ID、opener／location／generation、狀態、Continue 政策、cue 及退出 owner；成功、Back、等待中退出、重入四種 fixture 有 caller 和預期資料差異，適用檢查通過；文件 lint 通過（見 [testing](../../../testing.md)）。以下缺口是待工程驗收，不表示已修復或已播放／渲染驗證。
 
 ## 流程
 
@@ -40,7 +44,7 @@ INCLUSIVE 排除自身，EXCLUSIVE 排除所有同類，INCLUSIVE_REPEATABLE 不
 
 ### 四種 fixture 的具體接法
 
-建議 tests/ui_rest_services_probe.gd（未建立），由設施情境在真正 REST_SITE map_location_selected、RestOverlay populate 完成後 runtime load；靜態組合另由 Smoke Root ready 後呼叫。設施情境沿 Combat `_scenario()` 起局，但先攔 Map 自動 focus／音訊出口；目前不執行引擎。helper caller await 有界完成並將 assertion 交既有 `_check()`，不是新增檔即被 runner 執行。
+建議 tests/ui_rest_services_probe.gd（未建立），由設施情境在真正 REST_SITE map_location_selected、RestOverlay populate 完成後 runtime load；靜態組合另由 Smoke Root ready 後呼叫。設施情境沿 Combat `_scenario()` 起局，但先攔 Map 自動 focus／音訊出口。helper caller await 有界完成並將 assertion 交既有 `_check()`，不是新增檔即被 runner 執行。
 
 成功例提供兩張可升級牌（多於 min）及一張不合法牌，開服務→選合法→Confirm→等待 child idle／rest_action_ended，核對只改該永久牌、統計／excluded 正確且回父畫面。Back 例沿同一 opener，選牌後返回，核對 HP／deck／stat／excluded 不變、父鎖解除且可重開。
 

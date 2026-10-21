@@ -2,11 +2,13 @@
 
 [UI 入口](../ui.md)｜[呈現核實](../../../../analysis/slay-the-robot/design/presentation.md)｜[測試](../../testing.md)
 
-**何時用**：主選單或結算改成原創風格、加入繁中、調整不同畫面尺寸。**何時不用**：只換卡圖回圖像流程；改結算規則或 run 結束時機接機制流程。本篇準備檔案與背景驗收，不授權 GUI、截圖或實際輸入。
+**何時用**：主選單或結算改成原創風格、加入繁中、調整不同畫面尺寸。
+
+**何時不用**：只換卡圖回圖像流程；改結算規則或 run 結束時機接機制流程。
 
 ## Done when
 
-任務 plan（`games/<game>/design/plans/`）記有畫面／狀態、文字與字型來源、目標尺寸、改動及證據；適用的既有 suite 和新增斷言回傳預期結果，文件 lint 通過。視覺、字形呈現、實際命中或尺寸未測者明列，不能以背景結果代替完整 UI 驗收。
+任務 plan（`games/<game>/design/plans/`）記有畫面／狀態、文字與字型來源、目標尺寸、改動及證據；適用的既有 suite 和新增斷言回傳預期結果；文件 lint 通過（見 [testing](../../testing.md)）。視覺、字形呈現、實際命中或尺寸未測者明列，不能以背景結果代替完整 UI 驗收。
 
 ## 流程
 
@@ -30,10 +32,10 @@
 
 先列支援的 viewport 與縮放政策；未指定時將目前 1200×700 作基準，再提議一個較小尺寸和一個不同長寬比作候選，不能把候選當成已承諾支援。project.godot 目前 resizable=false；RunSummaryOverlay 和背景是固定 1200×700，統計為三欄，光改視窗旗標不會修好內部版面。從根容器、overlay、訊息區和按鈕逐層調 anchor／container／minimum size，保留必要的安全邊距。
 
-先用 `python3 tools/test_game.py --suite Smoke` 驗共享主場景，用 `--suite Combat` 保留現有敗北結算／返回流程；僅在本次授權允許引擎時執行。這兩者都沒有多尺寸、字型或通關勝利結算專項。新增場景 helper 的 UI 接法見 [專項驗證](verification.md)，候選副本見 [內容 bootstrap](../content/bootstrap.md)：僅新增 tests/*.gd 不會自動執行，也沒有 UI suite。
+先用 `python3 tools/test_game.py --suite Smoke` 驗共享主場景，用 `--suite Combat` 保留現有敗北結算／返回流程。這兩者都沒有多尺寸、字型或通關勝利結算專項。新增場景 helper 的 UI 接法見 [專項驗證](verification.md)，候選副本見 [內容 bootstrap](../content/bootstrap.md)：僅新增 tests/*.gd 不會自動執行，也沒有 UI suite。
 
-專項先準備有效 run statistics 與 EventData fixture，避免空資料走 breakpoint；分別觸發勝利、敗北及 EndRunButton handler，核對 Label、訊息、end state 和目的地。每個目標尺寸先讓 layout／延後字級更新完成，再斷言關鍵 rect 在可用區域內、必要元件可見、最小字級與文字值符合規格。這些是待實作的針對性斷言，不是既有工具能力；不呼叫 capture，不操作真實焦點或視窗。
+專項先準備有效 run statistics 與 EventData fixture，避免空資料走 breakpoint；分別觸發勝利、敗北及 EndRunButton handler，核對 Label、訊息、end state 和目的地。每個目標尺寸先讓 layout／延後字級更新完成，再斷言關鍵 rect 在可用區域內、必要元件可見、最小字級與文字值符合規格。這些是待實作的針對性斷言，不是既有工具能力；需要截圖或真實焦點的項目標記未執行（操作邊界見 [user.md](../../common/user.md#桌面與程序邊界)）。
 
 ## 交接
 
-交付 scene／script／theme／字型路徑、文字來源、尺寸及狀態、測試 helper 接入點、執行日誌與待驗項。背景幾何不證明字形、裁切、視覺對比、DPI 或輸入命中；留待有效授權允許後補驗。新增可重用事實回寫呈現分析，導航由整合 owner 同步。
+交付 scene／script／theme／字型路徑、文字來源、尺寸及狀態、測試 helper 接入點、執行日誌與待驗項。背景幾何不證明字形、裁切、視覺對比、DPI 或輸入命中，這些列為未驗。新增可重用事實回寫呈現分析，導航由整合 owner 同步。

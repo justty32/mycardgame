@@ -1,16 +1,18 @@
 # UI 共用元件與版面
 
-[UI 目錄](README.md)｜[互動狀態](interaction-states.md)｜[選單／繁中](menus-localization.md)｜[專項驗證](verification.md)
+[UI 入口](../ui.md)｜[互動狀態](interaction-states.md)｜[選單／繁中](menus-localization.md)｜[專項驗證](verification.md)
 
-**何時用**：共用 theme、卡牌／tooltip／按鈕、HUD 資訊層級、容器、長文字、無障礙與不同 viewport。**何時不用**：取消、選取與 Action 時序接互動狀態；圖像生成與裁切接 [素材](../art-assets.md)。
+**何時用**：共用 theme、卡牌／tooltip／按鈕、HUD 資訊層級、容器、長文字、無障礙與不同 viewport。
+
+**何時不用**：取消、選取與 Action 時序接互動狀態；圖像生成與裁切接 [素材](../art-assets.md)。
 
 ## Done when
 
-本次元件規格存在，列出消費場景、尺寸／字級／樣式來源、資料與互動介面、長文／空值政策及候選 viewport。新增元件的 scene 載入、引用與目標背景斷言回傳預期結果，文件 lint 通過；尚未實測的字形、可讀性與輸入保留待驗。
+本次元件規格存在，列出消費場景、尺寸／字級／樣式來源、資料與互動介面、長文／空值政策及候選 viewport。新增元件的 scene 載入、引用與目標背景斷言回傳預期結果；文件 lint 通過（見 [testing](../../testing.md)）；尚未實測的字形、可讀性與輸入保留待驗。
 
 ## 流程
 
-### C：先從既有元件選擇
+### 先從既有元件選擇
 
 [Card.tscn](../../../../game/scenes/ui/card/Card.tscn) 是手牌、draft、牌堆、商店與圖鑑共用視圖，根 144×184、圖框 96×96、名稱框 128×16、描述框 128×72。`Pivot/CardVisual` 管呈現，CardButton 管命中，CardGlow／CardDecoratorContainer 管附加狀態。沿 Scenes.CARD 實例化、add_child 之後 init；手牌用 `init(data, 0, true, true)`，牌堆／draft 用 `false, true`，不應把全域戰鬥訂閱套給所有展示卡。改共用尺寸需一併調 Hand.CARD_WIDTH、間距、pivot、曲線、hover 直接位移及重排 tween，並檢查選牌 Grid／HBox。
 

@@ -1,8 +1,10 @@
 # UI 專項驗證與 fixture 接線
 
-[UI 目錄](README.md)｜[互動狀態](interaction-states.md)｜[元件版面](components-layout.md)｜[驗收分流](../validation.md)
+[UI 入口](../ui.md)｜[互動狀態](interaction-states.md)｜[tooltip](tooltip-refresh.md)｜[選牌](card-pick-modal.md)｜[元件版面](components-layout.md)｜[驗收分流](../validation.md)
 
-**何時用**：要證明 UI 改動的資料、handler、顯示狀態與幾何契約。**何時不用**：文件冷讀只跑文件檢查；視覺與真實輸入需要另有有效授權，不以本篇授權 GUI。
+**何時用**：要證明 UI 改動的資料、handler、顯示狀態與幾何契約。
+
+**何時不用**：文件冷讀只跑文件檢查；視覺與真實輸入的驗收不在本篇範圍，操作邊界見 [user.md](../../common/user.md#桌面與程序邊界)。
 
 ## Done when
 
@@ -42,7 +44,7 @@ tooltip fixture 準備至少一個有效 KeywordData；呼叫 hover／timeout ha
 
 正常取消核對 picked_cards 空；若要求子效果未執行，ActionPickCards fixture 須設 min_card_amount=1、min_cards_are_required_for_action=true（can_back_out 僅控制返回可見）。draft Skip 後原 CardRewardButton 保留，另驗可重開；draft claim 核對 deck +1 及 ID；重複點擊／確認不得重複結果。等待中以受測場景自己的退出流程清 actions，核對 async_finished／async_cancelled、UI 參照與待選信號釋放，重進後只完成一次。這些是待補斷言，不是現有 suite 保證。
 
-鍵盤／手把實作後，可背景驗 action 定義、focus neighbor 路徑、可聚焦元件、可取消／不可取消 handler 和一個事件不穿透兩層。當前禁止焦點操作，勿呼叫真實 grab_focus 或操控視窗；背景 property／handler 不證明實際導覽、按鍵重複、控制器型號或輸入延遲。
+鍵盤／手把實作後，可背景驗 action 定義、focus neighbor 路徑、可聚焦元件、可取消／不可取消 handler 和一個事件不穿透兩層。背景專項不呼叫真實 grab_focus、不操控視窗；背景 property／handler 不證明實際導覽、按鍵重複、控制器型號或輸入延遲。
 
 休息／非 Draft 選牌的具體 caller 與成功、Back、退出、重入專項分別見 [rest-services](screens/rest-services.md) 與 [card-selection](screens/card-selection.md)。換點清 dictionary 後再送舊 rest_action_ended，應拒絕舊 generation 且不重開；目前 guard 未實作，不可忽略失敗。
 
@@ -52,6 +54,6 @@ tooltip fixture 準備至少一個有效 KeywordData；呼叫 hover／timeout ha
 
 ## 命令與交接
 
-僅在當次允許背景引擎時，從專案根跑 `python3 tools/test_game.py --suite Smoke`（共享場景／版面）、`--suite Combat`（戰鬥／獎勵 handler），清理變更加 `--suite ResourceLifecycle`。讀 artifacts/verification 當次 results.json、engine／console log 與專項 assertion；通過須符合 [testing](../../testing.md)，不能只看 exit 0。本次文件補強未執行這些引擎命令。
+從專案根跑 `python3 tools/test_game.py --suite Smoke`（共享場景／版面）、`--suite Combat`（戰鬥／獎勵 handler），清理變更加 `--suite ResourceLifecycle`。讀 artifacts/verification 當次 results.json、engine／console log 與專項 assertion；通過須符合 [testing](../../testing.md)，不能只看 exit 0。
 
-文件用 `bash wf/tools/wf-lint.sh --strict .`。交接列出 source／test hash、fixture、候選根、suite／helper 呼叫位置、測過的狀態與尺寸、未驗視覺／輸入，讓下一位能重現而不依對話記憶。
+文件 lint 見 [testing](../../testing.md)。交接列出 source／test hash、fixture、候選根、suite／helper 呼叫位置、測過的狀態與尺寸、未驗視覺／輸入，讓下一位能重現而不依對話記憶。

@@ -6,7 +6,7 @@
 
 ## Done when
 
-畫面規格及素材包有入口、角色／事件身份、每個狀態內容與結果、跳過／取消政策及 cue owner；來源引用和對應分支 fixture 斷言通過。未實作的頭像模型／逐字／配音與未驗視覺、真實輸入明列，文件 lint 通過。
+畫面規格及素材包有入口、角色／事件身份、每個狀態內容與結果、跳過／取消政策及 cue owner；來源引用和對應分支 fixture 斷言通過。未實作的頭像模型／逐字／配音與未驗視覺、真實輸入明列，文件 lint 通過（見 [testing](../../../testing.md)）。
 
 ## 流程
 
@@ -36,7 +36,7 @@ dialogue_ended、run started／ended、player_killed、離開 EVENT 都 reset：
 
 ### 聲音與動畫 cue 契約
 
-事件進場、完整句顯示、有效選項接受、失敗選項拒絕、效果完成／切 state、正常離開與強制取消各是不同語意。音效綁接受／完成的 owner，不能只用 mouse click 或 money_changed 當選項成功；資料 action 裡已有音效時避免 UI 再播。配音、逐字節奏與跳過停聲交 [對話音訊](../../audio/dialogue-cues.md)，整組演出交 [場景演出](../../art-assets/scene-choreography.md)。
+事件進場、完整句顯示、有效選項接受、失敗選項拒絕、效果完成／切 state、正常離開與強制取消各是不同語意。音效綁接受／完成的 owner，不能只用 mouse click 或 money_changed 當選項成功；資料 action 裡已有音效時避免 UI 再播。配音、逐字節奏與跳過停聲交 [對話音訊](../../audio/dialogue-cues.md)，整組演出交 [對話與商店動態](../../art-assets/motion/dialogue-shop.md)。
 
 現碼沒有 visible_characters／逐字 timer、voice ID、語音完成等待或 skip 鍵；它直接 parse_bbcode。新增逐字時規格需說明第一次確認是否只揭全文、第二次才選項、選項何時啟用、快速跳句如何取消舊 timer／音訊。頭像切換、文字揭露、選項出現可共用狀態序列，但動畫完成不得成為漏掉取消時永久卡住的唯一解鎖點。
 
@@ -46,7 +46,7 @@ dialogue_ended、run started／ended、player_killed、離開 EVENT 都 reset：
 
 依 [驗證接線](../verification.md) 在 autoload／Root ready 後 runtime load dialogue helper，建立有效 run/player/location，再觸發與驗資料／畫面。選一項後 assert action 效果恰一次、next state 和字串／圖像相符，失敗項不變，退出恢復地圖且無剩餘 action；重複輸入、等待中 run 結束和重進不能接到舊 callback。這些為待新增專項，既有 Combat 不涵蓋事件分支。
 
-文字／節點／圖片引用／handler 背景斷言不證明插圖裁切、字形、選項命中、focus 或聲音同步。當前只靜態查核，不啟動引擎或播放；所有 viewport、語系與視覺／實際輸入缺口列在交付。
+文字／節點／圖片引用／handler 背景斷言不證明插圖裁切、字形、選項命中、focus 或聲音同步。所有 viewport、語系與視覺／實際輸入缺口列在交付。
 
 ## 交接
 

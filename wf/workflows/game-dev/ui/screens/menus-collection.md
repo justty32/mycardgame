@@ -6,7 +6,7 @@
 
 ## Done when
 
-各畫面的玩家目的、入口／返回、資料與空值狀態、整套素材及 cue 紀錄存在；有效／空 profile、起局和結算 fixture 核對狀態及返回結果，文件 lint 通過。真實焦點／控制器、視覺和聲音未驗者明列。
+各畫面的玩家目的、入口／返回、資料與空值狀態、整套素材及 cue 紀錄存在；有效／空 profile、起局和結算 fixture 核對狀態及返回結果，文件 lint 通過（見 [testing](../../../testing.md)）。真實焦點／控制器、視覺和聲音未驗者明列。
 
 ## 流程
 
@@ -44,11 +44,11 @@ RunSummaryOverlay 收 run_victory 或 player_death_animation_finished，更新�
 
 TitleScreen 在 ready／run ended 播 title music；NewRunMenu.populate_character_info 可播 character_selection_audio_path，且自動選第一角也會進此路徑，不能再無條件加一次選角音。設定調整是音量控制，預覽音需另定；暫停音樂是否停止不得靠畫面 hidden 猜測。
 
-聲音的導航／選角／拒絕／設定／勝敗 cue 接 [畫面音訊](../../audio/screen-cues.md)。BaseMenu tween hook 可承載進退場，但 clear_menu 先隱藏再取得 outro，新動畫要確認可見性、輸入鎖和等待有效性；現成 hook 不等於所有選單已有動態。整體節奏接 [UI 動態](../../art-assets/ui-motion.md)／[場景演出](../../art-assets/scene-choreography.md)。取消／快速切頁時停舊 cue，晚到完成不再導航；字串刷新不重播勝利音。
+聲音的導航／選角／拒絕／設定／勝敗 cue 接 [畫面音訊](../../audio/screen-cues.md)。BaseMenu tween hook 可承載進退場，但 clear_menu 先隱藏再取得 outro，新動畫要確認可見性、輸入鎖和等待有效性；現成 hook 不等於所有選單已有動態。整體節奏接 [畫面轉場](../../art-assets/motion/menus.md)。取消／快速切頁時停舊 cue，晚到完成不再導航；字串刷新不重播勝利音。
 
 ### Fixture 與驗收
 
-以 Smoke Root ready 後 helper 驗 navigation 引用、空／有效 profile、角色切換與無遺物清空、收藏篩選零筆、歷史邊界和多次進退不累積子項。可能啟動音訊的 handler 在未獲播放授權前只做靜態查核；後續音訊驗證遵循隔離契約。設定專項只能用隔離 user_settings，不能寫個人設定。
+以 Smoke Root ready 後 helper 驗 navigation 引用、空／有效 profile、角色切換與無遺物清空、收藏篩選零筆、歷史邊界和多次進退不累積子項。可能啟動音訊的 handler 先做靜態查核，播放驗證遵循音訊的隔離契約。設定專項只能用隔離 user_settings，不能寫個人設定。
 
 Combat 既有敗北分支可保留結算／返回回歸；新勝利結算需有效 RunStatsData／EventData 的專項情境，核對結果只記一次及返回目標。GUI、focus、字形、實際控制器和聲音目前均未驗，不能由 button_up.emit 的成功推廣。fixture 實際接線依 verification，沒有自動新畫面 suite。
 

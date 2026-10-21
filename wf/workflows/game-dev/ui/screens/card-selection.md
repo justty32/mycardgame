@@ -6,7 +6,7 @@
 
 ## Done when
 
-畫面規格記有 mode、opener、action 身分、generation、候選／選取、每種完成原因及退出 owner；fixture 涵蓋 VIEW、SELECT、旁路完成、退出／重入，相關檢查通過。新 controller／cue／動畫與 guard 未實作時明列待工程驗收。
+畫面規格記有 mode、opener、action 身分、generation、候選／選取、每種完成原因及退出 owner；fixture 涵蓋 VIEW、SELECT、旁路完成、退出／重入，相關檢查通過；文件 lint 通過（見 [testing](../../../testing.md)）。新 controller／cue／動畫與 guard 未實作時明列待工程驗收。
 
 ## 流程
 
@@ -22,7 +22,7 @@ VIEW 的 opener 是 Combat 的 DeckButton／DrawPile／DiscardPile／ExhaustPile
 
 SELECT 的 opener 是發起 ActionPickCards 的效果 owner，例如 RestOverlay 的升級／移除服務，也可能是戰鬥效果。DECK_PICK_TYPES 的 card_pick_requested 交 [CardSelectionOverlay.gd](../../../../../game/scripts/ui/CardSelectionOverlay.gd)，記 current_card_pick_action，取 get_pickable_cards，再顯示計數／Confirm／Back。UI 目前沒記 opener；新增 controller 需要在發起端記 owner、location/run 身分與 generation，不能從 pick type 猜「關閉就回休息」。
 
-正常流程為候選 ready→可暫選／反選→足額可確認→提交→效果 owner 接結果→解除父畫面鎖。休息結果交 RestOverlay，戰鬥結果交原 Action，不用通用飛往牌組或獲得卡牌 cue。原父畫面保持在底層；只有仍有效的原 opener 可恢復輸入，已離場則不導航、不重開。focus 還原需求先記目的節點，當前禁止真實 focus 操作。
+正常流程為候選 ready→可暫選／反選→足額可確認→提交→效果 owner 接結果→解除父畫面鎖。休息結果交 RestOverlay，戰鬥結果交原 Action，不用通用飛往牌組或獲得卡牌 cue。原父畫面保持在底層；只有仍有效的原 opener 可恢復輸入，已離場則不導航、不重開。focus 還原需求先記目的節點；背景專項不呼叫真實 focus。
 
 ### 選取、確認與所有旁路
 
@@ -46,7 +46,7 @@ ActionPickCards.action_async_finished 只表示其子 actions 已排入，不保
 
 提供兩張合法和一張不合法牌、min=1/max=2/required=true/quick=false；驗暫選／反選、min/max、不可選、Confirm、Back允許／禁止、返回正確 opener，成功只一次。另用 quick=true 與零／剛好 min／random 情境驗旁路，無 modal 也能解除父鎖。結果核對 child idle 與永久資料，不只看 overlay hidden。
 
-退出測例在 reveal、暫選、提交待 child 結果三階段結束 run／換節點，核對 async、children、tooltip 和 cue owner 清理；舊 generation callback 不開畫面、不改下一個 opener。重入同一服務測一次完成；現有無 guard／清卡缺口先留失敗條件。執行前按 verification 排除 Map grab_focus／音訊出口，本輪僅讀碼，不跑引擎／GUI／播放。
+退出測例在 reveal、暫選、提交待 child 結果三階段結束 run／換節點，核對 async、children、tooltip 和 cue owner 清理；舊 generation callback 不開畫面、不改下一個 opener。重入同一服務測一次完成；現有無 guard／清卡缺口先留失敗條件。執行前按 verification 排除 Map grab_focus／音訊出口。
 
 ## 交接
 

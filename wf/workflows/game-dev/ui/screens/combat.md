@@ -6,7 +6,7 @@
 
 ## Done when
 
-畫面包有玩家決策資訊、各狀態和 cue 的資料 owner／接點；戰鬥 fixture 驗 HUD、成功／拒絕／目標取消及結束轉場，文件 lint 通過。視覺、真實輸入、聽感與同步未驗者分開記錄。
+畫面包有玩家決策資訊、各狀態和 cue 的資料 owner／接點；戰鬥 fixture 驗 HUD、成功／拒絕／目標取消及結束轉場，文件 lint 通過（見 [testing](../../../testing.md)）。視覺、真實輸入、聽感與同步未驗者分開記錄。
 
 ## 流程
 
@@ -36,13 +36,13 @@ Combat.gd 只做 HUD，行動流程在 CombatDirector：EndTurnButton 發 end_ac
 
 成功出牌、無效拒絕、選目標／取消、命中傷害、格擋、狀態改變、敵人死亡、回合開始、勝敗各自指定 cue owner。出牌點擊不是命中，生命數值更新不是所有 VFX 的唯一事件；重播／刷新 UI 不發遊戲事件。查卡 Action／AttackGenerator／EnemyIntent 既有音圖路徑，避免 UI 再重播一次。
 
-[戰鬥音訊](../../audio/combat-cues.md) 管聲音接受／成功時點與重疊；[UI 動態](../../art-assets/ui-motion.md) 管 hover／回合提示，[動畫](../../art-assets/animation.md) 和 [VFX](../../art-assets/vfx.md) 管人物／命中。若要整段頭目進場，先寫入「鎖輸入→介紹→資料 ready→解鎖」及跳過／退出時恢復，不假設已有 orchestration manager。
+[戰鬥音訊](../../audio/combat-cues.md) 管聲音接受／成功時點與重疊；[UI 動態](../../art-assets/motion/README.md) 管 hover，回合提示見 [畫面轉場](../../art-assets/motion/menus.md)，[動畫](../../art-assets/animation.md) 和 [VFX](../../art-assets/vfx.md) 管人物／命中。若要整段頭目進場，先寫入「鎖輸入→介紹→資料 ready→解鎖」及跳過／退出時恢復，不假設已有 orchestration manager。
 
 ### Fixture 與驗收
 
 由既有 Combat fixture 建 run 和敵人，選正常出牌、費用不足、目標取消各一條；HUD 數值與資料一致，queue／能量／HP 變化恰一次。加空手牌、滿手重疊、長卡文、多狀態、複數敵人／大圖框、等待中離場；不要只以單敵原生五張牌證明所有新資訊可讀。具體 helper 接入點見 [專項驗證](../verification.md)。
 
-音效／動畫／tooltip 類純呈現 fixture 比較前後能量、牌堆、keyword IDs、具名 RNG 與 queue，既有 mutation 差異先記錄；動到預覽／等待者加生命週期專項。背景斷言不證明命中、遮擋、演出同步或手把；當前不啟動引擎／播放。完成後由 [獎勵流程](rewards-selection.md) 或 [結算流程](menus-collection.md) 接續，回報每條轉場的證據。
+音效／動畫／tooltip 類純呈現 fixture 比較前後能量、牌堆、keyword IDs、具名 RNG 與 queue，既有 mutation 差異先記錄；動到預覽／等待者加生命週期專項。背景斷言不證明命中、遮擋、演出同步或手把。完成後由 [獎勵流程](rewards-selection.md) 或 [結算流程](menus-collection.md) 接續，回報每條轉場的證據。
 
 ## 交接
 
